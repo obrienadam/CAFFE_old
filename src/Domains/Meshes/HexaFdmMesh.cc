@@ -7,7 +7,7 @@ HexaFdmMesh::HexaFdmMesh()
 
 HexaFdmMesh::HexaFdmMesh(int nI, int nJ, int nK)
 :
-  nodes_(nI, nJ, nK)
+  PrimitiveMesh(nI, nJ, nK)
 {
   
 }

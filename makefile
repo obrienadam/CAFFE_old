@@ -11,7 +11,8 @@ CXX_FLAGS = $(CC_FLAGS)
 INCLUDE = -I./$(MATH_DIR)
 INCLUDE += -I./$(DATA_STRUCTURES_DIR)
 INCLUDE += -I./$(RUN_CONTROL_DIR)
-INCLUDE += -I./$(FDM_MESH_DIR)
+INCLUDE += -I./$(MESH_DIR)
+INClUDE += -I./$(FIELD_DIR)
 
 ## Directories
 
@@ -19,7 +20,8 @@ MODULES_DIR = Modules
 MATH_DIR = src/Math
 DATA_STRUCTURES_DIR = src/DataStructures
 RUN_CONTROL_DIR = src/RunControl
-FDM_MESH_DIR = src/Domains/Meshes/HexaFdmMesh
+MESH_DIR = src/Domains/Meshes
+FIELD_DIR = src/Fields
 
 ## Modules
 
@@ -55,7 +57,7 @@ $(MATH_OBJS):%.o:$(MATH_DIR)/%.cc
 $(RUN_CONTROL_OBJS):%.o:$(RUN_CONTROL_DIR)/%.cc
 	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
 
-HexaFdmMesh.o: $(FDM_MESH_DIR)/HexaFdmMesh.cc
+HexaFdmMesh.o: $(MESH_DIR)/HexaFdmMesh.cc
 	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
 
 clean:
@@ -68,4 +70,4 @@ superclean: clean
 	rm -f $(MATH_DIR)/*~
 	rm -f $(DATA_STRUCTURES_DIR)/*~
 	rm -f $(RUN_CONTROL_DIR)/*~
-	rm -f $(FDM_MESH_DIR)/*~
+	rm -f $(MESH_DIR)/*~

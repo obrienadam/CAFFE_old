@@ -1,7 +1,7 @@
 #ifndef PRIMITIVE_MESH_H
 #define PRIMITIVE_MESH_H
 
-#include "Vector3D.h"
+#include "Point3D.h"
 #include "SmartPointer3D.h"
 
 class PrimitiveMesh
@@ -9,7 +9,7 @@ class PrimitiveMesh
 
 protected:
 
-    SmartPointer3D<Vector3D> nodes_;
+    SmartPointer3D<Point3D> nodes_;
 
 public:
 

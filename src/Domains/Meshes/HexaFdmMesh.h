@@ -1,14 +1,11 @@
 #ifndef HEXA_FDM_MESH_H
 #define HEXA_FDM_MESH_H
 
-#include "SmartPointer3D.h"
-#include "Point3D.h"
+#include "PrimitiveMesh.h"
 
-class HexaFdmMesh
+class HexaFdmMesh : public PrimitiveMesh
 {
  private:
-
-  SmartPointer3D<Point3D> nodes_;
 
  public:
   
