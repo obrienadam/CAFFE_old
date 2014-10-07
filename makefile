@@ -68,7 +68,7 @@ install: all
 all: $(MODULES)
 
 $(ADVEC_DIFF): $(ADVEC_DIFF_OBJS)
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) -lboost_program_options
+	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) -lboost_program_options -lboost_system -lboost_date_time -lboost_chrono
 	mv $(ADVEC_DIFF) bin/
 
 $(ADVEC_DIFF_OBJS):%.o: %.cc

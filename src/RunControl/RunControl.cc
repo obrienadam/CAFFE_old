@@ -6,8 +6,10 @@ RunControl::RunControl()
  :
   itrs_(0),
   simTime_(0.),
-  cpuTime_(0.),
-  realTime_(0.)
+  startTime_(boost::posix_time::microsec_clock::local_time()),
+  elapsedTime_(0, 0, 0, 0),
+  maxElapsedTime_(48, 0, 0, 0),
+  terminationCondition(ITERATIONS)
 {
 
 }
@@ -37,21 +39,21 @@ bool RunControl::continueRun(double timeStep)
 
     case SIM_TIME:
       
-      if(simTime_ >= maxSimTime)
+      if(simTime_ >= maxSimTime_)
 	return false;
 
       break;
 
     case CPU_TIME:
 
-      if(cpuTime_ >= maxCpuTime)
+      if(cpuTime_ >= maxCpuTime_)
 	return false;
 
       break;
 
     case REAL_TIME:
 
-      if(realTime_ >= maxRealTime)
+      if(elapsedTime_ >= maxElapsedTime_)
 	return false;
 
       break;
@@ -70,6 +72,8 @@ void RunControl::displayStartMessage()
 {
   using namespace std;
 
+  startTime_ = boost::posix_time::second_clock::local_time();
+
   cout << endl 
        << "#################################################################\n"
        << endl
@@ -85,6 +89,19 @@ void RunControl::displayStartMessage()
        << "                      Author: Adam O'Brien\n"
        << "	            E-mail: roni511@gmail.com\n"
        << endl
-       << "#################################################################\n";
+       << "#################################################################\n"
+       << endl
+       << "Iterations beginning on " << startTime_ << "." << endl
+       << endl;
   
+}
+
+void RunControl::displayUpdateMessage()
+{
+
+}
+
+void RunControl::displayCompletionMessage()
+{
+
 }

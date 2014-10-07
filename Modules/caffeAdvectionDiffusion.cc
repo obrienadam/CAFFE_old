@@ -8,8 +8,8 @@ int main(int argc, const char* argv[])
 {
   using namespace std;
 
-  RunControl runControl(argc, argv);
-  HexaFdmMesh mesh(30, 30, 30);
+    RunControl runControl(argc, argv);
+    HexaFdmMesh mesh(30, 30, 30);
 
   runControl.displayStartMessage();
 

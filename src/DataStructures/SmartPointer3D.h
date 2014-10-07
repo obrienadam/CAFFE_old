@@ -24,7 +24,7 @@ class SmartPointer3D
   int sizeK(){return nK_;}
   int size(){return n_;}
   
-  T& operator()(int i, int j, int k);
+  inline T& operator()(int i, int j, int k);
 };
 
 #include "SmartPointer3DI.h"

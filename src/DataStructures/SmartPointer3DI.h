@@ -13,8 +13,9 @@ nI_(0),
 }
 
 template <class T>
-SmartPointer3D<T>::SmartPointer3D(int nI, int nJ, int nK) :
-data_(NULL)
+SmartPointer3D<T>::SmartPointer3D(int nI, int nJ, int nK)
+:
+SmartPointer3D()
 {
   allocate(nI, nJ, nK);
 }
@@ -30,8 +31,7 @@ void SmartPointer3D<T>::allocate(int nI, int nJ, int nK)
 {
   int i, j;
 
-  if(data_ == NULL)
-    deallocate();
+  deallocate();
 
   nI_ = nI;
   nJ_ = nJ;
