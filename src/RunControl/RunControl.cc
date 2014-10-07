@@ -91,7 +91,7 @@ void RunControl::displayStartMessage()
        << endl
        << "#################################################################\n"
        << endl
-       << "Iterations beginning on " << startTime_ << "." << endl
+       << "Iterations beginning on " << startTime_ << ".\n"
        << endl;
   
 }
@@ -101,7 +101,10 @@ void RunControl::displayUpdateMessage()
 
 }
 
-void RunControl::displayCompletionMessage()
+void RunControl::displayEndMessage()
 {
+  using namespace std;
 
+  cout << "Iterations complete on " << startTime_ + elapsedTime_ << ".\n"
+       << "Elapsed time: " << elapsedTime_ << endl;
 }

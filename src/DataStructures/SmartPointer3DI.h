@@ -70,6 +70,8 @@ void SmartPointer3D<T>::deallocate()
 
   delete[] data_;
 
+  data_ = NULL;
+
   nI_ = nJ_ = nK_ = n_ = 0;
 }
 

@@ -16,7 +16,11 @@ int main(int argc, const char* argv[])
   while(runControl.continueRun())
     {
 
+
+      runControl.displayUpdateMessage();
     }
+
+  runControl.displayEndMessage();
 
   return 0;
 }

@@ -15,7 +15,6 @@ class PrimitiveMesh
   SmartPointer3D<Point3D> nodes_;
 
   Patch facePatches_[6];
-  PrimitiveMesh* boundaryMeshes_;
 
  public:
 
@@ -26,8 +25,6 @@ class PrimitiveMesh
   void allocate(int nI, int nJ, int nK);
 
   Point3D& operator()(int i, int j, int k);
-
-  void createBoundary(Face location, Patch type, int order);
 };
 
 #endif // PRIMITIVEMESH_H

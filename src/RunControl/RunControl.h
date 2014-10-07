@@ -44,7 +44,7 @@ class RunControl
 
   void displayUpdateMessage();
 
-  void displayCompletionMessage();
+  void displayEndMessage();
 
 };
 
