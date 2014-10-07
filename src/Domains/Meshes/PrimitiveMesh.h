@@ -16,7 +16,7 @@ public:
     PrimitiveMesh();
     PrimitiveMesh(int nI, int nJ, int nK);
 
-    Vector3D& operator()(int i, int j, int k) const;
+    Vector3D& operator()(int i, int j, int k);
 };
 
 #endif // PRIMITIVEMESH_H

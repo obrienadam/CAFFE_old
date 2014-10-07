@@ -6,16 +6,14 @@ CC_FLAGS = -O3 -no-prec-div -Wall -fno-alias
 
 CXX_FLAGS = $(CC_FLAGS)
 
-## Add include paths
+## Modules
 
-INCLUDE = -I./$(MATH_DIR)
-INCLUDE += -I./$(DATA_STRUCTURES_DIR)
-INCLUDE += -I./$(RUN_CONTROL_DIR)
-INCLUDE += -I./$(MESH_DIR)
-INClUDE += -I./$(FIELD_DIR)
+ADVEC_DIFF = caffeAdvectionDiffusion
+MODULES += $(ADVEC_DIFF)
 
 ## Directories
 
+BUILD_DIR = Build
 MODULES_DIR = Modules
 MATH_DIR = src/Math
 DATA_STRUCTURES_DIR = src/DataStructures
@@ -23,51 +21,59 @@ RUN_CONTROL_DIR = src/RunControl
 MESH_DIR = src/Domains/Meshes
 FIELD_DIR = src/Fields
 
-## Modules
+ALL_DIRS = $(MODULES_DIR) $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(MESH_DIR) $(FIELD_DIR)
 
-ADVEC_DIFF = caffeAdvectionDiffusion
+## Includes
 
-MODULES += $(ADVEC_DIFF)
+INCLUDE = $(addprefix -I./, $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(MESH_DIR) $(FIELD_DIR))
 
-## Object files
+## External libraries
 
-ADVEC_DIFF_OBJS = $(ADVEC_DIFF).o
+## Source files
 
-MATH_OBJS += Vector3D.o
+# Math
 
-RUN_CONTROL_OBJS += RunControl.o
-RUN_CONTROL_OBJS += ArgsList.o
-RUN_CONTROL_OBJS += Input.o
+MATH_SRC_FILES += Vector3D.cc
+MATH_SRC_FILES += Tensor3D.cc
 
+MATH_SRC = $(addprefix $(MATH_DIR)/, $(MATH_SRC_FILES))
+
+# Run control
+
+RUN_CONTROL_SRC_FILES += RunControl.cc
+RUN_CONTROL_SRC_FILES += ArgsList.cc
+RUN_CONTROL_SRC_FILES += Input.cc
+
+RUN_CONTROL_SRC = $(addprefix $(RUN_CONTROL_DIR)/, $(RUN_CONTROL_SRC_FILES))
+
+# Meshes
+
+MESH_SRC_FILES += PrimitiveMesh.cc
+MESH_SRC_FILES += HexaFdmMesh.cc
+
+MESH_SRC = $(addprefix $(MESH_DIR)/, $(MESH_SRC_FILES))
+
+## Module Dependencies
+
+# Advection Diffusion
+
+ADVEC_DIFF_SRC += Modules/$(ADVEC_DIFF).cc
+ADVEC_DIFF_SRC += $(MATH_SRC)
+ADVEC_DIFF_SRC += $(RUN_CONTROL_SRC)
+ADVEC_DIFF_SRC += $(MESH_SRC)
+ADVEC_DIFF_OBJS = $(ADVEC_DIFF_SRC:.cc=.o)
 
 install: all
 
 all: $(MODULES)
 
-$(ADVEC_DIFF): $(ADVEC_DIFF_OBJS) $(MATH_OBJS) $(RUN_CONTROL_OBJS) HexaFdmMesh.o
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) $(MATH_OBJS) $(RUN_CONTROL_OBJS) HexaFdmMesh.o
-	mv $(ADVEC_DIFF) bin	
+$(ADVEC_DIFF): $(ADVEC_DIFF_OBJS)
+	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) -lboost_program_options
+	mv $(ADVEC_DIFF) bin/
 
-$(ADVEC_DIFF_OBJS):%.o:$(MODULES_DIR)/%.cc
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
-
-$(MATH_OBJS):%.o:$(MATH_DIR)/%.cc
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
-
-$(RUN_CONTROL_OBJS):%.o:$(RUN_CONTROL_DIR)/%.cc
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
-
-HexaFdmMesh.o: $(MESH_DIR)/HexaFdmMesh.cc
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $<
+$(ADVEC_DIFF_OBJS):%.o: %.cc
+	$(CXX) $(INCLUDE) $(CXX_FLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o *~
-
-superclean: clean
-	rm -f bin/*
-	rm -f build/*
-	rm -f $(MODULES_DIR)/*~
-	rm -f $(MATH_DIR)/*~
-	rm -f $(DATA_STRUCTURES_DIR)/*~
-	rm -f $(RUN_CONTROL_DIR)/*~
-	rm -f $(MESH_DIR)/*~
+	rm -f $(addsuffix /*.o, $(ALL_DIRS))
+	rm -f $(addsuffix /*~, $(ALL_DIRS))

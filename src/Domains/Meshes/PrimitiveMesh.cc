@@ -12,7 +12,7 @@ PrimitiveMesh::PrimitiveMesh(int nI, int nJ, int nK)
 
 }
 
-Vector3D& PrimitiveMesh::operator()(int i, int j, int k) const
+Vector3D& PrimitiveMesh::operator()(int i, int j, int k)
 {
     return nodes_(i, j, k);
 }

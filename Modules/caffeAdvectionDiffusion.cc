@@ -4,13 +4,12 @@
 #include "HexaFdmMesh.h"
 #include "AdvectionDiffusionField.h"
 
-using namespace std;
-
 int main(int argc, const char* argv[])
 {
+  using namespace std;
+
   RunControl runControl(argc, argv);
   HexaFdmMesh mesh(30, 30, 30);
-  AdvectionDiffusionField phiField(30, 30, 30);
 
   runControl.displayStartMessage();
 

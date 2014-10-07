@@ -20,6 +20,6 @@ class AdvectionDiffusionField
     return phi_(i, j, k);
   }
 
-}
+};
 
 #endif

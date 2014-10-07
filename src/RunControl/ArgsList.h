@@ -1,16 +1,15 @@
 #ifndef ARGS_LIST_H
 #define ARGS_LIST_H
 
-#include <string>
-#include "SmartPointer.h"
+#include <boost/program_options.hpp>
 
 class ArgsList
 {
 
 private:
 
-    SmartPointer<std::string> options_;
-    SmartPointer<std::string> args_;
+    boost::program_options::options_description optsDescription_;
+    boost::program_options::variables_map varsMap_;
 
 public:
 
