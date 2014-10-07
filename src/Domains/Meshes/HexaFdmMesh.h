@@ -8,8 +8,6 @@ class HexaFdmMesh : public PrimitiveMesh
  private:
 
  public:
-  
-  int eastPatch, westPatch, northPatch, southPatch, topPatch, bottomPatch;
 
   HexaFdmMesh();
   HexaFdmMesh(int nI, int nJ, int nK);

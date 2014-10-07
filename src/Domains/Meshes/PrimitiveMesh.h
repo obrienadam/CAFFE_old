@@ -4,19 +4,30 @@
 #include "Point3D.h"
 #include "SmartPointer3D.h"
 
+enum Patch{BOUNDARY, INTERIOR};
+enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+
 class PrimitiveMesh
 {
 
-protected:
+ protected:
 
-    SmartPointer3D<Point3D> nodes_;
+  SmartPointer3D<Point3D> nodes_;
 
-public:
+  Patch facePatches_[6];
+  PrimitiveMesh* boundaryMeshes_;
 
-    PrimitiveMesh();
-    PrimitiveMesh(int nI, int nJ, int nK);
+ public:
 
-    Vector3D& operator()(int i, int j, int k);
+  PrimitiveMesh();
+  PrimitiveMesh(int nI, int nJ, int nK);
+  ~PrimitiveMesh();
+
+  void allocate(int nI, int nJ, int nK);
+
+  Point3D& operator()(int i, int j, int k);
+
+  void createBoundary(Face location, Patch type, int order);
 };
 
 #endif // PRIMITIVEMESH_H
