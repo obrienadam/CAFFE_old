@@ -1,50 +1,51 @@
 #ifndef RUN_CONTROL_H
 #define RUN_CONTROL_H
 
+#include <string>
+
 #include <boost/date_time.hpp>
 #include <boost/chrono.hpp>
 
 #include "ArgsList.h"
 #include "Input.h"
 
-enum TerminationCondition{SIM_TIME, CPU_TIME, REAL_TIME, ITERATIONS};
-
 class RunControl
 {
 
- typedef boost::posix_time::ptime RealTime;
- typedef boost::posix_time::time_duration RealTimeDuration;
- typedef boost::chrono::process_cpu_clock::duration CpuTimeDuration;
+    typedef boost::posix_time::ptime RealTime;
+    typedef boost::posix_time::time_duration RealTimeDuration;
+    typedef boost::chrono::process_cpu_clock::duration CpuTimeDuration;
 
- private:
+private:
 
-  ArgsList argsList_;
-  Input input_;
+    ArgsList argsList_;
+    Input input_;
 
-  int itrs_;
+    std::string terminationCondition_;
 
-  double simTime_, maxSimTime_;
+    int itrs_, maxItrs_;
 
-  RealTime startTime_;
-  RealTimeDuration elapsedTime_, maxElapsedTime_;
-  CpuTimeDuration cpuTime_, maxCpuTime_;
+    double simTime_, maxSimTime_;
 
- public:
+    RealTime startTime_;
+    RealTimeDuration elapsedTime_, maxElapsedTime_;
+    CpuTimeDuration cpuTime_, maxCpuTime_;
 
-  RunControl();
-  RunControl(int argc, const char* argv[]);
+    RunControl();
 
-  TerminationCondition terminationCondition;
+public:
 
-  int maxItrs;
+    RunControl(int argc, const char* argv[]);
 
-  void displayStartMessage();
+    void setRunControlParametersFromInputFile();
 
-  bool continueRun(double timeStep = 0.);
+    void displayStartMessage();
 
-  void displayUpdateMessage();
+    bool continueRun(double timeStep = 0.);
 
-  void displayEndMessage();
+    void displayUpdateMessage();
+
+    void displayEndMessage();
 
 };
 

@@ -3,97 +3,118 @@
 #include "RunControl.h"
 
 RunControl::RunControl()
- :
-  itrs_(0),
-  simTime_(0.),
-  startTime_(boost::posix_time::microsec_clock::local_time()),
-  elapsedTime_(0, 0, 0, 0),
-  maxElapsedTime_(48, 0, 0, 0),
-  terminationCondition(ITERATIONS)
+    :
+      itrs_(0),
+      simTime_(0.),
+      startTime_(boost::posix_time::microsec_clock::local_time()),
+      elapsedTime_(0, 0, 0, 0),
+      maxElapsedTime_(48, 0, 0, 0),
+      terminationCondition_("iterations")
 {
 
 }
 
 RunControl::RunControl(int argc, const char* argv[])
-:
-  RunControl()
+    :
+      RunControl()
 {
-  argsList_.readArgs(argc, argv);
+
+    argsList_.readArgs(argc, argv);
+    input_.openInputFile(argsList_.inputFilename_);
+    setRunControlParametersFromInputFile();
+
+}
+
+void RunControl::setRunControlParametersFromInputFile()
+{
+
+    terminationCondition_ = input_.inputStrings["terminationCondition"];
+    maxItrs_ = input_.inputInts["maxItrs"];
+    maxSimTime_ = input_.inputDoubles["maxSimTime"];
+
 }
 
 bool RunControl::continueRun(double timeStep)
 {
-  ++itrs_;
-  simTime_ += timeStep;
 
-  switch(terminationCondition)
+    ++itrs_;
+    simTime_ += timeStep;
+
+    if(terminationCondition_ == "iterations")
     {
 
-    case ITERATIONS:
+        if(itrs_ >= maxItrs_)
+            return false;
 
-      if(itrs_ >= maxItrs)
-	return false;
+    }
 
-      break;
+    else if(terminationCondition_ == "simTime")
+    {
 
+        if(simTime_ >= maxSimTime_)
+            return false;
 
-    case SIM_TIME:
-      
-      if(simTime_ >= maxSimTime_)
-	return false;
+    }
 
-      break;
+    else if(terminationCondition_ == "cpuTime")
+    {
 
-    case CPU_TIME:
+        if(cpuTime_ >= maxCpuTime_)
+            return false;
 
-      if(cpuTime_ >= maxCpuTime_)
-	return false;
+    }
 
-      break;
+    else if (terminationCondition_ == "realTime")
+    {
 
-    case REAL_TIME:
+        if(elapsedTime_ >= maxElapsedTime_)
+            return false;
 
-      if(elapsedTime_ >= maxElapsedTime_)
-	return false;
+    }
 
-      break;
+    else
+    {
 
-    default:
+        std::string errorMessage("Invalid termination condition \"" + terminationCondition_ + "\" selected in RunControl.");
 
-      throw "Invalid termination condition in RunControl.";
-      return false;
+        throw errorMessage.c_str();
 
-    };
+    }
 
-      return true;
+    return true;
+
 }
 
 void RunControl::displayStartMessage()
 {
-  using namespace std;
 
-  startTime_ = boost::posix_time::second_clock::local_time();
+    using namespace std;
+    using namespace boost::posix_time;
 
-  cout << endl 
-       << "#################################################################\n"
-       << endl
-       << "|  || ___\n" 
-       << "|  ||/ _  \\ \\\n"				\
-       << "|  ||\\__/ | | |\n"
-       << "|  | \\___/  | | CAFFE\n"
-       << "|   \\______/  /\n"
-       << " \\___________/\n"  
-       << endl
-       << "  Computational Algorithm Framework for Fluid Equations (CAFFE)\n"  
-       << endl
-       << "                      Author: Adam O'Brien\n"
-       << "	            E-mail: roni511@gmail.com\n"
-       << endl
-       << "#################################################################\n"
-       << endl
-       << "Iterations beginning on " << startTime_ << ".\n"
-       << endl;
-  
+    startTime_ = second_clock::local_time();
+
+    cout << endl
+         << "#################################################################\n"
+         << endl
+         << "|  || ___\n"
+         << "|  ||/ _  \\ \\\n"				\
+         << "|  ||\\__/ | | |\n"
+         << "|  | \\___/  | | CAFFE\n"
+         << "|   \\______/  /\n"
+         << " \\___________/\n"
+         << endl
+         << "  Computational Algorithm Framework for Fluid Equations (CAFFE)\n"
+         << endl
+         << "                      Author: Adam O'Brien\n"
+         << "	            E-mail: roni511@gmail.com\n"
+         << endl
+         << "#################################################################\n"
+         << endl
+         << "Iterations beginning on " << startTime_ << ".\n"
+         << endl
+         << "Simulation termination condition: " << terminationCondition_ << endl
+         << endl;
+
 }
 
 void RunControl::displayUpdateMessage()
@@ -103,8 +124,12 @@ void RunControl::displayUpdateMessage()
 
 void RunControl::displayEndMessage()
 {
-  using namespace std;
 
-  cout << "Iterations complete on " << startTime_ + elapsedTime_ << ".\n"
-       << "Elapsed time: " << elapsedTime_ << endl;
+    using namespace std;
+
+    cout << "Iterations complete on " << startTime_ + elapsedTime_ << ".\n"
+         << endl
+         << "Elapsed time: " << elapsedTime_ << endl
+         << "CPU time: " << cpuTime_ << endl;
+
 }

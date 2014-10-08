@@ -8,24 +8,24 @@
 class Input
 {
 
- private:
+private:
 
-  std::string filename_;
-  std::ifstream fin_;
-  void processBuffer(std::string& buffer);
+    std::string filename_;
+    std::ifstream fin_;
+    void processBuffer(std::string& buffer);
 
- public:
+public:
 
-  std::map<std::string, int> inputInts;
-  std::map<std::string, double> inputDoubles;
-  std::map<std::string, std::string> inputStrings;
+    std::map<std::string, int> inputInts;
+    std::map<std::string, double> inputDoubles;
+    std::map<std::string, std::string> inputStrings;
 
-  Input();
-  Input(std::string filename);
-  ~Input();
+    Input();
+    Input(std::string filename);
+    ~Input();
 
-  void openInputFile(std::string filename);
-  
+    void openInputFile(std::string filename);
+
 };
 
 #endif

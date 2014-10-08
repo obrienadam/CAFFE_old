@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 ## Set-up the compiler flags
 
-CC_FLAGS = -O3 -no-prec-div -Wall -fno-alias
+CC_FLAGS = -O3 -no-prec-div -Wall -fno-alias -std=c++11
 
 CXX_FLAGS = $(CC_FLAGS)
 

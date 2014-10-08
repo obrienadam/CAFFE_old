@@ -7,16 +7,16 @@
 class TecplotAscii
 {
 
- private:
+private:
 
-  std::ofstream fout_;
+    std::ofstream fout_;
 
- public:
+public:
 
-  TecplotAscii();
-  TecplotAscii(std::string filename, int nVariables, std::string variableNames[], int strandID = 1);
+    TecplotAscii();
+    TecplotAscii(std::string filename, int nVariables, std::string variableNames[], int strandID = 1);
 
-  
+
 };
 
 #endif
