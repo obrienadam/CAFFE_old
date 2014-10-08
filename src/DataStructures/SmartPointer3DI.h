@@ -2,51 +2,56 @@
 
 template <class T>
 SmartPointer3D<T>::SmartPointer3D() 
-:
-nI_(0),
-  nJ_(0),
-  nK_(0),
-  n_(0),
-  data_(NULL)
+    :
+      nI_(0),
+      nJ_(0),
+      nK_(0),
+      n_(0),
+      data_(NULL)
 {
 
 }
 
 template <class T>
 SmartPointer3D<T>::SmartPointer3D(int nI, int nJ, int nK)
-:
-SmartPointer3D()
+    :
+      SmartPointer3D()
 {
-  allocate(nI, nJ, nK);
+    allocate(nI, nJ, nK);
 }
 
 template <class T>
 SmartPointer3D<T>::~SmartPointer3D()
 {
-  deallocate();
+    deallocate();
 }
 
 template <class T>
 void SmartPointer3D<T>::allocate(int nI, int nJ, int nK)
 {
-  int i, j;
+    int i, j;
 
-  deallocate();
+    deallocate();
 
-  nI_ = nI;
-  nJ_ = nJ;
-  nK_ = nK;
-  n_ = nI_*nJ_*nK_;
+    nI_ = nI;
+    nJ_ = nJ;
+    nK_ = nK;
+    n_ = nI_*nJ_*nK_;
 
-  data_ = new T**[nI_];
+    // Check for 0 value, if 0 do not attempt allocation
 
-  for(i = 0; i < nI_; ++i)
+    if(n_ == 0)
+        return;
+
+    data_ = new T**[nI_];
+
+    for(i = 0; i < nI_; ++i)
     {
-      data_[i] = new T*[nJ_];
+        data_[i] = new T*[nJ_];
         
-      for(j = 0; j < nJ_; ++j)
+        for(j = 0; j < nJ_; ++j)
         {
-          data_[i][j] = new T[nK_];
+            data_[i][j] = new T[nK_];
         }
     }
 }
@@ -54,33 +59,33 @@ void SmartPointer3D<T>::allocate(int nI, int nJ, int nK)
 template <class T>
 void SmartPointer3D<T>::deallocate()
 {
-  int i, j;
+    int i, j;
 
-  if(data_ == NULL)
-    return;
+    if(data_ == NULL)
+        return;
 
-  for(i = 0; i < nI_; ++i)
+    for(i = 0; i < nI_; ++i)
     {
-      for(j = 0; j < nJ_; ++j)
-	{
-	  delete[] data_[i][j];
-	}
-      delete[] data_[i];
+        for(j = 0; j < nJ_; ++j)
+        {
+            delete[] data_[i][j];
+        }
+        delete[] data_[i];
     }
 
-  delete[] data_;
+    delete[] data_;
 
-  data_ = NULL;
+    data_ = NULL;
 
-  nI_ = nJ_ = nK_ = n_ = 0;
+    nI_ = nJ_ = nK_ = n_ = 0;
 }
 
 template <class T>
 T& SmartPointer3D<T>::operator()(int i, int j, int k)
 {
-  if(i < 0 || j < 0 || k < 0 ||
-     i >= nI_ || j >= nJ_ || k >= nK_)
-    throw "Attempted to access element outside the bounds of SmartPointer3D.";
+    if(i < 0 || j < 0 || k < 0 ||
+            i >= nI_ || j >= nJ_ || k >= nK_)
+        throw "Attempted to access element outside the bounds of SmartPointer3D.";
 
-  return data_[i][j][k];
+    return data_[i][j][k];
 }

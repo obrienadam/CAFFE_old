@@ -21,6 +21,8 @@ class SmartPointer
 
   int size(){return n_;}
 
+  void pushBack(const T& newData);
+
   T& operator()(int i);
 
 };

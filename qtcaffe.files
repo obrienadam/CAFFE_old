@@ -8,12 +8,8 @@ src/Domains/Meshes/HexaFdmMesh.h
 src/Domains/Meshes/PrimitiveMesh.cc
 src/Domains/Meshes/PrimitiveMesh.h
 src/Domains/DomainInterface.h
-src/Fields/AdvectionDiffusionField.h
-src/Fields/EulerFluidField.h
-src/Fields/FieldInterface.h
 src/Fields/ScalarField.h
 src/Fields/VectorField.h
-src/Math/Field.h
 src/Math/Line3D.cc
 src/Math/Line3D.h
 src/Math/MathConstants.h
@@ -35,3 +31,8 @@ src/Schemes/SchemeInterface.h
 src/Solvers/Euler.cc
 src/Solvers/Euler.h
 src/Solvers/SolverInterface.h
+src/Fields/TensorField.h
+src/Fields/ScalarField.cc
+src/Fields/VectorField.cc
+src/Fields/TensorField.cc
+src/Fields/FieldInterface.h

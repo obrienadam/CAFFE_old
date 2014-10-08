@@ -2,37 +2,61 @@
 
 #include "RunControl.h"
 #include "HexaFdmMesh.h"
-#include "AdvectionDiffusionField.h"
+#include "ScalarField.h"
+#include "VectorField.h"
 
 int main(int argc, const char* argv[])
 {
-  using namespace std;
 
-  try
+    using namespace std;
+
+    try
     {
 
-      RunControl runControl(argc, argv);
-      HexaFdmMesh mesh(30, 30, 30);
+        //- Declare the basic module objects
 
-      runControl.displayStartMessage();
+        RunControl runControl(argc, argv);
+        HexaFdmMesh mesh(30, 30, 30);
 
-      while(runControl.continueRun())
-	{
+        //- Initialize the module specific fields
+
+        ScalarField phi("phi", 30, 30, 30);
+        ScalarField alpha("alpha", 30, 30, 30);
+        VectorField a("a", 30, 30, 30);
+
+        mesh.addField(&phi);
+        mesh.addField(&alpha);
+        mesh.addField(&a);
+
+        //- Display a start message and begin the run
+
+        runControl.displayStartMessage();
+
+        while(runControl.continueRun())
+        {
 
 
-	  runControl.displayUpdateMessage();
-	}
+            //- Display a periodic solution update
 
-      runControl.displayEndMessage();
+            runControl.displayUpdateMessage();
+
+        }
+
+        //- Display end message, the run ended normally
+
+        runControl.displayEndMessage();
 
     }
 
-  catch(const char* errorMessage)
+    //- Catch any exceptions thrown during the run
+
+    catch(const char* errorMessage)
     {
 
-      cerr << "Error: " << errorMessage << endl;
+        cerr << "Error: " << errorMessage << endl;
 
     }
 
-  return 0;
+    return 0;
+
 }

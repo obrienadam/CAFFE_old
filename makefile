@@ -2,7 +2,7 @@ SHELL = /bin/sh
 
 ## Set-up the compiler flags
 
-CC_FLAGS = -O3 -no-prec-div -Wall -fno-alias -std=c++11
+CC_FLAGS = -O3 -Wall -std=c++11
 
 CXX_FLAGS = $(CC_FLAGS)
 
@@ -18,14 +18,15 @@ MODULES_DIR = Modules
 MATH_DIR = src/Math
 DATA_STRUCTURES_DIR = src/DataStructures
 RUN_CONTROL_DIR = src/RunControl
-MESH_DIR = src/Domains/Meshes
+DOMAIN_DIR = src/Domains
 FIELD_DIR = src/Fields
+MESH_DIR = src/Domains/Meshes
 
-ALL_DIRS = $(MODULES_DIR) $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(MESH_DIR) $(FIELD_DIR)
+ALL_DIRS = $(MODULES_DIR) $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(DOMAIN_DIR) $(MESH_DIR) $(FIELD_DIR)
 
 ## Includes
 
-INCLUDE = $(addprefix -I./, $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(MESH_DIR) $(FIELD_DIR))
+INCLUDE = $(addprefix -I./, $(ALL_DIRS))
 
 ## External libraries
 
@@ -46,6 +47,14 @@ RUN_CONTROL_SRC_FILES += Input.cc
 
 RUN_CONTROL_SRC = $(addprefix $(RUN_CONTROL_DIR)/, $(RUN_CONTROL_SRC_FILES))
 
+# Fields
+
+FIELD_SRC_FILES += ScalarField.cc
+FIELD_SRC_FILES += VectorField.cc
+FIELD_SRC_FILES += TensorField.cc
+
+FIELD_SRC = $(addprefix $(FIELD_DIR)/, $(FIELD_SRC_FILES))
+
 # Meshes
 
 MESH_SRC_FILES += PrimitiveMesh.cc
@@ -60,6 +69,7 @@ MESH_SRC = $(addprefix $(MESH_DIR)/, $(MESH_SRC_FILES))
 ADVEC_DIFF_SRC += Modules/$(ADVEC_DIFF).cc
 ADVEC_DIFF_SRC += $(MATH_SRC)
 ADVEC_DIFF_SRC += $(RUN_CONTROL_SRC)
+ADVEC_DIFF_SRC += $(FIELD_SRC)
 ADVEC_DIFF_SRC += $(MESH_SRC)
 ADVEC_DIFF_OBJS = $(ADVEC_DIFF_SRC:.cc=.o)
 

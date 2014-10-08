@@ -1,9 +1,13 @@
 #ifndef HEXA_FDM_MESH_H
 #define HEXA_FDM_MESH_H
 
+#include "DomainInterface.h"
 #include "PrimitiveMesh.h"
 
-class HexaFdmMesh : public PrimitiveMesh
+class HexaFdmMesh
+        :
+        public DomainInterface,
+        public PrimitiveMesh
 {
  private:
 
