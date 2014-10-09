@@ -56,7 +56,20 @@ void SmartPointer3D<T>::allocate(int nI, int nJ, int nK)
         
         for(j = 0; j < nJ_; ++j)
         {
-            data_[i][j] = new T[nK_];
+
+            // Allocate nK_ + 1 so the iterator doesn't cause a seg fault
+            if(i == 0 && j == 0)
+            {
+
+                data_[i][j] = new T[nK_];
+
+            }
+            else
+            {
+
+                data_[i][j] = new T[nK_ - 1];
+
+            }
         }
     }
 }
@@ -88,11 +101,13 @@ void SmartPointer3D<T>::deallocate()
 template <class T>
 T& SmartPointer3D<T>::operator()(int i, int j, int k)
 {
+
     if(i < 0 || j < 0 || k < 0 ||
             i >= nI_ || j >= nJ_ || k >= nK_)
         throw "Attempted to access element outside the bounds of SmartPointer3D.";
 
     return data_[i][j][k];
+
 }
 
 //- Iterator methods
@@ -100,57 +115,68 @@ T& SmartPointer3D<T>::operator()(int i, int j, int k)
 template <class T>
 SmartPointer3D<T>::iterator::iterator()
     :
-      ptr_(NULL)
+      dataPtr_(NULL),
+      objectPtr_(NULL)
 {
 
 }
 
 template <class T>
-SmartPointer3D<T>::iterator::iterator(T* ptr)
+SmartPointer3D<T>::iterator::iterator(T* dataPtr,
+                                      SmartPointer3D<T>* objectPtr,
+                                      int i,
+                                      int j,
+                                      int k)
     :
-      ptr_(ptr)
+      dataPtr_(dataPtr),
+      objectPtr_(objectPtr),
+      i_(i),
+      j_(j),
+      k_(k)
 {
 
 }
 
 template <class T>
-SmartPointer3D<T>::iterator SmartPointer3D<T>::iterator::operator++()
+SmartPointer3D<T>::iterator& SmartPointer3D<T>::iterator::operator++()
 {
 
     ++i_;
 
-    if(i_ == ptr_->nI_)
+    if(i_ == objectPtr_->nI_)
     {
-
         i_ = 0;
         ++j_;
-
     }
 
-    if(j_ == ptr_->nJ_)
+    if(j_ == objectPtr_->nJ_)
     {
-
-        j_ == 0;
+        j_ = 0;
         ++k_;
-
     }
 
-    return ptr_ = ptr_[i][j][k];
+    dataPtr_ = &objectPtr_->data_[i_][j_][k_];
+
+    return *this;
+
 }
 
 template <class T>
 T& SmartPointer3D<T>::iterator::operator*()
 {
 
-    return *ptr_;
+    return *dataPtr_;
 
 }
 
 template <class T>
-T* SmartPointer3D<T>::iterator::operator->()
+bool SmartPointer3D<T>::iterator::operator!=(const iterator& rhs)
 {
 
-    return ptr_;
+    if(dataPtr_ != rhs.dataPtr_)
+        return true;
+
+    return false;
 
 }
 
@@ -158,7 +184,7 @@ template <class T>
 SmartPointer3D<T>::iterator SmartPointer3D<T>::begin()
 {
 
-    return iterator(&data_[0][0][0])
+    return iterator(&data_[0][0][0], this, 0, 0, 0);
 
 }
 
@@ -166,7 +192,9 @@ template <class T>
 SmartPointer3D<T>::iterator SmartPointer3D<T>::end()
 {
 
-    return iterator(&data_[nI_][nJ_][nK_ + 1]);
+    // The end is at container size + 1 so that the iterator will iterate over the entire container
+
+    return iterator(&data_[0][0][nK_], this, 0, 0, nK_);
 
 }
 

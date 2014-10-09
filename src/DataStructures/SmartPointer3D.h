@@ -42,19 +42,24 @@ public:
     private:
 
         int i_, j_, k_;
-        T* ptr_;
+        T* dataPtr_;
+        SmartPointer3D<T>* objectPtr_;
 
     public:
 
         typedef std::bidirectional_iterator_tag iterator_category;
 
         iterator();
-        iterator(T* ptr);
+        iterator(T* dataPtr,
+                 SmartPointer3D<T>* objectPtr,
+                 int i,
+                 int j,
+                 int k);
 
-        iterator operator++();
+        iterator& operator++();
+
         T& operator*();
-        T* operator->();
-        bool operator==(const iterator& rhs);
+
         bool operator!=(const iterator& rhs);
 
     };
