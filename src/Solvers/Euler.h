@@ -10,6 +10,8 @@ class Euler : public SolverInterface
 
  public:
 
+  Euler();
+
   void advanceSolution(DomainInterface* domain, SchemeInterface* scheme);
 
 };

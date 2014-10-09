@@ -24,7 +24,6 @@ class PrimitiveMesh
 
   void allocate(int nI, int nJ, int nK);
 
-  Point3D& operator()(int i, int j, int k);
 };
 
 #endif // PRIMITIVEMESH_H

@@ -6,6 +6,10 @@
 class FiniteDifference : public SchemeInterface
 {
 
+ public:
+
+  FiniteDifference();
+
 };
 
 #endif

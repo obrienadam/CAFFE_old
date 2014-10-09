@@ -32,7 +32,6 @@ src/Solvers/Euler.cc
 src/Solvers/Euler.h
 src/Solvers/SolverInterface.h
 src/Fields/TensorField.h
-src/Fields/ScalarField.cc
-src/Fields/VectorField.cc
-src/Fields/TensorField.cc
-src/Fields/FieldInterface.h
+src/Fields/Field.h
+src/Domains/DomainInterface.cc
+src/Fields/FieldI.h

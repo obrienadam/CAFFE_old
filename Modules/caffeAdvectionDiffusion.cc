@@ -2,6 +2,11 @@
 
 #include "RunControl.h"
 #include "HexaFdmMesh.h"
+
+#include "Euler.h"
+
+#include "FiniteDifference.h"
+
 #include "ScalarField.h"
 #include "VectorField.h"
 
@@ -17,6 +22,8 @@ int main(int argc, const char* argv[])
 
         RunControl runControl(argc, argv);
         HexaFdmMesh mesh(30, 30, 30);
+        SolverInterface* solver = new Euler;
+        SchemeInterface* scheme = new FiniteDifference;
 
         //- Initialize the module specific fields
 
@@ -24,9 +31,9 @@ int main(int argc, const char* argv[])
         ScalarField alpha("alpha", 30, 30, 30);
         VectorField a("a", 30, 30, 30);
 
-        mesh.addField(&phi);
-        mesh.addField(&alpha);
-        mesh.addField(&a);
+        mesh.addField(phi);
+        mesh.addField(alpha);
+        mesh.addField(a);
 
         //- Display a start message and begin the run
 

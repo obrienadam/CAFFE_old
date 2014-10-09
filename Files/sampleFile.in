@@ -7,7 +7,7 @@
 ### Run Control ############################################
 
 terminationCondition
-simTime
+iterations
 
 ### Iterations #############################################
 

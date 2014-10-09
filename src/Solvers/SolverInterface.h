@@ -9,13 +9,20 @@
 class SolverInterface
 {
 
- protected:
+protected:
 
-  std::string solverName_;
+    SolverInterface(std::string solverName)
+        :
+          solverName_(solverName)
+    {
 
- public:
+    }
 
-  virtual void advanceSolution(DomainInterface* domain, SchemeInterface* scheme) = 0;
+    std::string solverName_;
+
+public:
+
+    virtual void advanceSolution(DomainInterface* domain, SchemeInterface* scheme) = 0;
 
 };
 

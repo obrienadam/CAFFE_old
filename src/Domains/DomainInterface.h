@@ -5,24 +5,33 @@
 #include <cstdlib>
 
 #include "ScalarField.h"
-#include "FieldInterface.h"
+#include "VectorField.h"
+#include "TensorField.h"
+
 
 class DomainInterface
 {
 
- protected:
+    typedef std::map<std::string, ScalarField*> ScalarFieldMap;
+    typedef std::map<std::string, VectorField*> VectorFieldMap;
+    typedef std::map<std::string, TensorField*> TensorFieldMap;
 
- public:
 
-    std::map<std::string, FieldInterface*> fields;
+protected:
 
-    void addField(FieldInterface* field)
-    {
+    ScalarFieldMap scalarFields_;
+    VectorFieldMap vectorFields_;
+    TensorFieldMap tensorFields_;
 
-        fields[field->fieldName] = field;
+public:
 
-    }
+    void addField(ScalarField& scalarField);
+    void addField(VectorField& vectorField);
+    void addField(TensorField& tensorField);
 
+    ScalarField& scalar(const std::string& scalarFieldName);
+    VectorField& vector(const std::string& vectorFieldName);
+    TensorField& tensor(const std::string& tensorFieldName);
 };
 
 #endif
