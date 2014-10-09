@@ -1,3 +1,9 @@
+#ifndef FIELD_I_H
+#define FIELD_I_H
+
+#include <cstdlib>
+
+#include "Field.h"
 
 template <class T>
 Field<T>::Field()
@@ -48,3 +54,4 @@ Field<T>& Field<T>::operator/=(double rhs)
 
 }
 
+#endif

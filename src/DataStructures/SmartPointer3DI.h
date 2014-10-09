@@ -1,4 +1,9 @@
+#ifndef SMART_POINTER_3D_I_H
+#define SMART_POINTER_3D_I_H
+
 #include <cstdlib>
+
+#include "SmartPointer3D.h"
 
 template <class T>
 SmartPointer3D<T>::SmartPointer3D() 
@@ -89,3 +94,80 @@ T& SmartPointer3D<T>::operator()(int i, int j, int k)
 
     return data_[i][j][k];
 }
+
+//- Iterator methods
+
+template <class T>
+SmartPointer3D<T>::iterator::iterator()
+    :
+      ptr_(NULL)
+{
+
+}
+
+template <class T>
+SmartPointer3D<T>::iterator::iterator(T* ptr)
+    :
+      ptr_(ptr)
+{
+
+}
+
+template <class T>
+SmartPointer3D<T>::iterator SmartPointer3D<T>::iterator::operator++()
+{
+
+    ++i_;
+
+    if(i_ == ptr_->nI_)
+    {
+
+        i_ = 0;
+        ++j_;
+
+    }
+
+    if(j_ == ptr_->nJ_)
+    {
+
+        j_ == 0;
+        ++k_;
+
+    }
+
+    return ptr_ = ptr_[i][j][k];
+}
+
+template <class T>
+T& SmartPointer3D<T>::iterator::operator*()
+{
+
+    return *ptr_;
+
+}
+
+template <class T>
+T* SmartPointer3D<T>::iterator::operator->()
+{
+
+    return ptr_;
+
+}
+
+template <class T>
+SmartPointer3D<T>::iterator SmartPointer3D<T>::begin()
+{
+
+    return iterator(&data_[0][0][0])
+
+}
+
+template <class T>
+SmartPointer3D<T>::iterator SmartPointer3D<T>::end()
+{
+
+    return iterator(&data_[nI_][nJ_][nK_ + 1]);
+
+}
+
+#endif

@@ -1,4 +1,9 @@
+#ifndef SMART_POINTER_H
+#define SMART_POINTER_H
+
 #include <cstdlib>
+
+#include "SmartPointer.h"
 
 template <class T>
 SmartPointer<T>::SmartPointer()
@@ -57,3 +62,5 @@ T& SmartPointer<T>::operator()(int i)
 
     return data_[i];
 }
+
+#endif
