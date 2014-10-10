@@ -8,9 +8,14 @@
 
 #include "ArgsList.h"
 #include "Input.h"
+#include "DomainInterface.h"
+#include "SolverInterface.h"
+#include "SchemeInterface.h"
 
 class RunControl
 {
+
+    //- Typedefs
 
     typedef boost::posix_time::ptime RealTime;
     typedef boost::posix_time::time_duration RealTimeDuration;
@@ -39,13 +44,19 @@ public:
 
     void setRunControlParametersFromInputFile();
 
-    void displayStartMessage();
-
     bool continueRun(double timeStep = 0.);
 
-    void displayUpdateMessage();
+    //- Output messages
 
+    void displayStartMessage();
+    void displayUpdateMessage();
     void displayEndMessage();
+
+    //- Initialization
+
+    void initializeObjects(DomainInterface* domain,
+                           SolverInterface* solver,
+                           SchemeInterface* scheme);
 
 };
 

@@ -1,5 +1,10 @@
 #include "DomainInterface.h"
 
+DomainInterface::~DomainInterface()
+{
+
+}
+
 void DomainInterface::addField(ScalarField& scalarField)
 {
 
@@ -39,5 +44,12 @@ TensorField& DomainInterface::tensor(const std::string &tensorFieldName)
 {
 
     return *(tensorFields_[tensorFieldName]);
+
+}
+
+void DomainInterface::allocate(Input &input)
+{
+
+
 
 }

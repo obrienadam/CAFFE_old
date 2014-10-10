@@ -4,10 +4,7 @@
 #include "DomainInterface.h"
 #include "PrimitiveMesh.h"
 
-class HexaFdmMesh
-        :
-        public DomainInterface,
-        public PrimitiveMesh
+class HexaFdmMesh : public PrimitiveMesh
 {
  private:
 

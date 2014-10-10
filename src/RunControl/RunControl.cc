@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "RunControl.h"
+#include "Output.h"
 
 RunControl::RunControl()
     :
@@ -93,24 +94,7 @@ void RunControl::displayStartMessage()
 
     startTime_ = second_clock::local_time();
 
-    cout << endl
-         << "#################################################################\n"
-         << endl
-         << "|  || ___\n"
-         << "|  ||/ _  \\ \\\n"				\
-         << "|  ||\\__/ | | |\n"
-         << "|  | \\___/  | | CAFFE\n"
-         << "|   \\______/  /\n"
-         << " \\___________/\n"
-         << endl
-         << "  Computational Algorithm Framework for Fluid Equations (CAFFE)\n"
-         << endl
-         << "                      Author: Adam O'Brien\n"
-         << "	            E-mail: roni511@gmail.com\n"
-         << endl
-         << "#################################################################\n"
-         << endl
-         << "Iterations beginning on " << startTime_ << ".\n"
+    cout << "Iterations beginning on " << startTime_ << ".\n"
          << endl
          << "Simulation termination condition: " << terminationCondition_ << endl
          << endl;
@@ -131,5 +115,16 @@ void RunControl::displayEndMessage()
          << endl
          << "Elapsed time: " << elapsedTime_ << endl
          << "CPU time: " << cpuTime_ << endl;
+
+}
+
+void RunControl::initializeObjects(DomainInterface *domain,
+                                   SolverInterface *solver,
+                                   SchemeInterface *scheme)
+{
+
+    domain->allocate(input_);
+    solver->initialize(input_);
+    scheme->initialize(input_);
 
 }

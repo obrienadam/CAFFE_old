@@ -4,3 +4,9 @@ FiniteDifference::FiniteDifference()
 {
 
 }
+
+void FiniteDifference::initialize(Input &input)
+{
+
+
+}

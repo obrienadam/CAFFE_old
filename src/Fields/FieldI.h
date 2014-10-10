@@ -12,7 +12,10 @@ Field<T>::Field()
 }
 
 template <class T>
-Field<T>::Field(std::string fieldName, int nI, int nJ, int nK)
+Field<T>::Field(std::string fieldName,
+                int nI,
+                int nJ,
+                int nK)
     :
       fieldName(fieldName),
       SmartPointer3D<T>(nI, nJ, nK)

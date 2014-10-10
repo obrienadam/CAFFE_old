@@ -10,6 +10,8 @@ class FiniteDifference : public SchemeInterface
 
   FiniteDifference();
 
+  void initialize(Input &input);
+
 };
 
 #endif

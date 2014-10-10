@@ -5,6 +5,7 @@
 
 #include "DomainInterface.h"
 #include "SchemeInterface.h"
+#include "Input.h"
 
 class SolverInterface
 {
@@ -23,6 +24,8 @@ protected:
 public:
 
     virtual void advanceSolution(DomainInterface* domain, SchemeInterface* scheme) = 0;
+
+    virtual void initialize(Input& input) = 0;
 
 };
 

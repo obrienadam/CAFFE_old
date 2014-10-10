@@ -13,3 +13,10 @@ void Euler::advanceSolution(DomainInterface* domain, SchemeInterface* scheme)
 {
 
 }
+
+void Euler::initialize(Input &input)
+{
+
+
+
+}

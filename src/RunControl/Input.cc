@@ -25,6 +25,12 @@ Input::Input()
 
     inputStrings["terminationCondition"] = "simTime";
 
+    // Domain related data
+
+    inputInts["nI"] = 30;
+    inputInts["nJ"] = 30;
+    inputInts["nK"] = 30;
+
 }
 
 Input::Input(std::string filename)

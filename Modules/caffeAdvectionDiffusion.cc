@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "Output.h"
 #include "RunControl.h"
 #include "HexaFdmMesh.h"
 
@@ -15,25 +16,31 @@ int main(int argc, const char* argv[])
 
     using namespace std;
 
+    Output::displayCaffeHeader();
+
     try
     {
 
         //- Declare the basic module objects
 
         RunControl runControl(argc, argv);
-        HexaFdmMesh mesh(30, 30, 30);
+        HexaFdmMesh mesh;
         SolverInterface* solver = new Euler;
         SchemeInterface* scheme = new FiniteDifference;
 
         //- Initialize the module specific fields
 
-        ScalarField phi("phi", 30, 30, 30);
-        ScalarField alpha("alpha", 30, 30, 30);
-        VectorField a("a", 30, 30, 30);
+        ScalarField phi("phi");
+        ScalarField alpha("alpha");
+        VectorField a("a");
 
         mesh.addField(phi);
         mesh.addField(alpha);
         mesh.addField(a);
+
+        runControl.initializeObjects(&mesh,
+                                     solver,
+                                     scheme);
 
         //- Display a start message and begin the run
 

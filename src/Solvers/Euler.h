@@ -14,6 +14,8 @@ class Euler : public SolverInterface
 
   void advanceSolution(DomainInterface* domain, SchemeInterface* scheme);
 
+  void initialize(Input &input);
+
 };
 
 #endif
