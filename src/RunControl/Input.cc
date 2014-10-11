@@ -1,4 +1,5 @@
 #include <boost/algorithm/string/erase.hpp>
+
 #include "Input.h"
 
 Input::Input()
@@ -37,13 +38,17 @@ Input::Input(std::string filename)
     :
       Input()
 {
+
     openInputFile(filename);
+
 }
 
 Input::~Input()
 {
+
     if(fin_.is_open())
         fin_.close();
+
 }
 
 void Input::processBuffer(std::string& buffer)
@@ -83,6 +88,17 @@ void Input::openInputFile(std::string filename)
 
     filename_ = filename;
     fin_.open(filename.c_str());
+
+    //- Check if the file was found
+
+    if(!fin_.is_open())
+    {
+
+        string errorMessage("Input file \"" + filename_ + "\" was not found.");
+
+        throw errorMessage.c_str();
+
+    }
 
     while(!fin_.eof())
     {
