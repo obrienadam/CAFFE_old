@@ -21,38 +21,34 @@ void PrimitiveMesh::allocate(Input &input)
             nJ = input.inputInts["nJ"],
             nK = input.inputInts["nK"];
 
-    ScalarFieldMap::const_iterator scalarItr;
-    VectorFieldMap::const_iterator vectorItr;
-    TensorFieldMap::const_iterator tensorItr;
-
     nodes_.allocate(nI, nJ, nK);
 
     Output::printToScreen("Initialized nodes of PrimitiveMesh.");
 
-    for(scalarItr = scalarFields_.begin(); scalarItr != scalarFields_.end(); ++scalarItr)
+    for(scalarFieldMapItr_ = scalarFields_.begin(); scalarFieldMapItr_ != scalarFields_.end(); ++scalarFieldMapItr_)
     {
 
-        scalarItr->second->allocate(nI, nJ, nK);
+        scalarFieldMapItr_->second->allocate(nI, nJ, nK);
 
-        Output::printToScreen("Initialized scalar field \"" + scalarItr->second->fieldName + "\".");
+        Output::printToScreen("Initialized scalar field \"" + scalarFieldMapItr_->second->fieldName + "\".");
 
     }
 
-    for(vectorItr = vectorFields_.begin(); vectorItr != vectorFields_.end(); ++vectorItr)
+    for(vectorFieldMapItr_ = vectorFields_.begin(); vectorFieldMapItr_ != vectorFields_.end(); ++vectorFieldMapItr_)
     {
 
-        vectorItr->second->allocate(nI, nJ, nK);
+        vectorFieldMapItr_->second->allocate(nI, nJ, nK);
 
-        Output::printToScreen("Initialized vector field \"" + vectorItr->second->fieldName + "\".");
+        Output::printToScreen("Initialized vector field \"" + vectorFieldMapItr_->second->fieldName + "\".");
 
     }
 
-    for(tensorItr = tensorFields_.begin(); tensorItr != tensorFields_.end(); ++tensorItr)
+    for(tensorFieldMapItr_ = tensorFields_.begin(); tensorFieldMapItr_ != tensorFields_.end(); ++tensorFieldMapItr_)
     {
 
-        tensorItr->second->allocate(nI, nJ, nK);
+        tensorFieldMapItr_->second->allocate(nI, nJ, nK);
 
-        Output::printToScreen("Initialized tensor field \"" + tensorItr->second->fieldName + "\".");
+        Output::printToScreen("Initialized tensor field \"" + tensorFieldMapItr_->second->fieldName + "\".");
 
     }
 

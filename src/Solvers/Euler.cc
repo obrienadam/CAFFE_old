@@ -1,4 +1,5 @@
 #include "Euler.h"
+#include "Output.h"
 
 Euler::Euler()
     :
@@ -9,14 +10,22 @@ Euler::Euler()
 
 }
 
-void Euler::advanceSolution(DomainInterface* domain, SchemeInterface* scheme)
-{
-
-}
-
 void Euler::initialize(Input &input)
 {
 
+    timeStep_ = input.inputDoubles["timeStep"];
+    timeDerivatives_.resize(1);
+    timeDerivatives_[0].allocate(input);
 
+    Output::printToScreen("Initialized " + solverName_ + " time integration scheme.");
+    Output::printLine();
 
+}
+
+void Euler::advanceSolution(DomainInterface* domain, SchemeInterface* scheme)
+{
+
+    timeDerivatives_[0] = domain->computeTimeDerivative(scheme);
+
+    (*domain) += timeDerivatives_[0]*timeStep_;
 }

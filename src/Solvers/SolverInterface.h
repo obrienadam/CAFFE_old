@@ -2,6 +2,7 @@
 #define SOLVER_INTERFACE_H
 
 #include <string>
+#include <vector>
 
 #include "DomainInterface.h"
 #include "SchemeInterface.h"
@@ -20,6 +21,10 @@ protected:
     }
 
     std::string solverName_;
+
+    double timeStep_;
+
+    std::vector<DomainInterface> timeDerivatives_;
 
 public:
 

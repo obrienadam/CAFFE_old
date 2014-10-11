@@ -5,16 +5,16 @@
 
 class Euler : public SolverInterface
 {
-  
- private:
 
- public:
+private:
 
-  Euler();
+public:
 
-  void advanceSolution(DomainInterface* domain, SchemeInterface* scheme);
+    Euler();
 
-  void initialize(Input &input);
+    void initialize(Input &input);
+
+    void advanceSolution(DomainInterface* domain, SchemeInterface* scheme);
 
 };
 

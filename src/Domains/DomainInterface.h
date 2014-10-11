@@ -8,6 +8,7 @@
 #include "VectorField.h"
 #include "TensorField.h"
 #include "Input.h"
+#include "SchemeInterface.h"
 
 
 class DomainInterface
@@ -23,6 +24,10 @@ protected:
     VectorFieldMap vectorFields_;
     TensorFieldMap tensorFields_;
 
+    ScalarFieldMap::iterator scalarFieldMapItr_;
+    VectorFieldMap::iterator vectorFieldMapItr_;
+    TensorFieldMap::iterator tensorFieldMapItr_;
+
 public:
 
     virtual ~DomainInterface();
@@ -36,6 +41,13 @@ public:
     TensorField& tensor(const std::string& tensorFieldName);
 
     virtual void allocate(Input& input);
+
+    virtual DomainInterface& computeTimeDerivative(SchemeInterface* scheme);
+
+    DomainInterface& operator=(const DomainInterface& rhs);
+    DomainInterface& operator+=(const DomainInterface& rhs);
+    DomainInterface& operator*(const double rhs);
+
 };
 
 #endif
