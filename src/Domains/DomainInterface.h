@@ -1,8 +1,7 @@
 #ifndef DOMAIN_INTERFACE_H
 #define DOMAIN_INTERFACE_H
 
-#include <map>
-#include <cstdlib>
+#include <vector>
 
 #include "ScalarField.h"
 #include "VectorField.h"
@@ -16,17 +15,18 @@ class DomainInterface
 
 protected:
 
-    typedef std::map<std::string, ScalarField*> ScalarFieldMap;
-    typedef std::map<std::string, VectorField*> VectorFieldMap;
-    typedef std::map<std::string, TensorField*> TensorFieldMap;
+    typedef std::vector<ScalarField*> ScalarFieldVec;
+    typedef std::vector<VectorField*> VectorFieldVec;
+    typedef std::vector<TensorField*> TensorFieldVec;
 
-    ScalarFieldMap scalarFields_;
-    VectorFieldMap vectorFields_;
-    TensorFieldMap tensorFields_;
+    ScalarFieldVec scalarFields_;
+    VectorFieldVec vectorFields_;
+    TensorFieldVec tensorFields_;
 
-    ScalarFieldMap::iterator scalarFieldMapItr_;
-    VectorFieldMap::iterator vectorFieldMapItr_;
-    TensorFieldMap::iterator tensorFieldMapItr_;
+
+    ScalarFieldVec scalarAuxFields_;
+    VectorFieldVec vectorAuxFields_;
+    TensorFieldVec tensorAuxFields_;
 
 public:
 
@@ -36,10 +36,15 @@ public:
     void addField(VectorField& vectorField);
     void addField(TensorField& tensorField);
 
+    void addAuxField(ScalarField& scalarField);
+    void addAuxField(VectorField& vectorField);
+    void addAuxField(TensorField& tensorField);
+
     ScalarField& scalar(const std::string& scalarFieldName);
     VectorField& vector(const std::string& vectorFieldName);
     TensorField& tensor(const std::string& tensorFieldName);
 
+    void allocateFields(Input& input);
     virtual void allocate(Input& input);
 
     virtual DomainInterface& computeTimeDerivative(SchemeInterface* scheme);

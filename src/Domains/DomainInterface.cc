@@ -1,4 +1,5 @@
-﻿#include "DomainInterface.h"
+#include "DomainInterface.h"
+#include "Output.h"
 
 DomainInterface::~DomainInterface()
 {
@@ -8,72 +9,118 @@ DomainInterface::~DomainInterface()
 void DomainInterface::addField(ScalarField& scalarField)
 {
 
-    scalarFields_[scalarField.fieldName] = &scalarField;
+    scalarFields_.push_back(&scalarField);
 
 }
 
 void DomainInterface::addField(VectorField& vectorField)
 {
 
-    vectorFields_[vectorField.fieldName] = &vectorField;
+    vectorFields_.push_back(&vectorField);
 
 }
 
 void DomainInterface::addField(TensorField& tensorField)
 {
 
-    tensorFields_[tensorField.fieldName] = &tensorField;
+    tensorFields_.push_back(&tensorField);
 
 }
 
-ScalarField& DomainInterface::scalar(const std::string &scalarFieldName)
+void DomainInterface::addAuxField(ScalarField& scalarField)
 {
 
-    return *(scalarFields_[scalarFieldName]);
+    scalarAuxFields_.push_back(&scalarField);
 
 }
 
-VectorField& DomainInterface::vector(const std::string &vectorFieldName)
+void DomainInterface::addAuxField(VectorField& vectorField)
 {
 
-    return *(vectorFields_[vectorFieldName]);
+    vectorAuxFields_.push_back(&vectorField);
 
 }
 
-TensorField& DomainInterface::tensor(const std::string &tensorFieldName)
+void DomainInterface::addAuxField(TensorField& tensorField)
 {
 
-    return *(tensorFields_[tensorFieldName]);
+    tensorAuxFields_.push_back(&tensorField);
 
+}
+
+void DomainInterface::allocateFields(Input & input)
+{
+
+    int nI = input.inputInts["nI"],
+            nJ = input.inputInts["nJ"],
+            nK = input.inputInts["nK"],
+            fieldNo;
+
+    //- Initialize the main fields
+
+    for(fieldNo = 0; fieldNo < scalarFields_.size(); ++fieldNo)
+    {
+
+        scalarFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized scalar field \"" + scalarFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    for(fieldNo = 0; fieldNo < vectorFields_.size(); ++fieldNo)
+    {
+
+        vectorFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized vector field \"" + vectorFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    for(fieldNo = 0; fieldNo < tensorFields_.size(); ++fieldNo)
+    {
+
+        tensorFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized tensor field \"" + tensorFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    //- Initialize the auxillary fields
+
+    for(fieldNo = 0; fieldNo < scalarAuxFields_.size(); ++fieldNo)
+    {
+
+        scalarAuxFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized auxillary scalar field \"" + scalarAuxFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    for(fieldNo = 0; fieldNo < vectorAuxFields_.size(); ++fieldNo)
+    {
+
+        vectorAuxFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized auxillary vector field \"" + vectorAuxFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    for(fieldNo = 0; fieldNo < tensorAuxFields_.size(); ++fieldNo)
+    {
+
+        tensorAuxFields_[fieldNo]->allocate(nI, nJ, nK);
+
+        Output::printToScreen("Initialized auxillary tensor field \"" + tensorAuxFields_[fieldNo]->fieldName + "\".");
+
+    }
+
+    Output::printLine();
 }
 
 void DomainInterface::allocate(Input &input)
 {
 
-    int nI = input.inputInts["nI"],
-            nJ = input.inputInts["nJ"],
-            nK = input.inputInts["nK"];
-
-    for(scalarFieldMapItr_ = scalarFields_.begin(); scalarFieldMapItr_ != scalarFields_.end(); ++scalarFieldMapItr_)
-    {
-
-        scalarFieldMapItr_->second->allocate(nI, nJ, nK);
-
-    }
-
-    for(vectorFieldMapItr_ = vectorFields_.begin(); vectorFieldMapItr_ != vectorFields_.end(); ++vectorFieldMapItr_)
-    {
-
-        vectorFieldMapItr_->second->allocate(nI, nJ, nK);
-
-    }
-
-    for(tensorFieldMapItr_ = tensorFields_.begin(); tensorFieldMapItr_ != tensorFields_.end(); ++tensorFieldMapItr_)
-    {
-
-        tensorFieldMapItr_->second->allocate(nI, nJ, nK);
-
-    }
+    allocateFields(input);
 
 }
 

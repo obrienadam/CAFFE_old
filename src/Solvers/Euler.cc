@@ -15,7 +15,6 @@ void Euler::initialize(Input &input)
 
     timeStep_ = input.inputDoubles["timeStep"];
     timeDerivatives_.resize(1);
-    timeDerivatives_[0].allocate(input);
 
     Output::printToScreen("Initialized " + solverName_ + " time integration scheme.");
     Output::printLine();

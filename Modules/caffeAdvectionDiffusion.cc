@@ -40,8 +40,8 @@ int main(int argc, const char* argv[])
         VectorField a("a");
 
         mesh.addField(phi);
-        mesh.addField(alpha);
-        mesh.addField(a);
+        mesh.addAuxField(alpha);
+        mesh.addAuxField(a);
 
         runControl.initializeObjects(&mesh,
                                      solver,
