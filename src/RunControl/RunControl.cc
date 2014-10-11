@@ -21,6 +21,10 @@ RunControl::RunControl(int argc, const char* argv[])
 {
 
     argsList_.readArgs(argc, argv);
+
+    if(!(argsList_.validOptionsSelected_))
+        return;
+
     input_.openInputFile(argsList_.inputFilename_);
     setRunControlParametersFromInputFile();
 
@@ -32,6 +36,13 @@ void RunControl::setRunControlParametersFromInputFile()
     terminationCondition_ = input_.inputStrings["terminationCondition"];
     maxItrs_ = input_.inputInts["maxItrs"];
     maxSimTime_ = input_.inputDoubles["maxSimTime"];
+
+}
+
+bool RunControl::validOptionsSelected()
+{
+
+    return argsList_.validOptionsSelected_;
 
 }
 

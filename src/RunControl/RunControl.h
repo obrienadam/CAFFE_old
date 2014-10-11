@@ -44,6 +44,8 @@ public:
 
     void setRunControlParametersFromInputFile();
 
+    bool validOptionsSelected();
+
     bool continueRun(double timeStep = 0.);
 
     //- Output messages

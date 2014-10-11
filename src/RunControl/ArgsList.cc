@@ -5,7 +5,8 @@
 
 ArgsList::ArgsList()
     :
-      optsDescription_("Supported options")
+      optsDescription_("Supported options"),
+      validOptionsSelected_(true)
 {
 
     using namespace boost::program_options;
@@ -39,17 +40,23 @@ void ArgsList::readArgs(int argc, const char* argv[])
 
         cout << optsDescription_ << endl;
 
+        validOptionsSelected_ = false;
+
     }
     else if(varsMap_.count("file"))
     {
 
         inputFilename_ = varsMap_["file"].as<string>();
 
+        validOptionsSelected_ = true;
+
     }
     else
     {
 
         cout << optsDescription_ << endl;
+
+        validOptionsSelected_ = false;
 
     }
 

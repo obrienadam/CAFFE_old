@@ -18,6 +18,8 @@ private:
 
     std::string inputFilename_;
 
+    bool validOptionsSelected_;
+
 public:
 
     ArgsList();

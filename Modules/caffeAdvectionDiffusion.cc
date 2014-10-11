@@ -28,6 +28,11 @@ int main(int argc, const char* argv[])
         SolverInterface* solver = new Euler;
         SchemeInterface* scheme = new FiniteDifference;
 
+        //- Check if the command line arguments are valid
+
+        if(!(runControl.validOptionsSelected()))
+            return 0;
+
         //- Initialize the module specific fields
 
         ScalarField phi("phi");
