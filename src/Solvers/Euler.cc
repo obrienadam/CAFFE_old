@@ -21,10 +21,9 @@ void Euler::initialize(Input &input)
 
 }
 
-void Euler::advanceSolution(DomainInterface* domain, SchemeInterface* scheme)
+void Euler::advanceSolution(SmartPointer<DomainInterface> domain, SmartPointer<SchemeInterface> scheme)
 {
 
-    timeDerivatives_[0] = domain->computeTimeDerivative(scheme);
 
-    (*domain) += timeDerivatives_[0]*timeStep_;
+
 }

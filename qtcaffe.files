@@ -1,7 +1,7 @@
 Modules/caffeAdvectionDiffusion.cc
 src/DataStructures/SmartPointer.h
-src/DataStructures/SmartPointer3D.h
-src/DataStructures/SmartPointer3DI.h
+src/DataStructures/Array3D.h
+src/DataStructures/Array3DI.h
 src/DataStructures/SmartPointerI.h
 src/Domains/Meshes/HexaFdmMesh.cc
 src/Domains/Meshes/HexaFdmMesh.h
@@ -38,3 +38,6 @@ src/Fields/FieldI.h
 src/RunControl/Output.h
 src/RunControl/Output.cc
 src/Schemes/FiniteDifference.cc
+src/Domains/Meshes/DomainIncludes.h
+src/Solvers/SolverIncludes.h
+src/Schemes/SchemeIncludes.h

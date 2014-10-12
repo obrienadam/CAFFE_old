@@ -8,9 +8,11 @@
 
 #include "ArgsList.h"
 #include "Input.h"
-#include "DomainInterface.h"
-#include "SolverInterface.h"
-#include "SchemeInterface.h"
+#include "SmartPointer.h"
+
+#include "DomainIncludes.h"
+#include "SolverIncludes.h"
+#include "SchemeIncludes.h"
 
 class RunControl
 {
@@ -56,9 +58,9 @@ public:
 
     //- Initialization
 
-    void initializeObjects(DomainInterface* domain,
-                           SolverInterface* solver,
-                           SchemeInterface* scheme);
+    void initializeObjects(SmartPointer<DomainInterface> domain,
+                           SmartPointer<SolverInterface> solver,
+                           SmartPointer<SchemeInterface> scheme);
 
 };
 

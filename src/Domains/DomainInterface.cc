@@ -123,32 +123,3 @@ void DomainInterface::allocate(Input &input)
     allocateFields(input);
 
 }
-
-DomainInterface& DomainInterface::computeTimeDerivative(SchemeInterface *scheme)
-{
-
-
-
-}
-
-DomainInterface& DomainInterface::operator=(const DomainInterface& rhs)
-{
-
-
-
-}
-
-DomainInterface& DomainInterface::operator+=(const DomainInterface& rhs)
-{
-
-
-
-}
-
-
-DomainInterface& DomainInterface::operator*(const double rhs)
-{
-
-
-
-}

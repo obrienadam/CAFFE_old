@@ -4,8 +4,10 @@
 #include <string>
 #include <vector>
 
-#include "DomainInterface.h"
-#include "SchemeInterface.h"
+#include "SmartPointer.h"
+#include "DomainIncludes.h"
+#include "SchemeIncludes.h"
+
 #include "Input.h"
 
 class SolverInterface
@@ -28,7 +30,7 @@ protected:
 
 public:
 
-    virtual void advanceSolution(DomainInterface* domain, SchemeInterface* scheme) = 0;
+    virtual void advanceSolution(SmartPointer<DomainInterface> domain, SmartPointer<SchemeInterface> scheme) = 0;
 
     virtual void initialize(Input& input) = 0;
 

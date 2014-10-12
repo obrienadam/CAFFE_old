@@ -14,7 +14,7 @@ public:
 
     void initialize(Input &input);
 
-    void advanceSolution(DomainInterface* domain, SchemeInterface* scheme);
+    void advanceSolution(SmartPointer<DomainInterface> domain, SmartPointer<SchemeInterface> scheme);
 
 };
 

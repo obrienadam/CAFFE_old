@@ -1,10 +1,10 @@
-#ifndef SMART_POINTER_3D_H
-#define SMART_POINTER_3D_H
+#ifndef ARRAY_3D_H
+#define ARRAY_3D_H
 
 #include <iterator>
 
 template <class T>
-class SmartPointer3D
+class Array3D
 {
 
 private:
@@ -16,9 +16,9 @@ public:
 
     //- Constructors and destructors
 
-    SmartPointer3D();
-    SmartPointer3D(int nI, int nJ, int nK);
-    ~SmartPointer3D();
+    Array3D();
+    Array3D(int nI, int nJ, int nK);
+    ~Array3D();
 
     //- Memory management
 
@@ -43,7 +43,7 @@ public:
 
         int i_, j_, k_;
         T* dataPtr_;
-        SmartPointer3D<T>* objectPtr_;
+        Array3D<T>* objectPtr_;
 
     public:
 
@@ -51,7 +51,7 @@ public:
 
         iterator();
         iterator(T* dataPtr,
-                 SmartPointer3D<T>* objectPtr,
+                 Array3D<T>* objectPtr,
                  int i,
                  int j,
                  int k);
@@ -69,6 +69,6 @@ public:
 
 };
 
-#include "SmartPointer3DI.h"
+#include "Array3DI.h"
 
 #endif

@@ -16,7 +16,7 @@ Field<T>::Field(std::string fieldName,
                 int nK)
     :
       fieldName(fieldName),
-      SmartPointer3D<T>(nI, nJ, nK)
+      Array3D<T>(nI, nJ, nK)
 {
 
 

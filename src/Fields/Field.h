@@ -3,10 +3,10 @@
 
 #include <string>
 
-#include "SmartPointer3D.h"
+#include "Array3D.h"
 
 template <class T>
-class Field : public SmartPointer3D<T>
+class Field : public Array3D<T>
 {
 
 public:

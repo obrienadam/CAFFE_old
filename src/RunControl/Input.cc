@@ -14,6 +14,7 @@ Input::Input()
     inputDoubles["maxCpuTime"] = 100;
     inputDoubles["maxRealTime"] = 48;
 
+    inputStrings["solver"] = "Euler";
     inputStrings["simTimeUnits"] = "seconds";
     inputStrings["cpuTimeUnits"] = "years";
     inputStrings["reaTimeUnits"] = "hours";
@@ -25,12 +26,18 @@ Input::Input()
     // Run control related data
 
     inputStrings["terminationCondition"] = "simTime";
+    inputInts["fileWriteInterval"] = 50;
+    inputInts["screenWriteInterval"] = 50;
 
     // Domain related data
 
     inputInts["nI"] = 30;
     inputInts["nJ"] = 30;
     inputInts["nK"] = 30;
+
+    // Scheme related data
+
+    inputStrings["scheme"] = "finiteDifference";
 
 }
 

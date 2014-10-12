@@ -129,9 +129,9 @@ void RunControl::displayEndMessage()
 
 }
 
-void RunControl::initializeObjects(DomainInterface *domain,
-                                   SolverInterface *solver,
-                                   SchemeInterface *scheme)
+void RunControl::initializeObjects(SmartPointer<DomainInterface> domain,
+                                   SmartPointer<SolverInterface> solver,
+                                   SmartPointer<SchemeInterface> scheme)
 {
 
     domain->allocate(input_);

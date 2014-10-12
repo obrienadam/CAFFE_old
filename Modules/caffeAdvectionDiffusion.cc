@@ -2,11 +2,13 @@
 
 #include "Output.h"
 #include "RunControl.h"
-#include "HexaFdmMesh.h"
+#include "SmartPointer.h"
 
 #include "Euler.h"
 
-#include "FiniteDifference.h"
+#include "DomainIncludes.h"
+#include "SolverIncludes.h"
+#include "SchemeIncludes.h"
 
 #include "ScalarField.h"
 #include "VectorField.h"
@@ -24,26 +26,30 @@ int main(int argc, const char* argv[])
         //- Declare the basic module objects
 
         RunControl runControl(argc, argv);
-        HexaFdmMesh mesh;
-        SolverInterface* solver = new Euler;
-        SchemeInterface* scheme = new FiniteDifference;
+
 
         //- Check if the command line arguments are valid
 
         if(!(runControl.validOptionsSelected()))
             return 0;
 
+        SmartPointer<DomainInterface> domain = new HexaFdmMesh;
+        SmartPointer<SolverInterface> solver = new Euler;
+        SmartPointer<SchemeInterface> scheme = new FiniteDifference;
+
         //- Initialize the module specific fields
 
         ScalarField phi("phi");
-        ScalarField alpha("alpha");
+        VectorField alpha("alpha");
         VectorField a("a");
 
-        mesh.addField(phi);
-        mesh.addAuxField(alpha);
-        mesh.addAuxField(a);
+        domain->addField(phi);;
+        domain->addAuxField(alpha);
+        domain->addAuxField(a);
 
-        runControl.initializeObjects(&mesh,
+        //- Initialize the module objects from the user input
+
+        runControl.initializeObjects(domain,
                                      solver,
                                      scheme);
 
@@ -53,7 +59,6 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-
 
             //- Display a periodic solution update
 
