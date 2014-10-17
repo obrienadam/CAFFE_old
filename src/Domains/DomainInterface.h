@@ -6,7 +6,7 @@
 #include "Input.h"
 #include "SchemeInterface.h"
 
-
+template <class STATE_TYPE>
 class DomainInterface
 {
 
@@ -14,10 +14,8 @@ protected:
 
 public:
 
-    virtual void allocate(Input& input) = 0;
+    virtual void initialize(Input& input) = 0;
     virtual int size() = 0;
-
-
 
 };
 

@@ -1,7 +1,4 @@
-﻿#ifndef SMART_POINTER_I_H
-#define SMART_POINTER_I_H
-
-#include <cstdlib>
+﻿#include <cstdlib>
 
 #include "SmartPointer.h"
 
@@ -131,5 +128,3 @@ T& SmartPointer<T>::operator()(int i)
 
     return data_[i];
 }
-
-#endif

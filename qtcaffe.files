@@ -3,9 +3,9 @@ src/DataStructures/SmartPointer.h
 src/DataStructures/Array3D.h
 src/DataStructures/Array3DI.h
 src/DataStructures/SmartPointerI.h
-src/Domains/Meshes/HexaFdmMesh.cc
+src/Domains/Meshes/HexaFdmMeshI.h
 src/Domains/Meshes/HexaFdmMesh.h
-src/Domains/Meshes/StructuredMesh.cc
+src/Domains/Meshes/StructuredMeshI.h
 src/Domains/Meshes/StructuredMesh.h
 src/Domains/DomainInterface.h
 src/Fields/ScalarField.h
@@ -123,3 +123,4 @@ src/State/AdvectionDiffusion.h
 src/Solvers/Euler.h
 src/Solvers/EulerI.h
 src/Solvers/SolverInterfaceI.h
+src/RunControl/RunControlI.h

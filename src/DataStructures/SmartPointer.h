@@ -19,7 +19,7 @@ class SmartPointer
   SmartPointer();
   SmartPointer(int n);
   SmartPointer(T* ptr);
-  SmartPointer(const SmartPointer* other);
+  SmartPointer(const SmartPointer& other);
   ~SmartPointer();
 
   void allocate(int n);

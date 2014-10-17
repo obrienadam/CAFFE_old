@@ -1,6 +1,3 @@
-#ifndef ARRAY_3D_I_H
-#define ARRAY_3D_I_H
-
 #include <cstdlib>
 
 #include "Array3D.h"
@@ -138,6 +135,7 @@ Array3D<T>::iterator::iterator(T* dataPtr,
 }
 
 template <class T>
+typename
 Array3D<T>::iterator& Array3D<T>::iterator::operator++()
 {
 
@@ -181,6 +179,7 @@ bool Array3D<T>::iterator::operator!=(const iterator& rhs)
 }
 
 template <class T>
+typename
 Array3D<T>::iterator Array3D<T>::begin()
 {
 
@@ -189,6 +188,7 @@ Array3D<T>::iterator Array3D<T>::begin()
 }
 
 template <class T>
+typename
 Array3D<T>::iterator Array3D<T>::end()
 {
 
@@ -197,5 +197,3 @@ Array3D<T>::iterator Array3D<T>::end()
     return iterator(&data_[0][0][nK_], this, 0, 0, nK_);
 
 }
-
-#endif

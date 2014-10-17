@@ -33,6 +33,11 @@ INCLUDE = $(addprefix -I./, $(ALL_DIRS))
 
 ## External libraries
 
+LIBS += -lboost_program_options 
+LIBS += -lboost_system 
+LIBS += -lboost_date_time 
+LIBS += -lboost_chrono
+
 ## Source files
 
 # Math
@@ -50,13 +55,6 @@ RUN_CONTROL_SRC_FILES += Input.cc
 RUN_CONTROL_SRC_FILES += Output.cc
 
 RUN_CONTROL_SRC = $(addprefix $(RUN_CONTROL_DIR)/, $(RUN_CONTROL_SRC_FILES))
-
-# Meshes
-
-MESH_SRC_FILES += StructuredMesh.cc
-MESH_SRC_FILES += HexaFdmMesh.cc
-
-MESH_SRC = $(addprefix $(MESH_DIR)/, $(MESH_SRC_FILES))
 
 # Schemes
 
@@ -83,7 +81,7 @@ install: all
 all: $(MODULES)
 
 $(ADVEC_DIFF): $(ADVEC_DIFF_OBJS)
-	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) -lboost_program_options -lboost_system -lboost_date_time -lboost_chrono
+	$(CXX) $(INCLUDE) $(CXX_FLAGS) -o $(ADVEC_DIFF) $(ADVEC_DIFF_OBJS) $(LIBS)
 	mv $(ADVEC_DIFF) bin/
 
 $(ADVEC_DIFF_OBJS):%.o: %.cc

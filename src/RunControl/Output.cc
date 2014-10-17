@@ -9,6 +9,13 @@ void Output::printToScreen(const std::string& message)
 
 }
 
+void Output::printToScreen(const std::ostream& message)
+{
+
+    std::cout << std::endl << message << std::endl;
+
+}
+
 void Output::displayCaffeHeader()
 {
 

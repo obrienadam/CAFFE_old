@@ -50,7 +50,7 @@ protected:
 
     //- Helper function for initialization
 
-    void initNumOfSteps(int nSteps, int nElements);
+    void initializeNumOfSteps(int nSteps, int nElements);
 
 public:
 

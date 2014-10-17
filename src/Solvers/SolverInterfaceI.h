@@ -1,10 +1,7 @@
-#ifndef SOLVER_INTERFACEI_H
-#define SOLVER_INTERFACEI_H
-
 #include "SolverInterface.h"
 
 template <class DOMAIN_TYPE, class STATE_TYPE>
-void SolverInterface<DOMAIN_TYPE, STATE_TYPE>::initNumOfSteps(int nSteps, int nElements)
+void SolverInterface<DOMAIN_TYPE, STATE_TYPE>::initializeNumOfSteps(int nSteps, int nElements)
 {
 
     int k;
@@ -32,6 +29,6 @@ void SolverInterface<DOMAIN_TYPE, STATE_TYPE>::initialize(Input& input)
     begin_ = domain_.begin();
     end_ = domain_.end();
 
-}
+    timeStep_ = input.inputDoubles["timeStep"];
 
-#endif
+}

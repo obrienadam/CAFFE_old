@@ -4,7 +4,8 @@
 #include "DomainInterface.h"
 #include "StructuredMesh.h"
 
-class HexaFdmMesh : public StructuredMesh
+template <class STATE_TYPE>
+class HexaFdmMesh : public StructuredMesh<STATE_TYPE>
 {
  private:
 
@@ -13,8 +14,10 @@ class HexaFdmMesh : public StructuredMesh
   HexaFdmMesh();
   HexaFdmMesh(int nI, int nJ, int nK);
 
-  void allocate(Input &input);
+  void initialize(Input &input);
 
 };
+
+#include "HexaFdmMeshI.h"
 
 #endif

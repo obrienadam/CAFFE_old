@@ -24,6 +24,8 @@ public:
     Field& operator*=(double rhs);
     Field& operator/=(double rhs);
 
+    typedef typename Array3D<T>::iterator iterator;
+
 };
 
 #include "FieldI.h"

@@ -25,28 +25,42 @@ class RunControl
 
 private:
 
+    //- Input
+
     ArgsList argsList_;
     Input input_;
 
+    //- Simulation control
+
     std::string terminationCondition_;
-
     int itrs_, maxItrs_;
-
     double simTime_, maxSimTime_;
+
+    //- Time related objects
 
     RealTime startTime_;
     RealTimeDuration elapsedTime_, maxElapsedTime_;
     CpuTimeDuration cpuTime_, maxCpuTime_;
 
+    //- Private constructor only used to initialize defaults
+
     RunControl();
 
 public:
 
+    //- Constructor that accepts command line arguments
+
     RunControl(int argc, const char* argv[]);
+
+    //- Set the run control parameters
 
     void setRunControlParametersFromInputFile();
 
+    //- A function that allows an external check for vaild command line arguments
+
     bool validOptionsSelected();
+
+    //- Evaluate whether or not run should continue
 
     bool continueRun(double timeStep = 0.);
 
@@ -56,6 +70,13 @@ public:
     void displayUpdateMessage();
     void displayEndMessage();
 
+    //- Initializes the solver to a specific type
+
+    template <class DOMAIN_TYPE, class STATE_TYPE>
+    void solverInitialize(SolverInterface<DOMAIN_TYPE, STATE_TYPE>* solver);
+
 };
+
+#include "RunControlI.h"
 
 #endif

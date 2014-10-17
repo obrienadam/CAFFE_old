@@ -1,4 +1,4 @@
-#include <iostream>
+#include <sstream>
 
 #include "RunControl.h"
 #include "Output.h"
@@ -99,16 +99,24 @@ bool RunControl::continueRun(double timeStep)
 
 void RunControl::displayStartMessage()
 {
-
     using namespace std;
     using namespace boost::posix_time;
 
+    ostringstream message;
+
     startTime_ = second_clock::local_time();
 
-    cout << "Iterations beginning on " << startTime_ << ".\n"
-         << endl
-         << "Simulation termination condition: " << terminationCondition_ << endl
-         << endl;
+    Output::printLine();
+
+    message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << ".";
+
+    Output::printToScreen(message.str());
+
+    message.str("");
+
+    message << "Iterations beginning on " << startTime_ << ".";
+
+    Output::printToScreen(message.str());
 
 }
 
@@ -119,12 +127,28 @@ void RunControl::displayUpdateMessage()
 
 void RunControl::displayEndMessage()
 {
-
     using namespace std;
 
-    cout << "Iterations complete on " << startTime_ + elapsedTime_ << ".\n"
-         << endl
-         << "Elapsed time: " << elapsedTime_ << endl
-         << "CPU time: " << cpuTime_ << endl;
+    ostringstream message;
+
+    Output::printLine();
+
+    message << "Iterations complete on " << startTime_ + elapsedTime_;
+
+    Output::printToScreen(message.str());
+
+    message.str("");
+
+    message << "Elapsed time: " << elapsedTime_;
+
+    Output::printToScreen(message.str());
+
+    message.str("");
+
+    message << "CPU time: " << cpuTime_;
+
+    Output::printToScreen(message.str());
+
+    Output::printLine();
 
 }

@@ -9,6 +9,9 @@
 #include "SolverIncludes.h"
 #include "SchemeIncludes.h"
 
+typedef HexaFdmMesh<AdvectionDiffusion> Mesh;
+typedef SolverInterface<Mesh, AdvectionDiffusion> Solver;
+
 int main(int argc, const char* argv[])
 {
 
@@ -22,8 +25,7 @@ int main(int argc, const char* argv[])
         //- Declare the basic module objects
 
         RunControl runControl(argc, argv);
-        SolverInterface<HexaFdmMesh,AdvectionDiffusion>* solver = new Euler<HexaFdmMesh, AdvectionDiffusion>;
-
+        Solver* solver;
 
         //- Check if the command line arguments are valid
 
@@ -31,6 +33,8 @@ int main(int argc, const char* argv[])
             return 0;
 
         //- Display a start message and begin the run
+
+        runControl.solverInitialize(solver);
 
         runControl.displayStartMessage();
 
