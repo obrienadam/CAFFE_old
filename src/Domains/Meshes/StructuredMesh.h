@@ -1,5 +1,5 @@
-#ifndef PRIMITIVE_MESH_H
-#define PRIMITIVE_MESH_H
+#ifndef STRUCTURED_MESH_H
+#define STRUCTURED_MESH_H
 
 #include "DomainInterface.h"
 #include "Point3D.h"
@@ -8,7 +8,7 @@
 enum Patch{BOUNDARY, INTERIOR};
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 
-class PrimitiveMesh : public DomainInterface
+class StructuredMesh : public DomainInterface
 {
 
  protected:
@@ -19,10 +19,11 @@ class PrimitiveMesh : public DomainInterface
 
  public:
 
-  PrimitiveMesh();
-  virtual ~PrimitiveMesh();
+  StructuredMesh();
+  ~StructuredMesh();
 
   virtual void allocate(Input& input);
+  virtual int size();
 
 };
 

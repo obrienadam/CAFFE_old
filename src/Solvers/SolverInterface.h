@@ -10,10 +10,18 @@
 
 #include "Input.h"
 
+template <class DOMAIN_TYPE, class STATE_TYPE>
 class SolverInterface
 {
 
 protected:
+
+    //- Typedefs for the longer names
+
+    typedef std::vector< std::vector<STATE_TYPE> > Array2D;
+    typedef typename DOMAIN_TYPE::iterator Iterator;
+
+    //- The base constructor (called by all derived classes)
 
     SolverInterface(std::string solverName)
         :
@@ -24,16 +32,34 @@ protected:
 
     std::string solverName_;
 
+    //- Solver elements common to all sovlers
+
+    int nSteps_, nElements_;
     double timeStep_;
 
-    std::vector<DomainInterface> timeDerivatives_;
+    //- The domain and a data structure for storing the time derivatives of the domain
+
+    DOMAIN_TYPE domain_;
+    Array2D timeDerivatives_;
+
+    //- Iterators for the domain
+
+    Iterator itr_;
+    Iterator begin_;
+    Iterator end_;
+
+    //- Helper function for initialization
+
+    void initNumOfSteps(int nSteps, int nElements);
 
 public:
 
-    virtual void advanceSolution(SmartPointer<DomainInterface> domain, SmartPointer<SchemeInterface> scheme) = 0;
+    virtual void initialize(Input& input);
 
-    virtual void initialize(Input& input) = 0;
+    virtual void solve() = 0;
 
 };
+
+#include "SolverInterfaceI.h"
 
 #endif

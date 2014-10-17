@@ -3,19 +3,23 @@
 
 #include "SolverInterface.h"
 
-class Euler : public SolverInterface
+template <class DOMAIN_TYPE, class STATE_TYPE>
+class Euler : public SolverInterface<DOMAIN_TYPE, STATE_TYPE>
 {
 
 private:
+
+    typedef SolverInterface<DOMAIN_TYPE, STATE_TYPE> Solver;
 
 public:
 
     Euler();
 
     void initialize(Input &input);
-
-    void advanceSolution(SmartPointer<DomainInterface> domain, SmartPointer<SchemeInterface> scheme);
+    void solve();
 
 };
+
+#include "EulerI.h"
 
 #endif

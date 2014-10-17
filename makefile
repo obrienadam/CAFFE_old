@@ -19,13 +19,13 @@ MATH_DIR = src/Math
 DATA_STRUCTURES_DIR = src/DataStructures
 RUN_CONTROL_DIR = src/RunControl
 DOMAIN_DIR = src/Domains
-FIELD_DIR = src/Fields
 MESH_DIR = src/Domains/Meshes
+STATE_DIR = src/State
 SOLVER_DIR = src/Solvers
 SCHEME_DIR = src/Schemes
 
-ALL_DIRS = $(MODULES_DIR) $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) $(DOMAIN_DIR) \
-$(MESH_DIR) $(FIELD_DIR) $(SOLVER_DIR) $(SCHEME_DIR)
+ALL_DIRS = $(MODULES_DIR) $(MATH_DIR) $(DATA_STRUCTURES_DIR) $(RUN_CONTROL_DIR) \
+$(DOMAIN_DIR) $(MESH_DIR) $(STATE_DIR) $(SOLVER_DIR) $(SCHEME_DIR)
 
 ## Includes
 
@@ -51,28 +51,12 @@ RUN_CONTROL_SRC_FILES += Output.cc
 
 RUN_CONTROL_SRC = $(addprefix $(RUN_CONTROL_DIR)/, $(RUN_CONTROL_SRC_FILES))
 
-# Fields
-
-FIELD_SRC = $(addprefix $(FIELD_DIR)/, $(FIELD_SRC_FILES))
-
-# Domains
-
-DOMAIN_SRC_FILES += DomainInterface.cc
-
-DOMAIN_SRC = $(addprefix $(DOMAIN_DIR)/, $(DOMAIN_SRC_FILES))
-
 # Meshes
 
-MESH_SRC_FILES += PrimitiveMesh.cc
+MESH_SRC_FILES += StructuredMesh.cc
 MESH_SRC_FILES += HexaFdmMesh.cc
 
 MESH_SRC = $(addprefix $(MESH_DIR)/, $(MESH_SRC_FILES))
-
-# Solvers
-
-SOLVER_SRC_FILES += Euler.cc
-
-SOLVER_SRC = $(addprefix $(SOLVER_DIR)/, $(SOLVER_SRC_FILES))
 
 # Schemes
 
@@ -85,6 +69,7 @@ SCHEME_SRC = $(addprefix $(SCHEME_DIR)/, $(SCHEME_SRC_FILES))
 # Advection Diffusion
 
 ADVEC_DIFF_SRC += Modules/$(ADVEC_DIFF).cc
+ADVEC_DIFF_SRC += $(STATE_DIR)/AdvectionDiffusion.cc
 ADVEC_DIFF_SRC += $(MATH_SRC)
 ADVEC_DIFF_SRC += $(RUN_CONTROL_SRC)
 ADVEC_DIFF_SRC += $(DOMAIN_SRC)

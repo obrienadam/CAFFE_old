@@ -128,14 +128,3 @@ void RunControl::displayEndMessage()
          << "CPU time: " << cpuTime_ << endl;
 
 }
-
-void RunControl::initializeObjects(SmartPointer<DomainInterface> domain,
-                                   SmartPointer<SolverInterface> solver,
-                                   SmartPointer<SchemeInterface> scheme)
-{
-
-    domain->allocate(input_);
-    solver->initialize(input_);
-    scheme->initialize(input_);
-
-}

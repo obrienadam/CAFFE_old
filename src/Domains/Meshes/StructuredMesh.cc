@@ -1,20 +1,20 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include "PrimitiveMesh.h"
+#include "StructuredMesh.h"
 #include "Output.h"
 
-PrimitiveMesh::PrimitiveMesh()
+StructuredMesh::StructuredMesh()
 {
     std::fill_n(facePatches_, 6, INTERIOR);
 }
 
-PrimitiveMesh::~PrimitiveMesh()
+StructuredMesh::~StructuredMesh()
 {
 
 }
 
-void PrimitiveMesh::allocate(Input &input)
+void StructuredMesh::allocate(Input &input)
 {
 
     int nI = input.inputInts["nI"],
@@ -23,8 +23,13 @@ void PrimitiveMesh::allocate(Input &input)
 
     nodes_.allocate(nI, nJ, nK);
 
-    Output::printToScreen("Initialized nodes of PrimitiveMesh.");
+    Output::printToScreen("Initialized nodes of StructuredMesh.");
 
-    allocateFields(input);
+}
+
+void StructuredMesh::size()
+{
+
+    return nodes_.size();
 
 }

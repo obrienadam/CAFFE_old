@@ -2,9 +2,9 @@
 #define HEXA_FDM_MESH_H
 
 #include "DomainInterface.h"
-#include "PrimitiveMesh.h"
+#include "StructuredMesh.h"
 
-class HexaFdmMesh : public PrimitiveMesh
+class HexaFdmMesh : public StructuredMesh
 {
  private:
 
@@ -12,6 +12,8 @@ class HexaFdmMesh : public PrimitiveMesh
 
   HexaFdmMesh();
   HexaFdmMesh(int nI, int nJ, int nK);
+
+  void allocate(Input &input);
 
 };
 

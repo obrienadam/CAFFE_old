@@ -56,12 +56,6 @@ public:
     void displayUpdateMessage();
     void displayEndMessage();
 
-    //- Initialization
-
-    void initializeObjects(SmartPointer<DomainInterface> domain,
-                           SmartPointer<SolverInterface> solver,
-                           SmartPointer<SchemeInterface> scheme);
-
 };
 
 #endif
