@@ -19,11 +19,6 @@ public:
 
     std::string fieldName;
 
-    Field& operator+=(const Field& rhs);
-    Field& operator-=(const Field& rhs);
-    Field& operator*=(double rhs);
-    Field& operator/=(double rhs);
-
     typedef typename Array3D<T>::iterator iterator;
 
 };

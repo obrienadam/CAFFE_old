@@ -12,3 +12,32 @@ AdvectionDiffusion::AdvectionDiffusion(double phi,
 
 
 }
+
+AdvectionDiffusion& AdvectionDiffusion::operator+=(const AdvectionDiffusion& rhs)
+{
+
+    phi += rhs.phi;
+
+    return *this;
+
+}
+
+AdvectionDiffusion& AdvectionDiffusion::operator*=(double rhs)
+{
+
+    phi *= rhs;
+
+    return *this;
+
+}
+
+//- Functions
+
+AdvectionDiffusion operator*(AdvectionDiffusion lhs, double rhs)
+{
+
+    lhs *= rhs;
+
+    return lhs;
+
+}

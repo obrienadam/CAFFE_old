@@ -10,8 +10,6 @@ src/Domains/Meshes/StructuredMesh.h
 src/Domains/DomainInterface.h
 src/Fields/ScalarField.h
 src/Fields/VectorField.h
-src/Math/Line3D.cc
-src/Math/Line3D.h
 src/Math/MathConstants.h
 src/Math/Point3D.h
 src/Math/Tensor3D.cc

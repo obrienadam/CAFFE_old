@@ -39,6 +39,12 @@ public:
     virtual int size();
     virtual std::string meshStats();
 
+    //- Compute the time derivatives
+
+    virtual void computeTimeDerivatives(STATE_TYPE* timeDerivatives);
+
+    //- Iterators methods
+
     typedef typename Field<STATE_TYPE>::iterator iterator;
 
     iterator begin();

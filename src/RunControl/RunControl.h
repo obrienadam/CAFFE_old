@@ -73,7 +73,7 @@ public:
     //- Initializes the solver to a specific type
 
     template <class DOMAIN_TYPE, class STATE_TYPE>
-    void solverInitialize(SolverInterface<DOMAIN_TYPE, STATE_TYPE>* solver);
+    void solverInitialize(SolverInterface<DOMAIN_TYPE, STATE_TYPE>*& solver);
 
 };
 

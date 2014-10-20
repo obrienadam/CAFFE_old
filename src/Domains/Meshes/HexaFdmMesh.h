@@ -16,6 +16,8 @@ class HexaFdmMesh : public StructuredMesh<STATE_TYPE>
 
   void initialize(Input &input);
 
+  void computeTimeDerivatives(STATE_TYPE* timeDerivatives);
+
 };
 
 #include "HexaFdmMeshI.h"

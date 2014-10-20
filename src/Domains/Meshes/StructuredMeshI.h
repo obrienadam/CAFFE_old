@@ -63,6 +63,14 @@ std::string StructuredMesh<STATE_TYPE>::meshStats()
 }
 
 template <class STATE_TYPE>
+void StructuredMesh<STATE_TYPE>::computeTimeDerivatives(STATE_TYPE* timeDerivatives)
+{
+
+
+
+}
+
+template <class STATE_TYPE>
 typename
 Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::begin()
 {

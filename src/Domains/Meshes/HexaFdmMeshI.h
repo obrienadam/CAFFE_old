@@ -19,3 +19,9 @@ void HexaFdmMesh<STATE_TYPE>::initialize(Input &input)
     StructuredMesh<STATE_TYPE>::initialize(input);
 
 }
+
+template <class STATE_TYPE>
+void HexaFdmMesh<STATE_TYPE>::computeTimeDerivatives(STATE_TYPE* timeDerivatives)
+{
+
+}

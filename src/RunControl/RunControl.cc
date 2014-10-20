@@ -139,6 +139,18 @@ void RunControl::displayEndMessage()
 
     message.str("");
 
+    message << "Iterations completed: " << itrs_;
+
+    Output::printToScreen(message.str());
+
+    message.str("");
+
+    message << "Simulation time: " << simTime_;
+
+    Output::printToScreen(message.str());
+
+    message.str("");
+
     message << "Elapsed time: " << elapsedTime_;
 
     Output::printToScreen(message.str());

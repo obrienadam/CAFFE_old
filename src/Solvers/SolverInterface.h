@@ -2,6 +2,7 @@
 #define SOLVER_INTERFACE_H
 
 #include <string>
+#include <sstream>
 #include <vector>
 
 #include "SmartPointer.h"

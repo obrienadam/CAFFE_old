@@ -41,6 +41,8 @@ int main(int argc, const char* argv[])
         while(runControl.continueRun())
         {
 
+            solver->solve();
+
             //- Display a periodic solution update
 
             runControl.displayUpdateMessage();
