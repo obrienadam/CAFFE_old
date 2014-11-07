@@ -1,7 +1,8 @@
 # CMakeLists.txt for CAFFE/src/Math
 # Author: Adam O'Brien
 
-set(HEADERS Vector3D.h
+set(HEADERS MathConstants.h
+            Vector3D.h
             Tensor3D.h
 	    FiniteDifference.h
 	    FiniteDifferenceI.h)

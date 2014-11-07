@@ -8,7 +8,7 @@ class AdvectionDiffusion
 
 public:
 
-    AdvectionDiffusion(double phi = 298.,
+    AdvectionDiffusion(double phi = 0.,
                        double alpha = 1.,
                        Vector3D v = Vector3D(0., 0., 0.));
 
@@ -29,5 +29,9 @@ AdvectionDiffusion operator-(AdvectionDiffusion lhs, const AdvectionDiffusion& r
 AdvectionDiffusion operator*(AdvectionDiffusion lhs, double rhs);
 AdvectionDiffusion operator*(double lhs, AdvectionDiffusion rhs);
 AdvectionDiffusion operator/(AdvectionDiffusion lhs, double rhs);
+
+AdvectionDiffusion evaluateGradient(const AdvectionDiffusion& phiMinus1, double xMinus1,
+				    const AdvectionDiffusion& phi, double x,
+				    const AdvectionDiffusion& phiPlus1, double xPlus1);
 
 #endif

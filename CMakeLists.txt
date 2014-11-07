@@ -1,7 +1,7 @@
 # CMakeLists.txt for CAFFE
 # Author: Adam O'Brien
 
-cmake_minimum_required (VERSION 2.6.2)
+cmake_minimum_required (VERSION 2.6.2 FATAL_ERROR)
 
 project(CAFFE)
 
