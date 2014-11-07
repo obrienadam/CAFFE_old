@@ -8,7 +8,6 @@
 
 #include "ArgsList.h"
 #include "Input.h"
-#include "SmartPointer.h"
 
 #include "DomainIncludes.h"
 #include "SolverIncludes.h"
