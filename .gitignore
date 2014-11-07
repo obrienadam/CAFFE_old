@@ -1,1 +1,7 @@
 qt*
+CMake*
+!*Lists.txt
+cmake*
+Makefile
+bin
+lib

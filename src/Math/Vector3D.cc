@@ -118,3 +118,10 @@ Vector3D crossProduct(const Vector3D& u, const Vector3D& v)
 		  u.z*v.x - u.x*v.z,
 		  u.x*v.y - u.y*v.x);
 }
+
+Vector3D relativeVector(const Vector3D& u, const Vector3D& v)
+{
+
+  return v - u;
+
+}

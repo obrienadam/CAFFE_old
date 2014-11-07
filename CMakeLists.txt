@@ -18,6 +18,11 @@ set(INCLUDE_DIR src/DataStructures
 
 include_directories(${INCLUDE_DIR})
 
+# Compiler flags
+
+set(CMAKE_CC_FLAGS "-g -Wall -O3")
+set(CMAKE_CXX_FLAGS "-g -Wall -O3 -Wno-reorder -std=c++11")
+
 # Output paths
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)

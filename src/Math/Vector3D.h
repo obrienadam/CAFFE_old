@@ -31,5 +31,6 @@ Vector3D operator/(Vector3D lhs, double rhs);
 
 double dotProduct(const Vector3D& u, const Vector3D& v);
 Vector3D crossProduct(const Vector3D& u, const Vector3D& v);
+Vector3D relativeVector(const Vector3D& u, const Vector3D& v);
 
 #endif
