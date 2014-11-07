@@ -87,3 +87,11 @@ Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::end()
     return states_.end();
 
 }
+
+template <class STATE_TYPE>
+void StructuredMesh<STATE_TYPE>::outputData(double time)
+{
+
+
+
+}

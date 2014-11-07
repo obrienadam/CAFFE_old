@@ -16,12 +16,18 @@ public:
     Vector3D v;
 
     AdvectionDiffusion& operator+=(const AdvectionDiffusion& rhs);
+    AdvectionDiffusion& operator-=(const AdvectionDiffusion& rhs);
     AdvectionDiffusion& operator*=(double rhs);
+    AdvectionDiffusion& operator/=(double rhs);
 
 };
 
 //- Functions
 
+AdvectionDiffusion operator+(AdvectionDiffusion lhs, const AdvectionDiffusion& rhs);
+AdvectionDiffusion operator-(AdvectionDiffusion lhs, const AdvectionDiffusion& rhs);
 AdvectionDiffusion operator*(AdvectionDiffusion lhs, double rhs);
+AdvectionDiffusion operator*(double lhs, AdvectionDiffusion rhs);
+AdvectionDiffusion operator/(AdvectionDiffusion lhs, double rhs);
 
 #endif

@@ -122,3 +122,6 @@ src/Solvers/Euler.h
 src/Solvers/EulerI.h
 src/Solvers/SolverInterfaceI.h
 src/RunControl/RunControlI.h
+src/Math/FiniteDifference.h
+src/Math/FiniteDifferenceI.h
+test/FiniteDifferenceTest.cc

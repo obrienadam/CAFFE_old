@@ -19,6 +19,8 @@ public:
 
     virtual void computeTimeDerivatives(STATE_TYPE* timeDerivatives) = 0;
 
+    virtual void outputData(double time = 0.) = 0;
+
 };
 
 #endif

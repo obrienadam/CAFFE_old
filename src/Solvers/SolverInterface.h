@@ -24,9 +24,11 @@ protected:
 
     //- The base constructor (called by all derived classes)
 
-    SolverInterface(std::string solverName)
+    SolverInterface(std::string solverName = "Uninitialized Solver",
+                    std::string timeUnits = "seconds")
         :
-          solverName_(solverName)
+          solverName_(solverName),
+          timeUnits_(timeUnits)
     {
 
     }
@@ -37,6 +39,7 @@ protected:
 
     int nSteps_, nElements_;
     double timeStep_;
+    std::string timeUnits_;
 
     //- The domain and a data structure for storing the time derivatives of the domain
 
@@ -58,6 +61,10 @@ public:
     virtual void initialize(Input& input);
 
     virtual void solve() = 0;
+
+    virtual double timeStep();
+
+    std::string timeUnits();
 
 };
 

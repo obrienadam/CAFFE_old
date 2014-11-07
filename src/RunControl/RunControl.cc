@@ -123,6 +123,45 @@ void RunControl::displayStartMessage()
 void RunControl::displayUpdateMessage()
 {
 
+    std::ostringstream message;
+    double completionPercentage;
+
+    if(terminationCondition_ == "iterations")
+    {
+
+        completionPercentage = double(itrs_)/double(maxItrs_)*100.;
+
+    }
+
+    else if(terminationCondition_ == "simTime")
+    {
+
+        completionPercentage = simTime_/maxSimTime_*100.;
+
+    }
+
+    else if(terminationCondition_ == "cpuTime")
+    {
+
+
+
+    }
+
+    else if (terminationCondition_ == "realTime")
+    {
+
+
+
+    }
+
+    message << "Simulation completion: " << completionPercentage << "%\n"
+            << "Iterations completed: " << itrs_ << "\n"
+            << "Simulation time: " << simTime_ << "\n"
+            << "Elapsed time: " << elapsedTime_ << "\n"
+            << "CPU time: " << cpuTime_;
+
+    Output::printToScreen(message.str());
+
 }
 
 void RunControl::displayEndMessage()

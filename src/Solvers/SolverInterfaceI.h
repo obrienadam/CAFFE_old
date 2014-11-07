@@ -32,3 +32,19 @@ void SolverInterface<DOMAIN_TYPE, STATE_TYPE>::initialize(Input& input)
     timeStep_ = input.inputDoubles["timeStep"];
 
 }
+
+template <class DOMAIN_TYPE, class STATE_TYPE>
+double SolverInterface<DOMAIN_TYPE, STATE_TYPE>::timeStep()
+{
+
+    return timeStep_;
+
+}
+
+template <class DOMAIN_TYPE, class STATE_TYPE>
+std::string SolverInterface<DOMAIN_TYPE, STATE_TYPE>::timeUnits()
+{
+
+    return timeUnits_;
+
+}

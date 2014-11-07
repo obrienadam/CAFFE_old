@@ -7,6 +7,7 @@
 #include "Point3D.h"
 #include "Array3D.h"
 #include "Field.h"
+#include "TecplotAscii.h"
 
 enum Patch{BOUNDARY, INTERIOR};
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
@@ -25,6 +26,10 @@ protected:
     //- Patches used for boundary conditions and communication
 
     Patch facePatches_[6];
+
+    //- File output objects
+
+    TecplotAscii tec360Output_;
 
 public:
 
@@ -49,6 +54,10 @@ public:
 
     iterator begin();
     iterator end();
+
+    //- Output methods
+
+    virtual void outputData(double time = 0.);
 
 };
 

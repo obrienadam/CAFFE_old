@@ -38,7 +38,7 @@ int main(int argc, const char* argv[])
 
         runControl.displayStartMessage();
 
-        while(runControl.continueRun())
+        while(runControl.continueRun(solver->timeStep()))
         {
 
             solver->solve();
