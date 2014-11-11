@@ -1,6 +1,7 @@
 #ifndef HEXA_MESH_GEN_H
 #define HEXA_MESH_GEN_H
 
+#include <vector>
 #include <fstream>
 
 #include <boost/program_options.hpp>
@@ -18,13 +19,14 @@ private:
 
     double metricConversion_;
 
-    Array3D<Point3D> vertices_;
+    std::vector<Point3D> vertices_;
     Array3D<Point3D> nodes_;
 
-    void processBuffer(std::string& buffer);
+    void processBuffer(std::string& buffer, bool removeAllWhitespace = true);
 
-    void readVertices(std::ifstream& inFile);
-    void readResolution(std::ifstream& inFile);
+    void readVertices(std::ifstream& inputFile);
+    void readResolution(std::ifstream& inputFile);
+    double getNextElement(std::string& buffer);
 
 public:
 

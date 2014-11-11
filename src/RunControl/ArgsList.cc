@@ -2,6 +2,7 @@
 #include <string>
 
 #include "ArgsList.h"
+#include "Version.h"
 
 ArgsList::ArgsList()
     :
@@ -12,6 +13,7 @@ ArgsList::ArgsList()
 
     optsDescription_.add_options()
             ("help", "| shows this help message")
+            ("version", "| show version info")
             ("file", value<std::string>(), "| load input file");
 
 }
@@ -38,6 +40,14 @@ void ArgsList::readArgs(int argc, const char* argv[])
     {
 
         cout << optsDescription_ << endl;
+
+        exit(0);
+
+    }
+    else if(varsMap_.count("version"))
+    {
+
+        Version::display();
 
         exit(0);
 

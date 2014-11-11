@@ -68,12 +68,9 @@ void Input::processBuffer(std::string& buffer)
     boost::algorithm::erase_all(buffer, " ");
 
     // Check if it is a comment line, if so discard the input
+
     if(buffer[0] == '#')
-    {
-
         buffer.clear();
-
-    }
 
     // Remove any comments on the line
 
@@ -116,7 +113,7 @@ void Input::openInputFile(std::string filename)
 
         // Make sure the buffer is not empty, in case the last line was blank or a comment
 
-        if(buffer == "")
+        if(buffer.empty())
             continue;
 
         if(inputInts.find(buffer) != inputInts.end())
@@ -146,9 +143,7 @@ void Input::openInputFile(std::string filename)
         else
         {
 
-            string errorMessage("Unrecognized input parameter type \"" + buffer + "\".");
-
-            throw errorMessage.c_str();
+            throw ("Unrecognized input parameter type \"" + buffer + "\".").c_str();
 
         }
     }

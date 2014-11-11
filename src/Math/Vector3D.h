@@ -17,6 +17,8 @@ class Vector3D
   double mag();
   Vector3D unitVector();
 
+  void print();
+
   Vector3D& operator+=(const Vector3D& rhs);
   Vector3D& operator-=(const Vector3D& rhs);
   Vector3D& operator*=(double rhs);

@@ -1,4 +1,5 @@
 #include <math.h>
+#include <iostream>
 
 #include "Vector3D.h"
 
@@ -42,6 +43,13 @@ Vector3D Vector3D::unitVector()
   double invMag(1./mag());
 
   return Vector3D(invMag*x, invMag*y, invMag*z);
+}
+
+void Vector3D::print()
+{
+
+    std::cout << "(" << x << ", " << y << ", " << z << ")\n";
+
 }
 
 Vector3D& Vector3D::operator+=(const Vector3D& rhs)
