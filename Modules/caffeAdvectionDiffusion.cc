@@ -27,11 +27,6 @@ int main(int argc, const char* argv[])
         RunControl runControl(argc, argv);
         Solver* solver;
 
-        //- Check if the command line arguments are valid
-
-        if(!(runControl.validOptionsSelected()))
-            return 0;
-
         //- Display a start message and begin the run
 
         runControl.solverInitialize(solver);

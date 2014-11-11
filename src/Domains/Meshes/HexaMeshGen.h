@@ -1,5 +1,7 @@
-#ifndef HEXA_MESH_H
-#define HEXA_MESH_H
+#ifndef HEXA_MESH_GEN_H
+#define HEXA_MESH_GEN_H
+
+#include <fstream>
 
 #include <boost/program_options.hpp>
 
@@ -14,16 +16,29 @@ private:
 
     ArgsList argsList_;
 
+    double metricConversion_;
+
     Array3D<Point3D> vertices_;
     Array3D<Point3D> nodes_;
 
+    void processBuffer(std::string& buffer);
+
+    void readVertices(std::ifstream& inFile);
+    void readResolution(std::ifstream& inFile);
+
 public:
+
+    //- Constructors and destructors
 
     HexaMeshGen();
     HexaMeshGen(int argc, const char* argv[]);
 
+    //- HexaMesh file input and output
+
     void readMeshInputFile();
     void writeMeshFile();
+
+    //- Mesh generation
 
     void generateMesh();
     void generateBoxMesh(double dx, double dy, double dz);

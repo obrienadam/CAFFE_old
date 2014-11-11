@@ -55,10 +55,6 @@ public:
 
     void setRunControlParametersFromInputFile();
 
-    //- A function that allows an external check for vaild command line arguments
-
-    bool validOptionsSelected();
-
     //- Evaluate whether or not run should continue
 
     bool continueRun(double timeStep = 0.);

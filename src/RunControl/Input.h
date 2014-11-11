@@ -12,6 +12,7 @@ private:
 
     std::string filename_;
     std::ifstream fin_;
+
     void processBuffer(std::string& buffer);
 
 public:
