@@ -8,6 +8,8 @@
 class ArgsList
 {
 
+private:
+
     typedef boost::program_options::options_description OptsDescription;
     typedef boost::program_options::variables_map VarsMap;
 
@@ -28,6 +30,7 @@ public:
     void readArgs(int argc, const char* argv[]);
 
     friend class RunControl;
+    friend class HexaMeshGen;
 
 };
 

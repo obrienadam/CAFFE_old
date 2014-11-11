@@ -5,3 +5,5 @@ cmake*
 Makefile
 bin
 lib
+*~
+CAFFE.cbp

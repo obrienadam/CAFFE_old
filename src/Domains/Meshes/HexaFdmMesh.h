@@ -7,16 +7,17 @@
 template <class STATE_TYPE>
 class HexaFdmMesh : public StructuredMesh<STATE_TYPE>
 {
- private:
 
- public:
+private:
 
-  HexaFdmMesh();
-  HexaFdmMesh(int nI, int nJ, int nK);
+public:
 
-  void initialize(Input &input);
+    HexaFdmMesh();
+    HexaFdmMesh(int nI, int nJ, int nK);
 
-  void computeTimeDerivatives(STATE_TYPE* timeDerivatives);
+    void initialize(Input &input);
+
+    void computeTimeDerivatives(STATE_TYPE* timeDerivatives);
 
 };
 

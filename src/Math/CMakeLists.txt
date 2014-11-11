@@ -3,6 +3,7 @@
 
 set(HEADERS MathConstants.h
             Vector3D.h
+            Point3D.h
             Tensor3D.h
 	    FiniteDifference.h
 	    FiniteDifferenceI.h)
