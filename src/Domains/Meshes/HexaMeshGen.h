@@ -22,8 +22,9 @@ private:
     std::vector<Point3D> vertices_;
     Array3D<Point3D> nodes_;
 
-    void processBuffer(std::string& buffer, bool removeAllWhitespace = true);
+    //- Helper functions for reading mesh files
 
+    void processBuffer(std::string& buffer, bool removeAllWhitespace = true);
     void readVertices(std::ifstream& inputFile);
     void readResolution(std::ifstream& inputFile);
     double getNextElement(std::string& buffer);

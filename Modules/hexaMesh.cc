@@ -14,6 +14,8 @@ int main(int argc, const char* argv[])
 
         hexaMeshGen.readMeshInputFile();
 
+        hexaMeshGen.generateMesh();
+
         hexaMeshGen.writeMeshFile();
 
     }

@@ -1,9 +1,19 @@
+# QtCreator project files
 qt*
+CAFFE.cbp
+
+# CMake files other than CMakeLists.txt
 CMake*
 !*Lists.txt
 cmake*
 Makefile
+
+# Build files
 bin
 lib
+
+# Emacs backups
 *~
-CAFFE.cbp
+
+# Mesh files
+*.msh

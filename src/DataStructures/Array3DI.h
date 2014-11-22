@@ -19,18 +19,23 @@ Array3D<T>::Array3D(int nI, int nJ, int nK)
     :
       Array3D()
 {
+  
     allocate(nI, nJ, nK);
+    
 }
 
 template <class T>
 Array3D<T>::~Array3D()
 {
+  
     deallocate();
+    
 }
 
 template <class T>
 void Array3D<T>::allocate(int nI, int nJ, int nK)
 {
+  
     int i, j;
 
     deallocate();
@@ -55,25 +60,27 @@ void Array3D<T>::allocate(int nI, int nJ, int nK)
         {
 
             // Allocate nK_ + 1 so the iterator doesn't cause a seg fault
-            if(i == 0 && j == 0)
+            if(i == nI_ - 1 && j == nJ_ - 1)
             {
 
-                data_[i][j] = new T[nK_];
+                data_[i][j] = new T[nK_ + 1];
 
             }
             else
             {
 
-                data_[i][j] = new T[nK_ - 1];
+                data_[i][j] = new T[nK_];
 
             }
         }
     }
+    
 }
 
 template <class T>
 void Array3D<T>::deallocate()
 {
+  
     int i, j;
 
     if(data_ == NULL)
@@ -93,6 +100,7 @@ void Array3D<T>::deallocate()
     data_ = NULL;
 
     nI_ = nJ_ = nK_ = n_ = 0;
+    
 }
 
 template <class T>
