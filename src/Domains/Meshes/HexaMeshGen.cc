@@ -3,6 +3,7 @@
 
 #include "HexaMeshGen.h"
 #include "Output.h"
+#include "InputStringProcessing.h"
 
 HexaMeshGen::HexaMeshGen()
     :
@@ -20,39 +21,10 @@ HexaMeshGen::HexaMeshGen(int argc, const char *argv[])
     
 }
 
-void HexaMeshGen::processBuffer(std::string &buffer, bool removeAllWhitespace)
-{
-    using namespace boost::algorithm;
-    
-    // Trim the leading/lagging whitespace
-
-    trim(buffer);
-
-    // Remove all whitespace from buffer if desired (default)
-    
-    if(removeAllWhitespace)
-        erase_all(buffer, " ");
-    
-    // Check if it is a comment line, if so discard the input
-    
-    if(buffer[0] == '#')
-    {
-        
-        buffer.clear();
-        
-    }
-    
-    // Remove any comments on the line
-    
-    buffer = buffer.substr(0, buffer.find("#"));
-    
-}
-
 void HexaMeshGen::readVertices(std::ifstream& inputFile)
 {
     using namespace std;
 
-    Point3D tempVertex;
     string buffer;
 
     // Make sure the vertex list is empty since push_back is used
@@ -65,7 +37,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         // Get a line from the file and process it
 
         getline(inputFile, buffer);
-        processBuffer(buffer);
+        buffer = InputStringProcessing::processBuffer(buffer);
         
         if(buffer.empty())
         {
@@ -92,7 +64,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
     {
 
         getline(inputFile, buffer);
-        processBuffer(buffer, false);
+        buffer = InputStringProcessing::processBuffer(buffer, false);
 
         if(buffer.empty())
             continue;
@@ -100,24 +72,9 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         if(buffer == "}")
             break;
 
+        // buffer should contain a bracketed vector
 
-        // Extract the bracketed coordinate
-
-        buffer = buffer.substr(buffer.find_first_of("("), buffer.find_first_of(")") + 1);
-
-        // Begin extracting the vertex coordinates from the buffer
-
-        tempVertex.x = getNextElement(buffer);
-        tempVertex.y = getNextElement(buffer);
-        tempVertex.z = getNextElement(buffer);
-        vertices_.push_back(tempVertex);
-
-        if(buffer != ")")
-        {
-
-            throw "Expected a \")\"";
-
-        }
+        vertices_.push_back(Point3D(buffer));
 
     }
 
@@ -139,7 +96,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         // Get a line from the file and process it
 
         getline(inputFile, buffer);
-        processBuffer(buffer);
+        buffer = InputStringProcessing::processBuffer(buffer);
 
         if(buffer.empty())
         {
@@ -166,7 +123,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
     {
 
         getline(inputFile, buffer);
-        processBuffer(buffer, false);
+        buffer = InputStringProcessing::processBuffer(buffer, false);
 
         if(buffer.empty())
             continue;
@@ -181,9 +138,9 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
 
         // Begin extracting the vertex coordinates from the buffer
 
-        nI = int(getNextElement(buffer));
-        nJ = int(getNextElement(buffer));
-        nK = int(getNextElement(buffer));
+        nI = int(InputStringProcessing::getNextElement(buffer));
+        nJ = int(InputStringProcessing::getNextElement(buffer));
+        nK = int(InputStringProcessing::getNextElement(buffer));
         nodes_.allocate(nI, nJ, nK);
 
         if(buffer != ")")
@@ -196,28 +153,6 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
     }
 
     Output::printToScreen("HexaMeshGen: Successfully allocated mesh nodes.");
-
-}
-
-double HexaMeshGen::getNextElement(std::string &buffer)
-{
-    using namespace boost::algorithm;
-
-    double element;
-
-    // Ensure the buffer is trimmed
-
-    trim_left_if(buffer, is_any_of("( "));
-
-    // Extract a double element from the string
-
-    element = stod(buffer.substr(0, buffer.find_first_of(" )")));
-
-    // Remove the extracted element from the string
-
-    buffer = buffer.substr(buffer.find_first_of(" )"), buffer.back());
-
-    return element;
 
 }
 
@@ -241,7 +176,7 @@ void HexaMeshGen::readMeshInputFile()
         // Get a line from the buffer and process it
         
         getline(inputFile, buffer);
-        processBuffer(buffer);
+        buffer = InputStringProcessing::processBuffer(buffer);
         
         // Check to see if the buffer is empty
         
@@ -292,7 +227,9 @@ void HexaMeshGen::writeMeshFile()
     ofstream fout("mesh.msh");
 
     fout << "# CAFFE structured mesh file\n\n"
-         << "nNodesI=" << nodes_.sizeI() << " nNodesJ=" << nodes_.sizeJ() << " nNodesK=" << nodes_.sizeK() << "\n";
+         << "nNodesI=" << nodes_.sizeI() << endl
+         << "nNodesJ=" << nodes_.sizeJ() << endl
+         << "nNodesK=" << nodes_.sizeK() << endl;
 
     for(k = 0; k < nodes_.sizeK(); ++k)
     {
@@ -303,11 +240,11 @@ void HexaMeshGen::writeMeshFile()
             for(i = 0; i < nodes_.sizeI(); ++i)
             {
 
-                fout << nodes_(i, j, k) << " ";
+                fout << "(" << nodes_(i, j, k) << ") ";
 
             } // end for i
 
-            fout << "\n";
+            fout << endl;
 
         } // end for j
     } // end for k

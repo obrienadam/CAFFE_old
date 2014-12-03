@@ -1,6 +1,7 @@
 #include <boost/algorithm/string/erase.hpp>
 
 #include "Input.h"
+#include "InputStringProcessing.h"
 
 Input::Input()
 {
@@ -58,26 +59,6 @@ Input::~Input()
 
 }
 
-void Input::processBuffer(std::string& buffer)
-{
-
-    std::getline(fin_, buffer);
-
-    // Remove the whitespace
-
-    boost::algorithm::erase_all(buffer, " ");
-
-    // Check if it is a comment line, if so discard the input
-
-    if(buffer[0] == '#')
-        buffer.clear();
-
-    // Remove any comments on the line
-
-    buffer = buffer.substr(0, buffer.find("#"));
-
-}
-
 void Input::openInputFile(std::string filename)
 {
 
@@ -109,7 +90,7 @@ void Input::openInputFile(std::string filename)
 
         // Process the buffer
 
-        processBuffer(buffer);
+        buffer = InputStringProcessing::processBuffer(buffer);
 
         // Make sure the buffer is not empty, in case the last line was blank or a comment
 

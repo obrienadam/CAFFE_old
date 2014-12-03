@@ -1,5 +1,8 @@
 #include <math.h>
 #include <iostream>
+#include <vector>
+
+#include <boost/algorithm/string.hpp>
 
 #include "Vector3D.h"
 
@@ -8,6 +11,13 @@ Vector3D::Vector3D(double x, double y, double z) :
   y(y),
   z(z)
 {
+
+}
+
+Vector3D::Vector3D(std::string vectorStr)
+{
+
+    initialize(vectorStr);
 
 }
 
@@ -48,6 +58,27 @@ Vector3D Vector3D::unitVector()
   double invMag(1./mag());
 
   return Vector3D(invMag*x, invMag*y, invMag*z);
+
+}
+
+void Vector3D::initialize(std::string vectorStr)
+{
+    using namespace std;
+    using namespace boost::algorithm;
+
+    vector<string> vectorStrComponents;
+
+    // Extract everything within the bracket
+
+    vectorStr = vectorStr.substr(vectorStr.find_first_of("(") + 1, vectorStr.find_first_of(")") - 1);
+
+    // Delimination characters can be either spaces or commas
+
+    split(vectorStrComponents, vectorStr, is_any_of(" ,"));
+
+    x = stod(vectorStrComponents[0]);
+    y = stod(vectorStrComponents[1]);
+    z = stod(vectorStrComponents[2]);
 
 }
 

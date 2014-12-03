@@ -44,6 +44,10 @@ public:
     virtual int size();
     virtual std::string meshStats();
 
+    //- Initialize from input file
+
+    virtual void initialize(std::string filename);
+
     //- Compute the time derivatives
 
     virtual void computeTimeDerivatives(STATE_TYPE* timeDerivatives);

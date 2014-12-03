@@ -2,6 +2,7 @@
 #define VECTOR3D_H
 
 #include <iostream>
+#include <string>
 
 class Vector3D
 {
@@ -11,6 +12,7 @@ class Vector3D
  public:
 
   Vector3D(double x = 0., double y = 0., double z = 0.);
+  Vector3D(std::string vectorStr);
 
   double x, y, z;
 
@@ -18,6 +20,10 @@ class Vector3D
 
   double mag();
   Vector3D unitVector();
+
+  //- Special initializations
+
+  void initialize(std::string vectorStr);
 
   //- Print to screen
 

@@ -16,6 +16,18 @@ void Output::printToScreen(const std::ostream& message)
 
 }
 
+void Output::printToScreen(const std::vector<std::string>& vector)
+{
+
+    for(uint i = 0; i < vector.size(); ++i)
+    {
+
+        std::cout << "Element " << i << ": " << vector[i] << std::endl;
+
+    }
+
+}
+
 void Output::displayCaffeHeader()
 {
 

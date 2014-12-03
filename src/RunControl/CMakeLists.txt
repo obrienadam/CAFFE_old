@@ -3,6 +3,7 @@
 
 set(HEADERS ArgsList.h
 	    Version.h
+            InputStringProcessing.h
 	    Input.h
 	    Output.h
 	    RunControl.h
@@ -10,6 +11,7 @@ set(HEADERS ArgsList.h
 
 set(SOURCE ArgsList.cc
    	   Version.cc
+           InputStringProcessing.cc
  	   Input.cc
            Output.cc
   	   RunControl.cc

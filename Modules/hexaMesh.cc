@@ -11,11 +11,8 @@ int main(int argc, const char* argv[])
     {
 
         HexaMeshGen hexaMeshGen(argc, argv);
-
         hexaMeshGen.readMeshInputFile();
-
         hexaMeshGen.generateMesh();
-
         hexaMeshGen.writeMeshFile();
 
     }
