@@ -6,16 +6,15 @@ set(HEADERS ArgsList.h
             InputStringProcessing.h
 	    Input.h
 	    Output.h
-	    RunControl.h
-	    TecplotAscii.h)
+            RunControl.h
+            RunControlI.h)
 
 set(SOURCE ArgsList.cc
    	   Version.cc
            InputStringProcessing.cc
  	   Input.cc
            Output.cc
-  	   RunControl.cc
-	   TecplotAscii.cc)
+           RunControl.cc)
 
 add_library(RunControl ${HEADERS} ${SOURCE})
 target_link_libraries(RunControl boost_program_options

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <boost/algorithm/string/erase.hpp>
 
 #include "Input.h"
@@ -32,13 +34,7 @@ Input::Input()
 
     // Domain related data
 
-    inputInts["nI"] = 30;
-    inputInts["nJ"] = 30;
-    inputInts["nK"] = 30;
-
-    // Scheme related data
-
-    inputStrings["scheme"] = "finiteDifference";
+    inputStrings["domainFile"] = "domain.in";
 
 }
 
@@ -79,14 +75,14 @@ void Input::openInputFile(std::string filename)
     if(!fin_.is_open())
     {
 
-        string errorMessage("Input file \"" + filename_ + "\" was not found.");
-
-        throw errorMessage.c_str();
+        throw ("Input file \"" + filename_ + "\" was not found.").c_str();
 
     }
 
     while(!fin_.eof())
     {
+
+        getline(fin_, buffer);
 
         // Process the buffer
 
@@ -128,4 +124,42 @@ void Input::openInputFile(std::string filename)
 
         }
     }
+
+}
+
+void Input::print()
+{
+    using namespace std;
+
+    map<string, int>::iterator intMapItr;
+    map<string, double>::iterator doubleMapItr;
+    map<string, string>::iterator stringMapItr;
+
+    cout << "Input Integers:\n";
+
+    for(intMapItr = inputInts.begin(); intMapItr != inputInts.end(); ++intMapItr)
+    {
+
+        cout << intMapItr->first << ": " << intMapItr->second << endl;
+
+    }
+
+    cout << "Input Doubles:\n";
+
+    for(doubleMapItr = inputDoubles.begin(); doubleMapItr != inputDoubles.end(); ++doubleMapItr)
+    {
+
+        cout << doubleMapItr->first << ": " << doubleMapItr->second << endl;
+
+    }
+
+    cout << "Input Strings:\n";
+
+    for(stringMapItr = inputStrings.begin(); stringMapItr != inputStrings.end(); ++stringMapItr)
+    {
+
+        cout << stringMapItr->first << ": " << stringMapItr->second << endl;
+
+    }
+
 }

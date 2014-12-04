@@ -1,6 +1,9 @@
 #ifndef ADVECTION_DIFFUSION_H
 #define ADVECTION_DIFFUSION_H
 
+#include <string>
+#include <sstream>
+
 #include "Vector3D.h"
 
 class AdvectionDiffusion
@@ -19,6 +22,9 @@ public:
     AdvectionDiffusion& operator-=(const AdvectionDiffusion& rhs);
     AdvectionDiffusion& operator*=(double rhs);
     AdvectionDiffusion& operator/=(double rhs);
+
+    static std::string variableNames();
+    std::string getVariableString();
 
 };
 

@@ -17,3 +17,7 @@ lib
 
 # Mesh files
 *.msh
+
+# Tecplot files
+*.dat
+*.phy

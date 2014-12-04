@@ -2,12 +2,11 @@
 #define STRUCTURED_MESH_H
 
 #include <string>
+#include <fstream>
 
 #include "DomainInterface.h"
 #include "Point3D.h"
 #include "Array3D.h"
-#include "Field.h"
-#include "TecplotAscii.h"
 
 enum Patch{BOUNDARY, INTERIOR};
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
@@ -21,15 +20,15 @@ protected:
     //- Structured data
 
     Array3D<Point3D> nodes_;
-    Field<STATE_TYPE> states_;
+    Array3D<STATE_TYPE> states_;
 
     //- Patches used for boundary conditions and communication
 
     Patch facePatches_[6];
 
-    //- File output objects
+    //- File output object
 
-    TecplotAscii tec360Output_;
+    std::ofstream foutRestart_, foutTec360_;
 
 public:
 
@@ -37,6 +36,10 @@ public:
 
     StructuredMesh();
     ~StructuredMesh();
+
+    //- Mesh name
+
+    std::string name;
 
     //- Initialization
 
@@ -54,14 +57,15 @@ public:
 
     //- Iterators methods
 
-    typedef typename Field<STATE_TYPE>::iterator iterator;
+    typedef typename Array3D<STATE_TYPE>::iterator iterator;
 
     iterator begin();
     iterator end();
 
     //- Output methods
 
-    virtual void outputData(double time = 0.);
+    virtual void write(double time = 0.);
+    virtual void writeTec360(double time = 0.);
 
 };
 

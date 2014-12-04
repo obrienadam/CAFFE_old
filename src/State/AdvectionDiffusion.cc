@@ -50,6 +50,24 @@ AdvectionDiffusion& AdvectionDiffusion::operator/=(double rhs)
 
 }
 
+std::string AdvectionDiffusion::variableNames()
+{
+
+    return "\"u\", \"v\", \"w\", \"phi\"";
+
+}
+
+std::string AdvectionDiffusion::getVariableString()
+{
+
+    std::ostringstream variableStr;
+
+    variableStr << v.x << " " << v.y << " " << v.z << " " << phi;
+
+    return variableStr.str();
+
+}
+
 //- Functions
 
 AdvectionDiffusion operator+(AdvectionDiffusion lhs, const AdvectionDiffusion& rhs)

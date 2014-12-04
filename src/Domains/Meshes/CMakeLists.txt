@@ -1,7 +1,8 @@
 # CMakeLists.txt for CAFFE/src/Domains/Meshes
 # Author: Adam O'Brien
 
-set(HEADERS StructuredMesh.h
+set(HEADERS ../DomainInterface.h
+            StructuredMesh.h
 	    StructuredMeshI.h
 	    HexaFdmMesh.h
             HexaMeshGen.h)

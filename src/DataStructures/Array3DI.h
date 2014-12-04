@@ -50,7 +50,7 @@ void Array3D<T>::allocate(int nI, int nJ, int nK)
     if(n_ == 0)
         return;
 
-    data_ = new T**[nI_];
+    data_ = new T**[nI_ + 1];
 
     for(i = 0; i < nI_; ++i)
     {
@@ -59,21 +59,15 @@ void Array3D<T>::allocate(int nI, int nJ, int nK)
         for(j = 0; j < nJ_; ++j)
         {
 
-            // Allocate nK_ + 1 so the iterator doesn't cause a seg fault
-            if(i == nI_ - 1 && j == nJ_ - 1)
-            {
-
-                data_[i][j] = new T[nK_ + 1];
-
-            }
-            else
-            {
-
-                data_[i][j] = new T[nK_];
-
-            }
+	    data_[i][j] = new T[nK_];
+           
         }
     }
+
+    // Allocate one extra element such that the iterator does not cause a seg-fault
+
+    data_[nI_] = new T*[1];
+    data_[nI_][0] = new T[1];
     
 }
 
@@ -88,12 +82,22 @@ void Array3D<T>::deallocate()
 
     for(i = 0; i < nI_; ++i)
     {
+      
         for(j = 0; j < nJ_; ++j)
         {
+	  
             delete[] data_[i][j];
+	    
         }
+	
         delete[] data_[i];
+
     }
+
+    // Deallocate the last element
+
+    delete[] data_[nI_][0];
+    delete[] data_[nI_];
 
     delete[] data_;
 

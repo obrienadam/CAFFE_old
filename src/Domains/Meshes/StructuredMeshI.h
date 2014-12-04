@@ -9,13 +9,23 @@
 
 template <class STATE_TYPE>
 StructuredMesh<STATE_TYPE>::StructuredMesh()
+    :
+      name("UnnamedMesh")
 {
+
     std::fill_n(facePatches_, 6, INTERIOR);
+
 }
 
 template <class STATE_TYPE>
 StructuredMesh<STATE_TYPE>::~StructuredMesh()
 {
+
+    if(foutRestart_.is_open())
+        foutRestart_.close();
+
+    if(foutTec360_.is_open())
+        foutTec360_.close();
 
 }
 
@@ -23,15 +33,9 @@ template <class STATE_TYPE>
 void StructuredMesh<STATE_TYPE>::initialize(Input &input)
 {
 
-    int nI = input.inputInts["nI"],
-            nJ = input.inputInts["nJ"],
-            nK = input.inputInts["nK"];
+    Output::printToScreen("Initializing structured mesh...");
 
-    nodes_.allocate(nI, nJ, nK);
-
-    Output::printToScreen("Initialized nodes of StructuredMesh.");
-
-    states_.allocate(nI, nJ, nK);
+    initialize(input.inputStrings["domainFile"]);
 
     Output::printToScreen("Initialized solution states of StructuredMesh.");
 
@@ -105,6 +109,7 @@ void StructuredMesh<STATE_TYPE>::initialize(std::string filename)
         {
 
             nK = stoi(bufferVec[1]);
+            break;
 
         }
         else
@@ -115,6 +120,9 @@ void StructuredMesh<STATE_TYPE>::initialize(std::string filename)
         }
 
     }
+
+    nodes_.allocate(nI, nJ, nK);
+    states_.allocate(nI, nJ, nK);
 
     // Check to see if a dimension was not allocated
 
@@ -151,13 +159,16 @@ void StructuredMesh<STATE_TYPE>::initialize(std::string filename)
         {
 
             j = 0;
-            ++nK;
+            ++k;
 
         }
 
     }
 
     fin.close();
+
+    write();
+    writeTec360();
 
 }
 
@@ -171,7 +182,7 @@ void StructuredMesh<STATE_TYPE>::computeTimeDerivatives(STATE_TYPE* timeDerivati
 
 template <class STATE_TYPE>
 typename
-Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::begin()
+Array3D<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::begin()
 {
 
     return states_.begin();
@@ -180,7 +191,7 @@ Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::begin()
 
 template <class STATE_TYPE>
 typename
-Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::end()
+Array3D<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::end()
 {
 
     return states_.end();
@@ -188,9 +199,94 @@ Field<STATE_TYPE>::iterator StructuredMesh<STATE_TYPE>::end()
 }
 
 template <class STATE_TYPE>
-void StructuredMesh<STATE_TYPE>::outputData(double time)
+void StructuredMesh<STATE_TYPE>::write(double time)
 {
 
+    int nI, nJ, nK;
+    int i, j, k;
 
+    nI = nodes_.sizeI();
+    nJ = nodes_.sizeJ();
+    nK = nodes_.sizeK();
+
+    if(DomainInterface<STATE_TYPE>::nOutputs_ == 0)
+    {
+
+        foutRestart_.open((name + ".msh").c_str());
+
+        foutRestart_ << "nNodesI=" << nI << "\n"
+                     << "nNodesJ=" << nJ << "\n"
+                     << "nNodesK=" << nK << "\n";
+
+    }
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+
+        {
+
+            for(i = 0; i < nI; ++i)
+
+            {
+
+                 foutRestart_ << "(" << nodes_(i, j, k) << ") ";
+
+            } // end for i
+
+            foutRestart_ << "\n";
+
+        } // end for j
+    } // end for k
+
+    foutRestart_.close();
+
+}
+
+template <class STATE_TYPE>
+void StructuredMesh<STATE_TYPE>::writeTec360(double time)
+{
+
+    int nI, nJ, nK;
+    int i, j, k;
+
+    nI = nodes_.sizeI();
+    nJ = nodes_.sizeJ();
+    nK = nodes_.sizeK();
+
+    if(DomainInterface<STATE_TYPE>::nTec360Outputs_ == 0)
+    {
+
+        foutTec360_.open((name + ".dat").c_str());
+
+        foutTec360_ << "TITLE=" << name << "\n"
+                    << "STRANDID=1, SOLUTIONTIME=" << time << "\n"
+                    << "VARIABLES = " << "\"x\", \"y\", \"z\", " << STATE_TYPE::variableNames() << "\n"
+                    << "ZONE I=" << nI << ", J=" << nJ << ", K=" << nK << "\n"
+                    << "ZONETYPE=ORDERED, DATAPACKING=POINT" << "\n\n";
+
+    }
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+
+        {
+
+            for(i = 0; i < nI; ++i)
+
+            {
+
+                 foutTec360_ << nodes_(i, j, k).x << " " << nodes_(i, j, k).y << " " << nodes_(i, j, k).z << " " << states_(i, j, k).getVariableString() << "\n";
+
+            } // end for i
+        } // end for j
+    } // end for k
+
+    ++DomainInterface<STATE_TYPE>::nTec360Outputs_;
+
+    foutTec360_.close();
 
 }

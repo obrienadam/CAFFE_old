@@ -27,6 +27,10 @@ public:
 
     void openInputFile(std::string filename);
 
+    //- Show everything in the input for debugging purposes
+
+    void print();
+
 };
 
 #endif
