@@ -3,6 +3,7 @@
 
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "DomainInterface.h"
 #include "Point3D.h"
@@ -11,16 +12,14 @@
 enum Patch{BOUNDARY, INTERIOR};
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 
-template <class STATE_TYPE>
-class StructuredMesh : public DomainInterface<STATE_TYPE>
+class StructuredMesh : public DomainInterface
 {
 
 protected:
 
-    //- Structured data
+    //- Structured data. In this class, only the geometric mesh is stored
 
     Array3D<Point3D> nodes_;
-    Array3D<STATE_TYPE> states_;
 
     //- Patches used for boundary conditions and communication
 
@@ -51,24 +50,11 @@ public:
 
     virtual void initialize(std::string filename);
 
-    //- Compute the time derivatives
-
-    virtual void computeTimeDerivatives(STATE_TYPE* timeDerivatives);
-
-    //- Iterators methods
-
-    typedef typename Array3D<STATE_TYPE>::iterator iterator;
-
-    iterator begin();
-    iterator end();
-
     //- Output methods
 
     virtual void write(double time = 0.);
     virtual void writeTec360(double time = 0.);
 
 };
-
-#include "StructuredMeshI.h"
 
 #endif

@@ -2,15 +2,10 @@
 
 #include "Output.h"
 #include "RunControl.h"
-#include "SmartPointer.h"
 
-#include "AdvectionDiffusion.h"
-#include "DomainIncludes.h"
-#include "SolverIncludes.h"
+#include "HexaFvmMesh.h"
+#include "Solver.h"
 #include "SchemeIncludes.h"
-
-typedef HexaFdmMesh<AdvectionDiffusion> Mesh;
-typedef SolverInterface<Mesh, AdvectionDiffusion> Solver;
 
 int main(int argc, const char* argv[])
 {
@@ -22,35 +17,44 @@ int main(int argc, const char* argv[])
     try
     {
 
-        //- Declare the basic module objects
+        // Declare the basic program objects
 
         RunControl runControl(argc, argv);
-        Solver* solver;
+        Solver solver;
+        HexaFvmMesh mesh;
 
-        //- Display a start message and begin the run
+        mesh.addScalarField("phi");
+        mesh.addVectorField("mu");
+        mesh.addVectorField("a");
 
-        runControl.solverInitialize(solver);
+        // Initialize objects
+
+        runControl.initializeCase(solver, mesh);
+
+        mesh.writeDebug();
+
+        // Display a start message and begin the run
 
         runControl.displayStartMessage();
 
-        while(runControl.continueRun(solver->timeStep()))
+        while(runControl.continueRun())
         {
 
-            solver->solve();
+            // runControl.solver.integrateTime();
 
-            //- Display a periodic solution update
+            // Display a periodic solution update
 
             runControl.displayUpdateMessage();
 
         }
 
-        //- Display end message, the run ended normally
+        // Display end message, the run ended normally
 
         runControl.displayEndMessage();
 
     }
 
-    //- Catch any exceptions thrown during the run
+    // Catch any exceptions thrown during the run
 
     catch(const char* errorMessage)
     {

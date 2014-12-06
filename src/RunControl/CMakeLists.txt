@@ -6,8 +6,7 @@ set(HEADERS ArgsList.h
             InputStringProcessing.h
 	    Input.h
 	    Output.h
-            RunControl.h
-            RunControlI.h)
+            RunControl.h)
 
 set(SOURCE ArgsList.cc
    	   Version.cc

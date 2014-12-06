@@ -9,7 +9,7 @@ target_link_libraries(hexaMesh HexaMesh)
 # Build the advection diffusion solver
 
 add_executable(caffeAdvectionDiffusion caffeAdvectionDiffusion.cc)
-
 target_link_libraries(caffeAdvectionDiffusion RunControl
                                               Math
-                                              State)
+                                              Solvers
+                                              HexaMesh)

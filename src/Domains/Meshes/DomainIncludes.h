@@ -2,6 +2,6 @@
 #define DOMAIN_INCLUDES_H
 
 #include "DomainInterface.h"
-#include "HexaFdmMesh.h"
+#include "HexaFvmMesh.h"
 
 #endif

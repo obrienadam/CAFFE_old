@@ -9,9 +9,8 @@
 #include "ArgsList.h"
 #include "Input.h"
 
-#include "DomainIncludes.h"
-#include "SolverIncludes.h"
-#include "SchemeIncludes.h"
+#include "DomainInterface.h"
+#include "Solver.h"
 
 class RunControl
 {
@@ -51,10 +50,6 @@ public:
 
     RunControl(int argc, const char* argv[]);
 
-    //- Set the run control parameters
-
-    void setRunControlParametersFromInputFile();
-
     //- Evaluate whether or not run should continue
 
     bool continueRun(double timeStep = 0.);
@@ -65,13 +60,10 @@ public:
     void displayUpdateMessage();
     void displayEndMessage();
 
-    //- Initializes the solver to a specific type
+    //- Initializes the various case objects
 
-    template <class DOMAIN_TYPE, class STATE_TYPE>
-    void solverInitialize(SolverInterface<DOMAIN_TYPE, STATE_TYPE>*& solver);
+    void initializeCase(Solver& solver, DomainInterface& domain);
 
 };
-
-#include "RunControlI.h"
 
 #endif

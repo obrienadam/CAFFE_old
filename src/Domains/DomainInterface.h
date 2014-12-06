@@ -6,7 +6,6 @@
 #include "Input.h"
 #include "SchemeInterface.h"
 
-template <class STATE_TYPE>
 class DomainInterface
 {
 
@@ -24,8 +23,6 @@ public:
 
     virtual void initialize(Input& input) = 0;
     virtual int size() = 0;
-
-    virtual void computeTimeDerivatives(STATE_TYPE* timeDerivatives) = 0;
 
     virtual void writeTec360(double time = 0.) = 0;
 

@@ -21,14 +21,7 @@ RunControl::RunControl(int argc, const char* argv[])
 {
 
     argsList_.readArgs(argc, argv);
-
     input_.openInputFile(argsList_.inputFilename_);
-    setRunControlParametersFromInputFile();
-
-}
-
-void RunControl::setRunControlParametersFromInputFile()
-{
 
     terminationCondition_ = input_.inputStrings["terminationCondition"];
     maxItrs_ = input_.inputInts["maxItrs"];
@@ -191,5 +184,13 @@ void RunControl::displayEndMessage()
     Output::printToScreen(message.str());
 
     Output::printLine();
+
+}
+
+void RunControl::initializeCase(Solver& solver, DomainInterface& domain)
+{
+
+    domain.initialize(input_);
+    solver.initialize(input_);
 
 }
