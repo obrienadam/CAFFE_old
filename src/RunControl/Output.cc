@@ -28,6 +28,20 @@ void Output::printToScreen(const std::vector<std::string>& vector)
 
 }
 
+void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
+{
+
+    throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
+
+}
+
+void Output::raiseException(std::string className, std::string methodName, std::ostringstream &problemDescription)
+{
+
+    throw ("in \"" + className + "::" + methodName + "\", " + problemDescription.str()).c_str();
+
+}
+
 void Output::displayCaffeHeader()
 {
 

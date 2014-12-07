@@ -4,6 +4,7 @@
 #include "HexaMeshGen.h"
 #include "Output.h"
 #include "InputStringProcessing.h"
+#include "Geometry.h"
 
 HexaMeshGen::HexaMeshGen()
     :
@@ -48,7 +49,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         else if(buffer != "{")
         {
 
-            throw ("Expected a \"{\", but received a \"" + buffer + "\".").c_str();
+            Output::raiseException("HexaMeshGen", "readVertices", "Expected a \"{\", but received a \"" + buffer + "\".");
 
         }
 
@@ -80,6 +81,8 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
 
     Output::printToScreen("HexaMeshGen: Successfully initialized domain vertices.");
 
+    checkMesh();
+
 }
 
 
@@ -107,7 +110,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         else if(buffer != "{")
         {
 
-            throw ("Expected a \"{\", but received a \"" + buffer + "\".").c_str();
+            Output::raiseException("HexaMeshGen", "readResolution", "Expected a \"{\", but received a \"" + buffer + "\".");
 
         }
 
@@ -146,7 +149,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         if(buffer != ")")
         {
 
-            throw "Expected a \")\"";
+            Output::raiseException("HexaMeshGen", "readResolution", "expected a \")\"");
 
         }
 
@@ -166,7 +169,7 @@ void HexaMeshGen::readMeshInputFile()
     if(!inputFile.is_open())
     {
         
-        throw "Mesh input file not found.";
+        Output::raiseException("HexaMeshGen", "readMeshInputFile", "mesh input file not found.");
         
     }
     
@@ -191,7 +194,6 @@ void HexaMeshGen::readMeshInputFile()
             // Extract the metric conversion floating point number and store
             
             buffer = buffer.substr(buffer.find("=") + 1, buffer.back());
-            
             metricConversion_ = stod(buffer);
             
         }
@@ -210,7 +212,7 @@ void HexaMeshGen::readMeshInputFile()
         else
         {
             
-            throw ("Unrecognized input field header " + buffer + ".").c_str();
+            Output::raiseException("HexaMeshGen", "readMeshInputFile", "Unrecognized input field header " + buffer + ".");
             
         }
         
@@ -332,4 +334,14 @@ void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)
         } // end for j
     } // end for k
     
+}
+
+void HexaMeshGen::checkMesh()
+{
+
+    // Checks for non-planar surfaces
+
+    if(!Geometry::checkHexahedronSurfacesIsPlanar(vertices_.data()))
+        Output::raiseException("HexaMeshGen", "checkMesh", "one or more surfaces of the mesh geometry is not planar, which is not currently supported.");
+
 }

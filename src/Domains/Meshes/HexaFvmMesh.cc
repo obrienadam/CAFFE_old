@@ -23,8 +23,6 @@ void HexaFvmMesh::initialize(Input &input)
     cellCenters_.allocate(nI, nJ, nK);
     cellVolumes_.allocate(nI, nJ, nK);
 
-    // THIS IS WRONG, THIS IS NOT THE CELL CENTROID AND WON'T WORK FOR HIGHLY SKEWED CELLS
-
     for(k = 0; k < nK; ++k)
     {
 
@@ -43,8 +41,7 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[6] = nodes_(i + 1, j + 1, k + 1);
                 tmpPoints[7] = nodes_(i, j + 1, k + 1);
 
-                cellCenters_(i, j, k) = 0.125*(tmpPoints[0] + tmpPoints[1] + tmpPoints[2] + tmpPoints[3]
-                        + tmpPoints[4] + tmpPoints[5] + tmpPoints[6] + tmpPoints[7]);
+                cellCenters_(i, j, k) = Geometry::computeHexahedronCentroid(tmpPoints);
                 cellVolumes_(i, j, k) = Geometry::computeHexahedronVolume(tmpPoints);
 
             } // end for i
@@ -75,7 +72,7 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
                 tmpPoints[3] = nodes_(i, j, k + 1);
 
-                faceCentersI_(i, j, k) = 0.25*(tmpPoints[0] + tmpPoints[1] + tmpPoints[2] + tmpPoints[3]);
+                faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsI_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasI_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
 
@@ -107,7 +104,7 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
                 tmpPoints[3] = nodes_(i + 1, j, k);
 
-                faceCentersJ_(i, j, k) = 0.25*(tmpPoints[0] + tmpPoints[1] + tmpPoints[2] + tmpPoints[3]);
+                faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsJ_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasJ_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
 
@@ -139,7 +136,7 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
 
-                faceCentersK_(i, j, k) = 0.25*(tmpPoints[0] + tmpPoints[1] + tmpPoints[2] + tmpPoints[3]);
+                faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsK_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasK_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
 

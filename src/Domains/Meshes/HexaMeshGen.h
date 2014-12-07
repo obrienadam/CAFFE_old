@@ -44,6 +44,10 @@ public:
     void generateMesh();
     void generateBoxMesh(double dx, double dy, double dz);
 
+    //- Mesh check
+
+    void checkMesh();
+
 };
 
 #endif

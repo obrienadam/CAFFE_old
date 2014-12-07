@@ -70,9 +70,7 @@ bool RunControl::continueRun(double timeStep)
     else
     {
 
-        std::string errorMessage("Invalid termination condition \"" + terminationCondition_ + "\" selected in RunControl.");
-
-        throw errorMessage.c_str();
+        Output::raiseException("RunControl", "continueRun", "invalid termination condition \"" + terminationCondition_ + "\" selected.");
 
     }
 
