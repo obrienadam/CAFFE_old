@@ -1,10 +1,6 @@
 #include "HexaFvmMesh.h"
 #include "Geometry.h"
-
-HexaFvmMesh::HexaFvmMesh()
-{
-
-}
+#include "Output.h"
 
 void HexaFvmMesh::initialize(Input &input)
 {
@@ -146,35 +142,193 @@ void HexaFvmMesh::initialize(Input &input)
 
     // Initialize fields
 
-    for(i = 0; i < scalarFields_.size(); ++i)
+    for(i = 0; i < scalarFields.size(); ++i)
     {
 
-        scalarFields_[i].allocate(nI, nJ, nK);
+        scalarFields[i].allocate(nI, nJ, nK);
 
     }
 
-    for(i = 0; i < vectorFields_.size(); ++i)
+    for(i = 0; i < vectorFields.size(); ++i)
     {
 
-        vectorFields_[i].allocate(nI, nJ, nK);
+        vectorFields[i].allocate(nI, nJ, nK);
 
     }
 
 }
 
-void HexaFvmMesh::addScalarField(std::string scalarFieldName)
+void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
 {
 
-    scalarFields_.push_back(Field<double>(scalarFieldName));
-    scalarFields_.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
+    scalarFields.push_back(Field<double>(scalarFieldName, type));
+    scalarFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
+
+    if(type == CONSERVED)
+    {
+
+        scalarFluxFieldsI.push_back(Field<double>(scalarFieldName, type));
+        scalarFluxFieldsI.back().allocate(faceCentersI_.sizeI(), faceCentersI_.sizeJ(), faceCentersI_.sizeK());
+
+        scalarFluxFieldsJ.push_back(Field<double>(scalarFieldName, type));
+        scalarFluxFieldsJ.back().allocate(faceCentersJ_.sizeI(), faceCentersJ_.sizeJ(), faceCentersJ_.sizeK());
+
+        scalarFluxFieldsK.push_back(Field<double>(scalarFieldName, type));
+        scalarFluxFieldsK.back().allocate(faceCentersK_.sizeI(), faceCentersK_.sizeJ(), faceCentersK_.sizeK());
+
+    }
+
+    scalarFieldRegistry_[scalarFieldName] = &scalarFields.back();
 
 }
 
-void HexaFvmMesh::addVectorField(std::string vectorFieldName)
+void HexaFvmMesh::addVectorField(std::string vectorFieldName, int type)
 {
 
-    vectorFields_.push_back(Field<Vector3D>(vectorFieldName));
-    vectorFields_.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
+    vectorFields.push_back(Field<Vector3D>(vectorFieldName));
+    vectorFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
+
+    if(type == CONSERVED)
+    {
+
+        vectorFluxFieldsI.push_back(Field<Vector3D>(vectorFieldName, type));
+        vectorFluxFieldsI.back().allocate(faceCentersI_.sizeI(), faceCentersI_.sizeJ(), faceCentersI_.sizeK());
+
+        vectorFluxFieldsJ.push_back(Field<Vector3D>(vectorFieldName, type));
+        vectorFluxFieldsJ.back().allocate(faceCentersJ_.sizeI(), faceCentersJ_.sizeJ(), faceCentersJ_.sizeK());
+
+        vectorFluxFieldsK.push_back(Field<Vector3D>(vectorFieldName, type));
+        vectorFluxFieldsK.back().allocate(faceCentersK_.sizeI(), faceCentersK_.sizeJ(), faceCentersK_.sizeK());
+
+    }
+
+    vectorFieldRegistry_[vectorFieldName] = &vectorFields.back();
+
+}
+
+Field<double>* HexaFvmMesh::findScalarField(std::string fieldName)
+{
+
+    if(scalarFieldRegistry_.find(fieldName) == scalarFieldRegistry_.end())
+    {
+
+        Output::raiseException("HexaFvmMesh", "findScalarField", "field \"" + fieldName + "\" not found.");
+
+    }
+
+    return scalarFieldRegistry_[fieldName];
+
+}
+
+Field<Vector3D>* HexaFvmMesh::findVectorField(std::string fieldName)
+{
+
+    if(vectorFieldRegistry_.find(fieldName) == vectorFieldRegistry_.end())
+    {
+
+        Output::raiseException("HexaFvmMesh", "findVectorField", "field \"" + fieldName + "\" not found.");
+
+    }
+
+    return vectorFieldRegistry_[fieldName];
+
+}
+
+Point3D HexaFvmMesh::cellXc(int i, int j, int k)
+{
+
+    return cellCenters_(i, j, k);
+
+}
+
+double HexaFvmMesh::cellVol(int i, int j, int k)
+{
+
+    return cellVolumes_(i, j, k);
+
+}
+
+Point3D HexaFvmMesh::faceXcE(int i, int j, int k)
+{
+
+    return faceCentersI_(i + 1, j, k);
+
+}
+
+Point3D HexaFvmMesh::faceXcW(int i, int j, int k)
+{
+
+    return faceCentersI_(i, j, k);
+
+}
+
+Point3D HexaFvmMesh::faceXcN(int i, int j, int k)
+{
+
+    return faceCentersJ_(i, j + 1, k);
+
+}
+
+Point3D HexaFvmMesh::faceXcS(int i, int j, int k)
+{
+
+    return faceCentersJ_(i, j, k);
+
+}
+
+Point3D HexaFvmMesh::faceXcT(int i, int j, int k)
+{
+
+
+    return faceCentersK_(i, j, k + 1);
+}
+
+Point3D HexaFvmMesh::faceXcB(int i, int j, int k)
+{
+
+    return faceCentersK_(i, j, k);
+
+}
+
+double HexaFvmMesh::faceAreaE(int i, int j, int k)
+{
+
+    return faceAreasI_(i + 1, j, k);
+
+}
+
+double HexaFvmMesh::faceAreaW(int i, int j, int k)
+{
+
+    return faceAreasI_(i, j, k);
+
+}
+
+double HexaFvmMesh::faceAreaN(int i, int j, int k)
+{
+
+    return faceAreasJ_(i, j + 1, k);
+
+}
+
+double HexaFvmMesh::faceAreaS(int i, int j, int k)
+{
+
+    return faceAreasJ_(i, j, k);
+
+}
+
+double HexaFvmMesh::faceAreaT(int i, int j, int k)
+{
+
+    return faceAreasK_(i, j, k + 1);
+
+}
+
+double HexaFvmMesh::faceAreaB(int i, int j, int k)
+{
+
+    return faceAreasK_(i, j, k);
 
 }
 
@@ -186,7 +340,10 @@ void HexaFvmMesh::writeDebug()
     ofstream debugFout;
 
     debugFout.open((name + "_debug" + ".msh").c_str());
-    debugFout << "Cell Positions:\n";
+
+    debugFout << "HexaFvm Mesh Data:\n";
+
+    debugFout << "\nCell Positions:\n";
 
     nI = cellCenters_.sizeI();
     nJ = cellCenters_.sizeJ();
@@ -230,7 +387,79 @@ void HexaFvmMesh::writeDebug()
         } // end for j
     } // end for k
 
-    debugFout << "Face Normals I:\n";
+    debugFout << "\nFace Centers I:\n";
+
+    nI = faceCentersI_.sizeI();
+    nJ = faceCentersI_.sizeJ();
+    nK = faceCentersI_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            for(i = 0; i < nI; ++i)
+            {
+
+                debugFout << faceCentersI_(i, j, k) << " ";
+
+            } // end for i
+
+            debugFout << endl;
+
+        } // end for j
+    } // end for k
+
+    debugFout << "\nFace Centers J:\n";
+
+    nI = faceCentersJ_.sizeI();
+    nJ = faceCentersJ_.sizeJ();
+    nK = faceCentersJ_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            for(i = 0; i < nI; ++i)
+            {
+
+                debugFout << faceCentersJ_(i, j, k) << " ";
+
+            } // end for i
+
+            debugFout << endl;
+
+        } // end for j
+    } // end for k
+
+    debugFout << "\nFace Centers K:\n";
+
+    nI = faceCentersK_.sizeI();
+    nJ = faceCentersK_.sizeJ();
+    nK = faceCentersK_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            for(i = 0; i < nI; ++i)
+            {
+
+                debugFout << faceCentersK_(i, j, k) << " ";
+
+            } // end for i
+
+            debugFout << endl;
+
+        } // end for j
+    } // end for k
+
+    debugFout << "\nFace Normals I:\n";
 
     nI = faceNormalsI_.sizeI();
     nJ = faceNormalsI_.sizeJ();
@@ -254,7 +483,7 @@ void HexaFvmMesh::writeDebug()
         } // end for j
     } // end for k
 
-    debugFout << "Face Normals J:\n";
+    debugFout << "\nFace Normals J:\n";
 
     nI = faceNormalsJ_.sizeI();
     nJ = faceNormalsJ_.sizeJ();
@@ -278,7 +507,7 @@ void HexaFvmMesh::writeDebug()
         } // end for j
     } // end for k
 
-    debugFout << "Face Normals K:\n";
+    debugFout << "\nFace Normals K:\n";
 
     nI = faceNormalsK_.sizeI();
     nJ = faceNormalsK_.sizeJ();

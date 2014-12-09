@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "Input.h"
-#include "SchemeInterface.h"
 
 class DomainInterface
 {

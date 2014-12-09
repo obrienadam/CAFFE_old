@@ -3,9 +3,10 @@
 #include "Output.h"
 #include "RunControl.h"
 
-#include "HexaFvmMesh.h"
 #include "Solver.h"
-#include "SchemeIncludes.h"
+#include "HexaFvmMesh.h"
+#include "Diffusion.h"
+#include "LinearAdvection.h"
 
 int main(int argc, const char* argv[])
 {
@@ -22,14 +23,18 @@ int main(int argc, const char* argv[])
         RunControl runControl(argc, argv);
         Solver solver;
         HexaFvmMesh mesh;
+        Diffusion diffusion;
+        LinearAdvection linearadvection;
 
-        mesh.addScalarField("phi");
-        mesh.addVectorField("mu");
-        mesh.addVectorField("a");
+        mesh.addScalarField("phi", CONSERVED);
+        mesh.addVectorField("mu", AUXILLARY);
+        mesh.addVectorField("a", AUXILLARY);
 
         // Initialize objects
 
         runControl.initializeCase(solver, mesh);
+        diffusion.setMeshPointer(&mesh);
+        linearadvection.setMeshPointer(&mesh);
 
         mesh.writeDebug();
 

@@ -5,30 +5,34 @@
 
 #include "Array3D.h"
 
+enum{CONSERVED, AUXILLARY};
+
 template <class T>
 class Field : public Array3D<T>
 {
 
 public:
 
-    Field(std::string name = "UnnamedField", bool isConserved = false)
+    Field(std::string name = "UnnamedField", int type = AUXILLARY)
         :
           name(name),
-          isConserved(false)
+          type(type)
     {
 
     }
 
-    Field(int nI, int nJ, int nK, std::string name = "UnnamedField", bool isConserved = false)
+    Field(int nI, int nJ, int nK, std::string name = "UnnamedField", int type = AUXILLARY)
         :
           Array3D<T>(nI, nJ, nK),
           name(name),
-          isConserved(false)
+          type(type)
     {
 
     }
 
-    bool isConserved;
+    //- The "type" determines whether or not tranport equations need to be solved for this field
+
+    bool type;
     std::string name;
 
 };
