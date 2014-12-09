@@ -1,9 +1,19 @@
 # CMakeLists.txt for CAFFE
 # Author: Adam O'Brien
 
-cmake_minimum_required (VERSION 2.6.2 FATAL_ERROR)
+cmake_minimum_required (VERSION 2.8 FATAL_ERROR)
 
 project(CAFFE)
+
+# Find boost package
+
+find_package(Boost REQUIRED COMPONENTS program_options system date_time chrono)
+
+if(Boost_FOUND)
+
+    include_directories(${Boost_INCLUDE_DIRS})
+
+endif()
 
 # Includes
 

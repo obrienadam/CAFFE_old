@@ -16,7 +16,4 @@ set(SOURCE ArgsList.cc
            RunControl.cc)
 
 add_library(RunControl ${HEADERS} ${SOURCE})
-target_link_libraries(RunControl boost_program_options
-				 boost_system
-				 boost_date_time
-				 boost_chrono)
+target_link_libraries(RunControl ${Boost_LIBRARIES})
