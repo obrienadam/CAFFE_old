@@ -28,6 +28,13 @@ void Output::printToScreen(const std::vector<std::string>& vector)
 
 }
 
+void Output::printToScreen(std::string className, std::string message)
+{
+
+    std::cout << className + ": " << message << std::endl;
+
+}
+
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
 

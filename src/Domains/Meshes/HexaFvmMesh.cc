@@ -5,8 +5,9 @@
 void HexaFvmMesh::initialize(Input &input)
 {
 
-    uint i, j, k;
+    uint i, j, k, nI, nJ, nK;
     Point3D tmpPoints[8];
+    Vector3D tmpVec;
 
     // Initialize the mesh nodes
 
@@ -14,7 +15,9 @@ void HexaFvmMesh::initialize(Input &input)
 
     // Initialize the cells
 
-    uint nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1);
+    nI = nodes_.sizeI() - 1;
+    nJ = nodes_.sizeJ() - 1;
+    nK = nodes_.sizeK() - 1;
 
     cellCenters_.allocate(nI, nJ, nK);
     cellVolumes_.allocate(nI, nJ, nK);
@@ -52,7 +55,9 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersI_.allocate(nI, nJ, nK);
     faceNormalsI_.allocate(nI, nJ, nK);
+    distanceVectorsI_.allocate(nI, nJ, nK);;
     faceAreasI_.allocate(nI, nJ, nK);
+    cellDistancesI_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -68,15 +73,19 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
                 tmpPoints[3] = nodes_(i, j, k + 1);
 
+                tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
+
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsI_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                distanceVectorsI_(i, j, k) = tmpVec.unitVector();
                 faceAreasI_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                cellDistancesI_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
     } // end for k
 
-    // Initialize the J-direction faces (normals alligned with in the J-direction)
+    // Initialize the J-direction faces (normals aligned with in the J-direction)
 
     nI = nodes_.sizeI() - 1;
     nJ = nodes_.sizeJ();
@@ -84,7 +93,9 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersJ_.allocate(nI, nJ, nK);
     faceNormalsJ_.allocate(nI, nJ, nK);
+    distanceVectorsJ_.allocate(nI, nJ, nK);
     faceAreasJ_.allocate(nI, nJ, nK);
+    cellDistancesJ_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -100,9 +111,13 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
                 tmpPoints[3] = nodes_(i + 1, j, k);
 
+                tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
+
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsJ_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                distanceVectorsJ_(i, j, k) = tmpVec.unitVector();
                 faceAreasJ_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                cellDistancesJ_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
@@ -116,7 +131,9 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersK_.allocate(nI, nJ, nK);
     faceNormalsK_.allocate(nI, nJ, nK);
+    distanceVectorsK_.allocate(nI, nJ, nK);
     faceAreasK_.allocate(nI, nJ, nK);
+    cellDistancesK_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -132,29 +149,61 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
 
+                tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
+
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsK_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                distanceVectorsK_(i, j, k) = tmpVec.unitVector();
                 faceAreasK_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                cellDistancesK_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
     } // end for k
 
-    // Initialize fields
+    // All fields must now be reallocated
+
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK();
 
     for(i = 0; i < scalarFields.size(); ++i)
-    {
-
-        scalarFields[i].allocate(nI, nJ, nK);
-
-    }
+           scalarFields[i].allocate(nI, nJ, nK);
 
     for(i = 0; i < vectorFields.size(); ++i)
-    {
-
         vectorFields[i].allocate(nI, nJ, nK);
 
-    }
+    nI = faceCentersI_.sizeI();
+    nJ = faceCentersI_.sizeJ();
+    nK = faceCentersI_.sizeK();
+
+    for(i = 0; i < scalarFluxFieldsI.size(); ++i)
+        scalarFluxFieldsI[i].allocate(nI, nJ, nK);
+
+    for(i = 0; i < vectorFluxFieldsI.size(); ++i)
+        vectorFluxFieldsI[i].allocate(nI, nJ, nK);
+
+    nI = faceCentersJ_.sizeI();
+    nJ = faceCentersJ_.sizeJ();
+    nK = faceCentersJ_.sizeK();
+
+    for(i = 0; i < scalarFluxFieldsJ.size(); ++i)
+        scalarFluxFieldsJ[i].allocate(nI, nJ, nK);
+
+    for(i = 0; i < vectorFluxFieldsJ.size(); ++i)
+        vectorFluxFieldsJ[i].allocate(nI, nJ, nK);
+
+    nI = faceCentersK_.sizeI();
+    nJ = faceCentersK_.sizeJ();
+    nK = faceCentersK_.sizeK();
+
+    for(i = 0; i < scalarFluxFieldsK.size(); ++i)
+        scalarFluxFieldsK[i].allocate(nI, nJ, nK);
+
+    for(i = 0; i < vectorFluxFieldsK.size(); ++i)
+        vectorFluxFieldsK[i].allocate(nI, nJ, nK);
+
+    Output::printToScreen("HexaFvmMesh", "Initialization complete.");
 
 }
 

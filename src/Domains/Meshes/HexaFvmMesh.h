@@ -26,9 +26,15 @@ private:
     Array3D<Vector3D> faceNormalsI_;
     Array3D<Vector3D> faceNormalsJ_;
     Array3D<Vector3D> faceNormalsK_;
+    Array3D<Vector3D> distanceVectorsI_;
+    Array3D<Vector3D> distanceVectorsJ_;
+    Array3D<Vector3D> distanceVectorsK_;
     Array3D<double> faceAreasI_;
     Array3D<double> faceAreasJ_;
     Array3D<double> faceAreasK_;
+    Array3D<double> cellDistancesI_;
+    Array3D<double> cellDistancesJ_;
+    Array3D<double> cellDistancesK_;
 
     //- For accessing a field pointer by name
 

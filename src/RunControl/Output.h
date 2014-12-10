@@ -16,6 +16,7 @@ public:
     static void printToScreen(const std::string& message);
     static void printToScreen(const std::vector<std::string>& vector);
     static void printToScreen(const std::ostream& message);
+    static void printToScreen(std::string className, std::string message);
 
     //- These functions are for normalizing exception handling
 
