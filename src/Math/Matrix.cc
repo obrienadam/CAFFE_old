@@ -1,6 +1,15 @@
 #include <cstdlib>
 #include <iostream>
 
+// The following code is to work around a bug on lapack-3.4.2 on Fedora 20, and should be removed once the package
+// is updated
+
+//#include <complex.h>
+//#define lapack_complex_float    float _Complex
+//#define lapack_complex_double   double _Complex
+
+#include <lapacke/lapacke.h>
+
 #include "Matrix.h"
 #include "Output.h"
 
@@ -86,8 +95,8 @@ void Matrix::deallocate()
 double& Matrix::operator()(int i, int j)
 {
 
-    //if(i > m_ - 1 || i < 0 || j > n_ - 1 || j < 0)
-    // Output::raiseException("Matrix", "operator()", "tried to access element outside of the array bounds.");
+    if(i > m_ - 1 || i < 0 || j > n_ - 1 || j < 0)
+        Output::raiseException("Matrix", "operator()", "tried to access element outside of the array bounds.");
 
     return elements_[n_*i + j];
 
@@ -96,20 +105,19 @@ double& Matrix::operator()(int i, int j)
 void Matrix::solveLeastSquares(Matrix &b)
 {
 
-    int info = LAPACKE_dgels(LAPACK_ROW_MAJOR, 'N', m_, n_, b.n_, elements_, n_, b.elements_, b.n_);
+    LAPACKE_dgels(LAPACK_ROW_MAJOR, 'N', m_, n_, b.n_, elements_, n_, b.elements_, b.n_);
 
-    //if(info <= 0)
-    //Output::raiseException("Matrix", "solveLeastSquares", "an issue occured with Lapacke routine \"LAPACKE_dgels\".");
+    // Modify the dimensions of vector b to reflect the number of unknowns. Note that this doesn't release memory,
+    // but it shouldn't matter
+
+    b.m_ = n_;
 
 }
 
 void Matrix::solve(Matrix &b)
 {
 
-    int info = LAPACKE_dgesv(LAPACK_ROW_MAJOR, m_, b.n_, elements_, n_, ipiv_, b.elements_, b.n_);
-
-    //if(info <= 0)
-    //Output::raiseException("Matrix", "solve", "an issue occurred with Lapacke routine \"LAPACKE_dgesv\".");
+    LAPACKE_dgesv(LAPACK_ROW_MAJOR, m_, b.n_, elements_, n_, ipiv_, b.elements_, b.n_);
 
 }
 

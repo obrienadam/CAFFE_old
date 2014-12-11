@@ -18,4 +18,4 @@ set(SOURCES Vector3D.cc
             Interpolation.cc)
 
 add_library(Math ${HEADERS} ${SOURCES})
-target_link_libraries(Math lapacke)
+target_link_libraries(Math lapacke lapack blas)
