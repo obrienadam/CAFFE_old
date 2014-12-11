@@ -1,7 +1,7 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
-#include <lapacke.h>
+#include <lapacke/lapacke.h>
 
 class Matrix
 {
