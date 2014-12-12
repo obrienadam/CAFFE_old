@@ -55,9 +55,7 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersI_.allocate(nI, nJ, nK);
     faceNormalsI_.allocate(nI, nJ, nK);
-    distanceVectorsI_.allocate(nI, nJ, nK);;
     faceAreasI_.allocate(nI, nJ, nK);
-    cellDistancesI_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -73,13 +71,9 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
                 tmpPoints[3] = nodes_(i, j, k + 1);
 
-                tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
-
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsI_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                distanceVectorsI_(i, j, k) = tmpVec.unitVector();
                 faceAreasI_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-                cellDistancesI_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
@@ -93,9 +87,7 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersJ_.allocate(nI, nJ, nK);
     faceNormalsJ_.allocate(nI, nJ, nK);
-    distanceVectorsJ_.allocate(nI, nJ, nK);
     faceAreasJ_.allocate(nI, nJ, nK);
-    cellDistancesJ_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -111,13 +103,9 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
                 tmpPoints[3] = nodes_(i + 1, j, k);
 
-                tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
-
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsJ_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                distanceVectorsJ_(i, j, k) = tmpVec.unitVector();
                 faceAreasJ_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-                cellDistancesJ_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
@@ -131,9 +119,7 @@ void HexaFvmMesh::initialize(Input &input)
 
     faceCentersK_.allocate(nI, nJ, nK);
     faceNormalsK_.allocate(nI, nJ, nK);
-    distanceVectorsK_.allocate(nI, nJ, nK);
     faceAreasK_.allocate(nI, nJ, nK);
-    cellDistancesK_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -149,13 +135,9 @@ void HexaFvmMesh::initialize(Input &input)
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
 
-                tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
-
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsK_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                distanceVectorsK_(i, j, k) = tmpVec.unitVector();
                 faceAreasK_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-                cellDistancesK_(i, j, k) = tmpVec.mag();
 
             } // end for i
         } // end for j
@@ -280,104 +262,6 @@ Field<Vector3D>* HexaFvmMesh::findVectorField(std::string fieldName)
     }
 
     return vectorFieldRegistry_[fieldName];
-
-}
-
-Point3D HexaFvmMesh::cellXc(int i, int j, int k)
-{
-
-    return cellCenters_(i, j, k);
-
-}
-
-double HexaFvmMesh::cellVol(int i, int j, int k)
-{
-
-    return cellVolumes_(i, j, k);
-
-}
-
-Point3D HexaFvmMesh::faceXcE(int i, int j, int k)
-{
-
-    return faceCentersI_(i + 1, j, k);
-
-}
-
-Point3D HexaFvmMesh::faceXcW(int i, int j, int k)
-{
-
-    return faceCentersI_(i, j, k);
-
-}
-
-Point3D HexaFvmMesh::faceXcN(int i, int j, int k)
-{
-
-    return faceCentersJ_(i, j + 1, k);
-
-}
-
-Point3D HexaFvmMesh::faceXcS(int i, int j, int k)
-{
-
-    return faceCentersJ_(i, j, k);
-
-}
-
-Point3D HexaFvmMesh::faceXcT(int i, int j, int k)
-{
-
-
-    return faceCentersK_(i, j, k + 1);
-}
-
-Point3D HexaFvmMesh::faceXcB(int i, int j, int k)
-{
-
-    return faceCentersK_(i, j, k);
-
-}
-
-double HexaFvmMesh::faceAreaE(int i, int j, int k)
-{
-
-    return faceAreasI_(i + 1, j, k);
-
-}
-
-double HexaFvmMesh::faceAreaW(int i, int j, int k)
-{
-
-    return faceAreasI_(i, j, k);
-
-}
-
-double HexaFvmMesh::faceAreaN(int i, int j, int k)
-{
-
-    return faceAreasJ_(i, j + 1, k);
-
-}
-
-double HexaFvmMesh::faceAreaS(int i, int j, int k)
-{
-
-    return faceAreasJ_(i, j, k);
-
-}
-
-double HexaFvmMesh::faceAreaT(int i, int j, int k)
-{
-
-    return faceAreasK_(i, j, k + 1);
-
-}
-
-double HexaFvmMesh::faceAreaB(int i, int j, int k)
-{
-
-    return faceAreasK_(i, j, k);
 
 }
 

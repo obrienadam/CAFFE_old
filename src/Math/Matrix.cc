@@ -92,6 +92,15 @@ void Matrix::deallocate()
 
 }
 
+void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
+{
+
+    elements_[n_*i + j] = vec.x;
+    elements_[n_*i + j + 1] = vec.y;
+    elements_[n_*i + j + 2] = vec.z;
+
+}
+
 double& Matrix::operator()(int i, int j)
 {
 

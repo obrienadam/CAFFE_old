@@ -1,6 +1,8 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include "Vector3D.h"
+
 class Matrix
 {
 
@@ -31,6 +33,8 @@ public:
     int nRows(){return m_;}
     int nCols(){return n_;}
     int nElements(){return nElements_;}
+
+    void addVector3DToRow(const Vector3D& vec, int i, int j);
 
     //- Solution methods (lapacke wrappers)
 
