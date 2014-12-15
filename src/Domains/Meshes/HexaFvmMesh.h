@@ -20,21 +20,30 @@ private:
 
     Array3D<Point3D> cellCenters_;
     Array3D<double> cellVolumes_;
+
     Array3D<Point3D> faceCentersI_;
     Array3D<Point3D> faceCentersJ_;
     Array3D<Point3D> faceCentersK_;
-    Array3D<Vector3D> faceNormalsI_;
-    Array3D<Vector3D> faceNormalsJ_;
-    Array3D<Vector3D> faceNormalsK_;
-    //Array3D<Vector3D> distanceVectorsI_;
-    //Array3D<Vector3D> distanceVectorsJ_;
-    //Array3D<Vector3D> distanceVectorsK_;
     Array3D<double> faceAreasI_;
     Array3D<double> faceAreasJ_;
     Array3D<double> faceAreasK_;
-    //Array3D<double> cellDistancesI_;
-    //Array3D<double> cellDistancesJ_;
-    //Array3D<double> cellDistancesK_;
+    Array3D<Vector3D> faceNormalsI_;
+    Array3D<Vector3D> faceNormalsJ_;
+    Array3D<Vector3D> faceNormalsK_;
+
+    Array3D<Vector3D> cellToCellDistanceVectorsI_;
+    Array3D<Vector3D> cellToCellDistanceVectorsJ_;
+    Array3D<Vector3D> cellToCellDistanceVectorsK_;
+    Array3D<double> cellToCellDistancesI_;
+    Array3D<double> cellToCellDistancesJ_;
+    Array3D<double> cellToCellDistancesK_;
+
+    Array3D<Vector3D> cellToFaceDistanceVectorsI_;
+    Array3D<Vector3D> cellToFaceDistanceVectorsJ_;
+    Array3D<Vector3D> cellToFaceDistanceVectorsK_;
+    Array3D<double> cellToFaceDistancesI_;
+    Array3D<double> cellToFaceDistancesJ_;
+    Array3D<double> cellToFaceDistancesK_;
 
     //- For accessing a field pointer by name
 
@@ -50,11 +59,6 @@ public:
     std::vector< Field<double> > scalarFields;
     std::vector< Field<Vector3D> > vectorFields;
 
-    //- Flux fields
-
-    std::vector < Field<double> > scalarFluxFieldsI, scalarFluxFieldsJ, scalarFluxFieldsK;
-    std::vector < Field<Vector3D> > vectorFluxFieldsI, vectorFluxFieldsJ, vectorFluxFieldsK;
-
     //- Initialization
 
     void initialize(Input &input);
@@ -64,8 +68,8 @@ public:
 
     //- Access
 
-    Field<double>* findScalarField(std::string fieldName);
-    Field<Vector3D>* findVectorField(std::string fieldName);
+    Field<double>& findScalarField(std::string fieldName);
+    Field<Vector3D>& findVectorField(std::string fieldName);
 
     Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
     double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }
@@ -81,18 +85,18 @@ public:
     double faceAreaS(int i, int j, int k){ return faceAreasJ_(i, j, k); }
     double faceAreaT(int i, int j, int k){ return faceAreasK_(i, j, k + 1); }
     double faceAreaB(int i, int j, int k){ return faceAreasK_(i, j, k); }
-    /* Vector3D nesE(int i, int j, int k){ return distanceVectorsI_(i + 1, j, k); }
-    Vector3D nesW(int i, int j, int k){ return distanceVectorsI_(i, j, k); }
-    Vector3D nesN(int i, int j, int k){ return distanceVectorsJ_(i, j + 1, k); }
-    Vector3D nesS(int i, int j, int k){ return distanceVectorsJ_(i, j, k); }
-    Vector3D nesT(int i, int j, int k){ return distanceVectorsK_(i, j, k + 1); }
-    Vector3D nesB(int i, int j, int k){ return distanceVectorsK_(i, j, k); }
-    double cellDistanceE(int i, int j, int k){ return cellDistancesI_(i + 1, j, k); }
-    double cellDistanceW(int i, int j, int k){ return cellDistancesI_(i, j, k); }
-    double cellDistanceN(int i, int j, int k){ return cellDistancesJ_(i, j + 1, k); }
-    double cellDistanceS(int i, int j, int k){ return cellDistancesJ_(i, j, k); }
-    double cellDistanceT(int i, int j, int k){ return cellDistancesK_(i, j, k + 1); }
-    double cellDistanceB(int i, int j, int k){ return cellDistancesK_(i, j, k); } */
+    Vector3D nesE(int i, int j, int k){ return cellToCellDistanceVectorsI_(i, j, k); }
+    Vector3D nesW(int i, int j, int k){ return cellToCellDistanceVectorsI_(i - 1, j, k); }
+    Vector3D nesN(int i, int j, int k){ return cellToCellDistanceVectorsJ_(i, j, k); }
+    Vector3D nesS(int i, int j, int k){ return cellToCellDistanceVectorsJ_(i, j - 1, k); }
+    Vector3D nesT(int i, int j, int k){ return cellToCellDistanceVectorsK_(i, j, k); }
+    Vector3D nesB(int i, int j, int k){ return cellToCellDistanceVectorsK_(i, j, k - 1); }
+    double cellDistanceE(int i, int j, int k){ return cellToCellDistancesI_(i, j, k); }
+    double cellDistanceW(int i, int j, int k){ return cellToCellDistancesI_(i - 1, j, k); }
+    double cellDistanceN(int i, int j, int k){ return cellToCellDistancesJ_(i, j, k); }
+    double cellDistanceS(int i, int j, int k){ return cellToCellDistancesJ_(i, j - 1, k); }
+    double cellDistanceT(int i, int j, int k){ return cellToCellDistancesK_(i, j, k); }
+    double cellDistanceB(int i, int j, int k){ return cellToCellDistancesK_(i, j, k - 1); }
 
     int nCellsI(){ return cellCenters_.sizeI(); }
     int nCellsJ(){ return cellCenters_.sizeJ(); }

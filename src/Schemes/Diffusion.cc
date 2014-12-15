@@ -13,9 +13,6 @@ void Diffusion::setMeshPointer(HexaFvmMesh *mesh)
 
     FvScheme::setMeshPointer(mesh);
 
-    phi_ = mesh_->findScalarField("phi");
-    mu_ = mesh_->findVectorField("mu");
-
     lsMats_.allocate(mesh->nCellsI(), mesh->nCellsJ(), mesh->nCellsK());
 
     for(k = 0; k < lsMats_.sizeK(); ++k)

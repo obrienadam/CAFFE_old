@@ -47,6 +47,55 @@ void HexaFvmMesh::initialize(Input &input)
         } // end for j
     } // end for k
 
+    // Allocate the cell to cell distance vectors and distaces
+
+    cellToCellDistanceVectorsI_.allocate(nI - 1, nJ, nK);
+    cellToCellDistanceVectorsJ_.allocate(nI, nJ - 1, nK);
+    cellToCellDistanceVectorsK_.allocate(nI, nJ, nK - 1);
+    cellToCellDistancesI_.allocate(nI - 1, nJ, nK);
+    cellToCellDistancesJ_.allocate(nI, nJ - 1, nK);
+    cellToCellDistancesK_.allocate(nI, nJ, nK - 1);
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            for(i = 0; i < nI; ++i)
+            {
+
+                if (i < nI - 1)
+                {
+
+                    tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
+                    cellToCellDistanceVectorsI_(i, j, k) = tmpVec.unitVector();
+                    cellToCellDistancesI_(i, j, k) = tmpVec.mag();
+
+                }
+
+                if (j < nJ - 1)
+                {
+
+                    tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
+                    cellToCellDistanceVectorsJ_(i, j, k) = tmpVec.unitVector();
+                    cellToCellDistancesJ_(i, j, k) = tmpVec.mag();
+
+                }
+
+                if (k < nK - 1)
+                {
+
+                    tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
+                    cellToCellDistanceVectorsK_(i, j, k) = tmpVec.unitVector();
+                    cellToCellDistancesK_(i, j, k) = tmpVec.mag();
+
+                }
+
+            } // end for i
+        } // end for j
+    } // end for k
+
     // Initialize the I-direction faces (normals alligned with in the I-direction)
 
     nI = nodes_.sizeI();
@@ -150,40 +199,18 @@ void HexaFvmMesh::initialize(Input &input)
     nK = cellCenters_.sizeK();
 
     for(i = 0; i < scalarFields.size(); ++i)
-           scalarFields[i].allocate(nI, nJ, nK);
+    {
+
+        scalarFields[i].resize(nI, nJ, nK);
+
+    }
 
     for(i = 0; i < vectorFields.size(); ++i)
-        vectorFields[i].allocate(nI, nJ, nK);
+    {
 
-    nI = faceCentersI_.sizeI();
-    nJ = faceCentersI_.sizeJ();
-    nK = faceCentersI_.sizeK();
+        vectorFields[i].resize(nI, nJ, nK);
 
-    for(i = 0; i < scalarFluxFieldsI.size(); ++i)
-        scalarFluxFieldsI[i].allocate(nI, nJ, nK);
-
-    for(i = 0; i < vectorFluxFieldsI.size(); ++i)
-        vectorFluxFieldsI[i].allocate(nI, nJ, nK);
-
-    nI = faceCentersJ_.sizeI();
-    nJ = faceCentersJ_.sizeJ();
-    nK = faceCentersJ_.sizeK();
-
-    for(i = 0; i < scalarFluxFieldsJ.size(); ++i)
-        scalarFluxFieldsJ[i].allocate(nI, nJ, nK);
-
-    for(i = 0; i < vectorFluxFieldsJ.size(); ++i)
-        vectorFluxFieldsJ[i].allocate(nI, nJ, nK);
-
-    nI = faceCentersK_.sizeI();
-    nJ = faceCentersK_.sizeJ();
-    nK = faceCentersK_.sizeK();
-
-    for(i = 0; i < scalarFluxFieldsK.size(); ++i)
-        scalarFluxFieldsK[i].allocate(nI, nJ, nK);
-
-    for(i = 0; i < vectorFluxFieldsK.size(); ++i)
-        vectorFluxFieldsK[i].allocate(nI, nJ, nK);
+    }
 
     Output::printToScreen("HexaFvmMesh", "Initialization complete.");
 
@@ -194,21 +221,6 @@ void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
 
     scalarFields.push_back(Field<double>(scalarFieldName, type));
     scalarFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
-
-    if(type == CONSERVED)
-    {
-
-        scalarFluxFieldsI.push_back(Field<double>(scalarFieldName, type));
-        scalarFluxFieldsI.back().allocate(faceCentersI_.sizeI(), faceCentersI_.sizeJ(), faceCentersI_.sizeK());
-
-        scalarFluxFieldsJ.push_back(Field<double>(scalarFieldName, type));
-        scalarFluxFieldsJ.back().allocate(faceCentersJ_.sizeI(), faceCentersJ_.sizeJ(), faceCentersJ_.sizeK());
-
-        scalarFluxFieldsK.push_back(Field<double>(scalarFieldName, type));
-        scalarFluxFieldsK.back().allocate(faceCentersK_.sizeI(), faceCentersK_.sizeJ(), faceCentersK_.sizeK());
-
-    }
-
     scalarFieldRegistry_[scalarFieldName] = &scalarFields.back();
 
 }
@@ -218,26 +230,11 @@ void HexaFvmMesh::addVectorField(std::string vectorFieldName, int type)
 
     vectorFields.push_back(Field<Vector3D>(vectorFieldName));
     vectorFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
-
-    if(type == CONSERVED)
-    {
-
-        vectorFluxFieldsI.push_back(Field<Vector3D>(vectorFieldName, type));
-        vectorFluxFieldsI.back().allocate(faceCentersI_.sizeI(), faceCentersI_.sizeJ(), faceCentersI_.sizeK());
-
-        vectorFluxFieldsJ.push_back(Field<Vector3D>(vectorFieldName, type));
-        vectorFluxFieldsJ.back().allocate(faceCentersJ_.sizeI(), faceCentersJ_.sizeJ(), faceCentersJ_.sizeK());
-
-        vectorFluxFieldsK.push_back(Field<Vector3D>(vectorFieldName, type));
-        vectorFluxFieldsK.back().allocate(faceCentersK_.sizeI(), faceCentersK_.sizeJ(), faceCentersK_.sizeK());
-
-    }
-
     vectorFieldRegistry_[vectorFieldName] = &vectorFields.back();
 
 }
 
-Field<double>* HexaFvmMesh::findScalarField(std::string fieldName)
+Field<double>& HexaFvmMesh::findScalarField(std::string fieldName)
 {
 
     if(scalarFieldRegistry_.find(fieldName) == scalarFieldRegistry_.end())
@@ -247,11 +244,11 @@ Field<double>* HexaFvmMesh::findScalarField(std::string fieldName)
 
     }
 
-    return scalarFieldRegistry_[fieldName];
+    return *scalarFieldRegistry_[fieldName];
 
 }
 
-Field<Vector3D>* HexaFvmMesh::findVectorField(std::string fieldName)
+Field<Vector3D>& HexaFvmMesh::findVectorField(std::string fieldName)
 {
 
     if(vectorFieldRegistry_.find(fieldName) == vectorFieldRegistry_.end())
@@ -261,7 +258,7 @@ Field<Vector3D>* HexaFvmMesh::findVectorField(std::string fieldName)
 
     }
 
-    return vectorFieldRegistry_[fieldName];
+    return *vectorFieldRegistry_[fieldName];
 
 }
 

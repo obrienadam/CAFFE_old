@@ -12,11 +12,6 @@ class Diffusion : public FvScheme
 
 private:
 
-    //- Pointers to the fields needed for the solution
-
-    Field<double>* phi_;
-    Field<Vector3D>* mu_;
-
     //- Misc stuff
 
     Array3D<Matrix> lsMats_;
