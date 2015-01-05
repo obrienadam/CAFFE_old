@@ -1,6 +1,8 @@
 #ifndef LINEAR_ADVECTION_H
 #define LINEAR_ADVECTION_H
 
+#include <string>
+
 #include "FvScheme.h"
 #include "Field.h"
 #include "Vector3D.h"
@@ -10,12 +12,13 @@ class LinearAdvection : public FvScheme
 
 private:
 
-    Field<double>* phi_;
-    Field<Vector3D>* a_;
+    std::string velocityFieldName_;
 
 public:
 
-    void setMeshPointer(HexaFvmMesh* mesh);
+    LinearAdvection();
+
+    void initialize(HexaFvmMesh &mesh, std::string conservedFieldName = "phi", std::string velocityFieldName = "a");
 
 };
 

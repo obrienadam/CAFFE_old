@@ -24,7 +24,7 @@ int main(int argc, const char* argv[])
         Solver solver;
         HexaFvmMesh mesh;
         Diffusion diffusion;
-        LinearAdvection linearadvection;
+        LinearAdvection linearAdvection;
 
         mesh.addScalarField("phi", CONSERVED);
         mesh.addVectorField("mu", AUXILLARY);
@@ -33,8 +33,8 @@ int main(int argc, const char* argv[])
         // Initialize objects
 
         runControl.initializeCase(solver, mesh);
-        diffusion.setMeshPointer(&mesh);
-        linearadvection.setMeshPointer(&mesh);
+        diffusion.initialize(mesh);
+        linearAdvection.initialize(mesh);
 
         mesh.writeDebug();
 

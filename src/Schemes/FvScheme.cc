@@ -2,13 +2,16 @@
 #include "Output.h"
 
 FvScheme::FvScheme()
+    :
+      conservedFieldName_("phi")
 {
 
 }
 
-void FvScheme::setMeshPointer(HexaFvmMesh *mesh)
+void FvScheme::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 {
 
-    mesh_ = mesh;
+    meshPtr_ = &mesh;
+    conservedFieldName_ = conservedFieldName;
 
 }

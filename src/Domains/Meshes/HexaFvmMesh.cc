@@ -2,6 +2,8 @@
 #include "Geometry.h"
 #include "Output.h"
 
+// ************* Private Methods *************
+
 void HexaFvmMesh::initializeCells()
 {
 
@@ -271,6 +273,8 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     } // end for k
 
 }
+
+// ************* Public Methods *************
 
 void HexaFvmMesh::initialize(Input &input)
 {
@@ -556,6 +560,8 @@ void HexaFvmMesh::writeDebug()
 
         } // end for j
     } // end for k
+
+
 
     debugFout.close();
 

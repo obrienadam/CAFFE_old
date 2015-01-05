@@ -5,7 +5,7 @@
 
 #include "Array3D.h"
 
-enum{CONSERVED, AUXILLARY};
+enum{CONSERVED, AUXILLARY, PRIMITIVE};
 
 template <class T>
 class Field : public Array3D<T>

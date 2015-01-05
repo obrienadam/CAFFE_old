@@ -1,8 +1,15 @@
 #include "LinearAdvection.h"
 
-void LinearAdvection::setMeshPointer(HexaFvmMesh *mesh)
+LinearAdvection::LinearAdvection()
 {
 
-    FvScheme::setMeshPointer(mesh);
+}
+
+void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldName, std::string velocityFieldName)
+{
+
+    FvScheme::initialize(mesh, conservedFieldName);
+
+    velocityFieldName_ = velocityFieldName;
 
 }

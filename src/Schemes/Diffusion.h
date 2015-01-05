@@ -20,8 +20,6 @@ public:
 
     Diffusion();
 
-    void setMeshPointer(HexaFvmMesh* mesh);
-
 };
 
 #endif

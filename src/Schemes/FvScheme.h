@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 
+#include "Field.h"
 #include "HexaFvmMesh.h"
 
 class FvScheme
@@ -11,13 +12,15 @@ class FvScheme
 
 protected:
 
-    HexaFvmMesh* mesh_;
+    std::string conservedFieldName_;
+    HexaFvmMesh* meshPtr_;
+    Field<double> conservedFieldDerivatives_;
 
 public:
 
     FvScheme();
 
-    virtual void setMeshPointer(HexaFvmMesh* mesh);
+    virtual void initialize(HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
 
 };
 
