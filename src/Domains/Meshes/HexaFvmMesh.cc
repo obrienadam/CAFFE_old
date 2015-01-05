@@ -2,22 +2,13 @@
 #include "Geometry.h"
 #include "Output.h"
 
-void HexaFvmMesh::initialize(Input &input)
+void HexaFvmMesh::initializeCells()
 {
 
-    uint i, j, k, nI, nJ, nK;
+    int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
     Point3D tmpPoints[8];
-    Vector3D tmpVec;
 
-    // Initialize the mesh nodes
-
-    StructuredMesh::initialize(input);
-
-    // Initialize the cells
-
-    nI = nodes_.sizeI() - 1;
-    nJ = nodes_.sizeJ() - 1;
-    nK = nodes_.sizeK() - 1;
+    // Allocate cell centers and their volumes
 
     cellCenters_.allocate(nI, nJ, nK);
     cellVolumes_.allocate(nI, nJ, nK);
@@ -46,6 +37,14 @@ void HexaFvmMesh::initialize(Input &input)
             } // end for i
         } // end for j
     } // end for k
+
+}
+
+void HexaFvmMesh::initializeCellToCellParameters()
+{
+
+    int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
+    Vector3D tmpVec;
 
     // Allocate the cell to cell distance vectors and distaces
 
@@ -95,6 +94,14 @@ void HexaFvmMesh::initialize(Input &input)
             } // end for i
         } // end for j
     } // end for k
+
+}
+
+void HexaFvmMesh::initializeFaces()
+{
+
+    int nI, nJ, nK, i, j, k;
+    Point3D tmpPoints[4];
 
     // Initialize the I-direction faces (normals alligned with in the I-direction)
 
@@ -191,6 +198,95 @@ void HexaFvmMesh::initialize(Input &input)
             } // end for i
         } // end for j
     } // end for k
+
+}
+
+void HexaFvmMesh::initializeCellToFaceParameters()
+{
+
+    int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
+    Vector3D tmpVec;
+
+    cellToFaceDistanceVectorsE_.allocate(nI, nJ, nK);
+    cellToFaceDistanceVectorsW_.allocate(nI, nJ, nK);
+    cellToFaceDistanceVectorsN_.allocate(nI, nJ, nK);
+    cellToFaceDistanceVectorsS_.allocate(nI, nJ, nK);
+    cellToFaceDistanceVectorsT_.allocate(nI, nJ, nK);
+    cellToFaceDistanceVectorsB_.allocate(nI, nJ, nK);
+
+    cellToFaceDistancesE_.allocate(nI, nJ, nK);
+    cellToFaceDistancesW_.allocate(nI, nJ, nK);
+    cellToFaceDistancesN_.allocate(nI, nJ, nK);
+    cellToFaceDistancesS_.allocate(nI, nJ, nK);
+    cellToFaceDistancesT_.allocate(nI, nJ, nK);
+    cellToFaceDistancesB_.allocate(nI, nJ, nK);
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            for(i = 0; i < nI; ++i)
+            {
+
+                // East cell to face parameters
+
+                tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
+                cellToFaceDistanceVectorsE_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesE_(i, j, k) = tmpVec.mag();
+
+                // West cell to face parameters
+
+                tmpVec = cellCenters_(i, j, k) - faceCentersI_(i, j, k);
+                cellToFaceDistanceVectorsW_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
+
+                // North cell to face parameters
+
+                tmpVec = faceCentersJ_(i, j + 1, k) - cellCenters_(i, j, k);
+                cellToFaceDistanceVectorsN_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesN_(i, j, k) = tmpVec.mag();
+
+                // South cell to face parameters
+
+                tmpVec = cellCenters_(i, j, k) - faceCentersJ_(i, j, k);
+                cellToFaceDistanceVectorsS_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
+
+                // Top cell to face parameters
+
+                tmpVec = faceCentersK_(i, j, k + 1) - cellCenters_(i, j, k);
+                cellToFaceDistanceVectorsT_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesT_(i, j, k) = tmpVec.mag();
+
+                // Bottom cell to face parameters
+
+                tmpVec = cellCenters_(i, j, k) - faceCentersK_(i, j, k);
+                cellToFaceDistanceVectorsB_(i, j, k) = tmpVec.unitVector();
+                cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
+
+            } // end for i
+        } // end for j
+    } // end for k
+
+}
+
+void HexaFvmMesh::initialize(Input &input)
+{
+
+    uint nI, nJ, nK, i;
+
+    // Initialize the mesh nodes
+
+    StructuredMesh::initialize(input);
+
+    // Initialize the finite volume mesh
+
+    initializeCells();
+    initializeCellToCellParameters();
+    initializeFaces();
+    initializeCellToFaceParameters();
 
     // All fields must now be reallocated
 

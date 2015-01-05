@@ -149,6 +149,13 @@ Vector3D operator-(Vector3D lhs, const Vector3D& rhs)
 
 }
 
+Vector3D operator-(const Vector3D& rhs)
+{
+
+    return Vector3D(-rhs.x, -rhs.y, -rhs.z);
+
+}
+
 Vector3D operator*(Vector3D lhs, double rhs)
 {
 

@@ -43,6 +43,7 @@ class Vector3D
 
 Vector3D operator+(Vector3D lhs, const Vector3D& rhs);
 Vector3D operator-(Vector3D lhs, const Vector3D& rhs);
+Vector3D operator-(const Vector3D& rhs);
 Vector3D operator*(Vector3D lhs, double rhs);
 Vector3D operator*(double lhs, Vector3D rhs);
 Vector3D operator/(Vector3D lhs, double rhs);
