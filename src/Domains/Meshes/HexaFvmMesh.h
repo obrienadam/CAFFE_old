@@ -51,11 +51,6 @@ private:
     Array3D<double> cellToFaceDistancesT_;
     Array3D<double> cellToFaceDistancesB_;
 
-    //- For accessing a field pointer by name
-
-    std::map< std::string, Field<double>* > scalarFieldRegistry_;
-    std::map< std::string, Field<Vector3D>* > vectorFieldRegistry_;
-
     //- Private helper methods
 
     void initializeCells();
@@ -81,8 +76,8 @@ public:
 
     //- Access
 
-    Field<double>& findScalarField(std::string fieldName);
-    Field<Vector3D>& findVectorField(std::string fieldName);
+    Field<double>& findScalarField(const std::string &fieldName);
+    Field<Vector3D>& findVectorField(const std::string &fieldName);
 
     Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
     double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }

@@ -319,46 +319,58 @@ void HexaFvmMesh::initialize(Input &input)
 void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
 {
 
-    scalarFields.push_back(Field<double>(scalarFieldName, type));
-    scalarFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
-    scalarFieldRegistry_[scalarFieldName] = &scalarFields.back();
+    Field<double> newScalarField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), scalarFieldName, type);
+    scalarFields.push_back(newScalarField);
 
 }
 
 void HexaFvmMesh::addVectorField(std::string vectorFieldName, int type)
 {
 
-    vectorFields.push_back(Field<Vector3D>(vectorFieldName));
-    vectorFields.back().allocate(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK());
-    vectorFieldRegistry_[vectorFieldName] = &vectorFields.back();
+    Field<Vector3D> newVectorField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), vectorFieldName, type);
+    vectorFields.push_back(newVectorField);
 
 }
 
-Field<double>& HexaFvmMesh::findScalarField(std::string fieldName)
+Field<double>& HexaFvmMesh::findScalarField(const std::string& fieldName)
 {
 
-    if(scalarFieldRegistry_.find(fieldName) == scalarFieldRegistry_.end())
+    int i, end(scalarFields.size());
+
+    for(i = 0; i < end; ++i)
     {
 
-        Output::raiseException("HexaFvmMesh", "findScalarField", "field \"" + fieldName + "\" not found.");
+        if(fieldName == scalarFields[i].name)
+            return scalarFields[i];
 
     }
 
-    return *scalarFieldRegistry_[fieldName];
+    Output::raiseException("HexaFvmMesh", "findScalarField", "cannot find field \"" + fieldName + "\".");
+
+    // return just to suppress compiler warning
+
+    return scalarFields[end];
 
 }
 
-Field<Vector3D>& HexaFvmMesh::findVectorField(std::string fieldName)
+Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
 {
 
-    if(vectorFieldRegistry_.find(fieldName) == vectorFieldRegistry_.end())
+    int i, end(vectorFields.size());
+
+    for(i = 0; i < end; ++i)
     {
 
-        Output::raiseException("HexaFvmMesh", "findVectorField", "field \"" + fieldName + "\" not found.");
+        if(fieldName == vectorFields[i].name)
+            return vectorFields[i];
 
     }
 
-    return *vectorFieldRegistry_[fieldName];
+    Output::raiseException("HexaFvmMesh", "findVectorField", "cannot find field \"" + fieldName + "\".");
+
+    // return just to suppress compiler warning
+
+    return vectorFields[end];
 
 }
 

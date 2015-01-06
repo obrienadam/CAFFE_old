@@ -7,7 +7,7 @@ template <class T>
 class Array3D
 {
 
-private:
+protected:
 
     int nI_, nJ_, nK_, n_;
     T*** data_;
