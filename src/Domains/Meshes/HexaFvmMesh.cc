@@ -571,6 +571,9 @@ void HexaFvmMesh::writeDebug()
             debugFout << endl;
 
         } // end for j
+
+        debugFout << endl;
+
     } // end for k
 
 

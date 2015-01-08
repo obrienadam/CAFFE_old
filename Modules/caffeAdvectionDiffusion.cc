@@ -39,7 +39,12 @@ int main(int argc, const char* argv[])
 
         // Set boundaries
 
-        mesh.findScalarField("phi").setAllBoundaries(ZERO_GRADIENT, FIXED, FIXED, FIXED, FIXED, FIXED);
+        mesh.findScalarField("phi").setAllBoundaries(ZERO_GRADIENT, 0.,
+                                                     FIXED, 1.,
+                                                     FIXED, 0.,
+                                                     FIXED, 0.,
+                                                     FIXED, 0.,
+                                                     FIXED, 0.);
 
         mesh.writeDebug();
 

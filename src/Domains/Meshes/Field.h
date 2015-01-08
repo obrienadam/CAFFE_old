@@ -31,6 +31,15 @@ private:
     Array2D<BoundaryPatch> topBoundaryPatch_;
     Array2D<BoundaryPatch> bottomBoundaryPatch_;
 
+    //- Boundary fields
+
+    Array2D<T> eastBoundaryField_;
+    Array2D<T> westBoundaryField_;
+    Array2D<T> northBoundaryField_;
+    Array2D<T> southBoundaryField_;
+    Array2D<T> topBoundaryField_;
+    Array2D<T> bottomBoundaryField_;
+
 public:
 
     Field(std::string name = "UnnamedField", int type = AUXILLARY);
@@ -55,19 +64,19 @@ public:
 
     //- Input
 
-    void setAllBoundaries(BoundaryPatch eastBoundaryType,
-                          BoundaryPatch westBoundaryType,
-                          BoundaryPatch northBoundaryType,
-                          BoundaryPatch southBoundaryType,
-                          BoundaryPatch topBoundaryType,
-                          BoundaryPatch bottomBoundaryType);
+    void setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
+                          BoundaryPatch westBoundaryType, T westBoundaryValue,
+                          BoundaryPatch northBoundaryType, T northBoundaryValue,
+                          BoundaryPatch southBoundaryType, T southBoundaryValue,
+                          BoundaryPatch topBoundaryType, T topBoundaryValue,
+                          BoundaryPatch bottomBoundaryType, T bottomBoundaryValue);
 
-    void setEastBoundary(BoundaryPatch boundaryType);
-    void setWestBoundary(BoundaryPatch boundaryType);
-    void setNorthBoundary(BoundaryPatch BoundaryType);
-    void setSouthBoundary(BoundaryPatch BoundaryType);
-    void setTopBoundary(BoundaryPatch BoundaryType);
-    void setBottomBoundary(BoundaryPatch BoundaryType);
+    void setEastBoundary(BoundaryPatch boundaryType, T boundaryValue);
+    void setWestBoundary(BoundaryPatch boundaryType, T boundaryValue);
+    void setNorthBoundary(BoundaryPatch BoundaryType, T boundaryValue);
+    void setSouthBoundary(BoundaryPatch BoundaryType, T boundaryValue);
+    void setTopBoundary(BoundaryPatch BoundaryType, T boundaryValue);
+    void setBottomBoundary(BoundaryPatch BoundaryType, T boundaryValue);
 
     //- Debug
 

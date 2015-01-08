@@ -110,32 +110,33 @@ void Field<T>::print()
 }
 
 template<class T>
-void Field<T>::setAllBoundaries(BoundaryPatch eastBoundaryType,
-                                BoundaryPatch westBoundaryType,
-                                BoundaryPatch northBoundaryType,
-                                BoundaryPatch southBoundaryType,
-                                BoundaryPatch topBoundaryType,
-                                BoundaryPatch bottomBoundaryType)
+void Field<T>::setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
+                                BoundaryPatch westBoundaryType, T westBoundaryValue,
+                                BoundaryPatch northBoundaryType, T northBoundaryValue,
+                                BoundaryPatch southBoundaryType, T southBoundaryValue,
+                                BoundaryPatch topBoundaryType, T topBoundaryValue,
+                                BoundaryPatch bottomBoundaryType, T bottomBoundaryValue)
 {
 
-    setEastBoundary(eastBoundaryType);
-    setWestBoundary(westBoundaryType);
-    setNorthBoundary(northBoundaryType);
-    setSouthBoundary(southBoundaryType);
-    setTopBoundary(topBoundaryType);
-    setBottomBoundary(bottomBoundaryType);
+    setEastBoundary(eastBoundaryType, eastBoundaryValue);
+    setWestBoundary(westBoundaryType, westBoundaryValue);
+    setNorthBoundary(northBoundaryType, northBoundaryValue);
+    setSouthBoundary(southBoundaryType, southBoundaryValue);
+    setTopBoundary(topBoundaryType, topBoundaryValue);
+    setBottomBoundary(bottomBoundaryType, bottomBoundaryValue);
 
     Output::printToScreen("Field", "boundaries for field \"" + name + "\" have been set.");
 
 }
 
 template<class T>
-void Field<T>::setEastBoundary(BoundaryPatch boundaryType)
+void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int j, k;
 
     eastBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    eastBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -144,6 +145,7 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType)
         {
 
             eastBoundaryPatch_(j, k) = boundaryType;
+            eastBoundaryField_(j, k) = boundaryValue;
 
         } // end for j
     } //  end for k
@@ -151,12 +153,13 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType)
 }
 
 template<class T>
-void Field<T>::setWestBoundary(BoundaryPatch boundaryType)
+void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int j, k;
 
     westBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    westBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -165,6 +168,7 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType)
         {
 
             westBoundaryPatch_(j, k) = boundaryType;
+            westBoundaryField_(j, k) = boundaryValue;
 
         } // end for j
     } //  end for k
@@ -172,12 +176,13 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType)
 }
 
 template<class T>
-void Field<T>::setNorthBoundary(BoundaryPatch boundaryType)
+void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, k;
 
     northBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    northBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -186,6 +191,7 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType)
         {
 
             northBoundaryPatch_(i, k) = boundaryType;
+            northBoundaryField_(i, k) = boundaryValue;
 
         } // end for i
     } //  end for k
@@ -193,12 +199,13 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType)
 }
 
 template<class T>
-void Field<T>::setSouthBoundary(BoundaryPatch boundaryType)
+void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, k;
 
     southBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    southBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -207,6 +214,7 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType)
         {
 
             southBoundaryPatch_(i, k) = boundaryType;
+            southBoundaryField_(i, k) = boundaryValue;
 
         } // end for i
     } //  end for k
@@ -214,12 +222,13 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType)
 }
 
 template<class T>
-void Field<T>::setTopBoundary(BoundaryPatch boundaryType)
+void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, j;
 
     topBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+    topBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
 
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
@@ -228,6 +237,7 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType)
         {
 
             topBoundaryPatch_(i, j) = boundaryType;
+            topBoundaryField_(i, j) = boundaryValue;
 
         } // end for i
     } //  end for j
@@ -235,12 +245,13 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType)
 }
 
 template<class T>
-void Field<T>::setBottomBoundary(BoundaryPatch boundaryType)
+void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, j;
 
     bottomBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+    bottomBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
 
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
@@ -249,6 +260,7 @@ void Field<T>::setBottomBoundary(BoundaryPatch boundaryType)
         {
 
             bottomBoundaryPatch_(i, j) = boundaryType;
+            bottomBoundaryField_(i, j) = boundaryValue;
 
         } // end for i
     } //  end for j
