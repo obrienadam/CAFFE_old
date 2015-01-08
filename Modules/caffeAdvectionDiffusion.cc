@@ -27,14 +27,15 @@ int main(int argc, const char* argv[])
         LinearAdvection linearAdvection;
 
         mesh.addScalarField("phi", CONSERVED);
-        mesh.addVectorField("mu", AUXILLARY);
-        mesh.addVectorField("a", AUXILLARY);
+        mesh.addScalarField("mu", AUXILLARY);
+        mesh.addVectorField("v", AUXILLARY);
+        mesh.addScalarField("rho", AUXILLARY);
 
         // Initialize objects
 
         runControl.initializeCase(solver, mesh);
-        diffusion.initialize(mesh);
-        linearAdvection.initialize(mesh);
+        diffusion.initialize(mesh, "phi");
+        linearAdvection.initialize(mesh, "phi", "v");
 
         mesh.writeDebug();
 

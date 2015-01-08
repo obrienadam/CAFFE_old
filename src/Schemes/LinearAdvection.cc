@@ -13,3 +13,9 @@ void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldNa
     velocityFieldName_ = velocityFieldName;
 
 }
+
+
+void LinearAdvection::computeSemiDiscreteForm()
+{
+
+}

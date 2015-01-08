@@ -19,6 +19,7 @@ public:
     LinearAdvection();
 
     void initialize(HexaFvmMesh &mesh, std::string conservedFieldName = "phi", std::string velocityFieldName = "a");
+    void computeSemiDiscreteForm();
 
 };
 

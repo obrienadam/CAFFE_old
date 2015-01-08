@@ -1,9 +1,12 @@
+#include <cstdlib>
+
 #include "FvScheme.h"
 #include "Output.h"
 
 FvScheme::FvScheme()
     :
-      conservedFieldName_("phi")
+      conservedFieldName_("phi"),
+      meshPtr_(NULL)
 {
 
 }

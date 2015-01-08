@@ -14,13 +14,13 @@ protected:
 
     std::string conservedFieldName_;
     HexaFvmMesh* meshPtr_;
-    Field<double> conservedFieldDerivatives_;
 
 public:
 
     FvScheme();
 
     virtual void initialize(HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
+    virtual void computeSemiDiscreteForm() = 0;
 
 };
 

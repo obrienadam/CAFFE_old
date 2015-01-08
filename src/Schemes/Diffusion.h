@@ -12,13 +12,12 @@ class Diffusion : public FvScheme
 
 private:
 
-    //- Misc stuff
 
-    Array3D<Matrix> lsMats_;
 
 public:
 
     Diffusion();
+    void computeSemiDiscreteForm();
 
 };
 

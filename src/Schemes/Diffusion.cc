@@ -5,3 +5,10 @@ Diffusion::Diffusion()
 {
 
 }
+
+void Diffusion::computeSemiDiscreteForm()
+{
+
+
+
+}

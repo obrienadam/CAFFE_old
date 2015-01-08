@@ -9,7 +9,6 @@
 #include "Point3D.h"
 #include "Array3D.h"
 
-enum Patch{BOUNDARY, INTERIOR};
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 
 class StructuredMesh : public DomainInterface
@@ -21,13 +20,13 @@ protected:
 
     Array3D<Point3D> nodes_;
 
-    //- Patches used for boundary conditions and communication
-
-    Patch facePatches_[6];
-
     //- File output object
 
     std::ofstream foutRestart_, foutTec360_;
+
+    //- Private helper methods
+
+    void initializeBoundaryMeshes(int nGhostNodes);
 
 public:
 

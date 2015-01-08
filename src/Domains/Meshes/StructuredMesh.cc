@@ -6,12 +6,14 @@
 #include "Output.h"
 #include "InputStringProcessing.h"
 
+// ************* Private Methods *************
+
+// ************* Public Methods *************
+
 StructuredMesh::StructuredMesh()
     :
       name("UnnamedMesh")
 {
-
-    std::fill_n(facePatches_, 6, INTERIOR);
 
 }
 
@@ -108,7 +110,7 @@ void StructuredMesh::initialize(std::string filename)
         else
         {
 
-            throw ("Unrecognized structured mesh dimension \"" + bufferVec[0] + "\".").c_str();
+            Output::raiseException("StructuredMesh", "initialize", "unrecognized structured mesh dimension \"" + bufferVec[0] + "\".");
 
         }
 
@@ -121,7 +123,7 @@ void StructuredMesh::initialize(std::string filename)
     if(nI == 0 || nJ == 0 || nK == 0)
     {
 
-        throw ("One or more structured mesh dimensions were not found in file \"" + filename + "\".").c_str();
+        Output::raiseException("StructuredMesh", "initialize", "one or more structured mesh dimensions was not found in file \"" + filename + "\".");
 
     }
 
