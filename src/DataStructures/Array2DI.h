@@ -35,7 +35,7 @@ template <class T>
 void Array2D<T>::allocate(int nI, int nJ)
 {
   
-    int i, j;
+    int i;
 
     deallocate();
 

@@ -31,11 +31,11 @@ StructuredMesh::~StructuredMesh()
 void StructuredMesh::initialize(Input &input)
 {
 
-    Output::printToScreen("Initializing structured mesh...");
+    Output::printToScreen("StructuredMesh", "Initializing structured mesh...");
 
     initialize(input.inputStrings["domainFile"]);
 
-    Output::printToScreen("Initialization of structured mesh complete.");
+    Output::printToScreen("StructuredMesh", "Initialization of structured mesh complete.");
 
     Output::printToScreen(meshStats());
 

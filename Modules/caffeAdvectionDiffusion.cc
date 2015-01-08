@@ -37,6 +37,10 @@ int main(int argc, const char* argv[])
         diffusion.initialize(mesh, "phi");
         linearAdvection.initialize(mesh, "phi", "v");
 
+        // Set boundaries
+
+        mesh.findScalarField("phi").setAllBoundaries(ZERO_GRADIENT, FIXED, FIXED, FIXED, FIXED, FIXED);
+
         mesh.writeDebug();
 
         // Display a start message and begin the run

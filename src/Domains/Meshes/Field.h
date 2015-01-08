@@ -53,6 +53,22 @@ public:
     T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
     T& fluxB(int i, int j, int k){ return faceFluxesK_(i, j, k); }
 
+    //- Input
+
+    void setAllBoundaries(BoundaryPatch eastBoundaryType,
+                          BoundaryPatch westBoundaryType,
+                          BoundaryPatch northBoundaryType,
+                          BoundaryPatch southBoundaryType,
+                          BoundaryPatch topBoundaryType,
+                          BoundaryPatch bottomBoundaryType);
+
+    void setEastBoundary(BoundaryPatch boundaryType);
+    void setWestBoundary(BoundaryPatch boundaryType);
+    void setNorthBoundary(BoundaryPatch BoundaryType);
+    void setSouthBoundary(BoundaryPatch BoundaryType);
+    void setTopBoundary(BoundaryPatch BoundaryType);
+    void setBottomBoundary(BoundaryPatch BoundaryType);
+
     //- Debug
 
     void print();
