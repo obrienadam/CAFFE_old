@@ -1,7 +1,5 @@
 #include <cstdlib>
 
-#include "Array3D.h"
-
 template <class T>
 Array2D<T>::Array2D()
     :
@@ -95,7 +93,7 @@ T& Array2D<T>::operator()(int i, int j)
 
     if(i < 0 || j < 0 ||
             i >= nI_ || j >= nJ_)
-        throw "Attempted to access element outside the bounds of Array3D.";
+        throw "Attempted to access element outside the bounds of Array2D.";
 
     return data_[i][j];
 

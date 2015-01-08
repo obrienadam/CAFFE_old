@@ -62,7 +62,7 @@ public:
     T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
     T& fluxB(int i, int j, int k){ return faceFluxesK_(i, j, k); }
 
-    //- Input
+    //- Boundary related methods
 
     void setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
                           BoundaryPatch westBoundaryType, T westBoundaryValue,
@@ -77,6 +77,15 @@ public:
     void setSouthBoundary(BoundaryPatch BoundaryType, T boundaryValue);
     void setTopBoundary(BoundaryPatch BoundaryType, T boundaryValue);
     void setBottomBoundary(BoundaryPatch BoundaryType, T boundaryValue);
+
+    void setBoundaryFields();
+
+    void setEastBoundaryField();
+    void setWestBoundaryField();
+    void setNorthBoundaryField();
+    void setSouthBoundaryField();
+    void setTopBoundaryField();
+    void setBottomBoundaryField();
 
     //- Debug
 

@@ -266,3 +266,208 @@ void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
     } //  end for j
 
 }
+
+template<class T>
+void Field<T>::setBoundaryFields()
+{
+
+    setEastBoundaryField();
+    setWestBoundaryField();
+    setNorthBoundaryField();
+    setSouthBoundaryField();
+    setTopBoundaryField();
+    setBottomBoundaryField();
+
+}
+
+template<class T>
+void Field<T>::setEastBoundaryField()
+{
+
+    int j, k, nJ(eastBoundaryField_.sizeI()), nK(eastBoundaryField_.sizeJ()), maxI(Array3D<T>::nI_ - 1);
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            switch(eastBoundaryPatch_(j, k))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                eastBoundaryField_(j, k) = Array3D<T>::data_[maxI][j][k];
+
+                break;
+
+            };
+
+        } // end for j
+    } // end for k
+
+}
+
+template<class T>
+void Field<T>::setWestBoundaryField()
+{
+
+    int j, k, nJ(westBoundaryField_.sizeI()), nK(westBoundaryField_.sizeJ());
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(j = 0; j < nJ; ++j)
+        {
+
+            switch(westBoundaryPatch_(j, k))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                westBoundaryField_(j, k) = Array3D<T>::data_[0][j][k];
+
+                break;
+
+            };
+
+        } // end for j
+    } // end for k
+
+}
+
+template<class T>
+void Field<T>::setNorthBoundaryField()
+{
+
+    int i, k, nI(northBoundaryField_.sizeI()), nK(northBoundaryField_.sizeJ()), maxJ(Array3D<T>::nJ_ - 1);
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(i = 0; i < nI; ++i)
+        {
+
+            switch(northBoundaryPatch_(i, k))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                northBoundaryField_(i, k) = Array3D<T>::data_[i][maxJ][k];
+
+                break;
+
+            };
+
+        } // end for i
+    } // end for k
+
+}
+
+template<class T>
+void Field<T>::setSouthBoundaryField()
+{
+
+    int i, k, nI(southBoundaryField_.sizeI()), nK(southBoundaryField_.sizeJ());
+
+    for(k = 0; k < nK; ++k)
+    {
+
+        for(i = 0; i < nI; ++i)
+        {
+
+            switch(southBoundaryPatch_(i, k))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                southBoundaryField_(i, k) = Array3D<T>::data_[i][0][k];
+
+                break;
+
+            };
+
+        } // end for i
+    } // end for k
+
+}
+
+template<class T>
+void Field<T>::setTopBoundaryField()
+{
+
+    int i, j, nI(topBoundaryField_.sizeI()), nJ(topBoundaryField_.sizeJ()), maxK(Array3D<T>::nK_ - 1);
+
+    for(j = 0; j < nJ; ++j)
+    {
+
+        for(i = 0; i < nI; ++i)
+        {
+
+            switch(topBoundaryPatch_(i, j))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                topBoundaryField_(i, j) = Array3D<T>::data_[i][j][maxK];
+
+                break;
+
+            };
+
+        } // end for i
+    } // end for j
+
+}
+
+template<class T>
+void Field<T>::setBottomBoundaryField()
+{
+
+    int i, j, nI(bottomBoundaryField_.sizeI()), nJ(bottomBoundaryField_.sizeJ());
+
+    for(j = 0; j < nJ; ++j)
+    {
+
+        for(i = 0; i < nI; ++i)
+        {
+
+            switch(bottomBoundaryPatch_(i, j))
+            {
+
+            case FIXED:
+
+                break;
+
+            case ZERO_GRADIENT:
+
+                bottomBoundaryField_(i, j) = Array3D<T>::data_[i][j][0];
+
+                break;
+
+            };
+
+        } // end for i
+    } // end for j
+
+}
