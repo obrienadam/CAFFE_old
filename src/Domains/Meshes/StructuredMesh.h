@@ -9,8 +9,6 @@
 #include "Point3D.h"
 #include "Array3D.h"
 
-enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
-
 class StructuredMesh : public DomainInterface
 {
 

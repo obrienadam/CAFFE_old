@@ -58,7 +58,7 @@ std::string StructuredMesh::meshStats()
           << "Nodes in I direction-> " << nodes_.sizeI() << "\n"
           << "Nodes in J direction-> " << nodes_.sizeJ() << "\n"
           << "Nodes in K direction-> " << nodes_.sizeK() << "\n"
-          << "Nodes total-> " << nodes_.size();
+          << "Nodes total-> " << nodes_.size() << "\n";
 
     return stats.str();
 

@@ -11,6 +11,8 @@
 #include "Point3D.h"
 #include "Field.h"
 
+enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+
 class HexaFvmMesh : public StructuredMesh
 {
 

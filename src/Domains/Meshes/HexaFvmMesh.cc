@@ -381,6 +381,8 @@ void HexaFvmMesh::writeDebug()
     uint i, j, k, nI, nJ, nK;
     ofstream debugFout;
 
+    Output::printToScreen("HexaFvmMesh", "writing a debugging file...");
+
     debugFout.open((name + "_debug" + ".msh").c_str());
 
     debugFout << "HexaFvm Mesh Data:\n";
@@ -579,5 +581,7 @@ void HexaFvmMesh::writeDebug()
 
 
     debugFout.close();
+
+    Output::printToScreen("HexaFvmMesh", "finished writing debugging file.");
 
 }

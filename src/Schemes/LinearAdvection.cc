@@ -14,6 +14,19 @@ void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldNa
 
 }
 
+double LinearAdvection::computeFaceFlux(int i, int j, int k, Face face)
+{
+
+
+
+}
+
+double LinearAdvection::computeTimeDerivative(int i, int j, int k)
+{
+
+
+
+}
 
 void LinearAdvection::computeSemiDiscreteForm()
 {
