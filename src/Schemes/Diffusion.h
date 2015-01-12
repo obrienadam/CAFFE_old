@@ -5,11 +5,16 @@
 #include "Array3D.h"
 #include "Point3D.h"
 #include "Vector3D.h"
+#include "Matrix.h"
 
 class Diffusion : public FvScheme
 {
 
 private:
+
+    //- The matrix containing the least-squares coefficients
+
+    Array3D<Matrix> Als_;
 
 public:
 

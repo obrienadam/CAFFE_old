@@ -240,7 +240,7 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
                 // West cell to face parameters
 
-                tmpVec = cellCenters_(i, j, k) - faceCentersI_(i, j, k);
+                tmpVec = faceCentersI_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceDistanceVectorsW_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
 
@@ -252,7 +252,7 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
                 // South cell to face parameters
 
-                tmpVec = cellCenters_(i, j, k) - faceCentersJ_(i, j, k);
+                tmpVec = faceCentersJ_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceDistanceVectorsS_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
 
@@ -264,7 +264,7 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
                 // Bottom cell to face parameters
 
-                tmpVec = cellCenters_(i, j, k) - faceCentersK_(i, j, k);
+                tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceDistanceVectorsB_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
 
