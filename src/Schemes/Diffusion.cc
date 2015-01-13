@@ -1,6 +1,44 @@
 #include "Diffusion.h"
 #include "Output.h"
 
+// ************* Private Methods *************
+
+void Diffusion::computeCellCenteredGradients()
+{
+
+    int i, j, k, nCellsI(gradPhi_.sizeI()), nCellsJ(gradPhi_.sizeJ()), nCellsK(gradPhi_.sizeK());
+    Field<double>& phiField = *phiFieldPtr_;
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+
+        for(j = 0; j < nCellsJ; ++j)
+        {
+
+            for(i = 0; i < nCellsI; ++i)
+            {
+
+                bls_(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
+                bls_(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
+                bls_(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
+                bls_(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
+                bls_(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
+                bls_(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
+
+                xls_ = solveLeastSquares(Als_(i, j, k), bls_);
+
+                gradPhi_(i, j, k).x = xls_(0, 0);
+                gradPhi_(i, j, k).y = xls_(1, 0);
+                gradPhi_(i, j, k).z = xls_(2, 0);
+
+            } // end for i
+        } // end for j
+    } // end for k
+
+}
+
+// ************* Public Methods *************
+
 Diffusion::Diffusion()
 {
 
@@ -9,9 +47,7 @@ Diffusion::Diffusion()
 Diffusion::~Diffusion()
 {
 
-    // This prevents the destructor from being called on the original object. A little bit shady...
 
-    phiField = Field<double>(0., 0., 0.);
 
 }
 
@@ -26,7 +62,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     nCellsJ = meshPtr_->nCellsJ();
     nCellsK = meshPtr_->nCellsK();
 
-    phiField = mesh.findScalarField(conservedFieldName_);
+    phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
     Als_.allocate(nCellsI, nCellsJ, nCellsK);
 
     for(k = 0; k < nCellsK; ++k)
@@ -138,15 +174,16 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
         } // end for j
     } // end for k
 
-    Als_(1, 1, 1).print();
+    gradPhi_.allocate(nCellsI, nCellsJ, nCellsK);
+    xls_.allocate(6, 1);
+    bls_.allocate(6, 1);
 
 }
 
 double Diffusion::computeFaceFlux(int i, int j, int k, Face face)
 {
 
-    Vector3D phiGradient;
-    double flux;
+
 
 }
 

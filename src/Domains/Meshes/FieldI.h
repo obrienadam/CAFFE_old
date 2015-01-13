@@ -15,19 +15,11 @@ Field<T>::Field(std::string name, int type)
 template<class T>
 Field<T>::Field(int nI, int nJ, int nK, std::string name, int type)
     :
-      Array3D<T>(nI, nJ, nK),
       name(name),
       type(type)
 {
 
-    if (type == CONSERVED)
-    {
-
-        faceFluxesI_.allocate(Array3D<T>::nI_ + 1, Array3D<T>::nJ_, Array3D<T>::nK_);
-        faceFluxesJ_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_ + 1, Array3D<T>::nK_);
-        faceFluxesK_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_, Array3D<T>::nK_ + 1);
-
-    }
+    allocate(nI, nJ, nK);
 
 }
 
@@ -56,12 +48,14 @@ Field<T>::Field(const Field &other)
         } // end for j
     } // end for k
 
+
+
 }
 
 // ************* Public Methods *************
 
 template<class T>
-void Field<T>::resize(int nI, int nJ, int nK)
+void Field<T>::allocate(int nI, int nJ, int nK)
 {
 
     Array3D<T>::allocate(nI, nJ, nK);
@@ -74,6 +68,78 @@ void Field<T>::resize(int nI, int nJ, int nK)
         faceFluxesK_.allocate(nI, nJ, nK + 1);
 
     }
+
+    eastBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    eastBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    westBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    westBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
+    northBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    northBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    southBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    southBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
+    topBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+    topBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+    bottomBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+    bottomBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+
+}
+
+template<class T>
+T& Field<T>::operator()(int i, int j, int k)
+{
+
+    if(i >= 0 && j >= 0 && k >= 0 &&
+            i < Array3D<T>::nI_ && j < Array3D<T>::nJ_ && k < Array3D<T>::nK_)
+    {
+
+        return Array3D<T>::data_[i][j][k];
+
+    }
+
+    // Access to the boundary fields
+
+    if(i < 0)
+    {
+
+        return westBoundaryField_(j, k);
+
+    }
+    else if (i >= Array3D<T>::nI_)
+    {
+
+        return eastBoundaryField_(j, k);
+
+    }
+
+    if(j < 0)
+    {
+
+        return southBoundaryField_(i, k);
+
+    }
+    else if (j >= Array3D<T>::nJ_)
+    {
+
+        return northBoundaryField_(i, k);
+
+    }
+
+    if(k < 0)
+    {
+
+        return bottomBoundaryField_(i, j);
+
+    }
+    else if (k >= Array3D<T>::nK_)
+    {
+
+        return topBoundaryField_(i, j);
+
+    }
+
+    // Just to get rid of the compiler warning
+
+    return Array3D<T>::data_[i][j][k];
 
 }
 
@@ -135,9 +201,6 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
 
     int j, k;
 
-    eastBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    eastBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
 
@@ -157,9 +220,6 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int j, k;
-
-    westBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    westBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -181,9 +241,6 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 
     int i, k;
 
-    northBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    northBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
 
@@ -203,9 +260,6 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, k;
-
-    southBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    southBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -227,9 +281,6 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
 
     int i, j;
 
-    topBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
-    topBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
-
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
 
@@ -249,9 +300,6 @@ void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
 
     int i, j;
-
-    bottomBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
-    bottomBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
 
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {

@@ -49,18 +49,20 @@ public:
     int type;
     std::string name;
 
-    void resize(int nI, int nJ, int nK);
+    void allocate(int nI, int nJ, int nK);
 
     //- The "type" determines whether or not tranport equations need to be solved for this field
 
     //- Access
 
+    T& operator()(int i, int j, int k);
+
     T& fluxE(int i, int j, int k){ return faceFluxesI_(i + 1, j, k); }
-    T& fluxW(int i, int j, int k){ return faceFluxesI_(i, j, k); }
+    T& fluxW(int i, int j, int k){ return -faceFluxesI_(i, j, k); }
     T& fluxN(int i, int j, int k){ return faceFluxesJ_(i, j + 1, k); }
-    T& fluxS(int i, int j, int k){ return faceFluxesJ_(i, j, k); }
+    T& fluxS(int i, int j, int k){ return -faceFluxesJ_(i, j, k); }
     T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
-    T& fluxB(int i, int j, int k){ return faceFluxesK_(i, j, k); }
+    T& fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
 
     //- Boundary related methods
 

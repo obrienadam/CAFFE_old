@@ -22,7 +22,7 @@ public:
 
     //- Memory management
 
-    void allocate(int nI, int nJ, int nK);
+    virtual void allocate(int nI, int nJ, int nK);
     void deallocate();
 
     //- Return the container sizes
@@ -32,7 +32,7 @@ public:
     int sizeK(){return nK_;}
     int size(){return n_;}
 
-    inline T& operator()(int i, int j, int k);
+    virtual inline T& operator()(int i, int j, int k);
 
     //- Iterators
 

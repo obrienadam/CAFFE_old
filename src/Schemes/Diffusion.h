@@ -15,13 +15,17 @@ private:
     //- The matrix containing the least-squares coefficients
 
     Array3D<Matrix> Als_;
+    Matrix xls_;
+    Matrix bls_;
+    Field<double>* phiFieldPtr_;
+    Field<Vector3D> gradPhi_;
+
+    void computeCellCenteredGradients();
 
 public:
 
     Diffusion();
     ~Diffusion();
-
-    Field<double> phiField;
 
     void initialize(HexaFvmMesh &mesh, std::string conservedFieldName);
 

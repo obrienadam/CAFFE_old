@@ -301,14 +301,14 @@ void HexaFvmMesh::initialize(Input &input)
     for(i = 0; i < scalarFields.size(); ++i)
     {
 
-        scalarFields[i].resize(nI, nJ, nK);
+        scalarFields[i].allocate(nI, nJ, nK);
 
     }
 
     for(i = 0; i < vectorFields.size(); ++i)
     {
 
-        vectorFields[i].resize(nI, nJ, nK);
+        vectorFields[i].allocate(nI, nJ, nK);
 
     }
 
