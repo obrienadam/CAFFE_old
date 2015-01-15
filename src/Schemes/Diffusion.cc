@@ -18,6 +18,8 @@ void Diffusion::computeCellCenteredGradients()
             for(i = 0; i < nCellsI; ++i)
             {
 
+                Als_ = cellAls_(i, j, k);
+
                 bls_(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
                 bls_(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
                 bls_(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
@@ -25,11 +27,11 @@ void Diffusion::computeCellCenteredGradients()
                 bls_(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
                 bls_(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
 
-                xls_ = solveLeastSquares(Als_(i, j, k), bls_);
+                Als_.solveLeastSquares(bls_);
 
-                gradPhi_(i, j, k).x = xls_(0, 0);
-                gradPhi_(i, j, k).y = xls_(1, 0);
-                gradPhi_(i, j, k).z = xls_(2, 0);
+                gradPhi_(i, j, k).x = bls_(0, 0);
+                gradPhi_(i, j, k).y = bls_(1, 0);
+                gradPhi_(i, j, k).z = bls_(2, 0);
 
             } // end for i
         } // end for j
@@ -63,7 +65,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     nCellsK = meshPtr_->nCellsK();
 
     phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
-    Als_.allocate(nCellsI, nCellsJ, nCellsK);
+    cellAls_.allocate(nCellsI, nCellsJ, nCellsK);
 
     for(k = 0; k < nCellsK; ++k)
     {
@@ -76,7 +78,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 
                 // Allocate the least squares matrix
 
-                Als_(i, j, k).allocate(6, 3);
+                cellAls_(i, j, k).allocate(6, 3);
 
                 // Populate the least squares matrix
 
@@ -85,13 +87,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(i != nCellsI - 1)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceE(i, j, k)*meshPtr_->nesE(i, j, k), 0, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceE(i, j, k)*meshPtr_->nesE(i, j, k), 0, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceE(i, j, k)*meshPtr_->nefE(i, j, k), 0, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceE(i, j, k)*meshPtr_->nefE(i, j, k), 0, 0);
 
                 }
 
@@ -100,13 +102,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(i != 0)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceW(i, j, k)*meshPtr_->nesW(i, j, k), 1, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceW(i, j, k)*meshPtr_->nesW(i, j, k), 1, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceW(i, j, k)*meshPtr_->nefW(i, j, k), 1, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceW(i, j, k)*meshPtr_->nefW(i, j, k), 1, 0);
 
                 }
 
@@ -115,13 +117,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(j != nCellsJ - 1)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceN(i, j, k)*meshPtr_->nesN(i, j, k), 2, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceN(i, j, k)*meshPtr_->nesN(i, j, k), 2, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceN(i, j, k)*meshPtr_->nefN(i, j, k), 2, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceN(i, j, k)*meshPtr_->nefN(i, j, k), 2, 0);
 
                 }
 
@@ -130,13 +132,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(j != 0)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceS(i, j, k)*meshPtr_->nesS(i, j, k), 3, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceS(i, j, k)*meshPtr_->nesS(i, j, k), 3, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceS(i, j, k)*meshPtr_->nefS(i, j, k), 3, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceS(i, j, k)*meshPtr_->nefS(i, j, k), 3, 0);
 
                 }
 
@@ -145,13 +147,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(k != nCellsK - 1)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceT(i, j, k)*meshPtr_->nesT(i, j, k), 4, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceT(i, j, k)*meshPtr_->nesT(i, j, k), 4, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceT(i, j, k)*meshPtr_->nefT(i, j, k), 4, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceT(i, j, k)*meshPtr_->nefT(i, j, k), 4, 0);
 
                 }
 
@@ -160,13 +162,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
                 if(k != 0)
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceB(i, j, k)*meshPtr_->nesB(i, j, k), 5, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceB(i, j, k)*meshPtr_->nesB(i, j, k), 5, 0);
 
                 }
                 else
                 {
 
-                    Als_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceB(i, j, k)*meshPtr_->nefB(i, j, k), 5, 0);
+                    cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToFaceDistanceB(i, j, k)*meshPtr_->nefB(i, j, k), 5, 0);
 
                 }
 
@@ -175,7 +177,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     } // end for k
 
     gradPhi_.allocate(nCellsI, nCellsJ, nCellsK);
-    xls_.allocate(6, 1);
+    Als_.allocate(6, 3);
     bls_.allocate(6, 1);
 
 }

@@ -14,8 +14,8 @@ private:
 
     //- The matrix containing the least-squares coefficients
 
-    Array3D<Matrix> Als_;
-    Matrix xls_;
+    Array3D<Matrix> cellAls_;
+    Matrix Als_;
     Matrix bls_;
     Field<double>* phiFieldPtr_;
     Field<Vector3D> gradPhi_;

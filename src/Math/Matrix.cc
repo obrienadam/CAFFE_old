@@ -53,7 +53,12 @@ Matrix& Matrix::operator=(const Matrix& rhs)
     if(this == &rhs)
         return *this;
 
-    allocate(rhs.m_, rhs.n_);
+    if(nElements_ != rhs.nElements_)
+    {
+
+        allocate(rhs.m_, rhs.n_);
+
+    }
 
     for(i = 0; i < nElements_; ++i)
         elements_[i] = rhs.elements_[i];
@@ -117,7 +122,7 @@ void Matrix::solveLeastSquares(Matrix &b)
     LAPACKE_dgels(LAPACK_ROW_MAJOR, 'N', m_, n_, b.n_, elements_, n_, b.elements_, b.n_);
 
     // Modify the dimensions of vector b to reflect the number of unknowns. Note that this doesn't release memory,
-    // but it shouldn't matter
+    // but it shouldn't matter. Also, this function will change the values of both A and b.
 
     b.m_ = n_;
 
