@@ -4,7 +4,6 @@
 
 std::string InputStringProcessing::processBuffer(std::string &buffer, bool removeAllWhitespace)
 {
-
     using namespace boost::algorithm;
 
     // Trim the leading/lagging whitespace
@@ -20,22 +19,17 @@ std::string InputStringProcessing::processBuffer(std::string &buffer, bool remov
 
     if(buffer[0] == '#')
     {
-
         buffer.clear();
-
     }
 
     // Remove any comments on the line
 
     buffer = buffer.substr(0, buffer.find("#"));
-
     return buffer;
-
 }
 
 double InputStringProcessing::getNextElement(std::string &buffer)
 {
-
     using namespace boost::algorithm;
 
     double element;
@@ -51,9 +45,7 @@ double InputStringProcessing::getNextElement(std::string &buffer)
     // Remove the extracted element from the string
 
     buffer = buffer.substr(buffer.find_first_of(" )"), buffer.back());
-
     return element;
-
 }
 
 std::vector<std::string> InputStringProcessing::partition(std::string buffer, std::string delimiter)
@@ -66,5 +58,4 @@ std::vector<std::string> InputStringProcessing::partition(std::string buffer, st
     split(partitionedString, buffer, is_any_of(delimiter));
 
     return partitionedString;
-
 }

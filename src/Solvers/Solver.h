@@ -8,7 +8,6 @@ enum SolverType{EULER};
 
 class Solver
 {
-
 protected:
 
     SolverType currentSolver_;
@@ -22,7 +21,6 @@ public:
     void initialize(Input& input);
 
     void solve();
-
 };
 
 #endif

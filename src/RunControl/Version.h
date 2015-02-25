@@ -3,11 +3,9 @@
 
 class Version
 {
-
    public: 
 
    static void display();
-   
 };
 
 #endif

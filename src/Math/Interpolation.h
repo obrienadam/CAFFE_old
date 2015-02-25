@@ -5,7 +5,6 @@
 
 class Interpolation
 {
-
 private:
 
 public:
@@ -13,7 +12,6 @@ public:
     static double linear(const Point3D& point,
                          const double* values, const Point3D* points,
                          int nPoints);
-
 };
 
 #endif

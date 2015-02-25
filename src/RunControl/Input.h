@@ -7,7 +7,6 @@
 
 class Input
 {
-
 private:
 
     std::string filename_;
@@ -30,7 +29,6 @@ public:
     //- Show everything in the input for debugging purposes
 
     void print();
-
 };
 
 #endif

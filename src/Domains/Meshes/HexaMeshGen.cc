@@ -17,9 +17,7 @@ HexaMeshGen::HexaMeshGen(int argc, const char *argv[])
     :
       HexaMeshGen()
 {
-    
     argsList_.readArgs(argc, argv);
-    
 }
 
 void HexaMeshGen::readVertices(std::ifstream& inputFile)
@@ -34,7 +32,6 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
 
     while(!inputFile.eof())
     {
-        
         // Get a line from the file and process it
 
         getline(inputFile, buffer);
@@ -42,28 +39,22 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         
         if(buffer.empty())
         {
-
             continue;
-
         }
         else if(buffer != "{")
         {
-
             Output::raiseException("HexaMeshGen", "readVertices", "Expected a \"{\", but received a \"" + buffer + "\".");
-
         }
 
         // Input is good, break
 
         break;
-
     }
 
     // Begin reading the vertices
 
     while(true)
     {
-
         getline(inputFile, buffer);
         buffer = InputStringProcessing::processBuffer(buffer, false);
 
@@ -76,15 +67,12 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         // buffer should contain a bracketed vector
 
         vertices_.push_back(Point3D(buffer));
-
     }
 
     Output::printToScreen("HexaMeshGen: Successfully initialized domain vertices.");
 
     checkMesh();
-
 }
-
 
 void HexaMeshGen::readResolution(std::ifstream& inputFile)
 {
@@ -95,7 +83,6 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
 
     while(!inputFile.eof())
     {
-
         // Get a line from the file and process it
 
         getline(inputFile, buffer);
@@ -103,28 +90,22 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
 
         if(buffer.empty())
         {
-
             continue;
-
         }
         else if(buffer != "{")
         {
-
             Output::raiseException("HexaMeshGen", "readResolution", "Expected a \"{\", but received a \"" + buffer + "\".");
-
         }
 
         // Input is good, break
 
         break;
-
     }
 
     // Begin reading the vertices
 
     while(true)
     {
-
         getline(inputFile, buffer);
         buffer = InputStringProcessing::processBuffer(buffer, false);
 
@@ -148,15 +129,11 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
 
         if(buffer != ")")
         {
-
             Output::raiseException("HexaMeshGen", "readResolution", "expected a \")\"");
-
         }
-
     }
 
     Output::printToScreen("HexaMeshGen: Successfully allocated mesh nodes.");
-
 }
 
 void HexaMeshGen::readMeshInputFile()
@@ -167,15 +144,12 @@ void HexaMeshGen::readMeshInputFile()
     ifstream inputFile(argsList_.varsMap_["file"].as<string>().c_str());
     
     if(!inputFile.is_open())
-    {
-        
+    {      
         Output::raiseException("HexaMeshGen", "readMeshInputFile", "mesh input file not found.");
-        
     }
     
     while(!inputFile.eof())
     {
-        
         // Get a line from the buffer and process it
         
         getline(inputFile, buffer);
@@ -190,34 +164,24 @@ void HexaMeshGen::readMeshInputFile()
         
         if(buffer.substr(0, buffer.find("=")) == "MetricConversion")
         {
-            
             // Extract the metric conversion floating point number and store
             
             buffer = buffer.substr(buffer.find("=") + 1, buffer.back());
             metricConversion_ = stod(buffer);
-            
         }
         else if(buffer == "Vertices")
         {
-            
             readVertices(inputFile);
-            
         }
         else if(buffer == "Resolution")
         {
-            
             readResolution(inputFile);
-            
         }
         else
         {
-            
             Output::raiseException("HexaMeshGen", "readMeshInputFile", "Unrecognized input field header " + buffer + ".");
-            
         }
-        
     }
-    
 }
 
 void HexaMeshGen::writeMeshFile()
@@ -235,24 +199,18 @@ void HexaMeshGen::writeMeshFile()
 
     for(k = 0; k < nodes_.sizeK(); ++k)
     {
-
         for(j = 0; j < nodes_.sizeJ(); ++j)
         {
-
             for(i = 0; i < nodes_.sizeI(); ++i)
             {
-
                 fout << "(" << nodes_(i, j, k) << ") ";
-
             } // end for i
 
             fout << endl;
-
         } // end for j
     } // end for k
 
     fout.close();
-
 }
 
 void HexaMeshGen::generateMesh()
@@ -267,7 +225,6 @@ void HexaMeshGen::generateMesh()
 
     for(k = 0; k <= upperK; ++k)
     {
-
         s = double(k)/double(upperK);
 
         nodes_(0, 0, k) = (vertices_[4] - vertices_[0])*s + vertices_[0];
@@ -280,12 +237,10 @@ void HexaMeshGen::generateMesh()
 
         for(j = 0; j <= upperJ; ++j)
         {
-
             s = double(j)/double(upperJ);
 
             nodes_(0, j, k) = tmp1*s + nodes_(0, 0, k);
             nodes_(upperI, j, k) = tmp2*s + nodes_(upperI, 0, k);
-
         } // end for j
     } // end for k
 
@@ -293,30 +248,24 @@ void HexaMeshGen::generateMesh()
 
     for(k = 0; k <= upperK; ++k)
     {
-
         for(j = 0; j <= upperJ; ++j)
         {
-
             tmp1 = nodes_(upperI, j, k) - nodes_(0, j, k);
 
             for(i = 0; i <= upperI; ++i)
             {
-
                 s = double(i)/double(upperI);
 
                 nodes_(i, j, k) = tmp1*s + nodes_(0, j, k);
-
             } // end for i
         } // end for j
     } // end for k
 
     Output::printToScreen("HexaMeshGen: Mesh generation complete.");
-
 }
 
 void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)
 {
-    
     int i, j, k;
 
     for(k = 0; k < nodes_.sizeK(); ++k)
@@ -329,19 +278,15 @@ void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)
                 nodes_(i, j, k) = Point3D( dx*double(i)/double(nodes_.sizeI() - 1),
                                            dy*double(j)/double(nodes_.sizeJ() - 1),
                                            dz*double(k)/double(nodes_.sizeK() - 1) );
-
             } // end for i
         } // end for j
     } // end for k
-    
 }
 
 void HexaMeshGen::checkMesh()
 {
-
     // Checks for non-planar surfaces
 
     if(!Geometry::checkHexahedronSurfacesIsPlanar(vertices_.data()))
         Output::raiseException("HexaMeshGen", "checkMesh", "one or more surfaces of the mesh geometry is not planar, which is not currently supported.");
-
 }

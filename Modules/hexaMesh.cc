@@ -9,20 +9,15 @@ int main(int argc, const char* argv[])
 
     try
     {
-
         HexaMeshGen hexaMeshGen(argc, argv);
         hexaMeshGen.readMeshInputFile();
         hexaMeshGen.generateMesh();
         hexaMeshGen.writeMeshFile();
-
     }
     catch (const char* errorMessage)
     {
-
         cerr << "Error: " << errorMessage << endl;
-
     }
 
     return 0;
-    
 }

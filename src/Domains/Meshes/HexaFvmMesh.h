@@ -15,7 +15,6 @@ enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 
 class HexaFvmMesh : public StructuredMesh
 {
-
 private:
 
     //- Geometric data pertaining only to the interior fvm mesh
@@ -133,7 +132,6 @@ public:
     //- Dump mesh data to a text file for debugging
 
     void writeDebug();
-
 };
 
 #endif

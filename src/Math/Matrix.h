@@ -5,7 +5,6 @@
 
 class Matrix
 {
-
 private:
 
     int m_, n_, nElements_;
@@ -48,7 +47,6 @@ public:
     //- Debugging and printing
 
     void print();
-
 };
 
 //- Solution functions. These will not modify the original matrices

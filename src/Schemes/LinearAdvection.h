@@ -9,7 +9,6 @@
 
 class LinearAdvection : public FvScheme
 {
-
 private:
 
     std::string velocityFieldName_;
@@ -22,7 +21,6 @@ public:
     double computeFaceFlux(int i, int j, int k, Face face);
     double computeTimeDerivative(int i, int j, int k);
     void computeSemiDiscreteForm();
-
 };
 
 #endif

@@ -15,5 +15,4 @@ void Version::display()
 
 
     Output::printToScreen(versionInfo.str());
-
 }

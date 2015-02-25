@@ -4,7 +4,6 @@
 
 double Geometry::computeQuadrilateralArea(Point3D* points)
 {
-
     Vector3D r01, r02, r03;
 
     r01 = points[1] - points[0];
@@ -12,24 +11,20 @@ double Geometry::computeQuadrilateralArea(Point3D* points)
     r03 = points[3] - points[0];
 
     return 0.5*(crossProduct(r02, r01).mag() + crossProduct(r03, r02).mag());
-
 }
 
 Point3D Geometry::computeQuadrilateralCentroid(Point3D* points)
 {
-
     Point3D diag1Midpoint, diag2Midpoint;
 
     diag1Midpoint = points[0] + 0.5*(points[2] - points[0]);
     diag2Midpoint = points[1] + 0.5*(points[3] - points[1]);
 
     return diag1Midpoint + 0.5*(diag2Midpoint - diag1Midpoint);
-
 }
 
 Vector3D Geometry::computeQuadrilateralNormal(Point3D* points)
 {
-
     // This function uses Newell's method to approximately compute the normal
     // to a slightly non-planar surface
 
@@ -43,12 +38,10 @@ Vector3D Geometry::computeQuadrilateralNormal(Point3D* points)
     }
 
     return normal.unitVector();
-
 }
 
 bool Geometry::checkQuadrilateralIsPlanar(Point3D *points)
 {
-
     // Check to see if a quadrilateral is planary by comparing the normals formed by
     // the triangles sharing the diagonal
 
@@ -59,12 +52,10 @@ bool Geometry::checkQuadrilateralIsPlanar(Point3D *points)
     normal2 = crossProduct(points[2] - points[0], points[3] - points[0]).unitVector();
 
     return (normal1 - normal2).mag() <= TOLER;
-
 }
 
 double Geometry::computeHexahedronVolume(Point3D* points)
 {
-
     // This uses the method of calculating hexahedron volumes depicted in
     // Computational Fluid Mechanics and Heat Transfer, Third Edition, by
     // Richard H. Pletcher, John C. Tannehill and Gale Anderson
@@ -85,12 +76,10 @@ double Geometry::computeHexahedronVolume(Point3D* points)
     s2376 = 0.5*crossProduct(r27, r36);
 
     return fabs(dotProduct(s1265 + s5674 + s2376, points[6] - points[0])/3.);
-
 }
 
 Point3D Geometry::computeHexahedronCentroid(Point3D *points)
 {
-
     // The strategy is to break the hexahedron into tetrahedrons. The centroid is then
     // defined as the volume weighted average of the tetrahedron centroids
 
@@ -127,27 +116,21 @@ Point3D Geometry::computeHexahedronCentroid(Point3D *points)
 
     for(i = 0; i < 5; ++i)
     {
-
         tetCentroids[i] = computeTetrahedronCentroid(tet[i]);
         tetVolumes[i] = computeTetrahedronVolume(tet[i]);
         sumVolumes += tetVolumes[i];
-
     }
 
     for(i = 0; i < 5; ++i)
     {
-
         centroid += tetVolumes[i]*tetCentroids[i];
-
     }
 
     return centroid/sumVolumes;
-
 }
 
 bool Geometry::checkHexahedronSurfacesIsPlanar(Point3D *points)
 {
-
     Point3D tmpVertices[4];
 
     // Check east face
@@ -211,12 +194,10 @@ bool Geometry::checkHexahedronSurfacesIsPlanar(Point3D *points)
         return false;
 
     return true;
-
 }
 
 double Geometry::computeTetrahedronVolume(Point3D *points)
 {
-
     Vector3D a, b, c;
 
     a = points[1] - points[0];
@@ -224,17 +205,14 @@ double Geometry::computeTetrahedronVolume(Point3D *points)
     c = points[3] - points[0];
 
     return fabs(dotProduct(a, crossProduct(b, c)))/6.;
-
 }
 
 Point3D Geometry::computeTetrahedronCentroid(Point3D *points)
 {
-
     Point3D sum(0., 0., 0.);
 
     for(int i = 0; i < 4; ++i)
         sum += points[i];
 
     return 0.25*sum;
-
 }

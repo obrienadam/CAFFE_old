@@ -6,7 +6,7 @@
 
 class InputStringProcessing
 {
-
+private:
 
 public:
 
@@ -21,7 +21,6 @@ public:
     //- Partition the line, using a specified delimiting character
 
     static std::vector<std::string> partition(std::string buffer, std::string delimiter);
-
 };
 
 #endif

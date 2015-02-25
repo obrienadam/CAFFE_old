@@ -11,7 +11,6 @@
 
 class StructuredMesh : public DomainInterface
 {
-
 protected:
 
     //- Structured data. In this class, only the geometric mesh is stored
@@ -51,7 +50,6 @@ public:
 
     virtual void write(double time = 0.);
     virtual void writeTec360(double time = 0.);
-
 };
 
 #endif

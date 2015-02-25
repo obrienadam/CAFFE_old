@@ -9,7 +9,6 @@
 
 class FvScheme
 {
-
 protected:
 
     std::string conservedFieldName_;
@@ -22,7 +21,6 @@ public:
     virtual void initialize(HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
     virtual double computeFaceFlux(int i, int j, int k, Face face) = 0;
     virtual void computeSemiDiscreteForm() = 0;
-
 };
 
 #endif

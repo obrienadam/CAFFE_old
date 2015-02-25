@@ -4,54 +4,39 @@
 
 void Output::printToScreen(const std::string& message)
 {
-
     std::cout << std::endl << message << std::endl;
-
 }
 
 void Output::printToScreen(const std::ostream& message)
 {
-
     std::cout << std::endl << message << std::endl;
-
 }
 
 void Output::printToScreen(const std::vector<std::string>& vector)
 {
-
     for(uint i = 0; i < vector.size(); ++i)
     {
-
         std::cout << "Element " << i << ": " << vector[i] << std::endl;
-
     }
-
 }
 
 void Output::printToScreen(std::string className, std::string message)
 {
-
     std::cout << className + ": " << message << std::endl;
-
 }
 
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
-
     throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
-
 }
 
 void Output::raiseException(std::string className, std::string methodName, std::ostringstream &problemDescription)
 {
-
     throw ("in \"" + className + "::" + methodName + "\", " + problemDescription.str()).c_str();
-
 }
 
 void Output::displayCaffeHeader()
 {
-
     using namespace std;
 
 
@@ -71,12 +56,9 @@ void Output::displayCaffeHeader()
          << endl;
 
     printLine();
-
 }
 
 void Output::printLine()
 {
-
     std::cout << "------------------------------------------------------------------" << std::endl;
-
 }

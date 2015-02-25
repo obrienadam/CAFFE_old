@@ -13,8 +13,6 @@ FvScheme::FvScheme()
 
 void FvScheme::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 {
-
     meshPtr_ = &mesh;
     conservedFieldName_ = conservedFieldName;
-
 }

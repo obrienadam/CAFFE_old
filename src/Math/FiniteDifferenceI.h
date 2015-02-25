@@ -7,11 +7,9 @@ T fd2ndDeriv2ndOrderCentral(const T& phiMinus1,
                             double deltaMinus1,
                             double deltaPlus1)
 {
-
   double alpha(deltaPlus1/deltaMinus1);
 
   return (alpha*phiMinus1 - (1. + alpha)*phi + phiPlus1)/(0.5*alpha*(alpha + 1.)*deltaMinus1*deltaMinus1);
-
 }
 
 template <typename T>
@@ -21,8 +19,6 @@ T fd1stDeriv2ndOrderCentral(const T& phiMinus1,
                             double deltaMinus1,
                             double deltaPlus1)
 {
-
-
 
 }
 
@@ -34,8 +30,6 @@ T fd1stDeriv2ndOrderBackwards(const T& phiMinus2,
                               double deltaMinus1)
 {
 
-
-
 }
 
 template <typename T>
@@ -45,7 +39,5 @@ T fd1stDeriv2ndOrderForwards(const T& phi,
                              double deltaPlus1,
                              double deltaPlus2)
 {
-
-
 
 }

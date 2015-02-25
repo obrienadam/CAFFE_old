@@ -35,29 +35,23 @@ Input::Input()
     // Domain related data
 
     inputStrings["domainFile"] = "domain.in";
-
 }
 
 Input::Input(std::string filename)
     :
       Input()
 {
-
     openInputFile(filename);
-
 }
 
 Input::~Input()
 {
-
     if(fin_.is_open())
         fin_.close();
-
 }
 
 void Input::openInputFile(std::string filename)
 {
-
     using namespace std;
 
     string buffer;
@@ -74,14 +68,11 @@ void Input::openInputFile(std::string filename)
 
     if(!fin_.is_open())
     {
-
         throw ("Input file \"" + filename_ + "\" was not found.").c_str();
-
     }
 
     while(!fin_.eof())
     {
-
         getline(fin_, buffer);
 
         // Process the buffer
@@ -95,36 +86,26 @@ void Input::openInputFile(std::string filename)
 
         if(inputInts.find(buffer) != inputInts.end())
         {
-
             if(!(fin_ >> inputInts[buffer]))
                 throw "A problem occurred while attempting to read an input integer.";
-
         }
 
         else if (inputDoubles.find(buffer) != inputDoubles.end())
         {
-
             if(!(fin_ >> inputDoubles[buffer]))
                 throw "A problem occurred while attempting to read an input double.";
-
         }
 
         else if (inputStrings.find(buffer) != inputStrings.end())
         {
-
             if(!(fin_ >> inputStrings[buffer]))
                 throw "A problem occurred while attempting to read an input string.";
-
         }
-
         else
         {
-
             throw ("Unrecognized input parameter type \"" + buffer + "\".").c_str();
-
         }
     }
-
 }
 
 void Input::print()
@@ -139,27 +120,20 @@ void Input::print()
 
     for(intMapItr = inputInts.begin(); intMapItr != inputInts.end(); ++intMapItr)
     {
-
         cout << intMapItr->first << ": " << intMapItr->second << endl;
-
     }
 
     cout << "Input Doubles:\n";
 
     for(doubleMapItr = inputDoubles.begin(); doubleMapItr != inputDoubles.end(); ++doubleMapItr)
     {
-
         cout << doubleMapItr->first << ": " << doubleMapItr->second << endl;
-
     }
 
     cout << "Input Strings:\n";
 
     for(stringMapItr = inputStrings.begin(); stringMapItr != inputStrings.end(); ++stringMapItr)
     {
-
         cout << stringMapItr->first << ": " << stringMapItr->second << endl;
-
     }
-
 }

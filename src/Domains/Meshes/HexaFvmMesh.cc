@@ -6,7 +6,6 @@
 
 void HexaFvmMesh::initializeCells()
 {
-
     int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
     Point3D tmpPoints[8];
 
@@ -17,13 +16,10 @@ void HexaFvmMesh::initializeCells()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i + 1, j, k);
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
@@ -35,16 +31,13 @@ void HexaFvmMesh::initializeCells()
 
                 cellCenters_(i, j, k) = Geometry::computeHexahedronCentroid(tmpPoints);
                 cellVolumes_(i, j, k) = Geometry::computeHexahedronVolume(tmpPoints);
-
             } // end for i
         } // end for j
     } // end for k
-
 }
 
 void HexaFvmMesh::initializeCellToCellParameters()
 {
-
     int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
     Vector3D tmpVec;
 
@@ -59,49 +52,37 @@ void HexaFvmMesh::initializeCellToCellParameters()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 if (i < nI - 1)
                 {
-
                     tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
                     cellToCellDistanceVectorsI_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesI_(i, j, k) = tmpVec.mag();
-
                 }
 
                 if (j < nJ - 1)
                 {
-
                     tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
                     cellToCellDistanceVectorsJ_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesJ_(i, j, k) = tmpVec.mag();
-
                 }
 
                 if (k < nK - 1)
                 {
-
                     tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
                     cellToCellDistanceVectorsK_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesK_(i, j, k) = tmpVec.mag();
-
                 }
-
             } // end for i
         } // end for j
     } // end for k
-
 }
 
 void HexaFvmMesh::initializeFaces()
 {
-
     int nI, nJ, nK, i, j, k;
     Point3D tmpPoints[4];
 
@@ -117,13 +98,10 @@ void HexaFvmMesh::initializeFaces()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i, j + 1, k);
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
@@ -132,7 +110,6 @@ void HexaFvmMesh::initializeFaces()
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsI_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasI_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-
             } // end for i
         } // end for j
     } // end for k
@@ -149,13 +126,10 @@ void HexaFvmMesh::initializeFaces()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i, j, k + 1);
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
@@ -164,7 +138,6 @@ void HexaFvmMesh::initializeFaces()
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsJ_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasJ_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-
             } // end for i
         } // end for j
     } // end for k
@@ -181,13 +154,10 @@ void HexaFvmMesh::initializeFaces()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i + 1, j, k);
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
@@ -196,16 +166,13 @@ void HexaFvmMesh::initializeFaces()
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsK_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 faceAreasK_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
-
             } // end for i
         } // end for j
     } // end for k
-
 }
 
 void HexaFvmMesh::initializeCellToFaceParameters()
 {
-
     int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
     Vector3D tmpVec;
 
@@ -225,13 +192,10 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 // East cell to face parameters
 
                 tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
@@ -267,18 +231,15 @@ void HexaFvmMesh::initializeCellToFaceParameters()
                 tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceDistanceVectorsB_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
-
             } // end for i
         } // end for j
     } // end for k
-
 }
 
 // ************* Public Methods *************
 
 void HexaFvmMesh::initialize(Input &input)
 {
-
     uint nI, nJ, nK, i;
 
     // Initialize the mesh nodes
@@ -300,49 +261,37 @@ void HexaFvmMesh::initialize(Input &input)
 
     for(i = 0; i < scalarFields.size(); ++i)
     {
-
         scalarFields[i].allocate(nI, nJ, nK);
-
     }
 
     for(i = 0; i < vectorFields.size(); ++i)
     {
-
         vectorFields[i].allocate(nI, nJ, nK);
-
     }
 
     Output::printToScreen("HexaFvmMesh", "Initialization complete.");
-
 }
 
 void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
 {
-
     Field<double> newScalarField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), scalarFieldName, type);
     scalarFields.push_back(newScalarField);
-
 }
 
 void HexaFvmMesh::addVectorField(std::string vectorFieldName, int type)
 {
-
     Field<Vector3D> newVectorField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), vectorFieldName, type);
     vectorFields.push_back(newVectorField);
-
 }
 
 Field<double>& HexaFvmMesh::findScalarField(const std::string& fieldName)
 {
-
     int i, end(scalarFields.size());
 
     for(i = 0; i < end; ++i)
     {
-
         if(fieldName == scalarFields[i].name)
             return scalarFields[i];
-
     }
 
     Output::raiseException("HexaFvmMesh", "findScalarField", "cannot find field \"" + fieldName + "\".");
@@ -350,20 +299,16 @@ Field<double>& HexaFvmMesh::findScalarField(const std::string& fieldName)
     // return just to suppress compiler warning
 
     return scalarFields[end];
-
 }
 
 Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
 {
-
     int i, end(vectorFields.size());
 
     for(i = 0; i < end; ++i)
     {
-
         if(fieldName == vectorFields[i].name)
             return vectorFields[i];
-
     }
 
     Output::raiseException("HexaFvmMesh", "findVectorField", "cannot find field \"" + fieldName + "\".");
@@ -371,7 +316,6 @@ Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
     // return just to suppress compiler warning
 
     return vectorFields[end];
-
 }
 
 void HexaFvmMesh::writeDebug()
@@ -384,10 +328,8 @@ void HexaFvmMesh::writeDebug()
     Output::printToScreen("HexaFvmMesh", "writing a debugging file...");
 
     debugFout.open((name + "_debug" + ".msh").c_str());
-
-    debugFout << "HexaFvm Mesh Data:\n";
-
-    debugFout << "\nCell Positions:\n";
+    debugFout << "HexaFvm Mesh Data:\n"
+              << "\nCell Positions:\n";
 
     nI = cellCenters_.sizeI();
     nJ = cellCenters_.sizeJ();
@@ -395,19 +337,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << cellCenters_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -415,15 +352,11 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << cellVolumes_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
@@ -439,19 +372,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceCentersI_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -463,19 +391,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceCentersJ_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -487,19 +410,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceCentersK_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -511,19 +429,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceNormalsI_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -535,19 +448,14 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceNormalsJ_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
     } // end for k
 
@@ -559,29 +467,20 @@ void HexaFvmMesh::writeDebug()
 
     for(k = 0; k < nK; ++k)
     {
-
         for(j = 0; j < nJ; ++j)
         {
-
             for(i = 0; i < nI; ++i)
             {
-
                 debugFout << faceNormalsK_(i, j, k) << " ";
-
             } // end for i
 
             debugFout << endl;
-
         } // end for j
 
         debugFout << endl;
-
     } // end for k
-
-
 
     debugFout.close();
 
     Output::printToScreen("HexaFvmMesh", "finished writing debugging file.");
-
 }

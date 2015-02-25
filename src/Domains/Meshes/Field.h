@@ -13,7 +13,6 @@ enum{CONSERVED, AUXILLARY, PRIMITIVE};
 template <class T>
 class Field : public Array3D<T>
 {
-
 private:
 
     //- Face fluxes conserved fields (units/m^2)
@@ -92,7 +91,6 @@ public:
     //- Debug
 
     void print();
-
 };
 
 #include "FieldI.h"

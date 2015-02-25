@@ -12,7 +12,6 @@
 
 class HexaMeshGen
 {
-
 private:
 
     ArgsList argsList_;
@@ -47,7 +46,6 @@ public:
     //- Mesh check
 
     void checkMesh();
-
 };
 
 #endif

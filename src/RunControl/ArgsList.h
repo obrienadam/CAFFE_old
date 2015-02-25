@@ -7,7 +7,6 @@
 
 class ArgsList
 {
-
 private:
 
     typedef boost::program_options::options_description OptsDescription;
@@ -29,7 +28,6 @@ public:
 
     friend class RunControl;
     friend class HexaMeshGen;
-
 };
 
 #endif

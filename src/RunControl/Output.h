@@ -8,7 +8,6 @@
 
 class Output
 {
-
 public:
 
     //- These functions are for arbitrary screen output
@@ -25,7 +24,6 @@ public:
 
     static void displayCaffeHeader();
     static void printLine();
-
 };
 
 #endif

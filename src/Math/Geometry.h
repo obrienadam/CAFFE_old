@@ -5,7 +5,7 @@
 
 class Geometry
 {
-
+private:
 
 public:
 
@@ -28,7 +28,6 @@ public:
 
     static double computeTetrahedronVolume(Point3D* points);
     static Point3D computeTetrahedronCentroid(Point3D* points);
-
 };
 
 #endif

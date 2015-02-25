@@ -14,7 +14,6 @@
 
 class RunControl
 {
-
     //- Typedefs
 
     typedef boost::posix_time::ptime RealTime;
@@ -63,7 +62,6 @@ public:
     //- Initializes the various case objects
 
     void initializeCase(Solver& solver, DomainInterface& domain);
-
 };
 
 #endif

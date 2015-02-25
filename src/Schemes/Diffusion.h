@@ -9,7 +9,6 @@
 
 class Diffusion : public FvScheme
 {
-
 private:
 
     //- The matrix containing the least-squares coefficients
@@ -32,7 +31,6 @@ public:
     double computeFaceFlux(int i, int j, int k, Face face);
     double computeTimeDerivative(int i, int j, int k);
     void computeSemiDiscreteForm();
-
 };
 
 #endif

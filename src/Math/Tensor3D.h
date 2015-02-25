@@ -5,7 +5,6 @@
 
 class Tensor3D
 {
-
  private:
 
  public:

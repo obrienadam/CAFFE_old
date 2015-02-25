@@ -10,14 +10,12 @@
 
 int main(int argc, const char* argv[])
 {
-
     using namespace std;
 
     Output::displayCaffeHeader();
 
     try
     {
-
         // Declare the basic program objects
 
         RunControl runControl(argc, argv);
@@ -54,28 +52,22 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-
             // Display a periodic solution update
 
             runControl.displayUpdateMessage();
-
         }
 
         // Display end message, the run ended normally
 
         runControl.displayEndMessage();
-
     }
 
     // Catch any exceptions thrown during the run
 
     catch(const char* errorMessage)
     {
-
         cerr << "Error: " << errorMessage << endl;
-
     }
 
     return 0;
-
 }

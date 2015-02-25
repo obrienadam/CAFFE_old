@@ -7,7 +7,6 @@
 
 class DomainInterface
 {
-
 protected:
 
     uint nTec360Outputs_, nOutputs_;
@@ -24,7 +23,6 @@ public:
     virtual int size() = 0;
 
     virtual void writeTec360(double time = 0.) = 0;
-
 };
 
 #endif
