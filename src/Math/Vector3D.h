@@ -5,6 +5,10 @@
 #include <string>
 #include <sstream>
 
+#include "Tensor3D.h"
+
+class Tensor3D;
+
 class Vector3D
 {
  private:
@@ -51,6 +55,7 @@ std::ostream& operator<<(std::ostream& os, const Vector3D& vec);
 //- Vector3D related functions
 
 double dotProduct(const Vector3D& u, const Vector3D& v);
+Tensor3D outerProduct(const Vector3D& u, const Vector3D& v);
 Vector3D crossProduct(const Vector3D& u, const Vector3D& v);
 Vector3D relativeVector(const Vector3D& u, const Vector3D& v);
 

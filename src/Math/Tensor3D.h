@@ -3,6 +3,8 @@
 
 #include "Vector3D.h"
 
+class Vector3D;
+
 class Tensor3D
 {
  private:
@@ -31,6 +33,6 @@ class Tensor3D
   Tensor3D& operator/=(const double& rhs);
 };
 
-Vector3D operator*(const Tensor3D& lhs, Vector3D rhs);
+Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs);
 
 #endif

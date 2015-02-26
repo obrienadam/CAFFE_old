@@ -22,3 +22,10 @@ Tensor3D::Tensor3D(double xx,
 {
 
 }
+
+Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs)
+{
+    return Vector3D(lhs.xx*rhs.x + lhs.xy*rhs.y + lhs.xz*rhs.z,
+                    lhs.yx*rhs.x + lhs.yy*rhs.y + lhs.yz*rhs.z,
+                    lhs.zx*rhs.x + lhs.zy*rhs.z + lhs.zz*rhs.z);
+}

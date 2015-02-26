@@ -157,6 +157,13 @@ double dotProduct(const Vector3D& u, const Vector3D& v)
   return u.x*v.x + u.y*v.y + u.z*v.z;
 }
 
+Tensor3D outerProduct(const Vector3D &u, const Vector3D &v)
+{
+    return Tensor3D(u.x*v.x, u.x*v.y, u.x*v.z,
+                    u.y*v.x, u.y*v.y, u.y*v.z,
+                    u.z*v.x, u.z*v.y, u.z*v.z);
+}
+
 Vector3D crossProduct(const Vector3D& u, const Vector3D& v)
 {
   return Vector3D(u.y*v.z - u.z*v.y,
