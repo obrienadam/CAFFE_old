@@ -480,6 +480,71 @@ void HexaFvmMesh::writeDebug()
         debugFout << endl;
     } // end for k
 
+    // Print cell-to-cell parameters
+
+    debugFout << "\nCell to Cell Vectors I:\n";
+
+    nI = cellToCellDistancesI_.sizeI();
+    nJ = cellToCellDistancesI_.sizeJ();
+    nK = cellToCellDistancesI_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+        for(j = 0; j < nJ; ++j)
+        {
+            for(i = 0; i < nI; ++i)
+            {
+                debugFout << cellToCellDistancesI_(i, j, k)*cellToCellDistanceVectorsI_(i, j, k) << " ";
+            } // end for i
+
+            debugFout << endl;
+        } // end for j
+
+        debugFout << endl;
+    } // end for k
+
+    debugFout << "\nCell to Cell Vectors J:\n";
+
+    nI = cellToCellDistancesJ_.sizeI();
+    nJ = cellToCellDistancesJ_.sizeJ();
+    nK = cellToCellDistancesJ_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+        for(j = 0; j < nJ; ++j)
+        {
+            for(i = 0; i < nI; ++i)
+            {
+                debugFout << cellToCellDistancesJ_(i, j, k)*cellToCellDistanceVectorsJ_(i, j, k) << " ";
+            } // end for i
+
+            debugFout << endl;
+        } // end for j
+
+        debugFout << endl;
+    } // end for k
+
+    debugFout << "\nCell to Cell Vectors K:\n";
+
+    nI = cellToCellDistancesK_.sizeI();
+    nJ = cellToCellDistancesK_.sizeJ();
+    nK = cellToCellDistancesK_.sizeK();
+
+    for(k = 0; k < nK; ++k)
+    {
+        for(j = 0; j < nJ; ++j)
+        {
+            for(i = 0; i < nI; ++i)
+            {
+                debugFout << cellToCellDistancesK_(i, j, k)*cellToCellDistanceVectorsK_(i, j, k) << " ";
+            } // end for i
+
+            debugFout << endl;
+        } // end for j
+
+        debugFout << endl;
+    } // end for k
+
     debugFout.close();
 
     Output::printToScreen("HexaFvmMesh", "finished writing debugging file.");
