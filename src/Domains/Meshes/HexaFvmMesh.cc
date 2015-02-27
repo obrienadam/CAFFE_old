@@ -236,6 +236,30 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     } // end for k
 }
 
+void HexaFvmMesh::initializeGlobalIndexMaps()
+{
+    // Index maps are used for assembling linear systems. The ordering can be chosen such that the bandwidth is minimized.
+
+    int i, j, k, nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1);
+
+    rowVectorOrdering_.allocate(nI, nJ, nK);
+    columnVectorOrdering_.allocate(nI, nJ, nK);
+    layerVectorOrdering_.allocate(nI, nJ, nK);
+
+    for(k = 0; k < nK; ++k)
+    {
+        for(j = 0; j < nJ; ++j)
+        {
+            for(i = 0; i < nI; ++i)
+            {
+                rowVectorOrdering_(i, j, k) = i + nI*j + nI*nJ*k;
+                columnVectorOrdering_(i, j, k) = j + nJ*k + nJ*nK*i;
+                layerVectorOrdering_(i, j, k) = k + nK*i + nI*nK*j;
+            }// end for i
+        } // end for j
+    } // end for k
+}
+
 // ************* Public Methods *************
 
 void HexaFvmMesh::initialize(Input &input)
@@ -252,6 +276,7 @@ void HexaFvmMesh::initialize(Input &input)
     initializeCellToCellParameters();
     initializeFaces();
     initializeCellToFaceParameters();
+    initializeGlobalIndexMaps();
 
     // All fields must now be reallocated
 
@@ -316,6 +341,16 @@ Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
     // return just to suppress compiler warning
 
     return vectorFields[end];
+}
+
+int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)
+{
+    switch(vectorOrdering)
+    {
+    case ROW: return rowVectorOrdering_(i, j, k);
+    case COLUMN: return columnVectorOrdering_(i, j, k);
+    case LAYER: return layerVectorOrdering_(i, j, k);
+    };
 }
 
 void HexaFvmMesh::writeDebug()

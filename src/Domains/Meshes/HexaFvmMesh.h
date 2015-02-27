@@ -12,6 +12,7 @@
 #include "Field.h"
 
 enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+enum Ordering{ROW, COLUMN, LAYER};
 
 class HexaFvmMesh : public StructuredMesh
 {
@@ -52,12 +53,19 @@ private:
     Array3D<double> cellToFaceDistancesT_;
     Array3D<double> cellToFaceDistancesB_;
 
+    //- Global cell index map, for implicit methods
+
+    Array3D<int> rowVectorOrdering_;
+    Array3D<int> columnVectorOrdering_;
+    Array3D<int> layerVectorOrdering_;
+
     //- Private helper methods
 
     void initializeCells();
     void initializeCellToCellParameters();
     void initializeFaces();
     void initializeCellToFaceParameters();
+    void initializeGlobalIndexMaps();
 
 public:
 
@@ -124,6 +132,8 @@ public:
     double cellToFaceDistanceS(int i, int j, int k){ return cellToFaceDistancesS_(i, j, k); }
     double cellToFaceDistanceT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
     double cellToFaceDistanceB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
+
+    int globalIndex(int i, int j, int k, Ordering vectorOrdering);
 
     int nCellsI(){ return cellCenters_.sizeI(); }
     int nCellsJ(){ return cellCenters_.sizeJ(); }
