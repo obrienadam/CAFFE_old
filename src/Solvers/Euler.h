@@ -1,14 +1,16 @@
 #ifndef EULER_H
 #define EULER_H
 
-class Euler
+#include "Solver.h"
+
+class Euler : public Solver
 {
 private:
 
 public:
 
     Euler();
-    double integrate(double ddt, double dt);
+    void solve(double maxTime, double timeStep, int maxItrs, FvScheme &scheme);
 };
 
 #endif

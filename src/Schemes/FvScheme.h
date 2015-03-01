@@ -7,20 +7,24 @@
 #include "Field.h"
 #include "HexaFvmMesh.h"
 
+enum SchemeType{EXPLICIT, IMPLICIT};
+
 class FvScheme
 {
 protected:
 
     std::string conservedFieldName_;
     HexaFvmMesh* meshPtr_;
+    SchemeType schemeType;
 
 public:
 
     FvScheme();
 
     virtual void initialize(HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
-    virtual double computeFaceFlux(int i, int j, int k, Face face) = 0;
-    virtual void computeSemiDiscreteForm() = 0;
+
+    virtual void discretize() = 0;
+    virtual void integrate(double timeStep) = 0;
 };
 
 #endif

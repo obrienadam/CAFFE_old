@@ -146,17 +146,12 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     bls_.allocate(6, 1);
 }
 
-double Diffusion::computeFaceFlux(int i, int j, int k, Face face)
+void Diffusion::discretize()
 {
 
 }
 
-double Diffusion::computeTimeDerivative(int i, int j, int k)
-{
-
-}
-
-void Diffusion::computeSemiDiscreteForm()
+void Diffusion::integrate(double timeStep)
 {
 
 }

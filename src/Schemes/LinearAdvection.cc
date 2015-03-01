@@ -11,17 +11,12 @@ void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldNa
     velocityFieldName_ = velocityFieldName;
 }
 
-double LinearAdvection::computeFaceFlux(int i, int j, int k, Face face)
+void LinearAdvection::discretize()
 {
 
 }
 
-double LinearAdvection::computeTimeDerivative(int i, int j, int k)
-{
-
-}
-
-void LinearAdvection::computeSemiDiscreteForm()
+void LinearAdvection::integrate(double timeStep)
 {
 
 }

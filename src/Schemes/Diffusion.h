@@ -28,9 +28,8 @@ public:
 
     void initialize(HexaFvmMesh &mesh, std::string conservedFieldName);
 
-    double computeFaceFlux(int i, int j, int k, Face face);
-    double computeTimeDerivative(int i, int j, int k);
-    void computeSemiDiscreteForm();
+    void discretize();
+    void integrate(double timeStep);
 };
 
 #endif

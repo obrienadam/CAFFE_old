@@ -3,7 +3,7 @@
 #include "Output.h"
 #include "RunControl.h"
 
-#include "Solver.h"
+#include "Euler.h"
 #include "HexaFvmMesh.h"
 #include "Diffusion.h"
 #include "LinearAdvection.h"
@@ -19,7 +19,7 @@ int main(int argc, const char* argv[])
         // Declare the basic program objects
 
         RunControl runControl(argc, argv);
-        Solver solver;
+        Euler solver;
         HexaFvmMesh mesh;
         Diffusion diffusion;
         LinearAdvection linearAdvection;

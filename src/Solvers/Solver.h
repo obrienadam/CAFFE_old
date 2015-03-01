@@ -2,25 +2,18 @@
 #define SOLVER_H
 
 #include "Input.h"
-#include "Euler.h"
-
-enum SolverType{EULER};
+#include "FvScheme.h"
 
 class Solver
 {
 protected:
-
-    SolverType currentSolver_;
-
-    uint nIters_;
-    Euler euler_;
 
 public:
 
     Solver();
     void initialize(Input& input);
 
-    void solve();
+    virtual void solve(double maxTime, double timeStep, int maxItrs, FvScheme& scheme) = 0;
 };
 
 #endif
