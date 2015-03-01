@@ -146,12 +146,17 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     bls_.allocate(6, 1);
 }
 
-void Diffusion::discretize()
+int Diffusion::nConservedVariables()
+{
+    return phiFieldPtr_->size();
+}
+
+void Diffusion::discretize(std::vector<double>& timeDerivatives)
 {
 
 }
 
-void Diffusion::integrate(double timeStep)
+void Diffusion::updateSolution(std::vector<double> &timeDerivatives, double timeStep)
 {
 
 }

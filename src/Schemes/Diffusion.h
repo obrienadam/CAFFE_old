@@ -27,9 +27,10 @@ public:
     ~Diffusion();
 
     void initialize(HexaFvmMesh &mesh, std::string conservedFieldName);
+    int nConservedVariables();
 
-    void discretize();
-    void integrate(double timeStep);
+    void discretize(std::vector<double>& timeDerivatives);
+    void updateSolution(std::vector<double>& timeDerivatives, double timeStep);
 };
 
 #endif

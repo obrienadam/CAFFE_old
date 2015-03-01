@@ -6,8 +6,7 @@
 FvScheme::FvScheme()
     :
       conservedFieldName_("phi"),
-      meshPtr_(NULL),
-      schemeType(EXPLICIT)
+      meshPtr_(NULL)
 {
 
 }

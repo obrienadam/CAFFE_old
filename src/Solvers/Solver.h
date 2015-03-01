@@ -13,7 +13,7 @@ public:
     Solver();
     void initialize(Input& input);
 
-    virtual void solve(double maxTime, double timeStep, int maxItrs, FvScheme& scheme) = 0;
+    virtual void solve(double startTime, double maxTime, double timeStep, int maxItrs, FvScheme& scheme) = 0;
 };
 
 #endif

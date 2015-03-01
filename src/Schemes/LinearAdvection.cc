@@ -11,12 +11,17 @@ void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldNa
     velocityFieldName_ = velocityFieldName;
 }
 
-void LinearAdvection::discretize()
+int LinearAdvection::nConservedVariables()
 {
 
 }
 
-void LinearAdvection::integrate(double timeStep)
+void LinearAdvection::discretize(std::vector<double> &timeDerivatives)
+{
+
+}
+
+void LinearAdvection::updateSolution(std::vector<double> &timeDerivatives, double timeStep)
 {
 
 }

@@ -5,17 +5,21 @@ Euler::Euler()
 
 }
 
-void Euler::solve(double maxTime, double timeStep, int maxItrs, FvScheme &scheme)
+void Euler::solve(double startTime, double maxTime, double timeStep, int maxItrs, FvScheme &scheme)
 {
     double time;
-    int itrs;
+    int itrs, i, n;
+
+    timeDerivatives_.resize(scheme.nConservedVariables());
+
+    n = timeDerivatives_.size();
 
     Output::printToScreen("Euler", "beginning time-marching.");
 
-    for(time = 0., itrs = 0; time < maxTime && itrs < maxItrs; time += timeStep, ++itrs)
+    for(time = startTime, itrs = 0; time < maxTime && itrs < maxItrs; time += timeStep, ++itrs)
     {
-        scheme.discretize();
-        scheme.integrate(timeStep);
+        scheme.discretize(timeDerivatives_);
+        scheme.updateSolution(timeDerivatives_, timeStep);
     }
 
     Output::printToScreen("Euler", "time-marching complete.");
