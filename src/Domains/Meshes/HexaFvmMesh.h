@@ -105,19 +105,19 @@ public:
     double faceAreaT(int i, int j, int k){ return faceAreasK_(i, j, k + 1); }
     double faceAreaB(int i, int j, int k){ return faceAreasK_(i, j, k); }
 
-    Vector3D nesE(int i, int j, int k){ return cellToCellDistanceVectorsI_(i, j, k); }
-    Vector3D nesW(int i, int j, int k){ return -cellToCellDistanceVectorsI_(i - 1, j, k); }
-    Vector3D nesN(int i, int j, int k){ return cellToCellDistanceVectorsJ_(i, j, k); }
-    Vector3D nesS(int i, int j, int k){ return -cellToCellDistanceVectorsJ_(i, j - 1, k); }
-    Vector3D nesT(int i, int j, int k){ return cellToCellDistanceVectorsK_(i, j, k); }
-    Vector3D nesB(int i, int j, int k){ return -cellToCellDistanceVectorsK_(i, j, k - 1); }
+    Vector3D nesE(int i, int j, int k);
+    Vector3D nesW(int i, int j, int k);
+    Vector3D nesN(int i, int j, int k);
+    Vector3D nesS(int i, int j, int k);
+    Vector3D nesT(int i, int j, int k);
+    Vector3D nesB(int i, int j, int k);
 
-    double cellToCellDistanceE(int i, int j, int k){ return cellToCellDistancesI_(i, j, k); }
-    double cellToCellDistanceW(int i, int j, int k){ return cellToCellDistancesI_(i - 1, j, k); }
-    double cellToCellDistanceN(int i, int j, int k){ return cellToCellDistancesJ_(i, j, k); }
-    double cellToCellDistanceS(int i, int j, int k){ return cellToCellDistancesJ_(i, j - 1, k); }
-    double cellToCellDistanceT(int i, int j, int k){ return cellToCellDistancesK_(i, j, k); }
-    double cellToCellDistanceB(int i, int j, int k){ return cellToCellDistancesK_(i, j, k - 1); }
+    double cellToCellDistanceE(int i, int j, int k);
+    double cellToCellDistanceW(int i, int j, int k);
+    double cellToCellDistanceN(int i, int j, int k);
+    double cellToCellDistanceS(int i, int j, int k);
+    double cellToCellDistanceT(int i, int j, int k);
+    double cellToCellDistanceB(int i, int j, int k);
 
     Vector3D nefE(int i, int j, int k){ return cellToFaceDistanceVectorsE_(i, j, k); }
     Vector3D nefW(int i, int j, int k){ return cellToFaceDistanceVectorsW_(i, j, k); }

@@ -351,6 +351,103 @@ int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)
     case COLUMN: return columnVectorOrdering_(i, j, k);
     case LAYER: return layerVectorOrdering_(i, j, k);
     };
+
+    return rowVectorOrdering_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::nesE(int i, int j, int k)
+{
+    if(i == cellCenters_.sizeI() - 1)
+        return cellToFaceDistanceVectorsE_(i, j, k);
+
+    return cellToCellDistanceVectorsI_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::nesW(int i, int j, int k)
+{
+    if(i == 0)
+        return cellToFaceDistanceVectorsW_(i, j, k);
+
+    return -cellToCellDistanceVectorsI_(i - 1, j, k);
+}
+
+Vector3D HexaFvmMesh::nesN(int i, int j, int k)
+{
+    if(j == cellCenters_.sizeJ() - 1)
+        return cellToFaceDistanceVectorsN_(i, j, k);
+
+    return cellToCellDistanceVectorsJ_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::nesS(int i, int j, int k)
+{
+    if(j == 0)
+        return cellToFaceDistanceVectorsS_(i, j, k);
+
+    return -cellToCellDistanceVectorsJ_(i, j - 1, k);
+}
+Vector3D HexaFvmMesh::nesT(int i, int j, int k)
+{
+    if(k == cellCenters_.sizeK() - 1)
+        return cellToFaceDistanceVectorsT_(i, j, k);
+
+    return cellToCellDistanceVectorsK_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::nesB(int i, int j, int k)
+{
+    if(k == 0)
+        return cellToFaceDistanceVectorsB_(i, j, k);
+
+    return -cellToCellDistanceVectorsK_(i, j, k - 1);
+}
+
+double HexaFvmMesh::cellToCellDistanceE(int i, int j, int k)
+{
+    if(i == cellCenters_.sizeI() - 1)
+        return cellToFaceDistancesE_(i, j, k);
+
+    return cellToCellDistancesI_(i, j, k);
+}
+
+double HexaFvmMesh::cellToCellDistanceW(int i, int j, int k)
+{
+    if(i == 0)
+        return cellToFaceDistancesW_(i, j, k);
+
+    return cellToCellDistancesI_(i - 1, j, k);
+}
+
+double HexaFvmMesh::cellToCellDistanceN(int i, int j, int k)
+{
+    if(j == cellCenters_.sizeJ() - 1)
+        return cellToFaceDistancesN_(i, j, k);
+
+    return cellToCellDistancesJ_(i, j, k);
+}
+
+double HexaFvmMesh::cellToCellDistanceS(int i, int j, int k)
+{
+    if(j == 0)
+        return cellToFaceDistancesS_(i, j, k);
+
+    return cellToCellDistancesJ_(i, j - 1, k);
+}
+
+double HexaFvmMesh::cellToCellDistanceT(int i, int j, int k)
+{
+    if(k == cellCenters_.sizeK() - 1)
+        return cellToFaceDistancesT_(i, j, k);
+
+    return cellToCellDistancesK_(i, j, k);
+}
+
+double HexaFvmMesh::cellToCellDistanceB(int i, int j, int k)
+{
+    if(k == 0)
+        return cellToFaceDistancesB_(i, j, k);
+
+    return cellToCellDistancesK_(i, j, k - 1);
 }
 
 void HexaFvmMesh::writeDebug()
