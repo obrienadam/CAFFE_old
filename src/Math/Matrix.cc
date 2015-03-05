@@ -1,13 +1,10 @@
 #include <cstdlib>
 #include <iostream>
 
-// The following code is to work around a bug on lapack-3.4.2 on Fedora 20, and should be removed once the package
-// is updated
+// The following directives are to work around a bug in lapack-3.4.2 versions and earlier
 
-//#include <complex.h>
-//#define lapack_complex_float    float _Complex
-//#define lapack_complex_double   double _Complex
-
+#define lapack_complex_float    float _Complex
+#define lapack_complex_double   double _Complex
 #include <lapacke/lapacke.h>
 
 #include "Matrix.h"
