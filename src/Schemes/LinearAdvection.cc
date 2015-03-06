@@ -21,7 +21,7 @@ void LinearAdvection::discretize(std::vector<double> &timeDerivatives)
 
 }
 
-void LinearAdvection::updateSolution(std::vector<double> &timeDerivatives, double timeStep)
+void LinearAdvection::updateSolution(std::vector<double> &timeDerivatives)
 {
 
 }

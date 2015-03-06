@@ -14,7 +14,7 @@ private:
 public:
 
     Euler();
-    void solve(double startTime, double maxTime, double timeStep, int maxItrs, FvScheme &scheme);
+    void solve(double timeStep, FvScheme &scheme);
 };
 
 #endif

@@ -52,8 +52,6 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            // Display a periodic solution update
-
             runControl.displayUpdateMessage();
         }
 

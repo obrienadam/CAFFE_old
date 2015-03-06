@@ -97,7 +97,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
 
 }
 
-void Diffusion::updateSolution(std::vector<double> &timeDerivatives, double timeStep)
+void Diffusion::updateSolution(std::vector<double> &timeDerivatives)
 {
 
 }

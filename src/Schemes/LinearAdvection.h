@@ -21,7 +21,7 @@ public:
     int nConservedVariables();
 
     void discretize(std::vector<double>& timeDerivatives);
-    void updateSolution(std::vector<double>& timeDerivatives, double timeStep);
+    void updateSolution(std::vector<double>& timeDerivatives);
 };
 
 #endif
