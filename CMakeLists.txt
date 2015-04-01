@@ -45,3 +45,7 @@ add_subdirectory(src)
 # Modules
 
 add_subdirectory(Modules)
+
+# Testing
+
+add_subdirectory(test)

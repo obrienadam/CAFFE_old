@@ -1,3 +1,27 @@
+/**
+ * @file    Matrix.h
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * Contains the interface for class Matrix, which is used for storing,
+ * solving and performing other linear algebra operations.
+ */
+
 #ifndef MATRIX_H
 #define MATRIX_H
 
@@ -16,12 +40,12 @@ public:
     //- Constructors, copy constructors and destructors
 
     Matrix(int m = 0, int n = 0);
+    Matrix(double **elements, int m, int n);
+    Matrix(double *elements, int m, int n);
     Matrix(const Matrix& other);
     ~Matrix();
 
     Matrix& operator=(const Matrix& rhs);
-
-    //- Memory management
 
     void allocate(int m, int n);
     void deallocate();
@@ -29,24 +53,43 @@ public:
     //- Access
 
     double& operator()(int i, int j);
-    int nRows(){return m_;}
-    int nCols(){return n_;}
+    int nRows() const {return m_;}
+    int nCols() const {return n_;}
     int nElements(){return nElements_;}
 
+    /** Add a 3D vector to a row, with the first element at i, j.
+     */
     void addVector3DToRow(const Vector3D& vec, int i, int j);
 
-    //- Solution methods (lapacke wrappers)
-
+    /** Solve a least squares problem.
+     * @param b a matrix of rhs vectors
+     */
     void solveLeastSquares(Matrix& b);
+
+    /** Solve the matrix using an LU factorization.
+    * @param b a matrix of rhs vectors
+    */
     void solve(Matrix& b);
 
-    //- Matrix manipulation
+    /** Compute the inverse using an LU factorization.
+     */
+    Matrix& inverse();
 
-    void transpose();
+    /** Transpose the matrix.
+     */
+    Matrix& transpose();
 
-    //- Debugging and printing
+    Matrix& operator+=(Matrix& rhs);
+    Matrix& operator-=(Matrix& rhs);
+    Matrix& operator*=(double alpha);
+    Matrix& operator/=(double alpha);
 
+    /** Print the matrix to the console.
+     */
     void print();
+
+    friend Matrix operator*(Matrix& A, Matrix& B);
+    friend Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 };
 
 //- Solution functions. These will not modify the original matrices
@@ -55,5 +98,10 @@ Matrix solveLeastSquares(Matrix A, Matrix b);
 Matrix solve(Matrix A, Matrix b);
 Matrix eye(int m);
 Matrix random(int m, int n, double min, double max);
+Matrix transpose(Matrix matrix);
+Matrix inverse(Matrix matrix);
+
+Matrix operator*(Matrix& A, Matrix& B);
+Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 
 #endif

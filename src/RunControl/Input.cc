@@ -18,8 +18,7 @@
  *
  * @section DESCRIPTION
  *
- * Contains all of the implementations for the methods of the Input
- * class.
+ * Contains all of the implementations for the methods of class Input.
  */
 
 #include <iostream>
@@ -31,24 +30,24 @@
 
 Input::Input()
 {
-    inputDoubles["simStartTime"] = 0.;                  ///< Start time in simulation time.
-    inputDoubles["maxSimTime"] = 1.;                    ///< End time in simulation time.
-    inputDoubles["timeStep"] = 1e-4;                    ///< Fixed time step.
-    inputDoubles["maxCpuTime"] = 100;                   ///< Maximum allowed CPU time.
-    inputDoubles["maxRealTime"] = 48;                   ///< Maximum allowed real time.
+    inputDoubles["simStartTime"] = 0.;                  ///< Start time in simulation time
+    inputDoubles["maxSimTime"] = 1.;                    ///< End time in simulation time
+    inputDoubles["timeStep"] = 1e-4;                    ///< Fixed time step
+    inputDoubles["maxCpuTime"] = 100;                   ///< Maximum allowed CPU time
+    inputDoubles["maxRealTime"] = 48;                   ///< Maximum allowed real time
 
-    inputStrings["solver"] = "Euler";                   ///< The solver type.
-    inputStrings["simTimeUnits"] = "seconds";           ///< Simulation time units.
-    inputStrings["cpuTimeUnits"] = "years";             ///< CPU time units.
-    inputStrings["reaTimeUnits"] = "hours";             ///< Real time units.
+    inputStrings["solver"] = "Euler";                   ///< The solver type
+    inputStrings["simTimeUnits"] = "seconds";           ///< Simulation time units
+    inputStrings["cpuTimeUnits"] = "years";             ///< CPU time units
+    inputStrings["reaTimeUnits"] = "hours";             ///< Real time units
 
-    inputInts["maxItrs"] = 30000;                       ///< Maximum allowed iterations.
+    inputInts["maxItrs"] = 30000;                       ///< Maximum allowed iterations
 
-    inputStrings["terminationCondition"] = "simTime";   ///< The simulation termination condition.
-    inputInts["fileWriteInterval"] = 50;                ///< Number of iterations per file write.
-    inputInts["screenWriteInterval"] = 50;              ///< Number of interations before console output.
+    inputStrings["terminationCondition"] = "simTime";   ///< The simulation termination condition
+    inputInts["fileWriteInterval"] = 50;                ///< Number of iterations per file write
+    inputInts["screenWriteInterval"] = 50;              ///< Number of interations before console output
 
-    inputStrings["domainFile"] = "domain.in";           ///< Name of the domain input file.
+    inputStrings["domainFile"] = "domain.in";           ///< Name of the domain input file
 }
 
 Input::Input(std::string filename)
@@ -70,15 +69,11 @@ void Input::openInputFile(std::string filename)
 
     string buffer;
 
-    // Open an input file
-
     if(fin_.is_open())
         fin_.close();
 
     filename_ = filename;
     fin_.open(filename.c_str());
-
-    //- Check if the file was found
 
     if(!fin_.is_open())
     {

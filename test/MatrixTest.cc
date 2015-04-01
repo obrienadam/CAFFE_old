@@ -3,87 +3,69 @@
 #include "../src/RunControl/Output.h"
 #include "../src/Math/Matrix.h"
 
-using namespace std;
-
 int main()
 {
-  using namespace std;
+    using namespace std;
 
-  Matrix A(10, 10), B, C, b, x;
-  
-  cout << "An identity matrix:" << endl;
+    double a[16] = {1, 2, 4, 3, 2, 3, 4, 1, 9, 5, 3, 2, 1, 5, 3, 5};
+    double b[4] = {1, 2, 3, 4};
+    double c[4] = {-0.1538, 1.0000, -0.1538, -0.0769};
+    Matrix A(a, 4, 4), B(b, 4, 1), C(c, 4, 1);
 
-  A = eye(5);
-  A.print();
+    try{
 
-  cout << endl << "A random matrix:" << endl;
+        cout << "Allocating 5x5 matrices..." << endl;
 
-  A = random(8, 8, -5, 5);
-  A.print();
+        cout << "A contains:" << endl;
 
-  cout << endl << "Another random matrix:" << endl;
+        A.print();
 
-  B = random(8, 8, -6, 9);
-  B.print();
+        cout << "B contains:" << endl;
 
-  cout << endl <<"Test a known solution:" << endl;
+        B.print();
 
-  A.allocate(3, 3);
-  A(0, 0) = 3; A(0, 1) = 2; A(0, 2) = -1;
-  A(1, 0) = 2; A(1, 1) = -2; A(1, 2) = 4;
-  A(2, 0) = -1; A(2, 1) = 0.5; A(2, 2) = -1;
+        cout << "C is the solution of AC = B and contains:" << endl;
 
-  cout << endl << "A=" << endl;
-  A.print();
+        C.print();
 
-  B.allocate(3, 1);
-  B(0, 0) = 1;
-  B(1, 0) = -2;
-  B(2, 0) = 0;
+        cout << "Testing the linear solver (should be the same vector as above):" << endl;
 
-  cout << endl << "B=" << endl;
-  B.print();
+        C = solve(A, B);
+        C.print();
 
-  C = solve(A, B);
+        cout << "A still contains:" << endl;
 
-  cout << endl << "C=" << endl;
-  C.print();
+        A.print();
 
-  cout << endl << "Testing the least squares function by solving an over-determined system:" << endl;
+        cout << "Inverting A:" << endl;
 
-  B = random(10, 3, 0, 9);
-  A = random(10, 8, 0, 4);
-  C = solveLeastSquares(A, B);
-  C.print();
+        C = inverse(A);
+        C.print();
 
-  cout.flush();
-  cout << endl << "Test the least squares function by solving an over-determined system with known solution:" << endl;
+        cout << "Multiplying A*A^-1:" << endl;
 
-  A.allocate(5, 3);
-  B.allocate(5, 2);
+        B = A*C;
+        B.print();
 
-  A(0, 0) = 1; A(0, 1) = 1; A(0, 2) = 1;
-  A(1, 0) = 2; A(1, 1) = 3; A(1, 2) = 4;
-  A(2, 0) = 3; A(2, 1) = 5; A(2, 2) = 2;
-  A(3, 0) = 4; A(3, 1) = 2; A(3, 2) = 5;
-  A(4, 0) = 5; A(4, 1) = 4; A(4, 2) = 3;
-  
-  B(0, 0) = -10; B(0, 1) = -3;
-  B(1, 0) = 12; B(1, 1) = 14;
-  B(2, 0) = 14; B(2, 1) = 12;
-  B(3, 0) = 16; B(3, 1) = 16;
-  B(4, 0) = 18; B(4, 1) = 16;
-  
-  cout << endl << "A=" << endl;
-  A.print();
+        cout << "Multiplying A*A-1*A:" << endl;
 
-  cout << endl << "B=" << endl;
-  B.print();
+        C = B*A;
+        C.print();
 
-  C.allocate(3, 2);
-  C = solveLeastSquares(A, B);
+        cout << "Allocating a large matrix:" << endl;
 
-  cout << endl << "C=" << endl;
-  C.print();
-  
+        A = random(1000, 1000, 0, 9);
+        B = random(1000, 1000, -5, 9);
+
+        cout << "Solving large matrix with a large number of rhs vectors:" << endl;
+
+        A.solve(B);
+
+    }
+    catch (const char* errorMessage)
+    {
+        cerr << errorMessage << endl;
+    }
+
+    return 0;
 }

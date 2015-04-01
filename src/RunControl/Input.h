@@ -35,9 +35,7 @@ class Input
 private:
 
     std::string filename_;
-    std::ifstream fin_;
-
-    void processBuffer(std::string& buffer);
+    std::ifstream fin_;                                 ///< The input file stream
 
 public:
 
@@ -45,6 +43,8 @@ public:
     std::map<std::string, double> inputDoubles;
     std::map<std::string, std::string> inputStrings;
 
+    /** Default constructor. Sets all default input values.
+     */
     Input();
 
     /** Constructor that opens an input file.
