@@ -94,7 +94,10 @@ int Diffusion::nConservedVariables()
 
 void Diffusion::discretize(std::vector<double>& timeDerivatives)
 {
+    Field<double>& phiField = *phiFieldPtr_;
+    HexaFvmMesh& mesh = *meshPtr_;
 
+    computeCellCenteredGradients();
 }
 
 void Diffusion::updateSolution(std::vector<double> &timeDerivatives)

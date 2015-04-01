@@ -21,3 +21,7 @@ lib
 # Tecplot files
 *.dat
 *.phy
+
+# Doxygen directories
+html
+latex

@@ -1,3 +1,27 @@
+/**
+ * @file    Input.cc
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * Contains all of the implementations for the methods of the Input
+ * class.
+ */
+
 #include <iostream>
 
 #include <boost/algorithm/string/erase.hpp>
@@ -7,34 +31,24 @@
 
 Input::Input()
 {
-    //- Load all of the default input values, which may be overridden later
+    inputDoubles["simStartTime"] = 0.;                  ///< Start time in simulation time.
+    inputDoubles["maxSimTime"] = 1.;                    ///< End time in simulation time.
+    inputDoubles["timeStep"] = 1e-4;                    ///< Fixed time step.
+    inputDoubles["maxCpuTime"] = 100;                   ///< Maximum allowed CPU time.
+    inputDoubles["maxRealTime"] = 48;                   ///< Maximum allowed real time.
 
-    // Time input data
+    inputStrings["solver"] = "Euler";                   ///< The solver type.
+    inputStrings["simTimeUnits"] = "seconds";           ///< Simulation time units.
+    inputStrings["cpuTimeUnits"] = "years";             ///< CPU time units.
+    inputStrings["reaTimeUnits"] = "hours";             ///< Real time units.
 
-    inputDoubles["simStartTime"] = 0.;
-    inputDoubles["maxSimTime"] = 1.;
-    inputDoubles["timeStep"] = 1e-4;
-    inputDoubles["maxCpuTime"] = 100;
-    inputDoubles["maxRealTime"] = 48;
+    inputInts["maxItrs"] = 30000;                       ///< Maximum allowed iterations.
 
-    inputStrings["solver"] = "Euler";
-    inputStrings["simTimeUnits"] = "seconds";
-    inputStrings["cpuTimeUnits"] = "years";
-    inputStrings["reaTimeUnits"] = "hours";
+    inputStrings["terminationCondition"] = "simTime";   ///< The simulation termination condition.
+    inputInts["fileWriteInterval"] = 50;                ///< Number of iterations per file write.
+    inputInts["screenWriteInterval"] = 50;              ///< Number of interations before console output.
 
-    // Iteration related data
-
-    inputInts["maxItrs"] = 30000;
-
-    // Run control related data
-
-    inputStrings["terminationCondition"] = "simTime";
-    inputInts["fileWriteInterval"] = 50;
-    inputInts["screenWriteInterval"] = 50;
-
-    // Domain related data
-
-    inputStrings["domainFile"] = "domain.in";
+    inputStrings["domainFile"] = "domain.in";           ///< Name of the domain input file.
 }
 
 Input::Input(std::string filename)
