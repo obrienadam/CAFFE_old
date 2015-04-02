@@ -61,6 +61,32 @@ int main()
 
         A.solve(B);
 
+        cout << "Setting up a least squares problem:" << endl;
+
+        A = random(10, 3, -9, 9);
+        B = random(10, 1, -9, 9);
+
+        cout << "Matrix A:" << endl;
+
+        A.print();
+
+        cout << "Matrix B:" << endl;
+
+        B.print();
+
+        C = solveLeastSquares(A, B);
+
+        cout << "Solution:" << endl;
+
+        C.print();
+
+        cout << "Solution when computed second way:" << endl;
+
+        B = transpose(A)*B;
+        A = transpose(A)*A;
+        C = solve(A, B);
+        C.print();
+
     }
     catch (const char* errorMessage)
     {

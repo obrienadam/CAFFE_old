@@ -134,6 +134,15 @@ void Matrix::deallocate()
     nElements_ = m_ = n_ = 0;
 }
 
+void Matrix::reshape(int m, int n)
+{
+    if(m*n != nElements_)
+        Output::raiseException("Matrix", "reshape", "invalid number of rows and/or columns selected.");
+
+    m_ = m;
+    n_ = n;
+}
+
 void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
 {
     elements_[n_*i + j] = vec.x;
@@ -173,13 +182,16 @@ Matrix& Matrix::inverse()
 
 Matrix& Matrix::transpose()
 {
+    Matrix tmp(*this);
     int i, j;
 
-    for(i = 1; i < m_; ++i)
+    reshape(n_, m_);
+
+    for(i = 0; i < m_; ++i)
     {
-        for(j = 0; j < i; ++j)
+        for(j = 0; j < n_; ++j)
         {
-            std::swap(operator ()(i, j), operator ()(j, i));
+            std::swap(operator ()(i, j), tmp(j, i));
         }
     }
 
@@ -252,7 +264,7 @@ Matrix inverse(Matrix matrix)
     return matrix;
 }
 
-Matrix operator*(Matrix& A, Matrix& B)
+Matrix operator*(Matrix A, Matrix B)
 {
     Matrix C(A.m_, B.n_);
     return multiply(A, B, C);

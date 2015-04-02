@@ -40,7 +40,21 @@ public:
     //- Constructors, copy constructors and destructors
 
     Matrix(int m = 0, int n = 0);
+
+    /**
+     * @brief Matrix
+     * @param elements 2D array containing the elements
+     * @param m number of rows of elements
+     * @param n number of columns of elements
+     */
     Matrix(double **elements, int m, int n);
+
+    /**
+     * @brief Matrix
+     * @param elements 1D array containing the elements
+     * @param m number of rows
+     * @param n number of columns
+     */
     Matrix(double *elements, int m, int n);
     Matrix(const Matrix& other);
     ~Matrix();
@@ -50,7 +64,12 @@ public:
     void allocate(int m, int n);
     void deallocate();
 
-    //- Access
+    /**
+     * @brief reshape change the shape of the matrix
+     * @param m new number of rows
+     * @param n new number of columns
+     */
+    void reshape(int m, int n);
 
     double& operator()(int i, int j);
     int nRows() const {return m_;}
@@ -88,7 +107,7 @@ public:
      */
     void print();
 
-    friend Matrix operator*(Matrix& A, Matrix& B);
+    friend Matrix operator*(Matrix A, Matrix B);
     friend Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 };
 
@@ -101,7 +120,7 @@ Matrix random(int m, int n, double min, double max);
 Matrix transpose(Matrix matrix);
 Matrix inverse(Matrix matrix);
 
-Matrix operator*(Matrix& A, Matrix& B);
+Matrix operator*(Matrix A, Matrix B);
 Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 
 #endif
