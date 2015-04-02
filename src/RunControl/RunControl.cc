@@ -18,7 +18,7 @@
  *
  * @section DESCRIPTION
  *
- * Contains the implementations for class RunControl.
+ * This file contains the implementations for class RunControl.
  */
 
 #include <sstream>
@@ -100,13 +100,13 @@ void RunControl::displayStartMessage()
 
     message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << ".";
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 
     message.str("");
 
     message << "Iterations beginning on " << startTime_ << ".";
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 }
 
 void RunControl::displayUpdateMessage()
@@ -137,7 +137,7 @@ void RunControl::displayUpdateMessage()
             << "Elapsed time: " << elapsedTime_ << "\n"
             << "CPU time: " << cpuTime_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 }
 
 void RunControl::displayEndMessage()
@@ -150,31 +150,31 @@ void RunControl::displayEndMessage()
 
     message << "Iterations complete on " << startTime_ + elapsedTime_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 
     message.str("");
 
     message << "Iterations completed: " << itrs_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 
     message.str("");
 
     message << "Simulation time: " << simTime_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 
     message.str("");
 
     message << "Elapsed time: " << elapsedTime_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
 
     message.str("");
 
     message << "CPU time: " << cpuTime_;
 
-    Output::printToScreen(message.str());
+    Output::print(message.str());
     Output::printLine();
 }
 

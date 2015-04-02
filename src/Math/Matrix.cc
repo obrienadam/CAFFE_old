@@ -94,10 +94,13 @@ Matrix& Matrix::operator=(const Matrix& rhs)
     if(this == &rhs)
         return *this;
 
-    if(nElements_ != rhs.nElements_)
+    if(nElements_ < rhs.nElements_)
     {
         allocate(rhs.m_, rhs.n_);
     }
+
+    m_ = rhs.m_;
+    n_ = rhs.n_;
 
     for(i = 0; i < nElements_; ++i)
         elements_[i] = rhs.elements_[i];
@@ -153,7 +156,7 @@ void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
 double& Matrix::operator()(int i, int j)
 {
     if(i > m_ - 1 || i < 0 || j > n_ - 1 || j < 0)
-        Output::raiseException("Matrix", "operator()", "tried to access element outside of the array bounds.");
+        Output::raiseException("Matrix", "operator()", "tried to access element outside of the matrix.");
 
     return elements_[n_*i + j];
 }
@@ -264,7 +267,7 @@ Matrix inverse(Matrix matrix)
     return matrix;
 }
 
-Matrix operator*(Matrix A, Matrix B)
+Matrix operator*(Matrix A, Matrix& B)
 {
     Matrix C(A.m_, B.n_);
     return multiply(A, B, C);
@@ -273,6 +276,8 @@ Matrix operator*(Matrix A, Matrix B)
 Matrix& multiply(Matrix &A, Matrix &B, Matrix& C)
 {
     int i, j, k;
+
+    std::cout << A.nCols() << " " << B.nRows() << std::endl;
 
     if (A.n_ != B.m_)
         Output::raiseException("Matrix", "operator*", "Number of columns of A different than number of rows of B.");

@@ -18,7 +18,8 @@
  *
  * @section DESCRIPTION
  *
- * Contains the implementations for the methods of class Diffusion.
+ * This file contains the implementations for the methods of class
+ * Diffusion.
  */
 
 #include "Diffusion.h"
@@ -28,8 +29,14 @@
 
 void Diffusion::computeCellCenteredGradients()
 {
-    int i, j, k, nCellsI(gradPhi_.sizeI()), nCellsJ(gradPhi_.sizeJ()), nCellsK(gradPhi_.sizeK());
+    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
+    Matrix aLs(6, 3), bLs(6, 1), xLs(3, 1);
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
 
     for(k = 0; k < nCellsK; ++k)
     {
@@ -37,24 +44,21 @@ void Diffusion::computeCellCenteredGradients()
         {
             for(i = 0; i < nCellsI; ++i)
             {
-                Als_ = cellAls_(i, j, k);
+                bLs(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
+                bLs(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
+                bLs(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
+                bLs(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
+                bLs(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
+                bLs(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
 
-                bls_(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
-                bls_(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
-                bls_(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
-                bls_(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
-                bls_(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
-                bls_(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
+                xLs = solveLeastSquares(lsMatrices_(i, j, k), bLs);
 
-                Als_.solveLeastSquares(bls_);
-
-                gradPhi_(i, j, k).x = bls_(0, 0);
-                gradPhi_(i, j, k).y = bls_(1, 0);
-                gradPhi_(i, j, k).z = bls_(2, 0);
-            } // end for i
-        } // end for j
-    } // end for k
-
+                gradPhiField_(i, j, k).x = xLs(0, 0);
+                gradPhiField_(i, j, k).y = xLs(1, 0);
+                gradPhiField_(i, j, k).z = xLs(2, 0);
+            }
+        }
+    }
 }
 
 // ************* Public Methods *************
@@ -72,15 +76,17 @@ Diffusion::~Diffusion()
 void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     int i, j, k, nCellsI, nCellsJ, nCellsK;
+    Vector3D tmp;
+    Matrix lsMatrix(6, 3);
 
     FvScheme::initialize(mesh, conservedFieldName);
-
-    nCellsI = meshPtr_->nCellsI();
-    nCellsJ = meshPtr_->nCellsJ();
-    nCellsK = meshPtr_->nCellsK();
-
     phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
-    cellAls_.allocate(nCellsI, nCellsJ, nCellsK);
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    lsMatrices_.allocate(nCellsI, nCellsJ, nCellsK);
 
     for(k = 0; k < nCellsK; ++k)
     {
@@ -88,26 +94,19 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
         {
             for(i = 0; i < nCellsI; ++i)
             {
-                // Allocate the least squares matrix
+                lsMatrix.addVector3DToRow(mesh.nesE(i, j, k)*mesh.cellToCellDistanceE(i, j, k), 0, 0);
+                lsMatrix.addVector3DToRow(mesh.nesW(i, j, k)*mesh.cellToCellDistanceW(i, j, k), 1, 0);
+                lsMatrix.addVector3DToRow(mesh.nesN(i, j, k)*mesh.cellToCellDistanceN(i, j, k), 2, 0);
+                lsMatrix.addVector3DToRow(mesh.nesS(i, j, k)*mesh.cellToCellDistanceS(i, j, k), 3, 0);
+                lsMatrix.addVector3DToRow(mesh.nesT(i, j, k)*mesh.cellToCellDistanceT(i, j, k), 4, 0);
+                lsMatrix.addVector3DToRow(mesh.nesB(i, j, k)*mesh.cellToCellDistanceB(i, j, k), 5, 0);
 
-                cellAls_(i, j, k).allocate(6, 3);
+                lsMatrices_(i, j, k) = lsMatrix;
+            }
+        }
+    }
 
-                // Populate the least squares matrix
-
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceE(i, j, k)*meshPtr_->nesE(i, j, k), 0, 0);
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceW(i, j, k)*meshPtr_->nesW(i, j, k), 1, 0);
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceN(i, j, k)*meshPtr_->nesN(i, j, k), 2, 0);
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceS(i, j, k)*meshPtr_->nesS(i, j, k), 3, 0);
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceT(i, j, k)*meshPtr_->nesT(i, j, k), 4, 0);
-                cellAls_(i, j, k).addVector3DToRow(meshPtr_->cellToCellDistanceB(i, j, k)*meshPtr_->nesB(i, j, k), 5, 0);
-
-            } // end for i
-        } // end for j
-    } // end for k
-
-    gradPhi_.allocate(nCellsI, nCellsJ, nCellsK);
-    Als_.allocate(6, 3);
-    bls_.allocate(6, 1);
+    gradPhiField_.allocate(nCellsI, nCellsJ, nCellsK);
 }
 
 int Diffusion::nConservedVariables()

@@ -18,8 +18,8 @@
  *
  * @section DESCRIPTION
  *
- * Contains the interface for class RunControl, which is responsible
- * for setting up and running simulations.
+ * This file contains the interface for class RunControl, which is
+ * responsible for setting up and controlling the flow of simulations.
  */
 
 #ifndef RUN_CONTROL_H

@@ -18,9 +18,8 @@
  *
  * @section DESCRIPTION
  *
- * The input class contains all input fields required for setting up
- * and running cases. Contains necessary methods for reading input
- * files.
+ * This file contains the interface for class Input, which contains
+ * fields for setting up and running simulations.
  */
 
 #ifndef INPUT_H

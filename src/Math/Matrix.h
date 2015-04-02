@@ -107,7 +107,7 @@ public:
      */
     void print();
 
-    friend Matrix operator*(Matrix A, Matrix B);
+    friend Matrix operator*(Matrix A, Matrix& B);
     friend Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 };
 
@@ -120,7 +120,7 @@ Matrix random(int m, int n, double min, double max);
 Matrix transpose(Matrix matrix);
 Matrix inverse(Matrix matrix);
 
-Matrix operator*(Matrix A, Matrix B);
+Matrix operator*(Matrix A, Matrix& B);
 Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
 
 #endif

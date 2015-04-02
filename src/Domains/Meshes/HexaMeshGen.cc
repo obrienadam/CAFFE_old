@@ -69,7 +69,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         vertices_.push_back(Point3D(buffer));
     }
 
-    Output::printToScreen("HexaMeshGen: Successfully initialized domain vertices.");
+    Output::print("HexaMeshGen: Successfully initialized domain vertices.");
 
     checkMesh();
 }
@@ -133,7 +133,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         }
     }
 
-    Output::printToScreen("HexaMeshGen: Successfully allocated mesh nodes.");
+    Output::print("HexaMeshGen: Successfully allocated mesh nodes.");
 }
 
 void HexaMeshGen::readMeshInputFile()
@@ -261,7 +261,7 @@ void HexaMeshGen::generateMesh()
         } // end for j
     } // end for k
 
-    Output::printToScreen("HexaMeshGen: Mesh generation complete.");
+    Output::print("HexaMeshGen: Mesh generation complete.");
 }
 
 void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)

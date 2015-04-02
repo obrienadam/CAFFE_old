@@ -18,8 +18,8 @@
  *
  * @section DESCRIPTION
  *
- * Contains the interface for class Diffusion, which is a class containing
- * methods for discretizing diffusion problems.
+ * This file contains the interface for class Diffusion, which is a
+ * class containing methods for discretizing diffusion problems.
  */
 
 #ifndef DIFFUSION_H
@@ -35,13 +35,11 @@ class Diffusion : public FvScheme
 {
 private:
 
-    Array3D<Matrix> cellAls_;           ///< Contains the least squares matrices used for gradient reconstruction.
-    Matrix Als_;
-    Matrix bls_;
+    Array3D<Matrix> lsMatrices_;
     Field<double>* phiFieldPtr_;
-    Field<Vector3D> gradPhi_;
-
-    /** Helper function that computes the gradient at cell centers.
+    Field<Vector3D> gradPhiField_;
+public:
+    /** Helper function that computes the gradient at cell centers using a least squares method
      */
     void computeCellCenteredGradients();
 

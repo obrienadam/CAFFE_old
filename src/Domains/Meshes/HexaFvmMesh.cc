@@ -294,7 +294,7 @@ void HexaFvmMesh::initialize(Input &input)
         vectorFields[i].allocate(nI, nJ, nK);
     }
 
-    Output::printToScreen("HexaFvmMesh", "Initialization complete.");
+    Output::print("HexaFvmMesh", "Initialization complete.");
 }
 
 void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
@@ -457,7 +457,7 @@ void HexaFvmMesh::writeDebug()
     uint i, j, k, nI, nJ, nK;
     ofstream debugFout;
 
-    Output::printToScreen("HexaFvmMesh", "writing a debugging file...");
+    Output::print("HexaFvmMesh", "writing a debugging file...");
 
     debugFout.open((name + "_debug" + ".msh").c_str());
     debugFout << "HexaFvm Mesh Data:\n"
@@ -679,5 +679,5 @@ void HexaFvmMesh::writeDebug()
 
     debugFout.close();
 
-    Output::printToScreen("HexaFvmMesh", "finished writing debugging file.");
+    Output::print("HexaFvmMesh", "finished writing debugging file.");
 }

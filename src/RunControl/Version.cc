@@ -14,5 +14,5 @@ void Version::display()
                 << "warranty; not even for merchantability or fitness for a particular purpose.";
 
 
-    Output::printToScreen(versionInfo.str());
+    Output::print(versionInfo.str());
 }

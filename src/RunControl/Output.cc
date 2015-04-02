@@ -1,18 +1,41 @@
+/**
+ * @file    Output.c
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * This file contains the implementations for class Output.
+ */
+
 #include <iostream>
 
 #include "Output.h"
 
-void Output::printToScreen(const std::string& message)
+void Output::print(const std::string& message)
 {
     std::cout << std::endl << message << std::endl;
 }
 
-void Output::printToScreen(const std::ostream& message)
+void Output::print(const std::ostream& message)
 {
     std::cout << std::endl << message << std::endl;
 }
 
-void Output::printToScreen(const std::vector<std::string>& vector)
+void Output::print(const std::vector<std::string>& vector)
 {
     for(uint i = 0; i < vector.size(); ++i)
     {
@@ -20,7 +43,7 @@ void Output::printToScreen(const std::vector<std::string>& vector)
     }
 }
 
-void Output::printToScreen(std::string className, std::string message)
+void Output::print(std::string className, std::string message)
 {
     std::cout << className + ": " << message << std::endl;
 }
@@ -35,7 +58,7 @@ void Output::raiseException(std::string className, std::string methodName, std::
     throw ("in \"" + className + "::" + methodName + "\", " + problemDescription.str()).c_str();
 }
 
-void Output::displayCaffeHeader()
+void Output::printCaffeHeader()
 {
     using namespace std;
 

@@ -12,7 +12,7 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
-    Output::displayCaffeHeader();
+    Output::printCaffeHeader();
 
     try
     {
@@ -45,8 +45,6 @@ int main(int argc, const char* argv[])
                                                      FIXED, 0.);
 
         mesh.writeDebug();
-
-        // Display a start message and begin the run
 
         runControl.displayStartMessage();
 

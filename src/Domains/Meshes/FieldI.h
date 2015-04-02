@@ -152,7 +152,7 @@ void Field<T>::setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryVa
     setTopBoundary(topBoundaryType, topBoundaryValue);
     setBottomBoundary(bottomBoundaryType, bottomBoundaryValue);
 
-    Output::printToScreen("Field", "boundaries for field \"" + name + "\" have been set.");
+    Output::print("Field", "boundaries for field \"" + name + "\" have been set.");
 }
 
 template<class T>

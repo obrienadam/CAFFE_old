@@ -1,3 +1,27 @@
+/**
+ * @file    Output.h
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * This file contains the interface for class Output, which is used
+ * for printing to the screen and raising exceptions.
+ */
+
 #ifndef OUTPUT_H
 #define OUTPUT_H
 
@@ -10,19 +34,15 @@ class Output
 {
 public:
 
-    //- These functions are for arbitrary screen output
-
-    static void printToScreen(const std::string& message);
-    static void printToScreen(const std::vector<std::string>& vector);
-    static void printToScreen(const std::ostream& message);
-    static void printToScreen(std::string className, std::string message);
-
-    //- These functions are for normalizing exception handling
+    static void print(const std::string& message);
+    static void print(const std::vector<std::string>& vector);
+    static void print(const std::ostream& message);
+    static void print(std::string className, std::string message);
 
     static void raiseException(std::string className, std::string methodName, std::string problemDescription);
     static void raiseException(std::string className, std::string methodName, std::ostringstream& problemDescription);
 
-    static void displayCaffeHeader();
+    static void printCaffeHeader();
     static void printLine();
 };
 

@@ -18,7 +18,8 @@
  *
  * @section DESCRIPTION
  *
- * Contains all of the implementations for the methods of class Input.
+ * This file contains all of the implementations for the methods of
+ * class Input.
  */
 
 #include <iostream>
