@@ -1,3 +1,28 @@
+/**
+ * @file    HexaFvmMesh.h
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * This file contains the interface for class HexaFvmMesh, which
+ * is a domain for solving finite-volume problems on arbitrarily
+ * shaped hexahedral cells with planar faces.
+ */
+
 #ifndef HEXA_FVM_MESH_H
 #define HEXA_FVM_MESH_H
 
@@ -71,21 +96,48 @@ public:
 
     HexaFvmMesh(){}
 
-    //- Fields
-
+    /**
+     * @brief scalarFields A vector containing all scalar fields defined on the domain.
+     */
     std::vector< Field<double> > scalarFields;
+
+    /**
+     * @brief vectorFields A vector containing all vector fields defined on the domain.
+     */
     std::vector< Field<Vector3D> > vectorFields;
 
-    //- Initialization
-
+    /**
+     * @brief initialize Initialize the domain.
+     * @param input Input object containg initialization data.
+     */
     void initialize(Input &input);
 
+    /**
+     * @brief addScalarField Add a new scalar field to the domain.
+     * @param scalarFieldName Name of the new scalar field.
+     * @param type The type of field, either CONSERVED or AUXILLARY.
+     */
     void addScalarField(std::string scalarFieldName, int type = AUXILLARY);
+
+    /**
+     * @brief addVectorField Add a new vector field to the domain.
+     * @param vectorFieldName Name of the new vector field.
+     * @param type The type of field, either CONSERVED or AUXILLARY.
+     */
     void addVectorField(std::string vectorFieldName, int type = AUXILLARY);
 
-    //- Access
-
+    /**
+     * @brief findScalarField Locate a scalar field within the domain.
+     * @param fieldName The name of the field to be searched for.
+     * @return A reference to the field if found.
+     */
     Field<double>& findScalarField(const std::string &fieldName);
+
+    /**
+     * @brief findVectorField Locate a vector field within the domain.
+     * @param fieldName The name of the field to be searched for.
+     * @return  A reference to  the field if found.
+     */
     Field<Vector3D>& findVectorField(const std::string &fieldName);
 
     Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
@@ -133,14 +185,20 @@ public:
     double cellToFaceDistanceT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
     double cellToFaceDistanceB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
 
+    /**
+     * @brief globalIndex Get the vector index for a cell, useful for assembling matrices.
+     * @param vectorOrdering The ordering of the vector, either by ROW, COLUMN or LAYER.
+     * @return The global index.
+     */
     int globalIndex(int i, int j, int k, Ordering vectorOrdering);
 
     int nCellsI(){ return cellCenters_.sizeI(); }
     int nCellsJ(){ return cellCenters_.sizeJ(); }
     int nCellsK(){ return cellCenters_.sizeK(); }
 
-    //- Dump mesh data to a text file for debugging
-
+    /**
+     * @brief writeDebug Output mesh data to a file for debugging purposes.
+     */
     void writeDebug();
 };
 
