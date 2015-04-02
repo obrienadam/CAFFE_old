@@ -1,3 +1,27 @@
+/**
+ * @file    Field.h
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * This file contains the interface for class Field, which is used for
+ * storing various types of 3-Dimensional fields and their boundaries.
+ */
+
 #ifndef FIELD_H
 #define FIELD_H
 
@@ -23,12 +47,12 @@ private:
 
     //- Boundary patches
 
-    Array2D<BoundaryPatch> eastBoundaryPatch_;
-    Array2D<BoundaryPatch> westBoundaryPatch_;
-    Array2D<BoundaryPatch> northBoundaryPatch_;
-    Array2D<BoundaryPatch> southBoundaryPatch_;
-    Array2D<BoundaryPatch> topBoundaryPatch_;
-    Array2D<BoundaryPatch> bottomBoundaryPatch_;
+    BoundaryPatch eastBoundaryPatch_;
+    BoundaryPatch westBoundaryPatch_;
+    BoundaryPatch northBoundaryPatch_;
+    BoundaryPatch southBoundaryPatch_;
+    BoundaryPatch topBoundaryPatch_;
+    BoundaryPatch bottomBoundaryPatch_;
 
     //- Boundary fields
 
@@ -63,8 +87,21 @@ public:
     T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
     T& fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
 
-    //- Boundary related methods
+    /**
+     * @brief Get a stencil from the specified cell
+     * @return A 3D array containing the stencil.
+     */
+    Array3D<T> getStencil(int i, int j, int k);
 
+    /**
+     * @brief Place a stencil in the array provided from the specified cell
+     * @param stencil A 3D array to contain the stencil.
+     */
+    void getStencil(int i, int j, int k, Array3D<T>& stencil);
+
+    /**
+     * @brief Assign boundaries a patch that identifies the type, as well as a reference value.
+     */
     void setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
                           BoundaryPatch westBoundaryType, T westBoundaryValue,
                           BoundaryPatch northBoundaryType, T northBoundaryValue,
@@ -88,8 +125,9 @@ public:
     void setTopBoundaryField();
     void setBottomBoundaryField();
 
-    //- Debug
-
+    /**
+     * @brief Print the field to the console, for debugging purposes.
+     */
     void print();
 };
 

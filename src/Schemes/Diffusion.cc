@@ -32,7 +32,6 @@ void Diffusion::computeCellCenteredGradients()
     int i, j, k, nCellsI, nCellsJ, nCellsK;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
-    Matrix aLs(6, 3), bLs(6, 1), xLs(3, 1);
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
@@ -44,18 +43,18 @@ void Diffusion::computeCellCenteredGradients()
         {
             for(i = 0; i < nCellsI; ++i)
             {
-                bLs(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
-                bLs(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
-                bLs(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
-                bLs(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
-                bLs(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
-                bLs(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
+                bLs_(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
+                bLs_(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
+                bLs_(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
+                bLs_(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
+                bLs_(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
+                bLs_(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
 
-                xLs = solveLeastSquares(lsMatrices_(i, j, k), bLs);
+                xLs_ = solveLeastSquares(lsMatrices_(i, j, k), bLs_);
 
-                gradPhiField_(i, j, k).x = xLs(0, 0);
-                gradPhiField_(i, j, k).y = xLs(1, 0);
-                gradPhiField_(i, j, k).z = xLs(2, 0);
+                gradPhiField_(i, j, k).x = xLs_(0, 0);
+                gradPhiField_(i, j, k).y = xLs_(1, 0);
+                gradPhiField_(i, j, k).z = xLs_(2, 0);
             }
         }
     }
@@ -106,7 +105,11 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
         }
     }
 
+    aLs_.allocate(6, 3);
+    bLs_.allocate(6, 1);
+    aLs_.allocate(3, 1);
     gradPhiField_.allocate(nCellsI, nCellsJ, nCellsK);
+    stencil_.allocate(3, 3, 3);
 }
 
 int Diffusion::nConservedVariables()
@@ -120,6 +123,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
     HexaFvmMesh& mesh = *meshPtr_;
 
     computeCellCenteredGradients();
+
 }
 
 void Diffusion::updateSolution(std::vector<double> &timeDerivatives)

@@ -1,3 +1,27 @@
+/**
+ * @file    FieldI.h
+ * @author  Adam O'Brien <obrienadam89@gmail.com>
+ * @version 1.0
+ *
+ * @section LICENSE
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation; either version 2 of
+ * the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details at
+ * https://www.gnu.org/copyleft/gpl.html
+ *
+ * @section DESCRIPTION
+ *
+ * This file contains the templated method implementations for class
+ * Field.
+ */
+
 #include "Field.h"
 #include "Output.h"
 
@@ -54,18 +78,47 @@ void Field<T>::allocate(int nI, int nJ, int nK)
         faceFluxesK_.allocate(nI, nJ, nK + 1);
     }
 
-    eastBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
     eastBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    westBoundaryPatch_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
     westBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    northBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
     northBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    southBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
     southBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    topBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
     topBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
-    bottomBoundaryPatch_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
     bottomBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
+}
+
+template<class T>
+Array3D<T> Field<T>::getStencil(int i, int j, int k)
+{
+    Array3D<T> stencil(3, 3, 3);
+    int l, m, n;
+
+    for(n = -1; n < 2; ++n)
+    {
+        for(m = -1; m < 2; ++m)
+        {
+            for(l = -1; l < 2; ++l)
+            {
+                stencil(l, m, n) = operator ()(i + l, j + m, k + n);
+            }
+        }
+    }
+}
+
+template<class T>
+void Field<T>::getStencil(int i, int j, int k, Array3D<T> &stencil)
+{
+    int l, m, n;
+
+    for(n = -1; n < 2; ++n)
+    {
+        for(m = -1; m < 2; ++m)
+        {
+            for(l = -1; l < 2; ++l)
+            {
+                stencil(l, m, n) = operator ()(i + l, j + m, k + n);
+            }
+        }
+    }
 }
 
 template<class T>
@@ -160,11 +213,12 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int j, k;
 
+    eastBoundaryPatch_ = boundaryType;
+
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
         for(j = 0; j < Array3D<T>::nJ_; ++j)
         {
-            eastBoundaryPatch_(j, k) = boundaryType;
             eastBoundaryField_(j, k) = boundaryValue;
         } // end for j
     } //  end for k
@@ -175,11 +229,12 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int j, k;
 
+    westBoundaryPatch_ = boundaryType;
+
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
         for(j = 0; j < Array3D<T>::nJ_; ++j)
         {
-            westBoundaryPatch_(j, k) = boundaryType;
             westBoundaryField_(j, k) = boundaryValue;
         } // end for j
     } //  end for k
@@ -190,11 +245,12 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int i, k;
 
+    northBoundaryPatch_ = boundaryType;
+
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            northBoundaryPatch_(i, k) = boundaryType;
             northBoundaryField_(i, k) = boundaryValue;
         } // end for i
     } //  end for k
@@ -205,11 +261,12 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int i, k;
 
+    southBoundaryPatch_ = boundaryType;
+
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            southBoundaryPatch_(i, k) = boundaryType;
             southBoundaryField_(i, k) = boundaryValue;
         } // end for i
     } //  end for k
@@ -220,11 +277,12 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int i, j;
 
+    topBoundaryPatch_ = boundaryType;
+
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            topBoundaryPatch_(i, j) = boundaryType;
             topBoundaryField_(i, j) = boundaryValue;
         } // end for i
     } //  end for j
@@ -235,11 +293,12 @@ void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
 {
     int i, j;
 
+    bottomBoundaryPatch_ = boundaryType;
+
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            bottomBoundaryPatch_(i, j) = boundaryType;
             bottomBoundaryField_(i, j) = boundaryValue;
         } // end for i
     } //  end for j
@@ -265,7 +324,7 @@ void Field<T>::setEastBoundaryField()
     {
         for(j = 0; j < nJ; ++j)
         {
-            switch(eastBoundaryPatch_(j, k))
+            switch(eastBoundaryPatch_)
             {
             case FIXED:
 
@@ -279,7 +338,6 @@ void Field<T>::setEastBoundaryField()
             };
         } // end for j
     } // end for k
-
 }
 
 template<class T>
@@ -291,7 +349,7 @@ void Field<T>::setWestBoundaryField()
     {
         for(j = 0; j < nJ; ++j)
         {
-            switch(westBoundaryPatch_(j, k))
+            switch(westBoundaryPatch_)
             {
 
             case FIXED:
@@ -317,7 +375,7 @@ void Field<T>::setNorthBoundaryField()
     {
         for(i = 0; i < nI; ++i)
         {
-            switch(northBoundaryPatch_(i, k))
+            switch(northBoundaryPatch_)
             {
 
             case FIXED:
@@ -346,7 +404,7 @@ void Field<T>::setSouthBoundaryField()
         for(i = 0; i < nI; ++i)
         {
 
-            switch(southBoundaryPatch_(i, k))
+            switch(southBoundaryPatch_)
             {
             case FIXED:
 
@@ -371,7 +429,7 @@ void Field<T>::setTopBoundaryField()
     {
         for(i = 0; i < nI; ++i)
         {
-            switch(topBoundaryPatch_(i, j))
+            switch(topBoundaryPatch_)
             {
             case FIXED:
 
@@ -397,7 +455,7 @@ void Field<T>::setBottomBoundaryField()
     {
         for(i = 0; i < nI; ++i)
         {
-            switch(bottomBoundaryPatch_(i, j))
+            switch(bottomBoundaryPatch_)
             {
             case FIXED:
 

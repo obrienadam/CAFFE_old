@@ -135,7 +135,6 @@ void StructuredMesh::initialize(std::string filename)
     fin.close();
 
     write();
-    writeTec360();
 }
 
 void StructuredMesh::write(double time)

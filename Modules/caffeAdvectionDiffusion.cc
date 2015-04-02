@@ -56,6 +56,7 @@ int main(int argc, const char* argv[])
         // Display end message, the run ended normally
 
         runControl.displayEndMessage();
+        mesh.writeTec360(0.);
     }
 
     // Catch any exceptions thrown during the run

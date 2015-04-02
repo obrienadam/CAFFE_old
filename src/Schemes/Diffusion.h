@@ -36,8 +36,11 @@ class Diffusion : public FvScheme
 private:
 
     Array3D<Matrix> lsMatrices_;
+    Matrix aLs_, bLs_, xLs_;
     Field<double>* phiFieldPtr_;
     Field<Vector3D> gradPhiField_;
+    Array3D<double> stencil_;
+
 public:
     /** Helper function that computes the gradient at cell centers using a least squares method
      */

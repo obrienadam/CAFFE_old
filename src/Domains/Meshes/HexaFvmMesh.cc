@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file    HexaFvmMesh.cc
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
@@ -24,6 +24,8 @@
 #include "HexaFvmMesh.h"
 #include "Geometry.h"
 #include "Output.h"
+
+// ************* Constructors and Destructors *************
 
 // ************* Private Methods *************
 
@@ -703,4 +705,115 @@ void HexaFvmMesh::writeDebug()
     debugFout.close();
 
     Output::print("HexaFvmMesh", "finished writing debugging file.");
+}
+
+void HexaFvmMesh::writeTec360(double time)
+{
+    using namespace std;
+
+    int i, j, k, varNo, componentNo;
+    string component;
+
+    Output::print("HexaFvmMesh", "Writing data to Tec360 ASCII...");
+
+    if(!foutTec360_.is_open())
+    {
+        foutTec360_.open((name + ".dat").c_str());
+
+        foutTec360_ << "TITLE = \"" << name << "\"" << endl
+                    << "VARIABLES = \"x\", \"y\", \"z\", ";
+
+        for(varNo = 0; varNo < scalarFields.size(); ++varNo)
+        {
+            foutTec360_ << "\"" << scalarFields[varNo].name << "\", ";
+        }
+
+        for(varNo = 0; varNo < vectorFields.size(); ++varNo)
+        {
+            for(componentNo = 0; componentNo < 3; ++componentNo)
+            {
+                switch(componentNo)
+                {
+                case 0:
+                    component = "x";
+                    break;
+                case 1:
+                    component = "y";
+                    break;
+                case 2:
+                    component = "z";
+                    break;
+                }
+
+                foutTec360_ << "\"" << vectorFields[varNo].name + "_" + component << "\", ";
+            }
+        }
+
+        foutTec360_ << endl;
+    }
+
+    foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
+                << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
+                << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+                << "DATAPACKING = BLOCK" << endl
+                << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
+
+    // Output the mesh data
+
+    for(componentNo = 0; componentNo < 3; ++componentNo)
+    {
+        for(k = 0; k < nodes_.sizeK(); ++k)
+        {
+            for(j = 0; j < nodes_.sizeJ(); ++j)
+            {
+                for(i = 0; i < nodes_.sizeI(); ++i)
+                {
+                    foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
+                }
+            }
+        }
+
+        foutTec360_ << endl;
+    }
+
+    // Output the solution data for scalars
+
+    for(varNo = 0; varNo < scalarFields.size(); ++varNo)
+    {
+        for(k = 0; k < cellCenters_.sizeK(); ++k)
+        {
+            for(j = 0; j < cellCenters_.sizeJ(); ++j)
+            {
+                for(i = 0; i < cellCenters_.sizeI(); ++i)
+                {
+                    foutTec360_ << scalarFields[varNo](i, j, k) << " ";
+                }
+            }
+        }
+
+        foutTec360_ << endl;
+    }
+
+    // Output the solution data for vectors
+
+    for(varNo = 0; varNo < vectorFields.size(); ++varNo)
+    {
+        for(componentNo = 0; componentNo < 3; ++componentNo)
+        {
+            for(k = 0; k < cellCenters_.sizeK(); ++k)
+            {
+                for(j = 0; j < cellCenters_.sizeJ(); ++j)
+                {
+                    for(i = 0; i < cellCenters_.sizeI(); ++i)
+                    {
+                        foutTec360_ << vectorFields[varNo](i, j, k)(componentNo) << " ";
+                    }
+                }
+            }
+        }
+
+        foutTec360_ << endl;
+    }
+
+    Output::print("HexaFvmMesh", "Finished writing data to Tec360 ASCII.");
 }

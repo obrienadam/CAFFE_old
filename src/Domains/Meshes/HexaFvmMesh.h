@@ -197,9 +197,15 @@ public:
     int nCellsK(){ return cellCenters_.sizeK(); }
 
     /**
-     * @brief writeDebug Output mesh data to a file for debugging purposes.
+     * @brief Output all mesh data to a file for debugging purposes.
      */
     void writeDebug();
+
+    /**
+     * @brief Write cell-centered data to the Tecplot360 ASCII format.
+     * @param time The solution time.
+     */
+    void writeTec360(double time = 0);
 };
 
 #endif
