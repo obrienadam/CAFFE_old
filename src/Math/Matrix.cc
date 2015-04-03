@@ -39,7 +39,8 @@
 Matrix::Matrix(int m, int n)
     :
       elements_(NULL),
-      ipiv_(NULL)
+      ipiv_(NULL),
+      bufferSize_(0)
 {
     allocate(m, n);
 }
@@ -112,17 +113,30 @@ void Matrix::allocate(int m, int n)
 {
     deallocate();
 
-    if(m == 0 || n == 0)
-        return;
-
     m_ = m;
     n_ = n;
     nElements_ = m_*n_;
+
+    if(nElements_ == 0)
+        return;
+
     elements_ = new double[nElements_];
     ipiv_ = new int[m_];
+    bufferSize_ = nElements_;
+}
 
-    for(int k = 0; k < nElements_; ++k)
-        elements_[k] = 0.;
+void Matrix::reallocate(int m, int n)
+{
+    if(bufferSize_ < m*n)
+    {
+        allocate(m, n);
+    }
+    else
+    {
+        m_ = m;
+        n_ = n;
+        nElements_ = m_*n_;
+    }
 }
 
 void Matrix::deallocate()
@@ -134,7 +148,7 @@ void Matrix::deallocate()
     elements_ = NULL;
     delete[] ipiv_;
     ipiv_ = NULL;
-    nElements_ = m_ = n_ = 0;
+    bufferSize_ = nElements_ = m_ = n_ = 0;
 }
 
 void Matrix::reshape(int m, int n)

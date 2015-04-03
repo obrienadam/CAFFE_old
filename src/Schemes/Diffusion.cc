@@ -32,6 +32,7 @@ void Diffusion::computeCellCenteredGradients()
     int i, j, k, nCellsI, nCellsJ, nCellsK;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
+    Matrix A(6, 3), b(6, 1);
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
@@ -43,26 +44,49 @@ void Diffusion::computeCellCenteredGradients()
         {
             for(i = 0; i < nCellsI; ++i)
             {
-                bLs_(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
-                bLs_(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
-                bLs_(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
-                bLs_(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
-                bLs_(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
-                bLs_(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
+                b.reallocate(6, 1);
 
-                xLs_ = solveLeastSquares(lsMatrices_(i, j, k), bLs_);
+                A.addVector3DToRow(mesh.rCellE(i, j, k), 0, 0);
+                A.addVector3DToRow(mesh.rCellW(i, j, k), 1, 0);
+                A.addVector3DToRow(mesh.rCellN(i, j, k), 2, 0);
+                A.addVector3DToRow(mesh.rCellS(i, j, k), 3, 0);
+                A.addVector3DToRow(mesh.rCellT(i, j, k), 4, 0);
+                A.addVector3DToRow(mesh.rCellB(i, j, k), 5, 0);
 
-                gradPhiField_(i, j, k).x = xLs_(0, 0);
-                gradPhiField_(i, j, k).y = xLs_(1, 0);
-                gradPhiField_(i, j, k).z = xLs_(2, 0);
+                b(0, 0) = phiField(i + 1, j, k) - phiField(i, j, k);
+                b(1, 0) = phiField(i - 1, j, k) - phiField(i, j, k);
+                b(2, 0) = phiField(i, j + 1, k) - phiField(i, j, k);
+                b(3, 0) = phiField(i, j - 1, k) - phiField(i, j, k);
+                b(4, 0) = phiField(i, j, k + 1) - phiField(i, j, k);
+                b(5, 0) = phiField(i, j, k - 1) - phiField(i, j, k);
+
+                A.solveLeastSquares(b);
+
+                gradPhiField_(i, j, k).x = b(0, 0);
+                gradPhiField_(i, j, k).y = b(1, 0);
+                gradPhiField_(i, j, k).z = b(2, 0);
             }
         }
     }
 }
 
+void Diffusion::computeFaceCenteredGradients()
+{
+    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    HexaFvmMesh& mesh = *meshPtr_;
+    Field<double>& phiField = *phiFieldPtr_;
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+}
+
 // ************* Public Methods *************
 
 Diffusion::Diffusion()
+    :
+      gradPhiField_("gradPhiField", CONSERVED)
 {
 
 }
@@ -84,36 +108,13 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
     nCellsJ = mesh.nCellsJ();
     nCellsK = mesh.nCellsK();
 
-    lsMatrices_.allocate(nCellsI, nCellsJ, nCellsK);
-
-    for(k = 0; k < nCellsK; ++k)
-    {
-        for(j = 0; j < nCellsJ; ++j)
-        {
-            for(i = 0; i < nCellsI; ++i)
-            {
-                lsMatrix.addVector3DToRow(mesh.rCellE(i, j, k), 0, 0);
-                lsMatrix.addVector3DToRow(mesh.rCellW(i, j, k), 1, 0);
-                lsMatrix.addVector3DToRow(mesh.rCellN(i, j, k), 2, 0);
-                lsMatrix.addVector3DToRow(mesh.rCellS(i, j, k), 3, 0);
-                lsMatrix.addVector3DToRow(mesh.rCellT(i, j, k), 4, 0);
-                lsMatrix.addVector3DToRow(mesh.rCellB(i, j, k), 5, 0);
-
-                lsMatrices_(i, j, k) = lsMatrix;
-            }
-        }
-    }
-
-    aLs_.allocate(6, 3);
-    bLs_.allocate(6, 1);
-    aLs_.allocate(3, 1);
     gradPhiField_.allocate(nCellsI, nCellsJ, nCellsK);
     stencil_.allocate(3, 3, 3);
 }
 
 int Diffusion::nConservedVariables()
 {
-    return 1;
+    return phiFieldPtr_->size();
 }
 
 void Diffusion::discretize(std::vector<double>& timeDerivatives)
@@ -123,11 +124,13 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
     HexaFvmMesh& mesh = *meshPtr_;
     Vector3D gradPhiBar, gradPhiFace;
 
-    nCellsK = mesh.nCellsK();
-    nCellsJ = mesh.nCellsJ();
-    nCellsI = mesh.nCellsI();
+    nCellsI = mesh.nCellsI() - 1;
+    nCellsJ = mesh.nCellsJ() - 1;
+    nCellsK = mesh.nCellsK() - 1;
 
     computeCellCenteredGradients();
+    computeFaceCenteredGradients();
+    gradPhiField_.print();
 
     for(k = 0, l = 0; k < nCellsK; ++k)
     {
@@ -144,7 +147,23 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
 
 }
 
-void Diffusion::updateSolution(std::vector<double> &timeDerivatives)
+void Diffusion::updateSolution(std::vector<double>& update)
 {
+    int i, j, k, l, nCellsI, nCellsJ, nCellsK;
+    Field<double>& phiField = *phiFieldPtr_;
 
+    nCellsI = phiField.sizeI();
+    nCellsJ = phiField.sizeJ();
+    nCellsK = phiField.sizeK();
+
+    for(k = 0, l = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i, ++l)
+            {
+                phiField(i, j, k) = update[l];
+            }
+        }
+    }
 }

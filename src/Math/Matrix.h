@@ -31,7 +31,7 @@ class Matrix
 {
 private:
 
-    int m_, n_, nElements_;
+    int m_, n_, nElements_, bufferSize_;
     double* elements_;
     int* ipiv_;
 
@@ -62,6 +62,7 @@ public:
     Matrix& operator=(const Matrix& rhs);
 
     void allocate(int m, int n);
+    void reallocate(int m, int n);
     void deallocate();
 
     /**

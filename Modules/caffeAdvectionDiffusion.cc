@@ -50,6 +50,7 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
+            solver.solve(1e-5, diffusion);
             runControl.displayUpdateMessage();
         }
 

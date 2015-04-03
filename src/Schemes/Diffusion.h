@@ -35,16 +35,18 @@ class Diffusion : public FvScheme
 {
 private:
 
-    Array3D<Matrix> lsMatrices_;
-    Matrix aLs_, bLs_, xLs_;
     Field<double>* phiFieldPtr_;
     Field<Vector3D> gradPhiField_;
     Array3D<double> stencil_;
 
 public:
-    /** Helper function that computes the gradient at cell centers using a least squares method
+    /** @brief Helper function that computes the gradient at cell centers using a least squares method.
      */
     void computeCellCenteredGradients();
+
+    /** @brief Helper function that computes the gradient at cell faces using the method from Mathur Murthy.
+     */
+    void computeFaceCenteredGradients();
 
 public:
 
@@ -55,7 +57,7 @@ public:
     int nConservedVariables();
 
     void discretize(std::vector<double>& timeDerivatives);
-    void updateSolution(std::vector<double>& timeDerivatives);
+    void updateSolution(std::vector<double>& update);
 };
 
 #endif
