@@ -63,16 +63,25 @@ void HexaFvmMesh::initializeCells()
 
 void HexaFvmMesh::initializeCellToCellParameters()
 {
-    int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
+    int i, j, k, nI, nJ, nK;
     Vector3D tmpVec;
+
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK();
 
     // Allocate the cell to cell distance vectors and distaces
 
-    cellToCellDistanceVectorsI_.allocate(nI - 1, nJ, nK);
-    cellToCellDistanceVectorsJ_.allocate(nI, nJ - 1, nK);
-    cellToCellDistanceVectorsK_.allocate(nI, nJ, nK - 1);
+    cellToCellRelativeVectorsI_.allocate(nI - 1, nJ, nK);
+    cellToCellNormalVectorsI_.allocate(nI - 1, nJ, nK);
     cellToCellDistancesI_.allocate(nI - 1, nJ, nK);
+
+    cellToCellRelativeVectorsJ_.allocate(nI, nJ - 1, nK);
+    cellToCellNormalVectorsJ_.allocate(nI, nJ - 1, nK);
     cellToCellDistancesJ_.allocate(nI, nJ - 1, nK);
+
+    cellToCellRelativeVectorsK_.allocate(nI, nJ, nK - 1);
+    cellToCellNormalVectorsK_.allocate(nI, nJ, nK - 1);
     cellToCellDistancesK_.allocate(nI, nJ, nK - 1);
 
     for(k = 0; k < nK; ++k)
@@ -84,21 +93,24 @@ void HexaFvmMesh::initializeCellToCellParameters()
                 if (i < nI - 1)
                 {
                     tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
-                    cellToCellDistanceVectorsI_(i, j, k) = tmpVec.unitVector();
+                    cellToCellRelativeVectorsI_(i, j, k) = tmpVec;
+                    cellToCellNormalVectorsI_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesI_(i, j, k) = tmpVec.mag();
                 }
 
                 if (j < nJ - 1)
                 {
                     tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
-                    cellToCellDistanceVectorsJ_(i, j, k) = tmpVec.unitVector();
+                    cellToCellRelativeVectorsJ_(i, j, k) = tmpVec;
+                    cellToCellNormalVectorsJ_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesJ_(i, j, k) = tmpVec.mag();
                 }
 
                 if (k < nK - 1)
                 {
                     tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
-                    cellToCellDistanceVectorsK_(i, j, k) = tmpVec.unitVector();
+                    cellToCellRelativeVectorsK_(i, j, k) = tmpVec;
+                    cellToCellNormalVectorsK_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesK_(i, j, k) = tmpVec.mag();
                 }
             } // end for i
@@ -108,7 +120,7 @@ void HexaFvmMesh::initializeCellToCellParameters()
 
 void HexaFvmMesh::initializeFaces()
 {
-    int nI, nJ, nK, i, j, k;
+    int i, j, k, nI, nJ, nK;
     Point3D tmpPoints[4];
 
     // Initialize the I-direction faces (normals alligned with in the I-direction)
@@ -198,21 +210,35 @@ void HexaFvmMesh::initializeFaces()
 
 void HexaFvmMesh::initializeCellToFaceParameters()
 {
-    int nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1), i, j, k;
+    int i, j, k, nI, nJ, nK;
     Vector3D tmpVec;
 
-    cellToFaceDistanceVectorsE_.allocate(nI, nJ, nK);
-    cellToFaceDistanceVectorsW_.allocate(nI, nJ, nK);
-    cellToFaceDistanceVectorsN_.allocate(nI, nJ, nK);
-    cellToFaceDistanceVectorsS_.allocate(nI, nJ, nK);
-    cellToFaceDistanceVectorsT_.allocate(nI, nJ, nK);
-    cellToFaceDistanceVectorsB_.allocate(nI, nJ, nK);
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK();
 
+    cellToFaceRelativeVectorsE_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsE_.allocate(nI, nJ, nK);
     cellToFaceDistancesE_.allocate(nI, nJ, nK);
+
+    cellToFaceRelativeVectorsW_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsW_.allocate(nI, nJ, nK);
     cellToFaceDistancesW_.allocate(nI, nJ, nK);
+
+    cellToFaceRelativeVectorsN_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsN_.allocate(nI, nJ, nK);
     cellToFaceDistancesN_.allocate(nI, nJ, nK);
+
+    cellToFaceRelativeVectorsS_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsS_.allocate(nI, nJ, nK);
     cellToFaceDistancesS_.allocate(nI, nJ, nK);
+
+    cellToFaceRelativeVectorsT_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsT_.allocate(nI, nJ, nK);
     cellToFaceDistancesT_.allocate(nI, nJ, nK);
+
+    cellToFaceRelativeVectorsB_.allocate(nI, nJ, nK);
+    cellToFaceNormalVectorsB_.allocate(nI, nJ, nK);
     cellToFaceDistancesB_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -224,37 +250,43 @@ void HexaFvmMesh::initializeCellToFaceParameters()
                 // East cell to face parameters
 
                 tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsE_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsE_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsE_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesE_(i, j, k) = tmpVec.mag();
 
                 // West cell to face parameters
 
                 tmpVec = faceCentersI_(i, j, k) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsW_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsW_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsW_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
 
                 // North cell to face parameters
 
                 tmpVec = faceCentersJ_(i, j + 1, k) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsN_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsN_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsN_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesN_(i, j, k) = tmpVec.mag();
 
                 // South cell to face parameters
 
                 tmpVec = faceCentersJ_(i, j, k) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsS_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsS_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsS_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
 
                 // Top cell to face parameters
 
                 tmpVec = faceCentersK_(i, j, k + 1) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsT_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsT_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsT_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesT_(i, j, k) = tmpVec.mag();
 
                 // Bottom cell to face parameters
 
                 tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
-                cellToFaceDistanceVectorsB_(i, j, k) = tmpVec.unitVector();
+                cellToFaceRelativeVectorsB_(i, j, k) = tmpVec;
+                cellToFaceNormalVectorsB_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
             } // end for i
         } // end for j
@@ -380,62 +412,111 @@ int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)
     return rowVectorOrdering_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::nesE(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellE(int i, int j, int k)
 {
-    if(i == cellCenters_.sizeI() - 1)
-        return cellToFaceDistanceVectorsE_(i, j, k);
+    if(i == cellToCellRelativeVectorsI_.sizeI())
+        return cellToFaceRelativeVectorsE_(i, j, k);
 
-    return cellToCellDistanceVectorsI_(i, j, k);
+    return cellToCellRelativeVectorsI_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::nesW(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellW(int i, int j, int k)
 {
     if(i == 0)
-        return cellToFaceDistanceVectorsW_(i, j, k);
+        return cellToFaceRelativeVectorsW_(i, j, k);
 
-    return -cellToCellDistanceVectorsI_(i - 1, j, k);
+    return -cellToCellRelativeVectorsI_(i - 1, j, k);
 }
 
-Vector3D HexaFvmMesh::nesN(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellN(int i, int j, int k)
 {
-    if(j == cellCenters_.sizeJ() - 1)
-        return cellToFaceDistanceVectorsN_(i, j, k);
+    if(j == cellToCellRelativeVectorsJ_.sizeJ())
+        return cellToFaceRelativeVectorsN_(i, j, k);
 
-    return cellToCellDistanceVectorsJ_(i, j, k);
+    return cellToCellRelativeVectorsJ_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::nesS(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellS(int i, int j, int k)
 {
     if(j == 0)
-        return cellToFaceDistanceVectorsS_(i, j, k);
+        return cellToFaceRelativeVectorsS_(i, j, k);
 
-    return -cellToCellDistanceVectorsJ_(i, j - 1, k);
+    return -cellToCellRelativeVectorsJ_(i, j - 1, k);
 }
-Vector3D HexaFvmMesh::nesT(int i, int j, int k)
+
+Vector3D HexaFvmMesh::rCellT(int i, int j, int k)
 {
-    if(k == cellCenters_.sizeK() - 1)
-        return cellToFaceDistanceVectorsT_(i, j, k);
+    if(k == cellToCellRelativeVectorsK_.sizeK())
+        return cellToFaceRelativeVectorsT_(i, j, k);
 
-    return cellToCellDistanceVectorsK_(i, j, k);
+    return cellToCellRelativeVectorsK_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::nesB(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellB(int i, int j, int k)
 {
     if(k == 0)
-        return cellToFaceDistanceVectorsB_(i, j, k);
+        return cellToFaceRelativeVectorsB_(i, j, k);
 
-    return -cellToCellDistanceVectorsK_(i, j, k - 1);
+    return -cellToCellRelativeVectorsK_(i, j, k - 1);
 }
 
-double HexaFvmMesh::cellToCellDistanceE(int i, int j, int k)
+Vector3D HexaFvmMesh::rnCellE(int i, int j, int k)
 {
-    if(i == cellCenters_.sizeI() - 1)
+    if(i == cellToCellNormalVectorsI_.sizeI())
+        return cellToFaceNormalVectorsE_(i, j, k);
+
+    return cellToCellNormalVectorsI_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellW(int i, int j, int k)
+{
+    if(i == 0)
+        return cellToFaceNormalVectorsW_(i, j, k);
+
+    return -cellToCellNormalVectorsI_(i - 1, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellN(int i, int j, int k)
+{
+    if(j == cellToCellNormalVectorsJ_.sizeJ())
+        return cellToFaceNormalVectorsN_(i, j, k);
+
+    return cellToCellNormalVectorsJ_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellS(int i, int j, int k)
+{
+    if(j == 0)
+        return cellToFaceNormalVectorsS_(i, j, k);
+
+    return -cellToCellNormalVectorsJ_(i, j - 1, k);
+}
+
+Vector3D HexaFvmMesh::rnCellT(int i, int j, int k)
+{
+    if(k == cellToCellNormalVectorsK_.sizeK())
+        return cellToFaceNormalVectorsT_(i, j, k);
+
+    return cellToCellNormalVectorsK_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellB(int i, int j, int k)
+{
+    if(k == 0)
+        return cellToFaceNormalVectorsB_(i, j, k);
+
+    return -cellToCellNormalVectorsK_(i, j, k - 1);
+}
+
+double HexaFvmMesh::rCellMagE(int i, int j, int k)
+{
+    if(i == cellToCellDistancesI_.sizeI())
         return cellToFaceDistancesE_(i, j, k);
 
     return cellToCellDistancesI_(i, j, k);
 }
 
-double HexaFvmMesh::cellToCellDistanceW(int i, int j, int k)
+double HexaFvmMesh::rCellMagW(int i, int j, int k)
 {
     if(i == 0)
         return cellToFaceDistancesW_(i, j, k);
@@ -443,15 +524,15 @@ double HexaFvmMesh::cellToCellDistanceW(int i, int j, int k)
     return cellToCellDistancesI_(i - 1, j, k);
 }
 
-double HexaFvmMesh::cellToCellDistanceN(int i, int j, int k)
+double HexaFvmMesh::rCellMagN(int i, int j, int k)
 {
-    if(j == cellCenters_.sizeJ() - 1)
+    if(j == cellToCellDistancesJ_.sizeJ())
         return cellToFaceDistancesN_(i, j, k);
 
     return cellToCellDistancesJ_(i, j, k);
 }
 
-double HexaFvmMesh::cellToCellDistanceS(int i, int j, int k)
+double HexaFvmMesh::rCellMagS(int i, int j, int k)
 {
     if(j == 0)
         return cellToFaceDistancesS_(i, j, k);
@@ -459,15 +540,15 @@ double HexaFvmMesh::cellToCellDistanceS(int i, int j, int k)
     return cellToCellDistancesJ_(i, j - 1, k);
 }
 
-double HexaFvmMesh::cellToCellDistanceT(int i, int j, int k)
+double HexaFvmMesh::rCellMagT(int i, int j, int k)
 {
-    if(k == cellCenters_.sizeK() - 1)
+    if(k == cellToCellDistancesK_.sizeK())
         return cellToFaceDistancesT_(i, j, k);
 
     return cellToCellDistancesK_(i, j, k);
 }
 
-double HexaFvmMesh::cellToCellDistanceB(int i, int j, int k)
+double HexaFvmMesh::rCellMagB(int i, int j, int k)
 {
     if(k == 0)
         return cellToFaceDistancesB_(i, j, k);
@@ -651,7 +732,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << cellToCellDistancesI_(i, j, k)*cellToCellDistanceVectorsI_(i, j, k) << " ";
+                debugFout << cellToCellRelativeVectorsI_(i,j, k) << " ";
             } // end for i
 
             debugFout << endl;
@@ -672,7 +753,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << cellToCellDistancesJ_(i, j, k)*cellToCellDistanceVectorsJ_(i, j, k) << " ";
+                debugFout << cellToCellRelativeVectorsJ_(i, j, k) << " ";
             } // end for i
 
             debugFout << endl;
@@ -693,7 +774,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << cellToCellDistancesK_(i, j, k)*cellToCellDistanceVectorsK_(i, j, k) << " ";
+                debugFout << cellToCellRelativeVectorsK_(i, j, k) << " ";
             } // end for i
 
             debugFout << endl;

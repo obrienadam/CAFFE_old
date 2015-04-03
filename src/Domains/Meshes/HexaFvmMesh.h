@@ -58,19 +58,28 @@ private:
     Array3D<Vector3D> faceNormalsJ_;
     Array3D<Vector3D> faceNormalsK_;
 
-    Array3D<Vector3D> cellToCellDistanceVectorsI_;
-    Array3D<Vector3D> cellToCellDistanceVectorsJ_;
-    Array3D<Vector3D> cellToCellDistanceVectorsK_;
+    Array3D<Vector3D> cellToCellRelativeVectorsI_;
+    Array3D<Vector3D> cellToCellRelativeVectorsJ_;
+    Array3D<Vector3D> cellToCellRelativeVectorsK_;
+    Array3D<Vector3D> cellToCellNormalVectorsI_;
+    Array3D<Vector3D> cellToCellNormalVectorsJ_;
+    Array3D<Vector3D> cellToCellNormalVectorsK_;
     Array3D<double> cellToCellDistancesI_;
     Array3D<double> cellToCellDistancesJ_;
     Array3D<double> cellToCellDistancesK_;
 
-    Array3D<Vector3D> cellToFaceDistanceVectorsE_;
-    Array3D<Vector3D> cellToFaceDistanceVectorsW_;
-    Array3D<Vector3D> cellToFaceDistanceVectorsN_;
-    Array3D<Vector3D> cellToFaceDistanceVectorsS_;
-    Array3D<Vector3D> cellToFaceDistanceVectorsT_;
-    Array3D<Vector3D> cellToFaceDistanceVectorsB_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsE_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsW_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsN_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsS_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsT_;
+    Array3D<Vector3D> cellToFaceRelativeVectorsB_;
+    Array3D<Vector3D> cellToFaceNormalVectorsE_;
+    Array3D<Vector3D> cellToFaceNormalVectorsW_;
+    Array3D<Vector3D> cellToFaceNormalVectorsN_;
+    Array3D<Vector3D> cellToFaceNormalVectorsS_;
+    Array3D<Vector3D> cellToFaceNormalVectorsT_;
+    Array3D<Vector3D> cellToFaceNormalVectorsB_;
     Array3D<double> cellToFaceDistancesE_;
     Array3D<double> cellToFaceDistancesW_;
     Array3D<double> cellToFaceDistancesN_;
@@ -157,33 +166,47 @@ public:
     double faceAreaT(int i, int j, int k){ return faceAreasK_(i, j, k + 1); }
     double faceAreaB(int i, int j, int k){ return faceAreasK_(i, j, k); }
 
-    Vector3D nesE(int i, int j, int k);
-    Vector3D nesW(int i, int j, int k);
-    Vector3D nesN(int i, int j, int k);
-    Vector3D nesS(int i, int j, int k);
-    Vector3D nesT(int i, int j, int k);
-    Vector3D nesB(int i, int j, int k);
+    Vector3D rCellE(int i, int j, int k);
+    Vector3D rCellW(int i, int j, int k);
+    Vector3D rCellN(int i, int j, int k);
+    Vector3D rCellS(int i, int j, int k);
+    Vector3D rCellT(int i, int j, int k);
+    Vector3D rCellB(int i, int j, int k);
 
-    double cellToCellDistanceE(int i, int j, int k);
-    double cellToCellDistanceW(int i, int j, int k);
-    double cellToCellDistanceN(int i, int j, int k);
-    double cellToCellDistanceS(int i, int j, int k);
-    double cellToCellDistanceT(int i, int j, int k);
-    double cellToCellDistanceB(int i, int j, int k);
+    Vector3D rnCellE(int i, int j, int k);
+    Vector3D rnCellW(int i, int j, int k);
+    Vector3D rnCellN(int i, int j, int k);
+    Vector3D rnCellS(int i, int j, int k);
+    Vector3D rnCellT(int i, int j, int k);
+    Vector3D rnCellB(int i, int j, int k);
 
-    Vector3D nefE(int i, int j, int k){ return cellToFaceDistanceVectorsE_(i, j, k); }
-    Vector3D nefW(int i, int j, int k){ return cellToFaceDistanceVectorsW_(i, j, k); }
-    Vector3D nefN(int i, int j, int k){ return cellToFaceDistanceVectorsN_(i, j, k); }
-    Vector3D nefS(int i, int j, int k){ return cellToFaceDistanceVectorsS_(i, j, k); }
-    Vector3D nefT(int i, int j, int k){ return cellToFaceDistanceVectorsT_(i, j, k); }
-    Vector3D nefB(int i, int j, int k){ return cellToFaceDistanceVectorsB_(i, j, k); }
+    double rCellMagE(int i, int j, int k);
+    double rCellMagW(int i, int j, int k);
+    double rCellMagN(int i, int j, int k);
+    double rCellMagS(int i, int j, int k);
+    double rCellMagT(int i, int j, int k);
+    double rCellMagB(int i, int j, int k);
 
-    double cellToFaceDistanceE(int i, int j, int k){ return cellToFaceDistancesE_(i, j, k); }
-    double cellToFaceDistanceW(int i, int j, int k){ return cellToFaceDistancesW_(i, j, k); }
-    double cellToFaceDistanceN(int i, int j, int k){ return cellToFaceDistancesN_(i, j, k); }
-    double cellToFaceDistanceS(int i, int j, int k){ return cellToFaceDistancesS_(i, j, k); }
-    double cellToFaceDistanceT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
-    double cellToFaceDistanceB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
+    Vector3D rFaceE(int i, int j, int k){ return cellToFaceRelativeVectorsE_(i, j, k); }
+    Vector3D rFaceW(int i, int j, int k){ return cellToFaceRelativeVectorsW_(i, j, k); }
+    Vector3D rFaceN(int i, int j, int k){ return cellToFaceRelativeVectorsN_(i, j, k); }
+    Vector3D rFaceS(int i, int j, int k){ return cellToFaceRelativeVectorsS_(i, j, k); }
+    Vector3D rFaceT(int i, int j, int k){ return cellToFaceRelativeVectorsT_(i, j, k); }
+    Vector3D rFaceB(int i, int j, int k){ return cellToFaceRelativeVectorsB_(i, j, k); }
+
+    Vector3D rnFaceE(int i, int j, int k){ return cellToFaceNormalVectorsE_(i, j, k); }
+    Vector3D rnFaceW(int i, int j, int k){ return cellToFaceNormalVectorsW_(i, j, k); }
+    Vector3D rnFaceN(int i, int j, int k){ return cellToFaceNormalVectorsN_(i, j, k); }
+    Vector3D rnFaceS(int i, int j, int k){ return cellToFaceNormalVectorsS_(i, j, k); }
+    Vector3D rnFaceT(int i, int j, int k){ return cellToFaceNormalVectorsT_(i, j, k); }
+    Vector3D rnFaceB(int i, int j, int k){ return cellToFaceNormalVectorsB_(i, j, k); }
+
+    double rFaceMagE(int i, int j, int k){ return cellToFaceDistancesE_(i, j, k); }
+    double rFaceMagW(int i, int j, int k){ return cellToFaceDistancesW_(i, j, k); }
+    double rFaceMagN(int i, int j, int k){ return cellToFaceDistancesN_(i, j, k); }
+    double rFaceMagS(int i, int j, int k){ return cellToFaceDistancesS_(i, j, k); }
+    double rFaceMagT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
+    double rFaceMagB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
 
     /**
      * @brief globalIndex Get the vector index for a cell, useful for assembling matrices.

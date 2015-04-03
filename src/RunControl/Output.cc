@@ -30,7 +30,7 @@ void Output::print(const std::string& message)
     std::cout << std::endl << message << std::endl;
 }
 
-void Output::print(const std::ostream& message)
+void Output::print(const std::ostringstream &message)
 {
     std::cout << std::endl << message << std::endl;
 }

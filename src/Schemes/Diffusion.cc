@@ -75,7 +75,6 @@ Diffusion::~Diffusion()
 void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     int i, j, k, nCellsI, nCellsJ, nCellsK;
-    Vector3D tmp;
     Matrix lsMatrix(6, 3);
 
     FvScheme::initialize(mesh, conservedFieldName);
@@ -93,12 +92,12 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
         {
             for(i = 0; i < nCellsI; ++i)
             {
-                lsMatrix.addVector3DToRow(mesh.nesE(i, j, k)*mesh.cellToCellDistanceE(i, j, k), 0, 0);
-                lsMatrix.addVector3DToRow(mesh.nesW(i, j, k)*mesh.cellToCellDistanceW(i, j, k), 1, 0);
-                lsMatrix.addVector3DToRow(mesh.nesN(i, j, k)*mesh.cellToCellDistanceN(i, j, k), 2, 0);
-                lsMatrix.addVector3DToRow(mesh.nesS(i, j, k)*mesh.cellToCellDistanceS(i, j, k), 3, 0);
-                lsMatrix.addVector3DToRow(mesh.nesT(i, j, k)*mesh.cellToCellDistanceT(i, j, k), 4, 0);
-                lsMatrix.addVector3DToRow(mesh.nesB(i, j, k)*mesh.cellToCellDistanceB(i, j, k), 5, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellE(i, j, k), 0, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellW(i, j, k), 1, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellN(i, j, k), 2, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellS(i, j, k), 3, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellT(i, j, k), 4, 0);
+                lsMatrix.addVector3DToRow(mesh.rCellB(i, j, k), 5, 0);
 
                 lsMatrices_(i, j, k) = lsMatrix;
             }
@@ -114,7 +113,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 
 int Diffusion::nConservedVariables()
 {
-    return phiFieldPtr_->size();
+    return 1;
 }
 
 void Diffusion::discretize(std::vector<double>& timeDerivatives)
@@ -122,6 +121,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
     int i, j, k, l, nCellsI, nCellsJ, nCellsK;
     Field<double>& phiField = *phiFieldPtr_;
     HexaFvmMesh& mesh = *meshPtr_;
+    Vector3D gradPhiBar, gradPhiFace;
 
     nCellsK = mesh.nCellsK();
     nCellsJ = mesh.nCellsJ();
@@ -135,9 +135,9 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
         {
             for(i = 0; i < nCellsI; ++i, ++l)
             {
-                // Here fluxes should be computed in order to properly get time derivatives
+                // Reconstruct east face
 
-                timeDerivatives[l] = phiField.sumFluxes(i, j, k);
+                timeDerivatives[l] = phiField.sumFluxes(i, j, k)/mesh.cellVol(i, j, k);
             }
         }
     }

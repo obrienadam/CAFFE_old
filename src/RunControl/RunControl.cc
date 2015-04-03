@@ -98,20 +98,17 @@ void RunControl::displayStartMessage()
 
     Output::printLine();
 
-    message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << ".";
-
-    Output::print(message.str());
-
-    message.str("");
-
-    message << "Iterations beginning on " << startTime_ << ".";
+    message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << "." << endl
+            << "Iterations beginning on " << startTime_ << ".";
 
     Output::print(message.str());
 }
 
 void RunControl::displayUpdateMessage()
 {
-    std::ostringstream message;
+    using namespace std;
+
+    ostringstream message;
     double completionPercentage;
 
     if(terminationCondition_ == "iterations")
@@ -131,10 +128,10 @@ void RunControl::displayUpdateMessage()
 
     }
 
-    message << "Simulation completion: " << completionPercentage << "%\n"
-            << "Iterations completed: " << itrs_ << "\n"
-            << "Simulation time: " << simTime_ << "\n"
-            << "Elapsed time: " << elapsedTime_ << "\n"
+    message << "Simulation completion: " << completionPercentage << "%" << endl
+            << "Iterations completed: " << itrs_ << endl
+            << "Simulation time: " << simTime_ << endl
+            << "Elapsed time: " << elapsedTime_ << endl
             << "CPU time: " << cpuTime_;
 
     Output::print(message.str());
@@ -148,31 +145,11 @@ void RunControl::displayEndMessage()
 
     Output::printLine();
 
-    message << "Iterations complete on " << startTime_ + elapsedTime_;
-
-    Output::print(message.str());
-
-    message.str("");
-
-    message << "Iterations completed: " << itrs_;
-
-    Output::print(message.str());
-
-    message.str("");
-
-    message << "Simulation time: " << simTime_;
-
-    Output::print(message.str());
-
-    message.str("");
-
-    message << "Elapsed time: " << elapsedTime_;
-
-    Output::print(message.str());
-
-    message.str("");
-
-    message << "CPU time: " << cpuTime_;
+    message << "Iterations completed on " << startTime_ + elapsedTime_ << endl
+            << "Iterations completed: " << itrs_ << endl
+            << "Simulation time: " << simTime_ << endl
+            << "Elapsed time: " << elapsedTime_ << endl
+            << "CPU time: " << cpuTime_;
 
     Output::print(message.str());
     Output::printLine();

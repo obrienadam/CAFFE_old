@@ -36,7 +36,7 @@ public:
 
     static void print(const std::string& message);
     static void print(const std::vector<std::string>& vector);
-    static void print(const std::ostream& message);
+    static void print(const std::ostringstream &message);
     static void print(std::string className, std::string message);
 
     static void raiseException(std::string className, std::string methodName, std::string problemDescription);

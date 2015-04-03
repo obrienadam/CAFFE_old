@@ -31,7 +31,7 @@ include_directories(${INCLUDE_DIR})
 # Compiler flags
 
 set(CMAKE_CC_FLAGS "-g -Wall -O3")
-set(CMAKE_CXX_FLAGS "-g -Wall -O3 -Wno-reorder -std=c++11")
+set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -std=c++11 -O3")
 
 # Output paths
 
