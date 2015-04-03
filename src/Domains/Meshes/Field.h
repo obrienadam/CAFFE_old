@@ -86,6 +86,7 @@ public:
     T& fluxS(int i, int j, int k){ return -faceFluxesJ_(i, j, k); }
     T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
     T& fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
+    T sumFluxes(int i, int j, int k);
 
     /**
      * @brief Get a stencil from the specified cell

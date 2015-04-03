@@ -165,6 +165,12 @@ T& Field<T>::operator()(int i, int j, int k)
 }
 
 template<class T>
+T Field<T>::sumFluxes(int i, int j, int k)
+{
+    return faceFluxesI_(i + 1, j, k) - faceFluxesI_(i, j, k) + faceFluxesJ_(i, j + 1, k) - faceFluxesJ_(i, j, k) + faceFluxesK_(i, j, k + 1) - faceFluxesK_(i, j, k);
+}
+
+template<class T>
 void Field<T>::print()
 {
     using namespace std;

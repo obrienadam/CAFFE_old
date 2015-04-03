@@ -119,10 +119,28 @@ int Diffusion::nConservedVariables()
 
 void Diffusion::discretize(std::vector<double>& timeDerivatives)
 {
+    int i, j, k, l, nCellsI, nCellsJ, nCellsK;
     Field<double>& phiField = *phiFieldPtr_;
     HexaFvmMesh& mesh = *meshPtr_;
 
+    nCellsK = mesh.nCellsK();
+    nCellsJ = mesh.nCellsJ();
+    nCellsI = mesh.nCellsI();
+
     computeCellCenteredGradients();
+
+    for(k = 0, l = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i, ++l)
+            {
+                // Here fluxes should be computed in order to properly get time derivatives
+
+                timeDerivatives[l] = phiField.sumFluxes(i, j, k);
+            }
+        }
+    }
 
 }
 
