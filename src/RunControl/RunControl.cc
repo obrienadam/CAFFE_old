@@ -30,9 +30,8 @@ RunControl::RunControl()
     :
       itrs_(0),
       simTime_(0.),
-      startTime_(boost::posix_time::microsec_clock::local_time()),
-      elapsedTime_(0, 0, 0, 0),
-      maxElapsedTime_(48, 0, 0, 0),
+      startRealTime_(boost::posix_time::microsec_clock::local_time()),
+      maxElapsedRealTime_(boost::posix_time::hours(48)),
       terminationCondition_("iterations")
 {
 
@@ -52,33 +51,27 @@ RunControl::RunControl(int argc, const char* argv[])
 
 bool RunControl::continueRun(double timeStep)
 {
+    using namespace boost::posix_time;
+
     ++itrs_;
     simTime_ += timeStep;
+    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     if(terminationCondition_ == "iterations")
     {
         if(itrs_ >= maxItrs_)
             return false;
     }
-
     else if(terminationCondition_ == "simTime")
     {
         if(simTime_ >= maxSimTime_)
             return false;
     }
-
-    else if(terminationCondition_ == "cpuTime")
-    {
-        if(cpuTime_ >= maxCpuTime_)
-            return false;
-    }
-
     else if (terminationCondition_ == "realTime")
     {
-        if(elapsedTime_ >= maxElapsedTime_)
+        if(elapsedRealTime_ >= maxElapsedRealTime_)
             return false;
     }
-
     else
     {
         Output::raiseException("RunControl", "continueRun", "invalid termination condition \"" + terminationCondition_ + "\" selected.");
@@ -90,16 +83,13 @@ bool RunControl::continueRun(double timeStep)
 void RunControl::displayStartMessage()
 {
     using namespace std;
-    using namespace boost::posix_time;
 
     ostringstream message;
-
-    startTime_ = second_clock::local_time();
 
     Output::printLine();
 
     message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << "." << endl
-            << "Iterations beginning on " << startTime_ << ".";
+            << "Iterations beginning on " << startRealTime_ << ".";
 
     Output::print(message.str());
 }
@@ -107,9 +97,12 @@ void RunControl::displayStartMessage()
 void RunControl::displayUpdateMessage()
 {
     using namespace std;
+    using namespace boost::posix_time;
 
     ostringstream message;
     double completionPercentage;
+
+    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     if(terminationCondition_ == "iterations")
     {
@@ -119,20 +112,15 @@ void RunControl::displayUpdateMessage()
     {
         completionPercentage = simTime_/maxSimTime_*100.;
     }
-    else if(terminationCondition_ == "cpuTime")
-    {
-
-    }
     else if (terminationCondition_ == "realTime")
     {
-
+        completionPercentage = elapsedRealTime_.total_microseconds()/maxElapsedRealTime_.total_microseconds()*100.;
     }
 
     message << "Simulation completion: " << completionPercentage << "%" << endl
             << "Iterations completed: " << itrs_ << endl
             << "Simulation time: " << simTime_ << endl
-            << "Elapsed time: " << elapsedTime_ << endl
-            << "CPU time: " << cpuTime_;
+            << "Elapsed time: " << elapsedRealTime_;
 
     Output::print(message.str());
 }
@@ -140,16 +128,18 @@ void RunControl::displayUpdateMessage()
 void RunControl::displayEndMessage()
 {
     using namespace std;
+    using namespace boost::posix_time;
+
+    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     ostringstream message;
 
     Output::printLine();
 
-    message << "Iterations completed on " << startTime_ + elapsedTime_ << endl
+    message << "Iterations completed on " << startRealTime_ + elapsedRealTime_ << endl
             << "Iterations completed: " << itrs_ << endl
             << "Simulation time: " << simTime_ << endl
-            << "Elapsed time: " << elapsedTime_ << endl
-            << "CPU time: " << cpuTime_;
+            << "Elapsed time: " << elapsedRealTime_;
 
     Output::print(message.str());
     Output::printLine();

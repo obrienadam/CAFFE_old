@@ -28,18 +28,17 @@
 
 #include "Input.h"
 #include "InputStringProcessing.h"
+#include "Output.h"
 
 Input::Input()
 {
     inputDoubles["simStartTime"] = 0.;                  ///< Start time in simulation time
     inputDoubles["maxSimTime"] = 1.;                    ///< End time in simulation time
     inputDoubles["timeStep"] = 1e-4;                    ///< Fixed time step
-    inputDoubles["maxCpuTime"] = 100;                   ///< Maximum allowed CPU time
     inputDoubles["maxRealTime"] = 48;                   ///< Maximum allowed real time
 
     inputStrings["solver"] = "Euler";                   ///< The solver type
     inputStrings["simTimeUnits"] = "seconds";           ///< Simulation time units
-    inputStrings["cpuTimeUnits"] = "years";             ///< CPU time units
     inputStrings["reaTimeUnits"] = "hours";             ///< Real time units
 
     inputInts["maxItrs"] = 30000;                       ///< Maximum allowed iterations
@@ -77,9 +76,7 @@ void Input::openInputFile(std::string filename)
     fin_.open(filename.c_str());
 
     if(!fin_.is_open())
-    {
-        throw ("Input file \"" + filename_ + "\" was not found.").c_str();
-    }
+        Output::raiseException("Input", "openInputFile", "Input file \"" + filename_ + "\" was not found.");
 
     while(!fin_.eof())
     {
@@ -97,23 +94,23 @@ void Input::openInputFile(std::string filename)
         if(inputInts.find(buffer) != inputInts.end())
         {
             if(!(fin_ >> inputInts[buffer]))
-                throw "A problem occurred while attempting to read an input integer.";
+                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input integer.");
         }
 
         else if (inputDoubles.find(buffer) != inputDoubles.end())
         {
             if(!(fin_ >> inputDoubles[buffer]))
-                throw "A problem occurred while attempting to read an input double.";
+                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input double.");
         }
 
         else if (inputStrings.find(buffer) != inputStrings.end())
         {
             if(!(fin_ >> inputStrings[buffer]))
-                throw "A problem occurred while attempting to read an input string.";
+                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input string.");
         }
         else
         {
-            throw ("Unrecognized input parameter type \"" + buffer + "\".").c_str();
+            Output::raiseException("Input", "openInputFile", "Unrecognized input parameter type \"" + buffer + "\".");
         }
     }
 }

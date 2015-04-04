@@ -28,7 +28,6 @@
 #include <string>
 
 #include <boost/date_time.hpp>
-#include <boost/chrono.hpp>
 
 #include "ArgsList.h"
 #include "Input.h"
@@ -40,7 +39,6 @@ class RunControl
 {
     typedef boost::posix_time::ptime RealTime;
     typedef boost::posix_time::time_duration RealTimeDuration;
-    typedef boost::chrono::process_cpu_clock::duration CpuTimeDuration;
 
 private:
 
@@ -55,9 +53,8 @@ private:
 
     //- Time related objects
 
-    RealTime startTime_;
-    RealTimeDuration elapsedTime_, maxElapsedTime_;
-    CpuTimeDuration cpuTime_, maxCpuTime_;
+    RealTime startRealTime_;
+    RealTimeDuration elapsedRealTime_, maxElapsedRealTime_;
 
     //- Private constructor only used to initialize defaults
 

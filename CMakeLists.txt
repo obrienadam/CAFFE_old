@@ -7,7 +7,7 @@ project(CAFFE)
 
 # Find boost package
 
-find_package(Boost REQUIRED COMPONENTS program_options system date_time chrono)
+find_package(Boost REQUIRED COMPONENTS program_options system date_time)
 
 if(Boost_FOUND)
 
