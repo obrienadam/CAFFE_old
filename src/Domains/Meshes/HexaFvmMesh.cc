@@ -851,10 +851,10 @@ void HexaFvmMesh::writeTec360(double time)
                 {
                     foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
                 }
+
+                foutTec360_ << endl;
             }
         }
-
-        foutTec360_ << endl;
     }
 
     // Output the solution data for scalars
@@ -869,10 +869,10 @@ void HexaFvmMesh::writeTec360(double time)
                 {
                     foutTec360_ << scalarFields[varNo](i, j, k) << " ";
                 }
+
+                foutTec360_ << endl;
             }
         }
-
-        foutTec360_ << endl;
     }
 
     // Output the solution data for vectors
@@ -889,11 +889,11 @@ void HexaFvmMesh::writeTec360(double time)
                     {
                         foutTec360_ << vectorFields[varNo](i, j, k)(componentNo) << " ";
                     }
+
+                    foutTec360_ << endl;
                 }
             }
         }
-
-        foutTec360_ << endl;
     }
 
     Output::print("HexaFvmMesh", "Finished writing data to Tec360 ASCII.");

@@ -71,6 +71,13 @@ void Field<T>::allocate(int nI, int nJ, int nK)
 {
     Array3D<T>::allocate(nI, nJ, nK);
 
+    if (type == CONSERVED || type == PRIMITIVE)
+    {
+        facesI_.allocate(nI + 1, nJ, nK);
+        facesJ_.allocate(nI, nJ + 1, nK);
+        facesK_.allocate(nI, nJ, nK + 1);
+    }
+
     if (type == CONSERVED)
     {
         faceFluxesI_.allocate(nI + 1, nJ, nK);

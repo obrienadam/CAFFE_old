@@ -25,6 +25,21 @@
 #include "Diffusion.h"
 #include "Output.h"
 
+// ************* Constructors and Destructors *************
+
+
+Diffusion::Diffusion()
+    :
+      gradPhiField_("gradPhiField", PRIMITIVE)
+{
+
+}
+
+Diffusion::~Diffusion()
+{
+
+}
+
 // ************* Private Methods *************
 
 void Diffusion::computeCellCenteredGradients()
@@ -75,30 +90,45 @@ void Diffusion::computeFaceCenteredGradients()
     int i, j, k, nCellsI, nCellsJ, nCellsK;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
+    Vector3D phiBar;
+    double alpha;
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
     nCellsK = mesh.nCellsK();
 
+    //- Reconstruct the interior faces
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i)
+            {
+                // East faces
+                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i + 1, j, k));
+                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i + 1, j, k);
+                gradPhiField_.faceE(i, j, k) = phiBar;
+
+                // North faces
+                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i, j + 1, k));
+                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j + 1, k);
+                gradPhiField_.faceN(i, j, k) = phiBar;
+
+                // Top faces
+                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i, j, k + 1));
+                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j, k + 1);
+                gradPhiField_.facesT(i, j, k) = phiBar;
+            }
+        }
+    }
 }
 
 // ************* Public Methods *************
 
-Diffusion::Diffusion()
-    :
-      gradPhiField_("gradPhiField", CONSERVED)
-{
-
-}
-
-Diffusion::~Diffusion()
-{
-
-}
-
 void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    int nCellsI, nCellsJ, nCellsK;
     Matrix lsMatrix(6, 3);
 
     FvScheme::initialize(mesh, conservedFieldName);
@@ -130,7 +160,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
 
     computeCellCenteredGradients();
     computeFaceCenteredGradients();
-    gradPhiField_.print();
+    //gradPhiField_.print();
 
     for(k = 0, l = 0; k < nCellsK; ++k)
     {
@@ -138,7 +168,6 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
         {
             for(i = 0; i < nCellsI; ++i, ++l)
             {
-                // Reconstruct east face
 
                 timeDerivatives[l] = phiField.sumFluxes(i, j, k)/mesh.cellVol(i, j, k);
             }

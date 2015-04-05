@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file    Field.h
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
@@ -41,6 +41,11 @@ private:
 
     //- Face fluxes conserved fields (units/m^2)
 
+
+    Array3D<T> facesI_;
+    Array3D<T> facesJ_;
+    Array3D<T> facesK_;
+
     Array3D<T> faceFluxesI_;
     Array3D<T> faceFluxesJ_;
     Array3D<T> faceFluxesK_;
@@ -69,6 +74,10 @@ public:
     Field(int nI, int nJ, int nK, std::string name = "UnnamedField", int type = AUXILLARY);
     Field(const Field& other);
 
+    /**
+     * @brief A CONSERVED type allocates memory for both face values and face flux values. A PRIMITIVE type allocates
+     * memory only for face values. An AUXILLARY type only allocates the centered values.
+     */
     int type;
     std::string name;
 
@@ -79,6 +88,13 @@ public:
     //- Access
 
     T& operator()(int i, int j, int k);
+
+    T& faceE(int i, int j, int k){ return facesI_(i + 1, j, k); }
+    T& faceW(int i, int j, int k){ return facesI_(i, j, k); }
+    T& faceN(int i, int j, int k){ return facesJ_(i, j + 1, k); }
+    T& faceS(int i, int j, int k){ return facesJ_(i, j, k); }
+    T& facesT(int i, int j, int k){ return facesK_(i, j, k + 1); }
+    T& facesB(int i, int j, int k){ return facesK_(i, j, k); }
 
     T& fluxE(int i, int j, int k){ return faceFluxesI_(i + 1, j, k); }
     T& fluxW(int i, int j, int k){ return -faceFluxesI_(i, j, k); }
