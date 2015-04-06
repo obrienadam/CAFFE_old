@@ -50,18 +50,12 @@ Field<T>::Field(const Field &other)
     :
       Field(other.nI_, other.nJ_, other.nK_, other.name, other.type)
 {
-    int i, j, k;
+    int k;
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0; k < Array3D<T>::n_; ++k)
     {
-        for(j = 0; j < Array3D<T>::nJ_; ++j)
-        {
-            for(i = 0; i < Array3D<T>::nI_; ++i)
-            {
-                Array3D<T>::data_[i][j][k] = other.Array3D<T>::data_[i][j][k];
-            } // end for i
-        } // end for j
-    } // end for k
+        Array3D<T>::data_[k] = other.Array3D<T>::data_[k];
+    }
 }
 
 // ************* Public Methods *************
@@ -84,13 +78,6 @@ void Field<T>::allocate(int nI, int nJ, int nK)
         faceFluxesJ_.allocate(nI, nJ + 1, nK);
         faceFluxesK_.allocate(nI, nJ, nK + 1);
     }
-
-    eastBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    westBoundaryField_.allocate(Array3D<T>::nJ_, Array3D<T>::nK_);
-    northBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    southBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nK_);
-    topBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
-    bottomBoundaryField_.allocate(Array3D<T>::nI_, Array3D<T>::nJ_);
 }
 
 template<class T>
@@ -134,41 +121,41 @@ T& Field<T>::operator()(int i, int j, int k)
     if(i >= 0 && j >= 0 && k >= 0 &&
             i < Array3D<T>::nI_ && j < Array3D<T>::nJ_ && k < Array3D<T>::nK_)
     {
-        return Array3D<T>::data_[i][j][k];
+        return Array3D<T>::operator ()(i, j, k);
     }
 
-    // Access to the boundary fields
+    // Access to the boundaries
 
     if(i < 0)
     {
-        return westBoundaryField_(j, k);
+        return facesI_(0, j, k);
     }
     else if (i >= Array3D<T>::nI_)
     {
-        return eastBoundaryField_(j, k);
+        return facesI_(Array3D<T>::nI_, j, k);
     }
 
     if(j < 0)
     {
-        return southBoundaryField_(i, k);
+        return facesJ_(i, 0, k);
     }
     else if (j >= Array3D<T>::nJ_)
     {
-        return northBoundaryField_(i, k);
+        return facesJ_(i, Array3D<T>::nJ_, k);
     }
 
     if(k < 0)
     {
-        return bottomBoundaryField_(i, j);
+        return facesK_(i, j, 0);
     }
     else if (k >= Array3D<T>::nK_)
     {
-        return topBoundaryField_(i, j);
+        return facesK_(i, j, Array3D<T>::nK_);
     }
 
     // Just to get rid of the compiler warning
 
-    return Array3D<T>::data_[i][j][k];
+    return Array3D<T>::data_[0];
 }
 
 template<class T>
@@ -182,17 +169,17 @@ void Field<T>::print()
 {
     using namespace std;
 
-    int i, j, k;
+    int i, j, k, l;
 
     cout << "Field name = " << "\"" << name << "\"\n";
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0, l = 0; k < Array3D<T>::nK_; ++k)
     {
         for(j = 0; j < Array3D<T>::nJ_; ++j)
         {
-            for(i = 0; i < Array3D<T>::nI_; ++i)
+            for(i = 0; i < Array3D<T>::nI_; ++i, ++l)
             {
-                cout << Array3D<T>::data_[i][j][k] << " ";
+                cout << Array3D<T>::data_[l] << " ";
             } // end for i
 
             cout << endl;
@@ -200,7 +187,6 @@ void Field<T>::print()
 
         cout << endl;
     } // end for k
-
 }
 
 template<class T>
@@ -232,7 +218,7 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(j = 0; j < Array3D<T>::nJ_; ++j)
         {
-            eastBoundaryField_(j, k) = boundaryValue;
+            facesI_(Array3D<T>::nI_, j, k) = boundaryValue;
         } // end for j
     } //  end for k
 }
@@ -248,7 +234,7 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(j = 0; j < Array3D<T>::nJ_; ++j)
         {
-            westBoundaryField_(j, k) = boundaryValue;
+            facesI_(0, j, k) = boundaryValue;
         } // end for j
     } //  end for k
 }
@@ -264,7 +250,7 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            northBoundaryField_(i, k) = boundaryValue;
+            facesJ_(i, Array3D<T>::nJ_, k) = boundaryValue;
         } // end for i
     } //  end for k
 }
@@ -280,7 +266,7 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            southBoundaryField_(i, k) = boundaryValue;
+            facesJ_(i, 0, k) = boundaryValue;
         } // end for i
     } //  end for k
 }
@@ -296,7 +282,7 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            topBoundaryField_(i, j) = boundaryValue;
+            facesK_(i, j, Array3D<T>::nK_) = boundaryValue;
         } // end for i
     } //  end for j
 }
@@ -312,7 +298,7 @@ void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
     {
         for(i = 0; i < Array3D<T>::nI_; ++i)
         {
-            bottomBoundaryField_(i, j) = boundaryValue;
+            facesK_(i, j, 0) = boundaryValue;
         } // end for i
     } //  end for j
 }
@@ -331,7 +317,11 @@ void Field<T>::setBoundaryFields()
 template<class T>
 void Field<T>::setEastBoundaryField()
 {
-    int j, k, nJ(eastBoundaryField_.sizeI()), nK(eastBoundaryField_.sizeJ()), maxI(Array3D<T>::nI_ - 1);
+    int j, k, nJ, nK, maxI;
+
+    nJ = Array3D<T>::nJ_;
+    nK = Array3D<T>::nK_;
+    maxI = Array3D<T>::nI_ - 1;
 
     for(k = 0; k < nK; ++k)
     {
@@ -345,7 +335,7 @@ void Field<T>::setEastBoundaryField()
 
             case ZERO_GRADIENT:
 
-                eastBoundaryField_(j, k) = Array3D<T>::data_[maxI][j][k];
+                facesI_(Array3D<T>::nI_, j, k) = Array3D<T>::data_[maxI][j][k];
 
                 break;
             };
@@ -356,7 +346,10 @@ void Field<T>::setEastBoundaryField()
 template<class T>
 void Field<T>::setWestBoundaryField()
 {
-    int j, k, nJ(westBoundaryField_.sizeI()), nK(westBoundaryField_.sizeJ());
+    int j, k, nJ, nK;
+
+    nJ = Array3D<T>::nJ_;
+    nK = Array3D<T>::nK_;
 
     for(k = 0; k < nK; ++k)
     {
@@ -371,7 +364,7 @@ void Field<T>::setWestBoundaryField()
 
             case ZERO_GRADIENT:
 
-                westBoundaryField_(j, k) = Array3D<T>::data_[0][j][k];
+                facesI_(0, j, k) = Array3D<T>::data_[0][j][k];
 
                 break;
             };
@@ -382,7 +375,11 @@ void Field<T>::setWestBoundaryField()
 template<class T>
 void Field<T>::setNorthBoundaryField()
 {
-    int i, k, nI(northBoundaryField_.sizeI()), nK(northBoundaryField_.sizeJ()), maxJ(Array3D<T>::nJ_ - 1);
+    int i, k, nI, nK, maxJ;
+
+    nI = Array3D<T>::nI_;
+    nK = Array3D<T>::nK_;
+    maxJ = Array3D<T>::nJ_ - 1;
 
     for(k = 0; k < nK; ++k)
     {
@@ -397,7 +394,7 @@ void Field<T>::setNorthBoundaryField()
 
             case ZERO_GRADIENT:
 
-                northBoundaryField_(i, k) = Array3D<T>::data_[i][maxJ][k];
+                facesJ_(i, Array3D<T>::nJ_, k) = Array3D<T>::data_[i][maxJ][k];
 
                 break;
             };
@@ -409,7 +406,10 @@ void Field<T>::setNorthBoundaryField()
 template<class T>
 void Field<T>::setSouthBoundaryField()
 {
-    int i, k, nI(southBoundaryField_.sizeI()), nK(southBoundaryField_.sizeJ());
+    int i, k, nI, nK;
+
+    nI = Array3D<T>::nI_;
+    nK = Array3D<T>::nK_;
 
     for(k = 0; k < nK; ++k)
     {
@@ -425,7 +425,7 @@ void Field<T>::setSouthBoundaryField()
 
             case ZERO_GRADIENT:
 
-                southBoundaryField_(i, k) = Array3D<T>::data_[i][0][k];
+                facesJ_(i, 0, k) = Array3D<T>::data_[i][0][k];
 
                 break;
             };
@@ -436,7 +436,11 @@ void Field<T>::setSouthBoundaryField()
 template<class T>
 void Field<T>::setTopBoundaryField()
 {
-    int i, j, nI(topBoundaryField_.sizeI()), nJ(topBoundaryField_.sizeJ()), maxK(Array3D<T>::nK_ - 1);
+    int i, j, nI, nJ, maxK;
+
+    nI = Array3D<T>::nI_;
+    nJ = Array3D<T>::nJ_;
+    maxK = Array3D<T>::nK_ - 1;
 
     for(j = 0; j < nJ; ++j)
     {
@@ -450,7 +454,7 @@ void Field<T>::setTopBoundaryField()
 
             case ZERO_GRADIENT:
 
-                topBoundaryField_(i, j) = Array3D<T>::data_[i][j][maxK];
+                facesK_(i, j, Array3D<T>::nK_) = Array3D<T>::data_[i][j][maxK];
 
                 break;
             };
@@ -462,7 +466,10 @@ void Field<T>::setTopBoundaryField()
 template<class T>
 void Field<T>::setBottomBoundaryField()
 {
-    int i, j, nI(bottomBoundaryField_.sizeI()), nJ(bottomBoundaryField_.sizeJ());
+    int i, j, nI, nJ;
+
+    nI = Array3D<T>::nI_;
+    nJ = Array3D<T>::nJ_;
 
     for(j = 0; j < nJ; ++j)
     {
@@ -476,7 +483,7 @@ void Field<T>::setBottomBoundaryField()
 
             case ZERO_GRADIENT:
 
-                bottomBoundaryField_(i, j) = Array3D<T>::data_[i][j][0];
+                facesK_(i, j, 0) = Array3D<T>::data_[i][j][0];
 
                 break;
             };

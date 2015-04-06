@@ -93,9 +93,9 @@ void Diffusion::computeFaceCenteredGradients()
     Vector3D phiBar;
     double alpha;
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
+    nCellsI = mesh.nCellsI() - 1;
+    nCellsJ = mesh.nCellsJ() - 1;
+    nCellsK = mesh.nCellsK() - 1;
 
     //- Reconstruct the interior faces
 
@@ -160,7 +160,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
 
     computeCellCenteredGradients();
     computeFaceCenteredGradients();
-    //gradPhiField_.print();
+    gradPhiField_.print();
 
     for(k = 0, l = 0; k < nCellsK; ++k)
     {

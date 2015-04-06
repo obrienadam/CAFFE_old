@@ -39,12 +39,13 @@ class Field : public Array3D<T>
 {
 private:
 
-    //- Face fluxes conserved fields (units/m^2)
-
+    //- Face nodes for primitive and conserved fields
 
     Array3D<T> facesI_;
     Array3D<T> facesJ_;
     Array3D<T> facesK_;
+
+    //- Face fluxes conserved fields (units/m^2)
 
     Array3D<T> faceFluxesI_;
     Array3D<T> faceFluxesJ_;
@@ -58,15 +59,6 @@ private:
     BoundaryPatch southBoundaryPatch_;
     BoundaryPatch topBoundaryPatch_;
     BoundaryPatch bottomBoundaryPatch_;
-
-    //- Boundary fields
-
-    Array2D<T> eastBoundaryField_;
-    Array2D<T> westBoundaryField_;
-    Array2D<T> northBoundaryField_;
-    Array2D<T> southBoundaryField_;
-    Array2D<T> topBoundaryField_;
-    Array2D<T> bottomBoundaryField_;
 
 public:
 

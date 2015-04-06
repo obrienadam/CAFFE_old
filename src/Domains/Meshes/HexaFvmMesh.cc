@@ -73,15 +73,15 @@ void HexaFvmMesh::initializeCellToCellParameters()
     // Allocate the cell to cell distance vectors and distaces
 
     cellToCellRelativeVectorsI_.allocate(nI - 1, nJ, nK);
-    cellToCellNormalVectorsI_.allocate(nI - 1, nJ, nK);
+    cellToCellUnitVectorsI_.allocate(nI - 1, nJ, nK);
     cellToCellDistancesI_.allocate(nI - 1, nJ, nK);
 
     cellToCellRelativeVectorsJ_.allocate(nI, nJ - 1, nK);
-    cellToCellNormalVectorsJ_.allocate(nI, nJ - 1, nK);
+    cellToCellUnitVectorsJ_.allocate(nI, nJ - 1, nK);
     cellToCellDistancesJ_.allocate(nI, nJ - 1, nK);
 
     cellToCellRelativeVectorsK_.allocate(nI, nJ, nK - 1);
-    cellToCellNormalVectorsK_.allocate(nI, nJ, nK - 1);
+    cellToCellUnitVectorsK_.allocate(nI, nJ, nK - 1);
     cellToCellDistancesK_.allocate(nI, nJ, nK - 1);
 
     for(k = 0; k < nK; ++k)
@@ -94,7 +94,7 @@ void HexaFvmMesh::initializeCellToCellParameters()
                 {
                     tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsI_(i, j, k) = tmpVec;
-                    cellToCellNormalVectorsI_(i, j, k) = tmpVec.unitVector();
+                    cellToCellUnitVectorsI_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesI_(i, j, k) = tmpVec.mag();
                 }
 
@@ -102,7 +102,7 @@ void HexaFvmMesh::initializeCellToCellParameters()
                 {
                     tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsJ_(i, j, k) = tmpVec;
-                    cellToCellNormalVectorsJ_(i, j, k) = tmpVec.unitVector();
+                    cellToCellUnitVectorsJ_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesJ_(i, j, k) = tmpVec.mag();
                 }
 
@@ -110,7 +110,7 @@ void HexaFvmMesh::initializeCellToCellParameters()
                 {
                     tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsK_(i, j, k) = tmpVec;
-                    cellToCellNormalVectorsK_(i, j, k) = tmpVec.unitVector();
+                    cellToCellUnitVectorsK_(i, j, k) = tmpVec.unitVector();
                     cellToCellDistancesK_(i, j, k) = tmpVec.mag();
                 }
             } // end for i
@@ -122,15 +122,18 @@ void HexaFvmMesh::initializeFaces()
 {
     int i, j, k, nI, nJ, nK;
     Point3D tmpPoints[4];
+    Vector3D tmpVec;
+    double tmpArea;
 
     // Initialize the I-direction faces (normals alligned with in the I-direction)
 
-    nI = nodes_.sizeI();
-    nJ = nodes_.sizeJ() - 1;
-    nK = nodes_.sizeK() - 1;
+    nI = cellCenters_.sizeI() + 1;
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK();
 
     faceCentersI_.allocate(nI, nJ, nK);
     faceNormalsI_.allocate(nI, nJ, nK);
+    faceUnitNormalsI_.allocate(nI, nJ, nK);
     faceAreasI_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -144,21 +147,26 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
                 tmpPoints[3] = nodes_(i, j, k + 1);
 
+                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
+
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
-                faceNormalsI_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                faceAreasI_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                faceNormalsI_(i, j, k) = tmpVec*tmpArea;
+                faceUnitNormalsI_(i, j, k) = tmpVec.unitVector();
+                faceAreasI_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
 
     // Initialize the J-direction faces (normals aligned with in the J-direction)
 
-    nI = nodes_.sizeI() - 1;
-    nJ = nodes_.sizeJ();
-    nK = nodes_.sizeK() - 1;
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ() + 1;
+    nK = cellCenters_.sizeK();
 
     faceCentersJ_.allocate(nI, nJ, nK);
     faceNormalsJ_.allocate(nI, nJ, nK);
+    faceUnitNormalsJ_.allocate(nI, nJ, nK);
     faceAreasJ_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -172,21 +180,26 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
                 tmpPoints[3] = nodes_(i + 1, j, k);
 
+                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
+
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
-                faceNormalsJ_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                faceAreasJ_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                faceNormalsJ_(i, j, k) = tmpVec*tmpArea;
+                faceUnitNormalsJ_(i, j, k) = tmpVec.unitVector();
+                faceAreasJ_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
 
     // Initialize the K-direction faces (normals alligned with in the K-direction)
 
-    nI = nodes_.sizeI() - 1;
-    nJ = nodes_.sizeJ() - 1;
-    nK = nodes_.sizeK();
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK() + 1;
 
     faceCentersK_.allocate(nI, nJ, nK);
     faceNormalsK_.allocate(nI, nJ, nK);
+    faceUnitNormalsK_.allocate(nI, nJ, nK);
     faceAreasK_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -200,9 +213,13 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
 
+                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
+
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
-                faceNormalsK_(i, j, k) = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
-                faceAreasK_(i, j, k) = Geometry::computeQuadrilateralArea(tmpPoints);
+                faceNormalsK_(i, j, k) = tmpVec*tmpArea;
+                faceUnitNormalsK_(i, j, k) = tmpVec.unitVector();
+                faceAreasK_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
@@ -218,27 +235,27 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     nK = cellCenters_.sizeK();
 
     cellToFaceRelativeVectorsE_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsE_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsE_.allocate(nI, nJ, nK);
     cellToFaceDistancesE_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsW_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsW_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsW_.allocate(nI, nJ, nK);
     cellToFaceDistancesW_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsN_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsN_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsN_.allocate(nI, nJ, nK);
     cellToFaceDistancesN_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsS_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsS_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsS_.allocate(nI, nJ, nK);
     cellToFaceDistancesS_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsT_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsT_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsT_.allocate(nI, nJ, nK);
     cellToFaceDistancesT_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsB_.allocate(nI, nJ, nK);
-    cellToFaceNormalVectorsB_.allocate(nI, nJ, nK);
+    cellToFaceUnitVectorsB_.allocate(nI, nJ, nK);
     cellToFaceDistancesB_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -251,42 +268,42 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
                 tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsE_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsE_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsE_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesE_(i, j, k) = tmpVec.mag();
 
                 // West cell to face parameters
 
                 tmpVec = faceCentersI_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsW_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsW_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsW_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
 
                 // North cell to face parameters
 
                 tmpVec = faceCentersJ_(i, j + 1, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsN_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsN_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsN_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesN_(i, j, k) = tmpVec.mag();
 
                 // South cell to face parameters
 
                 tmpVec = faceCentersJ_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsS_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsS_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsS_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
 
                 // Top cell to face parameters
 
                 tmpVec = faceCentersK_(i, j, k + 1) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsT_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsT_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsT_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesT_(i, j, k) = tmpVec.mag();
 
                 // Bottom cell to face parameters
 
                 tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsB_(i, j, k) = tmpVec;
-                cellToFaceNormalVectorsB_(i, j, k) = tmpVec.unitVector();
+                cellToFaceUnitVectorsB_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
             } // end for i
         } // end for j
@@ -462,50 +479,50 @@ Vector3D HexaFvmMesh::rCellB(int i, int j, int k)
 
 Vector3D HexaFvmMesh::rnCellE(int i, int j, int k)
 {
-    if(i == cellToCellNormalVectorsI_.sizeI())
-        return cellToFaceNormalVectorsE_(i, j, k);
+    if(i == cellToCellUnitVectorsI_.sizeI())
+        return cellToFaceUnitVectorsE_(i, j, k);
 
-    return cellToCellNormalVectorsI_(i, j, k);
+    return cellToCellUnitVectorsI_(i, j, k);
 }
 
 Vector3D HexaFvmMesh::rnCellW(int i, int j, int k)
 {
     if(i == 0)
-        return cellToFaceNormalVectorsW_(i, j, k);
+        return cellToFaceUnitVectorsW_(i, j, k);
 
-    return -cellToCellNormalVectorsI_(i - 1, j, k);
+    return -cellToCellUnitVectorsI_(i - 1, j, k);
 }
 
 Vector3D HexaFvmMesh::rnCellN(int i, int j, int k)
 {
-    if(j == cellToCellNormalVectorsJ_.sizeJ())
-        return cellToFaceNormalVectorsN_(i, j, k);
+    if(j == cellToCellUnitVectorsJ_.sizeJ())
+        return cellToFaceUnitVectorsN_(i, j, k);
 
-    return cellToCellNormalVectorsJ_(i, j, k);
+    return cellToCellUnitVectorsJ_(i, j, k);
 }
 
 Vector3D HexaFvmMesh::rnCellS(int i, int j, int k)
 {
     if(j == 0)
-        return cellToFaceNormalVectorsS_(i, j, k);
+        return cellToFaceUnitVectorsS_(i, j, k);
 
-    return -cellToCellNormalVectorsJ_(i, j - 1, k);
+    return -cellToCellUnitVectorsJ_(i, j - 1, k);
 }
 
 Vector3D HexaFvmMesh::rnCellT(int i, int j, int k)
 {
-    if(k == cellToCellNormalVectorsK_.sizeK())
-        return cellToFaceNormalVectorsT_(i, j, k);
+    if(k == cellToCellUnitVectorsK_.sizeK())
+        return cellToFaceUnitVectorsT_(i, j, k);
 
-    return cellToCellNormalVectorsK_(i, j, k);
+    return cellToCellUnitVectorsK_(i, j, k);
 }
 
 Vector3D HexaFvmMesh::rnCellB(int i, int j, int k)
 {
     if(k == 0)
-        return cellToFaceNormalVectorsB_(i, j, k);
+        return cellToFaceUnitVectorsB_(i, j, k);
 
-    return -cellToCellNormalVectorsK_(i, j, k - 1);
+    return -cellToCellUnitVectorsK_(i, j, k - 1);
 }
 
 double HexaFvmMesh::rCellMagE(int i, int j, int k)
@@ -661,9 +678,9 @@ void HexaFvmMesh::writeDebug()
 
     debugFout << "\nFace Normals I:\n";
 
-    nI = faceNormalsI_.sizeI();
-    nJ = faceNormalsI_.sizeJ();
-    nK = faceNormalsI_.sizeK();
+    nI = faceUnitNormalsI_.sizeI();
+    nJ = faceUnitNormalsI_.sizeJ();
+    nK = faceUnitNormalsI_.sizeK();
 
     for(k = 0; k < nK; ++k)
     {
@@ -671,7 +688,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << faceNormalsI_(i, j, k) << " ";
+                debugFout << faceUnitNormalsI_(i, j, k) << " ";
             } // end for i
 
             debugFout << endl;
@@ -680,9 +697,9 @@ void HexaFvmMesh::writeDebug()
 
     debugFout << "\nFace Normals J:\n";
 
-    nI = faceNormalsJ_.sizeI();
-    nJ = faceNormalsJ_.sizeJ();
-    nK = faceNormalsJ_.sizeK();
+    nI = faceUnitNormalsJ_.sizeI();
+    nJ = faceUnitNormalsJ_.sizeJ();
+    nK = faceUnitNormalsJ_.sizeK();
 
     for(k = 0; k < nK; ++k)
     {
@@ -690,7 +707,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << faceNormalsJ_(i, j, k) << " ";
+                debugFout << faceUnitNormalsJ_(i, j, k) << " ";
             } // end for i
 
             debugFout << endl;
@@ -699,9 +716,9 @@ void HexaFvmMesh::writeDebug()
 
     debugFout << "\nFace Normals K:\n";
 
-    nI = faceNormalsK_.sizeI();
-    nJ = faceNormalsK_.sizeJ();
-    nK = faceNormalsK_.sizeK();
+    nI = faceUnitNormalsK_.sizeI();
+    nJ = faceUnitNormalsK_.sizeJ();
+    nK = faceUnitNormalsK_.sizeK();
 
     for(k = 0; k < nK; ++k)
     {
@@ -709,7 +726,7 @@ void HexaFvmMesh::writeDebug()
         {
             for(i = 0; i < nI; ++i)
             {
-                debugFout << faceNormalsK_(i, j, k) << " ";
+                debugFout << faceUnitNormalsK_(i, j, k) << " ";
             } // end for i
 
             debugFout << endl;

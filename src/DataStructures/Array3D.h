@@ -10,7 +10,8 @@ class Array3D
 protected:
 
     int nI_, nJ_, nK_, n_;
-    T*** data_;
+    int nInJ_, nInK_, nJnK_;
+    T* data_;
 
 public:
 
@@ -41,7 +42,7 @@ public:
 
     private:
 
-        int i_, j_, k_;
+        int k_;
         T* dataPtr_;
         Array3D<T>* objectPtr_;
 
@@ -52,8 +53,6 @@ public:
         iterator();
         iterator(T* dataPtr,
                  Array3D<T>* objectPtr,
-                 int i,
-                 int j,
                  int k);
 
         iterator& operator++();
@@ -61,7 +60,6 @@ public:
         T& operator*();
 
         bool operator!=(const iterator& rhs);
-
     };
 
     iterator begin();

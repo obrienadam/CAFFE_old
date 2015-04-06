@@ -19,104 +19,56 @@ Array3D<T>::Array3D(int nI, int nJ, int nK)
     :
       Array3D()
 {
-  
     allocate(nI, nJ, nK);
-    
 }
 
 template <class T>
 Array3D<T>::~Array3D()
 {
-  
     deallocate();
-    
 }
 
 template <class T>
 void Array3D<T>::allocate(int nI, int nJ, int nK)
 {
-  
-    int i, j;
-
     deallocate();
 
     nI_ = nI;
     nJ_ = nJ;
     nK_ = nK;
-    n_ = nI_*nJ_*nK_;
+    nInJ_ = nI_*nJ_;
+    nInK_ = nI_*nK_;
+    nJnK_ = nJ_*nK_;
+    n_ = nInJ_*nK_;
 
     // Check for 0 value, if 0 do not attempt allocation
 
     if(n_ == 0)
         return;
-
-    data_ = new T**[nI_ + 1];
-
-    for(i = 0; i < nI_; ++i)
-    {
-        data_[i] = new T*[nJ_];
-        
-        for(j = 0; j < nJ_; ++j)
-        {
-
-	    data_[i][j] = new T[nK_];
-           
-        }
-    }
-
-    // Allocate one extra element such that the iterator does not cause a seg-fault
-
-    data_[nI_] = new T*[1];
-    data_[nI_][0] = new T[1];
     
+    data_ = new T[n_ + 1];
 }
 
 template <class T>
 void Array3D<T>::deallocate()
 {
-  
-    int i, j;
-
     if(data_ == NULL)
         return;
 
-    for(i = 0; i < nI_; ++i)
-    {
-      
-        for(j = 0; j < nJ_; ++j)
-        {
-	  
-            delete[] data_[i][j];
-	    
-        }
-	
-        delete[] data_[i];
-
-    }
-
-    // Deallocate the last element
-
-    delete[] data_[nI_][0];
-    delete[] data_[nI_];
-
     delete[] data_;
-
     data_ = NULL;
 
-    nI_ = nJ_ = nK_ = n_ = 0;
-    
+    nI_ = nJ_ = nK_ = nInJ_ = nInK_ = nJnK_ = n_ = 0;
 }
 
 template <class T>
 T& Array3D<T>::operator()(int i, int j, int k)
 {
-
     if(i < 0 || j < 0 || k < 0 ||
             i >= nI_ || j >= nJ_ || k >= nK_)
         throw "Attempted to access element outside the bounds of Array3D.";
 
-    return data_[i][j][k];
-
+    return data_[k*nInJ_ + j*nI_ + i];
 }
 
 //- Iterator methods
@@ -133,14 +85,10 @@ Array3D<T>::iterator::iterator()
 template <class T>
 Array3D<T>::iterator::iterator(T* dataPtr,
                                       Array3D<T>* objectPtr,
-                                      int i,
-                                      int j,
                                       int k)
     :
       dataPtr_(dataPtr),
       objectPtr_(objectPtr),
-      i_(i),
-      j_(j),
       k_(k)
 {
 
@@ -150,62 +98,40 @@ template <class T>
 typename
 Array3D<T>::iterator& Array3D<T>::iterator::operator++()
 {
+    ++k_;
 
-    ++i_;
-
-    if(i_ == objectPtr_->nI_)
-    {
-        i_ = 0;
-        ++j_;
-    }
-
-    if(j_ == objectPtr_->nJ_)
-    {
-        j_ = 0;
-        ++k_;
-    }
-
-    dataPtr_ = &objectPtr_->data_[i_][j_][k_];
+    dataPtr_ = &objectPtr_->data_[k_];
 
     return *this;
-
 }
 
 template <class T>
 T& Array3D<T>::iterator::operator*()
 {
-
     return *dataPtr_;
-
 }
 
 template <class T>
 bool Array3D<T>::iterator::operator!=(const iterator& rhs)
 {
-
     if(dataPtr_ != rhs.dataPtr_)
         return true;
 
     return false;
-
 }
 
 template <class T>
 typename
 Array3D<T>::iterator Array3D<T>::begin()
 {
-
-    return iterator(&data_[0][0][0], this, 0, 0, 0);
-
+    return iterator(&data_[0], this, 0);
 }
 
 template <class T>
 typename
 Array3D<T>::iterator Array3D<T>::end()
 {
-
     // The end is at container size + 1 so that the iterator will iterate over the entire container
 
-    return iterator(&data_[0][0][nK_], this, 0, 0, nK_);
-
+    return iterator(&data_[n_], this, n_);
 }
