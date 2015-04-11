@@ -62,7 +62,8 @@ public:
     int nConservedVariables();
 
     void discretize(std::vector<double>& timeDerivatives);
-    void updateSolution(std::vector<double>& update);
+    void copySolution(std::vector<double>& original);
+    void updateSolution(std::vector<double>& update, int method);
 };
 
 #endif

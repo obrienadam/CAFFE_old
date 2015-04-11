@@ -22,6 +22,8 @@
  * Diffusion.
  */
 
+#include <math.h>
+
 #include "Diffusion.h"
 #include "Output.h"
 
@@ -125,9 +127,33 @@ void Diffusion::computeFaceCenteredGradients()
                     gradPhiField_.faceE(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
                 }
 
-                // North faces
+                // North faces 
+                if(j < uJ)
+                {
+                    alpha = FvScheme::getAlpha(i, j, k, NORTH);
+
+                    phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j + 1, k);
+                    A = mesh.fAreaNormN(i, j, k);
+                    es = mesh.rnCellN(i, j, k);
+                    phi1 = phiField(i, j + 1, k);
+                    ds = mesh.rCellMagN(i, j, k);
+
+                    gradPhiField_.faceN(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
+                }
 
                 // Top faces
+                if(k < uK)
+                {
+                    alpha = FvScheme::getAlpha(i, j, k, TOP);
+
+                    phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j, k + 1);
+                    A = mesh.fAreaNormT(i, j, k);
+                    es = mesh.rnCellT(i, j, k);
+                    phi1 = phiField(i, j, k + 1);
+                    ds = mesh.rCellMagT(i, j, k);
+
+                    gradPhiField_.faceT(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
+                }
             }
         }
     }
@@ -158,8 +184,50 @@ void Diffusion::computeFaceCenteredGradients()
     }
 
     // North and south
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(i = 0; i < nCellsI; ++i)
+        {
+            phi0 = phiField(i, uJ, k);
+            phiB = phiField(i, uJ + 1, k);
+            db = mesh.rFaceMagN(i, uJ, k);
+            eb = mesh.rnFaceN(i, uJ, k);
+            A = mesh.fAreaNormN(i, uJ, k);
+
+            gradPhiField_.faceN(i, uJ, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(i, uJ, k) - dot(gradPhiField_(i, uJ, k), eb)*A/dot(A, eb);
+
+            phi0 = phiField(i, 0, k);
+            phiB = phiField(i, -1, k);
+            db = mesh.rFaceMagS(i, 0, k);
+            eb = mesh.rnFaceS(i, 0, k);
+            A = mesh.fAreaNormS(i, 0, k);
+
+            gradPhiField_.faceS(i, 0, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(i, 0, k) - dot(gradPhiField_(i, 0, k), eb)*A/dot(A, eb);
+        }
+    }
 
     // Top and bottom
+    for(j = 0; j < nCellsJ; ++j)
+    {
+        for(i = 0; i < nCellsI; ++i)
+        {
+            phi0 = phiField(i, j, uK);
+            phiB = phiField(i, j, uK + 1);
+            db = mesh.rFaceMagT(i, j, uK);
+            eb = mesh.rnFaceT(i, j, uK);
+            A = mesh.fAreaNormT(i, j, uK);
+
+            gradPhiField_.faceT(i, j, uK) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(i, j, uK) - dot(gradPhiField_(i, j, uK), eb)*A/dot(A, eb);
+
+            phi0 = phiField(i, j, 0);
+            phiB = phiField(i, j, -1);
+            db = mesh.rFaceMagB(i, j, 0);
+            eb = mesh.rnFaceB(i, j, 0);
+            A = mesh.fAreaNormB(i, j, 0);
+
+            gradPhiField_.faceB(i, j, 0) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(i, j, 0) - dot(gradPhiField_(i, j, 0), eb)*A/dot(A, eb);
+        }
+    }
 }
 
 void Diffusion::computeFaceFluxes()
@@ -181,8 +249,11 @@ void Diffusion::computeFaceFluxes()
                 if(j < nFacesJ - 1 && k < nFacesK - 1)
                     phiField.fluxI(i, j, k) = dot(gradPhiField_.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
 
-                //phiField.fluxJ(i, j, k) = dot(gradPhiField_.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
-                //phiField.fluxK(i, j, k) = dot(gradPhiField_.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
+                if(i < nFacesI - 1 && k < nFacesK - 1)
+                    phiField.fluxJ(i, j, k) = dot(gradPhiField_.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
+
+                if(i < nFacesI - 1 && j < nFacesJ - 1)
+                    phiField.fluxK(i, j, k) = dot(gradPhiField_.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
     }
@@ -239,29 +310,55 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
             }
         }
     }
-
 }
 
-void Diffusion::updateSolution(std::vector<double>& update)
+void Diffusion::copySolution(std::vector<double> &original)
 {
-    int i, j, k, l, nCellsI, nCellsJ, nCellsK;
+    int k, size;
     Field<double>& phiField = *phiFieldPtr_;
 
-    nCellsI = phiField.sizeI();
-    nCellsJ = phiField.sizeJ();
-    nCellsK = phiField.sizeK();
+    size = phiField.size();
 
-    for(k = 0, l = 0; k < nCellsK; ++k)
+    for(k = 0; k < size; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
-        {
-            for(i = 0; i < nCellsI; ++i)
-            {
-                phiField(i, j, k) += update[l];
-                ++l;
-            }
-        }
+        original[k] = phiField(k);
     }
+}
 
-    Output::print("Diffusion", "Update norm -> " + std::to_string(FvScheme::computeUpdateNorm(update)));
+void Diffusion::updateSolution(std::vector<double>& update, int method)
+{
+    int k, size;
+    Field<double>& phiField = *phiFieldPtr_;
+    double norm;
+
+    size = phiField.size();
+
+    switch(method)
+    {
+    case ADD:
+
+        for(k = 0; k < size; ++k)
+        {
+            phiField(k) += update[k];
+        }
+
+        norm = FvScheme::computeUpdateNorm(update);
+        Output::print("Diffusion", "Update norm -> " + std::to_string(norm));
+
+        if(isnan(norm))
+            Output::raiseException("Diffusion", "updateSolution", "A NaN value has been detected.");
+
+        break;
+    case REPLACE:
+
+        for(k = 0; k < size; ++k)
+        {
+            phiField(k) = update[k];
+        }
+
+        break;
+    default:
+
+        Output::raiseException("Diffusion", "updateSolution", "Invalid update method selected.");
+    };
 }

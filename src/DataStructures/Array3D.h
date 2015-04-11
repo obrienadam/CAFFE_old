@@ -35,7 +35,7 @@ public:
     int vecIndex(int i, int j, int k){ return k*nInJ_ + j*nI_ + i; }
 
     virtual inline T& operator()(int i, int j, int k);
-    virtual inline T& operator()(int k);
+   	inline T& operator()(int k);
 
     //- Iterators
 

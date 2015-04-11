@@ -80,6 +80,7 @@ public:
     //- Access
 
     T& operator()(int i, int j, int k);
+    T& operator()(int k);
 
     T& faceE(int i, int j, int k){ return facesI_(i + 1, j, k); }
     T& faceW(int i, int j, int k){ return facesI_(i, j, k); }

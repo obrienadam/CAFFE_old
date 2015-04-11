@@ -48,7 +48,7 @@ double FvScheme::computeUpdateNorm(std::vector<double> &timeDerivatives_)
 
     for(k = 0; k < n; ++k)
     {
-        sum += timeDerivatives_[k];
+        sum += timeDerivatives_[k]*timeDerivatives_[k];
     }
 
     return sqrt(sum);

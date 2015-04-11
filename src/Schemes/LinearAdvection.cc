@@ -21,7 +21,12 @@ void LinearAdvection::discretize(std::vector<double> &timeDerivatives)
 
 }
 
-void LinearAdvection::updateSolution(std::vector<double> &timeDerivatives)
+void LinearAdvection::copySolution(std::vector<double> &original)
+{
+
+}
+
+void LinearAdvection::updateSolution(std::vector<double> &timeDerivatives, int method)
 {
 
 }

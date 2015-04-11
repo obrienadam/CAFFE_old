@@ -159,6 +159,15 @@ T& Field<T>::operator()(int i, int j, int k)
 }
 
 template<class T>
+T& Field<T>::operator ()(int k)
+{
+    if(k < 0 || k >= Array3D<T>::n_)
+        Output::raiseException("Field", "operator()", "Attempted to access an element outside the bounds of the field.");
+
+    return Array3D<T>::data_[k];
+}
+
+template<class T>
 T Field<T>::sumFluxes(int i, int j, int k)
 {
     return faceFluxesI_(i + 1, j, k) - faceFluxesI_(i, j, k) + faceFluxesJ_(i, j + 1, k) - faceFluxesJ_(i, j, k) + faceFluxesK_(i, j, k + 1) - faceFluxesK_(i, j, k);

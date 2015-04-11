@@ -20,7 +20,7 @@ void Euler::solve(double timeStep, FvScheme &scheme)
         timeDerivatives_[i] *= timeStep;
     }
 
-    scheme.updateSolution(timeDerivatives_);
+    scheme.updateSolution(timeDerivatives_, ADD);
 
     simTime_ += timeStep;
     ++itrs_;

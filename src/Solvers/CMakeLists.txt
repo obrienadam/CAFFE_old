@@ -2,9 +2,11 @@
 # Author: Adam O'Brien
 
 set(HEADERS Solver.h
-	    Euler.h)
+            Euler.h
+            PredictorCorrector.h)
 
 set(SOURCE Solver.cc
-	   Euler.cc)
+           Euler.cc
+           PredictorCorrector.cc)
 
 add_library(Solvers ${HEADERS} ${SOURCE})

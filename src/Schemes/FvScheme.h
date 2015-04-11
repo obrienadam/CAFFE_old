@@ -32,6 +32,8 @@
 #include "Field.h"
 #include "HexaFvmMesh.h"
 
+enum {ADD, REPLACE};
+
 class FvScheme
 {
 protected:
@@ -47,7 +49,8 @@ public:
     virtual int nConservedVariables() = 0;
 
     virtual void discretize(std::vector<double>& timeDerivatives_) = 0;
-    virtual void updateSolution(std::vector<double>& timeDerivatives_) = 0;
+    virtual void copySolution(std::vector<double>& original) = 0;
+    virtual void updateSolution(std::vector<double>& timeDerivatives_, int method) = 0;
     virtual double computeUpdateNorm(std::vector<double>& timeDerivatives_);
 
 

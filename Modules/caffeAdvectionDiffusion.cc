@@ -4,6 +4,7 @@
 #include "RunControl.h"
 
 #include "Euler.h"
+#include "PredictorCorrector.h"
 #include "HexaFvmMesh.h"
 #include "Diffusion.h"
 #include "LinearAdvection.h"
@@ -19,7 +20,7 @@ int main(int argc, const char* argv[])
         // Declare the basic program objects
 
         RunControl runControl(argc, argv);
-        Euler solver;
+        PredictorCorrector solver;
         HexaFvmMesh mesh;
         Diffusion diffusion;
         LinearAdvection linearAdvection;
@@ -38,7 +39,7 @@ int main(int argc, const char* argv[])
         // Set the boundary conditions
 
         mesh.findScalarField("phi").setAllBoundaries(FIXED, 1.,
-                                                     FIXED, 0.,
+                                                     FIXED, 1.,
                                                      FIXED, 0.,
                                                      FIXED, 0.,
                                                      FIXED, 0.,
@@ -50,7 +51,7 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            solver.solve(1e-3, diffusion);
+            solver.solve(0.6e-4, diffusion);
             runControl.displayUpdateMessage();
         }
 
