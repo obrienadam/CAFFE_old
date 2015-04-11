@@ -87,15 +87,19 @@ void Diffusion::computeCellCenteredGradients()
 
 void Diffusion::computeFaceCenteredGradients()
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
-    Vector3D phiBar;
-    double alpha;
+    Vector3D phiBar, A, es, eb;
+    double alpha, phi1, phi0, phiB, ds, db;
 
-    nCellsI = mesh.nCellsI() - 1;
-    nCellsJ = mesh.nCellsJ() - 1;
-    nCellsK = mesh.nCellsK() - 1;
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    uI = nCellsI - 1;
+    uJ = nCellsJ - 1;
+    uK = nCellsK - 1;
 
     //- Reconstruct the interior faces
 
@@ -105,20 +109,80 @@ void Diffusion::computeFaceCenteredGradients()
         {
             for(i = 0; i < nCellsI; ++i)
             {
+                phi0 = phiField(i, j, k);
+
                 // East faces
-                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i + 1, j, k));
-                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i + 1, j, k);
-                gradPhiField_.faceE(i, j, k) = phiBar;
+                if(i < uI)
+                {
+                    alpha = FvScheme::getAlpha(i, j, k, EAST);
+
+                    phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i + 1, j, k);
+                    A = mesh.fAreaNormE(i, j, k);
+                    es = mesh.rnCellE(i, j, k);
+                    phi1 = phiField(i + 1, j, k);
+                    ds = mesh.rCellMagE(i, j, k);
+
+                    gradPhiField_.faceE(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
+                }
 
                 // North faces
-                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i, j + 1, k));
-                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j + 1, k);
-                gradPhiField_.faceN(i, j, k) = phiBar;
 
                 // Top faces
-                alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i, j, k + 1));
-                phiBar = alpha*gradPhiField_(i, j, k) + (1. - alpha)*gradPhiField_(i, j, k + 1);
-                gradPhiField_.facesT(i, j, k) = phiBar;
+            }
+        }
+    }
+
+    //- Reconstruct the boundary faces
+
+    // East and west
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            phi0 = phiField(uI, j, k);
+            phiB = phiField(uI + 1, j, k);
+            db = mesh.rFaceMagE(uI, j, k);
+            eb = mesh.rnFaceE(uI, j, k);
+            A = mesh.fAreaNormE(uI, j, k);
+
+            gradPhiField_.faceE(uI, j, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(uI, j, k) - dot(gradPhiField_(uI, j, k), eb)*A/dot(A, eb);
+
+            phi0 = phiField(0, j, k);
+            phiB = phiField(-1, j, k);
+            db = mesh.rFaceMagW(0, j, k);
+            eb = mesh.rnFaceW(0, j, k);
+            A = mesh.fAreaNormW(0, j, k);
+
+            gradPhiField_.faceW(0, j, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField_(0, j, k) - dot(gradPhiField_(0, j, k), eb)*A/dot(A, eb);
+        }
+    }
+
+    // North and south
+
+    // Top and bottom
+}
+
+void Diffusion::computeFaceFluxes()
+{
+    int i, j, k, nFacesI, nFacesJ, nFacesK;
+    HexaFvmMesh& mesh = *meshPtr_;
+    Field<double>& phiField = *phiFieldPtr_;
+
+    nFacesI = mesh.nFacesI();
+    nFacesJ = mesh.nFacesJ();
+    nFacesK = mesh.nFacesK();
+
+    for(k = 0; k < nFacesK; ++k)
+    {
+        for(j = 0; j < nFacesJ; ++j)
+        {
+            for(i = 0; i < nFacesI; ++i)
+            {
+                if(j < nFacesJ - 1 && k < nFacesK - 1)
+                    phiField.fluxI(i, j, k) = dot(gradPhiField_.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
+
+                //phiField.fluxJ(i, j, k) = dot(gradPhiField_.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
+                //phiField.fluxK(i, j, k) = dot(gradPhiField_.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
     }
@@ -133,6 +197,7 @@ void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
 
     FvScheme::initialize(mesh, conservedFieldName);
     phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
+    mesh.addVectorField("phiGrad");
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
@@ -152,24 +217,25 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
     int i, j, k, l, nCellsI, nCellsJ, nCellsK;
     Field<double>& phiField = *phiFieldPtr_;
     HexaFvmMesh& mesh = *meshPtr_;
-    Vector3D gradPhiBar, gradPhiFace;
 
-    nCellsI = mesh.nCellsI() - 1;
-    nCellsJ = mesh.nCellsJ() - 1;
-    nCellsK = mesh.nCellsK() - 1;
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
 
+    phiField.setBoundaryFields();
     computeCellCenteredGradients();
     computeFaceCenteredGradients();
-    gradPhiField_.print();
+    computeFaceFluxes();
 
     for(k = 0, l = 0; k < nCellsK; ++k)
     {
         for(j = 0; j < nCellsJ; ++j)
         {
-            for(i = 0; i < nCellsI; ++i, ++l)
+            for(i = 0; i < nCellsI; ++i)
             {
-
                 timeDerivatives[l] = phiField.sumFluxes(i, j, k)/mesh.cellVol(i, j, k);
+                mesh.findVectorField("phiGrad")(i, j, k) = gradPhiField_(i, j, k);
+                ++l;
             }
         }
     }
@@ -189,10 +255,13 @@ void Diffusion::updateSolution(std::vector<double>& update)
     {
         for(j = 0; j < nCellsJ; ++j)
         {
-            for(i = 0; i < nCellsI; ++i, ++l)
+            for(i = 0; i < nCellsI; ++i)
             {
-                phiField(i, j, k) = update[l];
+                phiField(i, j, k) += update[l];
+                ++l;
             }
         }
     }
+
+    Output::print("Diffusion", "Update norm -> " + std::to_string(FvScheme::computeUpdateNorm(update)));
 }

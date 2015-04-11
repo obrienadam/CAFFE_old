@@ -85,15 +85,23 @@ public:
     T& faceW(int i, int j, int k){ return facesI_(i, j, k); }
     T& faceN(int i, int j, int k){ return facesJ_(i, j + 1, k); }
     T& faceS(int i, int j, int k){ return facesJ_(i, j, k); }
-    T& facesT(int i, int j, int k){ return facesK_(i, j, k + 1); }
-    T& facesB(int i, int j, int k){ return facesK_(i, j, k); }
+    T& faceT(int i, int j, int k){ return facesK_(i, j, k + 1); }
+    T& faceB(int i, int j, int k){ return facesK_(i, j, k); }
 
-    T& fluxE(int i, int j, int k){ return faceFluxesI_(i + 1, j, k); }
-    T& fluxW(int i, int j, int k){ return -faceFluxesI_(i, j, k); }
-    T& fluxN(int i, int j, int k){ return faceFluxesJ_(i, j + 1, k); }
-    T& fluxS(int i, int j, int k){ return -faceFluxesJ_(i, j, k); }
-    T& fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
-    T& fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
+    T& faceI(int i, int j, int k){ return facesI_(i, j, k); }
+    T& faceJ(int i, int j, int k){ return facesJ_(i, j, k); }
+    T& faceK(int i, int j, int k){ return facesK_(i, j, k); }
+
+    T& fluxI(int i, int j, int k){ return faceFluxesI_(i, j, k); }
+    T& fluxJ(int i, int j, int k){ return faceFluxesJ_(i, j, k); }
+    T& fluxK(int i, int j, int k){ return faceFluxesK_(i, j, k); }
+
+    T fluxE(int i, int j, int k){ return faceFluxesI_(i + 1, j, k); }
+    T fluxW(int i, int j, int k){ return -faceFluxesI_(i, j, k); }
+    T fluxN(int i, int j, int k){ return faceFluxesJ_(i, j + 1, k); }
+    T fluxS(int i, int j, int k){ return -faceFluxesJ_(i, j, k); }
+    T fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
+    T fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
     T sumFluxes(int i, int j, int k);
 
     /**

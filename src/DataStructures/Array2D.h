@@ -10,7 +10,7 @@ class Array2D
 protected:
 
     int nI_, nJ_, n_;
-    T** data_;
+    T* data_;
 
 public:
 
@@ -64,7 +64,6 @@ public:
 
     iterator begin();
     iterator end();
-
 };
 
 #include "Array2DI.h"

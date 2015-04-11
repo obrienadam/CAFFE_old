@@ -32,8 +32,10 @@ public:
     int sizeJ(){return nJ_;}
     int sizeK(){return nK_;}
     int size(){return n_;}
+    int vecIndex(int i, int j, int k){ return k*nInJ_ + j*nI_ + i; }
 
     virtual inline T& operator()(int i, int j, int k);
+    virtual inline T& operator()(int k);
 
     //- Iterators
 

@@ -147,7 +147,7 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i, j + 1, k + 1);
                 tmpPoints[3] = nodes_(i, j, k + 1);
 
-                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpVec = cross(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
 
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
@@ -180,7 +180,7 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i + 1, j, k + 1);
                 tmpPoints[3] = nodes_(i + 1, j, k);
 
-                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpVec = cross(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
 
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
@@ -213,7 +213,7 @@ void HexaFvmMesh::initializeFaces()
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
 
-                tmpVec = crossProduct(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
+                tmpVec = cross(tmpPoints[1] - tmpPoints[0], tmpPoints[2] - tmpPoints[0]).unitVector();
                 tmpArea = Geometry::computeQuadrilateralArea(tmpPoints);
 
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);

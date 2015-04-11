@@ -335,7 +335,7 @@ void Field<T>::setEastBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesI_(Array3D<T>::nI_, j, k) = Array3D<T>::data_[maxI][j][k];
+                facesI_(Array3D<T>::nI_, j, k) = Array3D<T>::operator ()(maxI, j, k);
 
                 break;
             };
@@ -364,7 +364,7 @@ void Field<T>::setWestBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesI_(0, j, k) = Array3D<T>::data_[0][j][k];
+                facesI_(0, j, k) = Array3D<T>::operator ()(0, j, k);
 
                 break;
             };
@@ -394,7 +394,7 @@ void Field<T>::setNorthBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesJ_(i, Array3D<T>::nJ_, k) = Array3D<T>::data_[i][maxJ][k];
+                facesJ_(i, Array3D<T>::nJ_, k) = Array3D<T>::operator ()(i, maxJ, k);
 
                 break;
             };
@@ -425,7 +425,7 @@ void Field<T>::setSouthBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesJ_(i, 0, k) = Array3D<T>::data_[i][0][k];
+                facesJ_(i, 0, k) = Array3D<T>::operator ()(i, 0, k);
 
                 break;
             };
@@ -454,7 +454,7 @@ void Field<T>::setTopBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesK_(i, j, Array3D<T>::nK_) = Array3D<T>::data_[i][j][maxK];
+                facesK_(i, j, Array3D<T>::nK_) = Array3D<T>::operator ()(i, j, maxK);
 
                 break;
             };
@@ -483,7 +483,7 @@ void Field<T>::setBottomBoundaryField()
 
             case ZERO_GRADIENT:
 
-                facesK_(i, j, 0) = Array3D<T>::data_[i][j][0];
+                facesK_(i, j, 0) = Array3D<T>::operator ()(i, j, 0);
 
                 break;
             };

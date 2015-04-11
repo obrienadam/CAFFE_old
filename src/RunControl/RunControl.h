@@ -63,8 +63,8 @@ private:
 public:
 
     /** Constructor that accepts command line arguments.
-     * @param argc number of command line arguments. Expects two.
-     * @param argv command line arguments, should be a filename.
+     * @param argc The number of command line arguments. Expects two.
+     * @param argv The command line arguments, should be a filename.
      */
     RunControl(int argc, const char* argv[]);
 
@@ -81,8 +81,8 @@ public:
     void displayEndMessage();
 
     /** Initializes a Solver and Domain by passing it the input.
-     * @param solver the solver.
-     * @param domain the computational domain.
+     * @param solver A reference to the solver used.
+     * @param domain A reference to the computational domain used.
      */
     void initializeCase(Solver& solver, DomainInterface& domain);
 };

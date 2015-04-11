@@ -54,9 +54,9 @@ std::ostream& operator<<(std::ostream& os, const Vector3D& vec);
 
 //- Vector3D related functions
 
-double dotProduct(const Vector3D& u, const Vector3D& v);
-Tensor3D outerProduct(const Vector3D& u, const Vector3D& v);
-Vector3D crossProduct(const Vector3D& u, const Vector3D& v);
+double dot(const Vector3D& u, const Vector3D& v);
+Tensor3D tensor(const Vector3D& u, const Vector3D& v);
+Vector3D cross(const Vector3D& u, const Vector3D& v);
 Vector3D relativeVector(const Vector3D& u, const Vector3D& v);
 
 #endif

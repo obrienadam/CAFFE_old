@@ -30,11 +30,6 @@ void Output::print(const std::string& message)
     std::cout << std::endl << message << std::endl;
 }
 
-void Output::print(const std::ostringstream &message)
-{
-    std::cout << std::endl << message << std::endl;
-}
-
 void Output::print(const std::vector<std::string>& vector)
 {
     for(uint i = 0; i < vector.size(); ++i)
@@ -51,11 +46,6 @@ void Output::print(std::string className, std::string message)
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
     throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
-}
-
-void Output::raiseException(std::string className, std::string methodName, std::ostringstream &problemDescription)
-{
-    throw ("in \"" + className + "::" + methodName + "\", " + problemDescription.str()).c_str();
 }
 
 void Output::printCaffeHeader()

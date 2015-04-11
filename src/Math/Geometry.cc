@@ -10,7 +10,7 @@ double Geometry::computeQuadrilateralArea(Point3D* points)
     r02 = points[2] - points[0];
     r03 = points[3] - points[0];
 
-    return 0.5*(crossProduct(r02, r01).mag() + crossProduct(r03, r02).mag());
+    return 0.5*(cross(r02, r01).mag() + cross(r03, r02).mag());
 }
 
 Point3D Geometry::computeQuadrilateralCentroid(Point3D* points)
@@ -33,7 +33,7 @@ Vector3D Geometry::computeQuadrilateralNormal(Point3D* points)
     for(int i = 0; i < 4; ++i)
     {
 
-        normal += crossProduct(points[0], points[(i + 1)%4]);
+        normal += cross(points[0], points[(i + 1)%4]);
 
     }
 
@@ -48,8 +48,8 @@ bool Geometry::checkQuadrilateralIsPlanar(Point3D *points)
     Vector3D normal1, normal2;
     const double TOLER(1e-8);
 
-    normal1 = crossProduct(points[1] - points[0], points[2] - points[0]).unitVector();
-    normal2 = crossProduct(points[2] - points[0], points[3] - points[0]).unitVector();
+    normal1 = cross(points[1] - points[0], points[2] - points[0]).unitVector();
+    normal2 = cross(points[2] - points[0], points[3] - points[0]).unitVector();
 
     return (normal1 - normal2).mag() <= TOLER;
 }
@@ -65,17 +65,17 @@ double Geometry::computeHexahedronVolume(Point3D* points)
 
     r16 = points[6] - points[1];
     r25 = points[5] - points[2];
-    s1265 = 0.5*crossProduct(r16, r25);
+    s1265 = 0.5*cross(r16, r25);
 
     r57 = points[7] - points[5];
     r64 = points[4] - points[6];
-    s5674 = 0.5*crossProduct(r57, r64);
+    s5674 = 0.5*cross(r57, r64);
 
     r27 = points[7] - points[2];
     r36 = points[6] - points[3];
-    s2376 = 0.5*crossProduct(r27, r36);
+    s2376 = 0.5*cross(r27, r36);
 
-    return fabs(dotProduct(s1265 + s5674 + s2376, points[6] - points[0])/3.);
+    return fabs(dot(s1265 + s5674 + s2376, points[6] - points[0])/3.);
 }
 
 Point3D Geometry::computeHexahedronCentroid(Point3D *points)
@@ -204,7 +204,7 @@ double Geometry::computeTetrahedronVolume(Point3D *points)
     b = points[2] - points[0];
     c = points[3] - points[0];
 
-    return fabs(dotProduct(a, crossProduct(b, c)))/6.;
+    return fabs(dot(a, cross(b, c)))/6.;
 }
 
 Point3D Geometry::computeTetrahedronCentroid(Point3D *points)

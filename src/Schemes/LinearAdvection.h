@@ -11,6 +11,7 @@ class LinearAdvection : public FvScheme
 {
 private:
 
+    Field<double>* phiFieldPtr_;
     std::string velocityFieldName_;
 
 public:

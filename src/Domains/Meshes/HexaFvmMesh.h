@@ -36,7 +36,7 @@
 #include "Point3D.h"
 #include "Field.h"
 
-enum Face{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 enum Ordering{ROW, COLUMN, LAYER};
 
 class HexaFvmMesh : public StructuredMesh
@@ -146,15 +146,17 @@ public:
     Field<double>& findScalarField(const std::string &fieldName);
 
     /**
-     * @brief findVectorField Locate a vector field within the domain.
+     * @brief Locate a vector field within the domain. Raises an exception if it is not found.
      * @param fieldName The name of the field to be searched for.
      * @return  A reference to  the field if found.
      */
     Field<Vector3D>& findVectorField(const std::string &fieldName);
 
+    // Retrieve cell parameters
     Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
     double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }
 
+    // Retrive face parameters
     Point3D faceXcE(int i, int j, int k){ return faceCentersI_(i + 1, j, k); }
     Point3D faceXcW(int i, int j, int k){ return faceCentersI_(i, j, k); }
     Point3D faceXcN(int i, int j, int k){ return faceCentersJ_(i, j + 1, k); }
@@ -176,6 +178,19 @@ public:
     double faceAreaT(int i, int j, int k){ return faceAreasK_(i, j, k + 1); }
     double faceAreaB(int i, int j, int k){ return faceAreasK_(i, j, k); }
 
+    Point3D faceXcI(int i, int j, int k){ return faceCentersI_(i, j, k); }
+    Point3D faceXcJ(int i, int j, int k){ return faceCentersJ_(i, j, k); }
+    Point3D faceXcK(int i, int j, int k){ return faceCentersK_(i, j, k); }
+
+    Vector3D fAreaNormI(int i, int j, int k){ return faceNormalsI_(i, j, k); }
+    Vector3D fAreaNormJ(int i, int j, int k){ return faceNormalsJ_(i, j, k); }
+    Vector3D fAreaNormK(int i, int j, int k){ return faceNormalsK_(i, j, k); }
+
+    double fAreaI(int i, int j, int k){ return faceAreasI_(i, j, k); }
+    double fAreaJ(int i, int j, int k){ return faceAreasJ_(i, j, k); }
+    double fAreaK(int i, int j, int k){ return faceAreasK_(i, j, k); }
+
+    // Retrieve cell to cell parameters
     Vector3D rCellE(int i, int j, int k);
     Vector3D rCellW(int i, int j, int k);
     Vector3D rCellN(int i, int j, int k);
@@ -228,6 +243,9 @@ public:
     int nCellsI(){ return cellCenters_.sizeI(); }
     int nCellsJ(){ return cellCenters_.sizeJ(); }
     int nCellsK(){ return cellCenters_.sizeK(); }
+    int nFacesI(){ return faceCentersI_.sizeI(); }
+    int nFacesJ(){ return faceCentersJ_.sizeJ(); }
+    int nFacesK(){ return faceCentersK_.sizeK(); }
 
     /**
      * @brief Output all mesh data to a file for debugging purposes.

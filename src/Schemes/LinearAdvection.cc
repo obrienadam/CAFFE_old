@@ -13,7 +13,7 @@ void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldNa
 
 int LinearAdvection::nConservedVariables()
 {
-
+    return phiFieldPtr_->size();
 }
 
 void LinearAdvection::discretize(std::vector<double> &timeDerivatives)

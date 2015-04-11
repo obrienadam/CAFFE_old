@@ -71,6 +71,15 @@ T& Array3D<T>::operator()(int i, int j, int k)
     return data_[k*nInJ_ + j*nI_ + i];
 }
 
+template <class T>
+T& Array3D<T>::operator()(int k)
+{
+	if(k < 0 || k >= n_)
+		throw "Attempted to access element outside the bounds of Array3D.";
+
+	return data_[k];
+}
+
 //- Iterator methods
 
 template <class T>

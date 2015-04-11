@@ -44,9 +44,14 @@ public:
      */
     void computeCellCenteredGradients();
 
-    /** @brief Helper function that computes the gradient at cell faces using the method from Mathur Murthy.
+    /** @brief Helper function that computes the gradient at cell faces using the method from Mathur and Murthy.
      */
     void computeFaceCenteredGradients();
+
+    /**
+     * @brief Helper function that computes all of the face fluxes after the reconstructions are complete.
+     */
+    void computeFaceFluxes();
 
 public:
 

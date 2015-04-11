@@ -37,8 +37,8 @@ int main(int argc, const char* argv[])
 
         // Set the boundary conditions
 
-        mesh.findScalarField("phi").setAllBoundaries(ZERO_GRADIENT, 0.,
-                                                     FIXED, 1.,
+        mesh.findScalarField("phi").setAllBoundaries(FIXED, 1.,
+                                                     FIXED, 0.,
                                                      FIXED, 0.,
                                                      FIXED, 0.,
                                                      FIXED, 0.,
@@ -50,7 +50,7 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            solver.solve(1e-5, diffusion);
+            solver.solve(1e-3, diffusion);
             runControl.displayUpdateMessage();
         }
 

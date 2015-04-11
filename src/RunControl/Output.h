@@ -36,11 +36,15 @@ public:
 
     static void print(const std::string& message);
     static void print(const std::vector<std::string>& vector);
-    static void print(const std::ostringstream &message);
     static void print(std::string className, std::string message);
 
+    /**
+     * @brief Used to raise an exception, while also making sure relevant information about the method raising the exception.
+     * @param className The name of the class raising the exception.
+     * @param methodName The method of the class that is raising the exception.
+     * @param problemDescription A description of the problem that occurred.
+     */
     static void raiseException(std::string className, std::string methodName, std::string problemDescription);
-    static void raiseException(std::string className, std::string methodName, std::ostringstream& problemDescription);
 
     static void printCaffeHeader();
     static void printLine();
