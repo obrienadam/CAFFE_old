@@ -66,7 +66,7 @@ void ArgsList::readArgs(int argc, const char* argv[])
     }
     else if(varsMap_.count("file"))
     {
-        inputFilename_ = varsMap_["file"].as<string>();
+        inputFilename = varsMap_["file"].as<string>();
     }
     else
     {

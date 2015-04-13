@@ -18,7 +18,7 @@ public:
 
     LinearAdvection();
 
-    void initialize(HexaFvmMesh &mesh, std::string conservedFieldName = "phi", std::string velocityFieldName = "a");
+    void initialize(Input& input, HexaFvmMesh &mesh, std::string conservedFieldName = "phi", std::string velocityFieldName = "a");
     int nConservedVariables();
 
     void discretize(std::vector<double>& timeDerivatives);

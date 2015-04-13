@@ -42,17 +42,14 @@ private:
     OptsDescription optsDescription_;
     VarsMap varsMap_;
 
-    std::string inputFilename_;
-
 public:
 
     ArgsList();
     ArgsList(int argc, const char* argv[]);
 
-    void readArgs(int argc, const char* argv[]);
+    std::string inputFilename;
 
-    friend class RunControl;
-    friend class HexaMeshGen;
+    void readArgs(int argc, const char* argv[]);
 };
 
 #endif

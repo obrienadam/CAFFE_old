@@ -35,23 +35,10 @@ FvScheme::FvScheme()
 
 }
 
-void FvScheme::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
+void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     meshPtr_ = &mesh;
     conservedFieldName_ = conservedFieldName;
-}
-
-double FvScheme::computeUpdateNorm(std::vector<double> &timeDerivatives_)
-{
-    int k, n = timeDerivatives_.size();
-    double sum = 0.;
-
-    for(k = 0; k < n; ++k)
-    {
-        sum += timeDerivatives_[k]*timeDerivatives_[k];
-    }
-
-    return sqrt(sum);
 }
 
 double FvScheme::getAlpha(int i, int j, int k, int direction)

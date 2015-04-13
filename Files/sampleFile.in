@@ -16,9 +16,11 @@ maxItrs
 
 ### Time ###################################################
 
+timeStep
+2e-5
 maxSimTime
 48
-maxRealTime
+maxRealTimeHours
 48
 
 ### Domain ###################################################

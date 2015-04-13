@@ -37,24 +37,20 @@ RunControl::RunControl()
 
 }
 
-RunControl::RunControl(int argc, const char* argv[])
-    :
-      RunControl()
+void RunControl::initialize(Input &input)
 {
-    argsList_.readArgs(argc, argv);
-    input_.openInputFile(argsList_.inputFilename_);
-
-    terminationCondition_ = input_.inputStrings["terminationCondition"];
-    maxItrs_ = input_.inputInts["maxItrs"];
-    maxSimTime_ = input_.inputDoubles["maxSimTime"];
+    terminationCondition_ = input.inputStrings["terminationCondition"];
+    maxItrs_ = input.inputInts["maxItrs"];
+    timeStep_ = input.inputDoubles["timeStep"];
+    maxSimTime_ = input.inputDoubles["maxSimTime"];
 }
 
-bool RunControl::continueRun(double timeStep)
+bool RunControl::continueRun()
 {
     using namespace boost::posix_time;
 
     ++itrs_;
-    simTime_ += timeStep;
+    simTime_ += timeStep_;
     elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     if(terminationCondition_ == "iterations")
@@ -120,7 +116,8 @@ void RunControl::displayUpdateMessage()
     message << "Simulation completion: " << completionPercentage << "%" << endl
             << "Iterations completed: " << itrs_ << endl
             << "Simulation time: " << simTime_ << endl
-            << "Elapsed time: " << elapsedRealTime_;
+            << "Elapsed time: " << elapsedRealTime_ << endl
+            << "Residual norm: " << residualNorm;
 
     Output::print(message.str());
 }
@@ -143,10 +140,4 @@ void RunControl::displayEndMessage()
 
     Output::print(message.str());
     Output::printLine();
-}
-
-void RunControl::initializeCase(Solver& solver, DomainInterface& domain)
-{
-    domain.initialize(input_);
-    solver.initialize(input_);
 }

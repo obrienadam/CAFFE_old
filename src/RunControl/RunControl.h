@@ -29,9 +29,7 @@
 
 #include <boost/date_time.hpp>
 
-#include "ArgsList.h"
 #include "Input.h"
-
 #include "DomainInterface.h"
 #include "Solver.h"
 
@@ -42,49 +40,38 @@ class RunControl
 
 private:
 
-    ArgsList argsList_;
-    Input input_;
-
     //- Simulation control
 
     std::string terminationCondition_;
     int itrs_, maxItrs_;
-    double simTime_, maxSimTime_;
+    double simTime_, timeStep_, maxSimTime_;
 
     //- Time related objects
 
     RealTime startRealTime_;
     RealTimeDuration elapsedRealTime_, maxElapsedRealTime_;
 
-    //- Private constructor only used to initialize defaults
+public:
+
+    double residualNorm;
 
     RunControl();
 
-public:
-
-    /** Constructor that accepts command line arguments.
-     * @param argc The number of command line arguments. Expects two.
-     * @param argv The command line arguments, should be a filename.
-     */
-    RunControl(int argc, const char* argv[]);
+    void initialize(Input& input);
 
     /** Decide whether or not to continue running.
      * @param timeStep the fixed timeStep.
      * @retval terminate if false, continue if true.
      */
-    bool continueRun(double timeStep = 0.);
+    bool continueRun();
+    void reset();
+    double timeStep(){ return timeStep_; }
 
     //- Output messages
 
     void displayStartMessage();
     void displayUpdateMessage();
     void displayEndMessage();
-
-    /** Initializes a Solver and Domain by passing it the input.
-     * @param solver A reference to the solver used.
-     * @param domain A reference to the computational domain used.
-     */
-    void initializeCase(Solver& solver, DomainInterface& domain);
 };
 
 #endif

@@ -15,7 +15,7 @@ public:
 
     PredictorCorrector();
 
-    void solve(double timeStep, FvScheme& scheme);
+    double solve(double timeStep, FvScheme& scheme);
 };
 
 #endif

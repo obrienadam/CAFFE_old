@@ -5,7 +5,7 @@ PredictorCorrector::PredictorCorrector()
 
 }
 
-void PredictorCorrector::solve(double timeStep, FvScheme &scheme)
+double PredictorCorrector::solve(double timeStep, FvScheme &scheme)
 {
     int i, end;
 
@@ -15,6 +15,7 @@ void PredictorCorrector::solve(double timeStep, FvScheme &scheme)
         original_.resize(scheme.nConservedVariables());
         pTimeDerivatives_.resize(scheme.nConservedVariables());
         cTimeDerivatives_.resize(scheme.nConservedVariables());
+        timeDerivatives_.resize(scheme.nConservedVariables());
     }
 
     scheme.copySolution(original_);
@@ -32,9 +33,12 @@ void PredictorCorrector::solve(double timeStep, FvScheme &scheme)
 
     for(i = 0; i < end; ++i)
     {
-        update_[i] = original_[i] + 0.5*timeStep*(pTimeDerivatives_[i] + cTimeDerivatives_[i]);
+        timeDerivatives_[i] = 0.5*(pTimeDerivatives_[i] + cTimeDerivatives_[i]);
+        update_[i] = original_[i] + timeStep*timeDerivatives_[i];
     }
 
     scheme.updateSolution(update_, REPLACE);
+
+    return computeResidualNorm();
 }
 

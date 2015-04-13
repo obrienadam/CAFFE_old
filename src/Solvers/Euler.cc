@@ -5,7 +5,7 @@ Euler::Euler()
 
 }
 
-void Euler::solve(double timeStep, FvScheme &scheme)
+double Euler::solve(double timeStep, FvScheme &scheme)
 {
     int i, end;
 
@@ -22,6 +22,5 @@ void Euler::solve(double timeStep, FvScheme &scheme)
 
     scheme.updateSolution(timeDerivatives_, ADD);
 
-    simTime_ += timeStep;
-    ++itrs_;
+    return computeResidualNorm();
 }

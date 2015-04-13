@@ -34,7 +34,7 @@ class Input
 private:
 
     std::string filename_;
-    std::ifstream fin_;                                 ///< The input file stream
+    std::ifstream fin_;
 
 public:
 

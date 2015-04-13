@@ -9,12 +9,10 @@ class Euler : public Solver
 {
 private:
 
-    std::vector<double> timeDerivatives_;
-
 public:
 
     Euler();
-    void solve(double timeStep, FvScheme &scheme);
+    double solve(double timeStep, FvScheme &scheme);
 };
 
 #endif

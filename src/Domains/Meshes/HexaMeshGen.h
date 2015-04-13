@@ -4,17 +4,12 @@
 #include <vector>
 #include <fstream>
 
-#include <boost/program_options.hpp>
-
-#include "ArgsList.h"
 #include "Array3D.h"
 #include "Point3D.h"
 
 class HexaMeshGen
 {
 private:
-
-    ArgsList argsList_;
 
     double metricConversion_;
 
@@ -31,11 +26,10 @@ public:
     //- Constructors and destructors
 
     HexaMeshGen();
-    HexaMeshGen(int argc, const char* argv[]);
 
     //- HexaMesh file input and output
 
-    void readMeshInputFile();
+    void readMeshInputFile(std::string filename);
     void writeMeshFile();
 
     //- Mesh generation

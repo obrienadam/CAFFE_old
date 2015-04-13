@@ -1,11 +1,26 @@
+#include <math.h>
+
 #include "Solver.h"
+#include "Output.h"
 
 Solver::Solver()
-    :
-      simTime_(0.),
-      itrs_(0.)
 {
 
+}
+
+double Solver::computeResidualNorm()
+{
+    double sum = 0.;
+
+    for(int i = 0; i < timeDerivatives_.size(); ++i)
+    {
+        sum += timeDerivatives_[i]*timeDerivatives_[i];
+    }
+
+    if(isnan(sum))
+        Output::raiseException("Solver", "computeResidualNorm", "A NaN value has been detected.");
+
+    return sqrt(sum);
 }
 
 void Solver::initialize(Input &input)
@@ -16,20 +31,4 @@ void Solver::initialize(Input &input)
 void Solver::initialize(int nSolutionVariables)
 {
     timeDerivatives_.resize(nSolutionVariables);
-}
-
-void Solver::reset()
-{
-    simTime_ = 0.;
-    itrs_ = 0;
-}
-
-double Solver::simTime()
-{
-    return simTime_;
-}
-
-int Solver::nItrs()
-{
-    return itrs_;
 }

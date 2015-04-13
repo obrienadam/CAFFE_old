@@ -1,7 +1,8 @@
 # CMakeLists.txt for CAFFE/src/Solvers
 # Author: Adam O'Brien
 
-set(HEADERS Solver.h
+set(HEADERS SolverIncludes.h
+            Solver.h
             Euler.h
             PredictorCorrector.h)
 

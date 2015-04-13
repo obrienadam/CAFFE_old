@@ -32,22 +32,36 @@
 
 Input::Input()
 {
-    inputDoubles["simStartTime"] = 0.;                  ///< Start time in simulation time
-    inputDoubles["maxSimTime"] = 1.;                    ///< End time in simulation time
-    inputDoubles["timeStep"] = 1e-4;                    ///< Fixed time step
-    inputDoubles["maxRealTime"] = 48;                   ///< Maximum allowed real time
+    //- Set-up default input values
 
-    inputStrings["solver"] = "Euler";                   ///< The solver type
-    inputStrings["simTimeUnits"] = "seconds";           ///< Simulation time units
-    inputStrings["reaTimeUnits"] = "hours";             ///< Real time units
+    inputDoubles["simStartTime"] = 0.;
+    inputDoubles["maxSimTime"] = 1.;
+    inputDoubles["timeStep"] = 1e-4;
+    inputDoubles["maxRealTimeHours"] = 48.;
+    inputDoubles["maxRealTimeMinutes"] = 0.;
+    inputDoubles["maxRealTimeSeconds"] = 0.;
 
-    inputInts["maxItrs"] = 30000;                       ///< Maximum allowed iterations
+    inputInts["maxItrs"] = 1000;
+    inputInts["fileWriteInterval"] = 50;
+    inputInts["screenWriteInterval"] = 50;
 
-    inputStrings["terminationCondition"] = "simTime";   ///< The simulation termination condition
-    inputInts["fileWriteInterval"] = 50;                ///< Number of iterations per file write
-    inputInts["screenWriteInterval"] = 50;              ///< Number of interations before console output
+    inputStrings["solver"] = "Euler";
+    inputStrings["terminationCondition"] = "simTime";
+    inputStrings["domainFile"] = "domain.in";
 
-    inputStrings["domainFile"] = "domain.in";           ///< Name of the domain input file
+    inputStrings["boundaryTypeEast"] = "fixed";
+    inputStrings["boundaryTypeWest"] = "fixed";
+    inputStrings["boundaryTypeNorth"] = "fixed";
+    inputStrings["boundaryTypeSouth"] = "fixed";
+    inputStrings["boundaryTypeTop"] = "fixed";
+    inputStrings["boundaryTypeBottom"] = "fixed";
+
+    inputDoubles["boundaryRefValueEast"] = 0.;
+    inputDoubles["boundaryRefValueWest"] = 0.;
+    inputDoubles["boundaryRefValueNorth"] = 0.;
+    inputDoubles["boundaryRefValueSouth"] = 0.;
+    inputDoubles["boundaryRefValueTop"] = 0.;
+    inputDoubles["boundaryRefValueBottom"] = 0.;
 }
 
 Input::Input(std::string filename)
@@ -94,23 +108,23 @@ void Input::openInputFile(std::string filename)
         if(inputInts.find(buffer) != inputInts.end())
         {
             if(!(fin_ >> inputInts[buffer]))
-                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input integer.");
+                Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects an integer value.");
         }
 
         else if (inputDoubles.find(buffer) != inputDoubles.end())
         {
             if(!(fin_ >> inputDoubles[buffer]))
-                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input double.");
+                Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects a double value.");
         }
 
         else if (inputStrings.find(buffer) != inputStrings.end())
         {
             if(!(fin_ >> inputStrings[buffer]))
-                Output::raiseException("Input", "openInputFile", "A problem occurred while trying to read in an input string.");
+                Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects a string.");
         }
         else
         {
-            Output::raiseException("Input", "openInputFile", "Unrecognized input parameter type \"" + buffer + "\".");
+            Output::raiseException("Input", "openInputFile", "Unrecognized input field \"" + buffer + "\".");
         }
     }
 }

@@ -5,9 +5,9 @@ LinearAdvection::LinearAdvection()
 
 }
 
-void LinearAdvection::initialize(HexaFvmMesh &mesh, std::string conservedFieldName, std::string velocityFieldName)
+void LinearAdvection::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName, std::string velocityFieldName)
 {
-    FvScheme::initialize(mesh, conservedFieldName);
+    FvScheme::initialize(input, mesh, conservedFieldName);
     velocityFieldName_ = velocityFieldName;
 }
 

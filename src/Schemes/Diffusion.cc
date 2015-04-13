@@ -261,12 +261,12 @@ void Diffusion::computeFaceFluxes()
 
 // ************* Public Methods *************
 
-void Diffusion::initialize(HexaFvmMesh &mesh, std::string conservedFieldName)
+void Diffusion::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     int nCellsI, nCellsJ, nCellsK;
     Matrix lsMatrix(6, 3);
 
-    FvScheme::initialize(mesh, conservedFieldName);
+    FvScheme::initialize(input, mesh, conservedFieldName);
     phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
     mesh.addVectorField("phiGrad");
 
@@ -329,7 +329,6 @@ void Diffusion::updateSolution(std::vector<double>& update, int method)
 {
     int k, size;
     Field<double>& phiField = *phiFieldPtr_;
-    double norm;
 
     size = phiField.size();
 
@@ -341,12 +340,6 @@ void Diffusion::updateSolution(std::vector<double>& update, int method)
         {
             phiField(k) += update[k];
         }
-
-        norm = FvScheme::computeUpdateNorm(update);
-        Output::print("Diffusion", "Update norm -> " + std::to_string(norm));
-
-        if(isnan(norm))
-            Output::raiseException("Diffusion", "updateSolution", "A NaN value has been detected.");
 
         break;
     case REPLACE:

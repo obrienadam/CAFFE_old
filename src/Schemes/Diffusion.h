@@ -58,7 +58,7 @@ public:
     Diffusion();
     ~Diffusion();
 
-    void initialize(HexaFvmMesh &mesh, std::string conservedFieldName);
+    void initialize(Input& input, HexaFvmMesh &mesh, std::string conservedFieldName);
     int nConservedVariables();
 
     void discretize(std::vector<double>& timeDerivatives);

@@ -29,6 +29,7 @@
 #include <vector>
 #include <string>
 
+#include "Input.h"
 #include "Field.h"
 #include "HexaFvmMesh.h"
 
@@ -45,14 +46,12 @@ public:
 
     FvScheme();
 
-    virtual void initialize(HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
+    virtual void initialize(Input& input, HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
     virtual int nConservedVariables() = 0;
 
     virtual void discretize(std::vector<double>& timeDerivatives_) = 0;
     virtual void copySolution(std::vector<double>& original) = 0;
     virtual void updateSolution(std::vector<double>& timeDerivatives_, int method) = 0;
-    virtual double computeUpdateNorm(std::vector<double>& timeDerivatives_);
-
 
     /**
      * @brief This method is used for computing a weighted averaging coefficient based on a specified criteria.

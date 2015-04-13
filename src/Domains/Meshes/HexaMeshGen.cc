@@ -1,5 +1,4 @@
 #include <fstream>
-#include <boost/algorithm/string.hpp>
 
 #include "HexaMeshGen.h"
 #include "Output.h"
@@ -11,13 +10,6 @@ HexaMeshGen::HexaMeshGen()
       metricConversion_(1.)
 {
     
-}
-
-HexaMeshGen::HexaMeshGen(int argc, const char *argv[])
-    :
-      HexaMeshGen()
-{
-    argsList_.readArgs(argc, argv);
 }
 
 void HexaMeshGen::readVertices(std::ifstream& inputFile)
@@ -136,12 +128,12 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
     Output::print("HexaMeshGen: Successfully allocated mesh nodes.");
 }
 
-void HexaMeshGen::readMeshInputFile()
+void HexaMeshGen::readMeshInputFile(std::string filename)
 {
     using namespace std;
     
     string buffer;
-    ifstream inputFile(argsList_.varsMap_["file"].as<string>().c_str());
+    ifstream inputFile(filename.c_str());
     
     if(!inputFile.is_open())
     {      

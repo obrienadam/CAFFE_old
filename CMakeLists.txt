@@ -1,9 +1,27 @@
 # CMakeLists.txt for CAFFE
 # Author: Adam O'Brien
 
-cmake_minimum_required (VERSION 2.8 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project(CAFFE)
+
+# Version number
+
+set(CAFFE_VERSION_MAJOR 1)
+set(CAFFE_VERSION_MINOR 0)
+
+# Compiler
+
+set(CMAKE_CXX_COMPILER "g++")
+
+# Compiler flags
+
+set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -std=c++11 -O3")
+
+# Output paths
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Find boost package
 
@@ -14,6 +32,10 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 
 endif()
+
+# Find lapack package
+
+find_package(LAPACK)
 
 # Includes
 
@@ -27,16 +49,6 @@ set(INCLUDE_DIR src/DataStructures
 		src/State)
 
 include_directories(${INCLUDE_DIR})
-
-# Compiler flags
-
-set(CMAKE_CC_FLAGS "-g -Wall -O3")
-set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -std=c++11 -O3")
-
-# Output paths
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Libraries
 

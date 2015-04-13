@@ -48,6 +48,11 @@ void Output::raiseException(std::string className, std::string methodName, std::
     throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
 }
 
+void Output::issueWarning(std::string className, std::string methodName, std::string warningDescription)
+{
+    std::cout << "WARNING! in \"" << className << "::" << methodName << "\", " << warningDescription << std::endl;
+}
+
 void Output::printCaffeHeader()
 {
     using namespace std;

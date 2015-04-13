@@ -45,6 +45,7 @@ public:
      * @param problemDescription A description of the problem that occurred.
      */
     static void raiseException(std::string className, std::string methodName, std::string problemDescription);
+    static void issueWarning(std::string className, std::string methodName, std::string warningDescription);
 
     static void printCaffeHeader();
     static void printLine();

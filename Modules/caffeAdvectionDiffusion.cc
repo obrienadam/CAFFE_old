@@ -1,10 +1,11 @@
 #include <iostream>
 
 #include "Output.h"
+#include "ArgsList.h"
+#include "Input.h"
 #include "RunControl.h"
 
-#include "Euler.h"
-#include "PredictorCorrector.h"
+#include "SolverIncludes.h"
 #include "HexaFvmMesh.h"
 #include "Diffusion.h"
 #include "LinearAdvection.h"
@@ -19,8 +20,10 @@ int main(int argc, const char* argv[])
     {
         // Declare the basic program objects
 
-        RunControl runControl(argc, argv);
-        PredictorCorrector solver;
+        ArgsList args(argc, argv);
+        Input input(args.inputFilename);
+        RunControl runControl;
+        Euler solver;
         HexaFvmMesh mesh;
         Diffusion diffusion;
         LinearAdvection linearAdvection;
@@ -32,17 +35,19 @@ int main(int argc, const char* argv[])
 
         // Initialize objects
 
-        runControl.initializeCase(solver, mesh);
-        diffusion.initialize(mesh, "phi");
-        linearAdvection.initialize(mesh, "phi", "v");
+        runControl.initialize(input);
+        solver.initialize(input);
+        mesh.initialize(input);
+        diffusion.initialize(input, mesh, "phi");
+        linearAdvection.initialize(input, mesh, "phi", "v");
 
         // Set the boundary conditions
 
-        mesh.findScalarField("phi").setAllBoundaries(FIXED, 1.,
+        mesh.findScalarField("phi").setAllBoundaries(FIXED, 0.,
+                                                     FIXED, 0.,
                                                      FIXED, 1.,
-                                                     FIXED, 0.,
-                                                     FIXED, 0.,
-                                                     FIXED, 0.,
+                                                     FIXED, 1.,
+                                                     FIXED, 1.,
                                                      FIXED, 0.);
 
         mesh.writeDebug();
@@ -51,7 +56,7 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            solver.solve(0.6e-4, diffusion);
+            runControl.residualNorm = solver.solve(runControl.timeStep(), diffusion);
             runControl.displayUpdateMessage();
         }
 

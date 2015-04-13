@@ -28,7 +28,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 
 #include "StructuredMesh.h"
 #include "Array3D.h"
