@@ -50,8 +50,6 @@ int main(int argc, const char* argv[])
                                                      FIXED, 1.,
                                                      FIXED, 0.);
 
-        mesh.writeDebug();
-
         runControl.displayStartMessage();
 
         while(runControl.continueRun())

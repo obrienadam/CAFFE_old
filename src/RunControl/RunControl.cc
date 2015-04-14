@@ -113,13 +113,14 @@ void RunControl::displayUpdateMessage()
         completionPercentage = elapsedRealTime_.total_microseconds()/maxElapsedRealTime_.total_microseconds()*100.;
     }
 
-    message << "Simulation completion: " << completionPercentage << "%" << endl
-            << "Iterations completed: " << itrs_ << endl
-            << "Simulation time: " << simTime_ << endl
-            << "Elapsed time: " << elapsedRealTime_ << endl
-            << "Residual norm: " << residualNorm;
+    message << "Simulation completion (%) |      " << completionPercentage << endl
+            << "Iterations completed      |      " << itrs_ << endl
+            << "Simulation time (sec)     |      " << simTime_ << endl
+            << "Elapsed time (hh:mm:ss)   |      " << elapsedRealTime_ << endl
+            << "Residual norm             |      " << residualNorm;
 
     Output::print(message.str());
+    Output::printLine();
 }
 
 void RunControl::displayEndMessage()

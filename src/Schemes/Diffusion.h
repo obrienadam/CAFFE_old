@@ -29,7 +29,6 @@
 #include "Array3D.h"
 #include "Point3D.h"
 #include "Vector3D.h"
-#include "Matrix.h"
 
 class Diffusion : public FvScheme
 {
@@ -40,13 +39,6 @@ private:
     Array3D<double> stencil_;
 
 public:
-    /** @brief Helper function that computes the gradient at cell centers using a least squares method.
-     */
-    void computeCellCenteredGradients();
-
-    /** @brief Helper function that computes the gradient at cell faces using the method from Mathur and Murthy.
-     */
-    void computeFaceCenteredGradients();
 
     /**
      * @brief Helper function that computes all of the face fluxes after the reconstructions are complete.

@@ -30,6 +30,7 @@
 #include <string>
 
 #include "Input.h"
+#include "Vector3D.h"
 #include "Field.h"
 #include "HexaFvmMesh.h"
 
@@ -58,6 +59,20 @@ public:
      * @return An interpolation factor.
      */
     double getAlpha(int i, int j, int k, int direction);
+
+    /**
+     * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.
+     * @param phiField A reference to the scalar field.
+     * @param gradPhiField A reference to the vector field that will contain the cell-centered gradients.
+     */
+    void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
+
+    /**
+     * @brief Compute the gradient of a scalar field at the face center. An apropriate cell-centered gradient computation method should be called first.
+     * @param phiField A reference to the scalar field.
+     * @param gradPhiField A reference to the vector field that contains the computed cell-centered gradients.
+     */
+    void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 };
 
 #endif
