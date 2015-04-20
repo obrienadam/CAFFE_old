@@ -24,31 +24,53 @@ int main(int argc, const char* argv[])
         HexaFvmMesh mesh;
         Simple simple;
 
-        mesh.addScalarField("phi", CONSERVED);
-        mesh.addScalarField("mu", AUXILLARY);
-        mesh.addVectorField("v", AUXILLARY);
-        mesh.addScalarField("rho", AUXILLARY);
+        mesh.addScalarField("u", CONSERVED);
+        mesh.addScalarField("v", CONSERVED);
+        mesh.addScalarField("w", CONSERVED);
+        mesh.addScalarField("p", CONSERVED);
 
         // Initialize objects
 
         runControl.initialize(input);
         solver.initialize(input);
         mesh.initialize(input);
+        simple.initialize(input, mesh);
 
         // Set the boundary conditions
 
-        mesh.findScalarField("phi").setAllBoundaries(FIXED, 0.,
-                                                     FIXED, 0.,
-                                                     FIXED, 1.,
-                                                     FIXED, 1.,
-                                                     FIXED, 1.,
-                                                     FIXED, 0.);
+        mesh.findScalarField("u").setAllBoundaries(ZERO_GRADIENT, 0.,
+                                                   FIXED, 1.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.);
+
+        mesh.findScalarField("v").setAllBoundaries(ZERO_GRADIENT, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.);
+
+        mesh.findScalarField("w").setAllBoundaries(ZERO_GRADIENT, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.,
+                                                   FIXED, 0.);
+
+        mesh.findScalarField("p").setAllBoundaries(FIXED, 101325.,
+                                                   ZERO_GRADIENT, 0.,
+                                                   ZERO_GRADIENT, 0.,
+                                                   ZERO_GRADIENT, 0.,
+                                                   ZERO_GRADIENT, 0.,
+                                                   ZERO_GRADIENT, 0.);
 
         runControl.displayStartMessage();
 
         while(runControl.continueRun())
         {
-            //runControl.residualNorm = solver.solve(runControl.timeStep(), diffusion);
+            runControl.residualNorm = solver.solve(runControl.timeStep(), simple);
 
             if(runControl.writeToScreen())
                 runControl.displayUpdateMessage();
@@ -60,7 +82,6 @@ int main(int argc, const char* argv[])
         // Display end message, the run ended normally
 
         runControl.displayEndMessage();
-        mesh.writeTec360(0.);
     }
 
     // Catch any exceptions thrown during the run

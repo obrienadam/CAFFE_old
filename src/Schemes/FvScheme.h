@@ -65,14 +65,14 @@ public:
      * @param phiField A reference to the scalar field.
      * @param gradPhiField A reference to the vector field that will contain the cell-centered gradients.
      */
-    void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
+    virtual void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 
     /**
      * @brief Compute the gradient of a scalar field at the face center. An apropriate cell-centered gradient computation method should be called first.
      * @param phiField A reference to the scalar field.
      * @param gradPhiField A reference to the vector field that contains the computed cell-centered gradients.
      */
-    void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
+    virtual void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 };
 
 #endif
