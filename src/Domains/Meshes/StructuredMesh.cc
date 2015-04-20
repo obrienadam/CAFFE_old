@@ -30,7 +30,7 @@ void StructuredMesh::initialize(Input &input)
 {
     Output::print("StructuredMesh", "Initializing structured mesh...");
 
-    initialize(input.inputStrings["domainFile"]);
+    initialize("mesh/structuredMesh.msh");
 
     Output::print("StructuredMesh", "Initialization of structured mesh complete.");
     Output::print(meshStats());

@@ -182,7 +182,7 @@ void HexaMeshGen::writeMeshFile()
 
     int i, j, k;
 
-    ofstream fout("mesh.msh");
+    ofstream fout("mesh/structuredMesh.msh");
 
     fout << "# CAFFE structured mesh file\n\n"
          << "nNodesI=" << nodes_.sizeI() << endl

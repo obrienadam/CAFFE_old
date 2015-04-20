@@ -805,7 +805,7 @@ void HexaFvmMesh::writeDebug()
     Output::print("HexaFvmMesh", "finished writing debugging file.");
 }
 
-void HexaFvmMesh::writeTec360(double time)
+void HexaFvmMesh::writeTec360(double time, std::string directoryName)
 {
     using namespace std;
 
@@ -816,7 +816,7 @@ void HexaFvmMesh::writeTec360(double time)
 
     if(!foutTec360_.is_open())
     {
-        foutTec360_.open((name + ".dat").c_str());
+        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
 
         foutTec360_ << "TITLE = \"" << name << "\"" << endl
                     << "VARIABLES = \"x\", \"y\", \"z\", ";

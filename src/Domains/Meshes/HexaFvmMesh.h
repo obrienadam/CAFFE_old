@@ -255,7 +255,7 @@ public:
      * @brief Write cell-centered data to the Tecplot360 ASCII format.
      * @param time The solution time.
      */
-    void writeTec360(double time = 0);
+    void writeTec360(double time = 0, std::string directoryName = "");
 };
 
 #endif

@@ -3,10 +3,12 @@
 
 set(HEADERS FvScheme.h
 	    Diffusion.h
-	    LinearAdvection.h)
+	    LinearAdvection.h
+	    Simple.h)
 
 set(SOURCE FvScheme.cc
 	   Diffusion.cc
-	   LinearAdvection.cc)
+	   LinearAdvection.cc
+	   Simple.cc)
 
 add_library(Schemes ${HEADERS} ${SOURCE})

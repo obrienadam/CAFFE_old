@@ -12,7 +12,11 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-4000
+10000
+screenWriteInterval
+50
+fileWriteInterval
+200
 
 ### Time ###################################################
 
@@ -22,8 +26,3 @@ maxSimTime
 48
 maxRealTimeHours
 48
-
-### Domain ###################################################
-
-domainFile
-mesh.msh

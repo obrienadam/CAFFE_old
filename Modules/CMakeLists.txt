@@ -14,3 +14,10 @@ target_link_libraries(caffeAdvectionDiffusion RunControl
                                               Solvers
                                               HexaMesh
                                               Schemes)
+
+add_executable(caffeSimple caffeSimple.cc)
+target_link_libraries(caffeSimple RunControl
+                                  Math
+                                  Solvers
+                                  HexaMesh
+                                  Schemes)

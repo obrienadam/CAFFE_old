@@ -6,8 +6,7 @@
 
 #include "SolverIncludes.h"
 #include "HexaFvmMesh.h"
-#include "Diffusion.h"
-#include "LinearAdvection.h"
+#include "Simple.h"
 
 int main(int argc, const char* argv[])
 {
@@ -23,8 +22,7 @@ int main(int argc, const char* argv[])
         RunControl runControl;
         Euler solver;
         HexaFvmMesh mesh;
-        Diffusion diffusion;
-        LinearAdvection linearAdvection;
+        Simple simple;
 
         mesh.addScalarField("phi", CONSERVED);
         mesh.addScalarField("mu", AUXILLARY);
@@ -36,8 +34,6 @@ int main(int argc, const char* argv[])
         runControl.initialize(input);
         solver.initialize(input);
         mesh.initialize(input);
-        diffusion.initialize(input, mesh, "phi");
-        linearAdvection.initialize(input, mesh, "phi", "v");
 
         // Set the boundary conditions
 
@@ -52,7 +48,7 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            runControl.residualNorm = solver.solve(runControl.timeStep(), diffusion);
+            //runControl.residualNorm = solver.solve(runControl.timeStep(), diffusion);
 
             if(runControl.writeToScreen())
                 runControl.displayUpdateMessage();

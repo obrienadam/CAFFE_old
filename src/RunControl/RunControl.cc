@@ -22,6 +22,7 @@
  */
 
 #include <sstream>
+#include <boost/filesystem.hpp>
 
 #include "RunControl.h"
 #include "Output.h"
@@ -43,6 +44,12 @@ void RunControl::initialize(Input &input)
     maxItrs_ = input.inputInts["maxItrs"];
     timeStep_ = input.inputDoubles["timeStep"];
     maxSimTime_ = input.inputDoubles["maxSimTime"];
+    screenWriteInterval_ = input.inputInts["screenWriteInterval"];
+    fileWriteInterval_ = input.inputInts["fileWriteInterval"];
+
+    //- Create a directory for the solution output
+
+    createDirectory("solution");
 }
 
 bool RunControl::continueRun()
@@ -74,6 +81,38 @@ bool RunControl::continueRun()
     }
 
     return true;
+}
+
+bool RunControl::writeToScreen()
+{
+    if(itrs_%screenWriteInterval_ == 0)
+        return true;
+
+    return false;
+}
+
+bool RunControl::writeToFile()
+{
+    if(itrs_%fileWriteInterval_ == 0)
+        return true;
+
+    return false;
+}
+
+void RunControl::reset()
+{
+    Output::raiseException("RunControl", "reset", "Method not yet implemented.");
+}
+
+void RunControl::createDirectory(std::string directoryName)
+{
+    boost::filesystem::path dir(directoryName);
+
+    if(!boost::filesystem::exists(dir))
+    {
+        if(!boost::filesystem::create_directory(dir))
+            Output::raiseException("RunControl", "createDirectory", "Creation of directory \"" + directoryName + "\" failed.");
+    }
 }
 
 void RunControl::displayStartMessage()

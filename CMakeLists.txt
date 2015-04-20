@@ -25,7 +25,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # Find boost package
 
-find_package(Boost REQUIRED COMPONENTS program_options system date_time)
+find_package(Boost REQUIRED COMPONENTS program_options system date_time filesystem)
 
 if(Boost_FOUND)
 

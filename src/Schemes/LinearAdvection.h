@@ -1,8 +1,6 @@
 #ifndef LINEAR_ADVECTION_H
 #define LINEAR_ADVECTION_H
 
-#include <string>
-
 #include "FvScheme.h"
 #include "Field.h"
 #include "Vector3D.h"

@@ -46,6 +46,8 @@ private:
     int itrs_, maxItrs_;
     double simTime_, timeStep_, maxSimTime_;
 
+    int screenWriteInterval_, fileWriteInterval_;
+
     //- Time related objects
 
     RealTime startRealTime_;
@@ -64,8 +66,16 @@ public:
      * @retval terminate if false, continue if true.
      */
     bool continueRun();
+    bool writeToScreen();
+    bool writeToFile();
     void reset();
     double timeStep(){ return timeStep_; }
+    double simTime() { return simTime_; }
+
+    /** Create a directory. Platform independant.
+     * @param directoryName The name of the directory to be created.
+     */
+    void createDirectory(std::string directoryName);
 
     //- Output messages
 

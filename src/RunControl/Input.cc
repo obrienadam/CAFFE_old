@@ -47,7 +47,6 @@ Input::Input()
 
     inputStrings["solver"] = "Euler";
     inputStrings["terminationCondition"] = "simTime";
-    inputStrings["domainFile"] = "domain.in";
 
     inputStrings["boundaryTypeEast"] = "fixed";
     inputStrings["boundaryTypeWest"] = "fixed";

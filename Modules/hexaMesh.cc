@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 
-#include "ArgsList.h"
 #include "HexaMeshGen.h"
 
 int main(int argc, const char* argv[])
@@ -10,9 +9,8 @@ int main(int argc, const char* argv[])
 
     try
     {
-        ArgsList args(argc, argv);
         HexaMeshGen hexaMeshGen;
-        hexaMeshGen.readMeshInputFile(args.inputFilename);
+        hexaMeshGen.readMeshInputFile("mesh/structuredMesh.in");
         hexaMeshGen.generateMesh();
         hexaMeshGen.writeMeshFile();
     }
