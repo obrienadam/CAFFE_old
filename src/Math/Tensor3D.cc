@@ -98,6 +98,21 @@ double& Tensor3D::operator()(int i)
     throw("Attempted to access element outside the bounds of Tensor3D.");
 }
 
+Vector3D Tensor3D::row(int rowNo)
+{
+    switch(rowNo)
+    {
+    case 0:
+        return Vector3D(xx, xy, xz);
+    case 1:
+        return Vector3D(yx, yy, yz);
+    case 2:
+        return Vector3D(zx, zy, zz);
+    };
+
+    throw("Attempted to access row outside the bounds of Tensor3D.");
+}
+
 Tensor3D& Tensor3D::transpose()
 {
     std::swap(xy, yx);
@@ -157,6 +172,13 @@ Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs)
     return Vector3D(lhs.xx*rhs.x + lhs.xy*rhs.y + lhs.xz*rhs.z,
                     lhs.yx*rhs.x + lhs.yy*rhs.y + lhs.yz*rhs.z,
                     lhs.zx*rhs.x + lhs.zy*rhs.y + lhs.zz*rhs.z);
+}
+
+Tensor3D operator*(const Tensor3D& lhs, const Tensor3D& rhs)
+{
+    return Tensor3D(lhs.xx*rhs.xx + lhs.xy*rhs.yx + lhs.xz*rhs.zx, lhs.yx*rhs.xx + lhs.yy*rhs.yx + lhs.yz*rhs.zx, lhs.zx*rhs.xx + lhs.zy*rhs.yx + lhs.zz*rhs.zx,
+                    lhs.xx*rhs.xy + lhs.xy*rhs.yy + lhs.xz*rhs.zy, lhs.yx*rhs.xy + lhs.yy*rhs.yy + lhs.yz*rhs.zy, lhs.zx*rhs.xy + lhs.zy*rhs.yy + lhs.zz*rhs.zy,
+                    lhs.xx*rhs.xz + lhs.xy*rhs.yz + lhs.xz*rhs.zz, lhs.yx*rhs.xz + lhs.yy*rhs.yz + lhs.yz*rhs.zz, lhs.zx*rhs.xz + lhs.zy*rhs.yz + lhs.zz*rhs.zz);
 }
 
 Tensor3D operator+(Tensor3D lhs, const Tensor3D& rhs)

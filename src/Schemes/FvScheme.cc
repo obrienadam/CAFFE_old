@@ -138,6 +138,69 @@ void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, 
     }
 }
 
+void FvScheme::computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField, Field<Tensor3D> &gradUField, Field<Vector3D> &uField)
+{
+    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
+    HexaFvmMesh& mesh = *meshPtr_;
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    uI = nCellsI - 1;
+    uJ = nCellsJ - 1;
+    uK = nCellsK - 1;
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i)
+            {
+                //- Reconstruct east face
+
+                if(i < uI)
+                {
+                    if(dot(uField.faceE(i, j, k), mesh.fAreaNormE(i, j, k)) >= 0.)
+                    {
+                        vecField.faceE(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceE(i, j, k);
+                    }
+                    else
+                    {
+                        vecField.faceE(i, j, k) = vecField(i + 1, j, k) + gradUField(i + 1, j, k)*mesh.rFaceW(i + 1, j, k);
+                    }
+                }
+                //- Reconstruct north face
+
+                if(j < uJ)
+                {
+                    if(dot(uField.faceN(i, j, k), mesh.fAreaNormN(i, j, k)) >= 0.)
+                    {
+                        vecField.faceN(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceN(i, j, k);
+                    }
+                    else
+                    {
+                        vecField.faceN(i, j, k) = vecField(i, j + 1, k) + gradUField(i, j + 1, k)*mesh.rFaceS(i, j + 1, k);
+                    }
+                }
+                //- Reconstruct top face
+
+                if(k < uK)
+                {
+                    if(dot(uField.faceT(i, j, k), mesh.fAreaNormT(i, j, k)) >= 0.)
+                    {
+                        vecField.faceT(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceT(i, j, k);
+                    }
+                    else
+                    {
+                        vecField.faceT(i, j, k) = vecField(i, j, k + 1) + gradUField(i, j, k + 1)*mesh.rFaceB(i, j, k + 1);
+                    }
+                }
+            }
+        }
+    }
+}
+
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
 {
     int i, j, k, nCellsI, nCellsJ, nCellsK;

@@ -67,6 +67,7 @@ public:
      * @param uField A reference to the convective field.
      */
     virtual void computeUpwindFaceCenteredReconstruction(Field<double>& phiField, Field<Vector3D>& gradPhiField, Field<Vector3D>& uField);
+    virtual void computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField, Field<Tensor3D> &gradUField, Field<Vector3D> &uField);
 
     /**
      * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.

@@ -30,22 +30,14 @@ Simple::Simple()
     :
       gradUField_("gradUField", PRIMITIVE),
       gradPField_("gradPField", PRIMITIVE),
-      relaxationFactor_(0.8)
+      relaxationFactor_(0.8),
+      rho_(998.),
+      mu_(0.1)
 {
-
+    nu_ = mu_/rho_;
 }
 
 // ************* Private Methods *************
-
-void Simple::computePredictedMomentum()
-{
-
-}
-
-void Simple::computeCorrectedMomentum()
-{
-
-}
 
 // ************* Public Methods *************
 
@@ -58,6 +50,9 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     pFieldPtr_ = &mesh.findScalarField("p");
 
     relaxationFactor_ = input.inputDoubles["relaxationFactor"];
+    rho_ = input.inputDoubles["rho"];
+    mu_ = input.inputDoubles["mu"];
+    nu_ = mu_/rho_;
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
@@ -88,10 +83,17 @@ void Simple::discretize(std::vector<double> &timeDerivatives_)
     uField.setBoundaryFields();
     pField.setBoundaryFields();
 
-    //- Compute gradients
+    //- Compute relevant gradients and jacobians
 
     computeCellCenteredJacobians(uField, gradUField_);
     computeCellCenteredGradients(pField, gradPField_);
+
+    computeUpwindFaceCenteredReconstruction(uField, gradUField_, uField);
+    computeFaceCenteredGradients(pField, gradPField_);
+
+    //- Compute momentum using currently available pressure field
+
+    computeMomentum(uField, gradUField_, gradPField_);
 
     for(k = 0, l = 0; k < nCellsK; ++k)
     {
@@ -115,4 +117,35 @@ void Simple::copySolution(std::vector<double> &original)
 void Simple::updateSolution(std::vector<double> &update, int method)
 {
 
+}
+
+void Simple::computeMomentum(Field<Vector3D> &uField, Field<Tensor3D> &gradUField, Field<Vector3D> &gradPField)
+{
+    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    HexaFvmMesh& mesh = *meshPtr_;
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i)
+            {
+                //- Convective flux
+
+                uField.fluxE(i, j, k) = -(tensor(uField.faceE(i, j, k), uField.faceE(i, j, k))*mesh.fAreaNormE(i, j, k));
+                uField.fluxN(i, j, k) = -(tensor(uField.faceN(i, j, k), uField.faceN(i, j, k))*mesh.fAreaNormN(i, j, k));
+                uField.fluxT(i, j, k) = -(tensor(uField.faceT(i, j, k), uField.faceT(i, j, k))*mesh.fAreaNormT(i, j, k));
+
+                //- Diffusive flux
+
+                uField.fluxE(i, j, k) += nu_*gradUField.faceE(i, j, k)*mesh.fAreaNormE(i, j, k);
+                uField.fluxN(i, j, k) += nu_*gradUField.faceN(i, j, k)*mesh.fAreaNormN(i, j, k);
+                uField.fluxT(i, j, k) += nu_*gradUField.faceT(i, j, k)*mesh.fAreaNormT(i, j, k);
+            }
+        }
+    }
 }

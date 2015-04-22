@@ -37,10 +37,7 @@ private:
     Field<double>* pFieldPtr_;
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
-    double relaxationFactor_;
-
-    void computePredictedMomentum();
-    void computeCorrectedMomentum();
+    double relaxationFactor_, rho_, mu_, nu_;
 
 public:
 
@@ -53,6 +50,8 @@ public:
     void discretize(std::vector<double>& timeDerivatives_);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
+
+    void computeMomentum(Field<Vector3D>& uField, Field<Tensor3D>& gradUField, Field<Vector3D>& gradPField);
 };
 
 #endif

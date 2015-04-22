@@ -27,6 +27,7 @@ class Tensor3D
 
   double& operator()(int i, int j);
   double& operator()(int i);
+  Vector3D row(int rowNo);
 
   double mag();
   Tensor3D& transpose();
@@ -40,6 +41,7 @@ class Tensor3D
 };
 
 Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs);
+Tensor3D operator*(const Tensor3D& lhs, const Tensor3D& rhs);
 Tensor3D operator+(Tensor3D lhs, const Tensor3D& rhs);
 Tensor3D operator-(Tensor3D lhs, const Tensor3D& rhs);
 
