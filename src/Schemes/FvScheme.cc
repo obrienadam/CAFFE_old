@@ -73,6 +73,71 @@ double FvScheme::getAlpha(int i, int j, int k, int direction)
     return meshPtr_->cellVol(i, j, k)/(meshPtr_->cellVol(i, j, k) + meshPtr_->cellVol(i + deltaI, j + deltaJ, k + deltaK));
 }
 
+void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, Field<Vector3D> &gradPhiField, Field<Vector3D> &uField)
+{
+    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
+    HexaFvmMesh& mesh = *meshPtr_;
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    uI = nCellsI - 1;
+    uJ = nCellsJ - 1;
+    uK = nCellsK - 1;
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i)
+            {
+                //- Reconstruct east face
+
+                if(i < uI)
+                {
+                    if(dot(mesh.fAreaNormE(i, j, k), uField.faceE(i, j, k)) >= 0.)
+                    {
+                        phiField.faceE(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceE(i, j, k));
+                    }
+                    else
+                    {
+                        phiField.faceE(i, j, k) = phiField(i + 1, j, k) + dot(gradPhiField(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
+                    }
+                }
+
+                //- Reconstruct north face
+
+                if(j < uJ)
+                {
+                    if(dot(mesh.fAreaNormN(i, j, k), uField.faceN(i, j, k)) >= 0.)
+                    {
+                        phiField.faceN(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceE(i, j, k));
+                    }
+                    else
+                    {
+                        phiField.faceN(i, j, k) = phiField(i, j + 1, k) + dot(gradPhiField(i, j + 1, k), mesh.rFaceS(i, j + 1, k));
+                    }
+                }
+
+                //- Reconstruct top face
+
+                if(k < uK)
+                {
+                    if(dot(mesh.fAreaNormT(i, j, k), uField.faceT(i, j, k)) >= 0.)
+                    {
+                        phiField.faceT(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceT(i, j, k));
+                    }
+                    else
+                    {
+                        phiField.faceT(i, j, k) = phiField(i, j, k + 1) + dot(gradPhiField(i, j, k + 1), mesh.rFaceB(i, j, k + 1));
+                    }
+                }
+            }
+        }
+    }
+}
+
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
 {
     int i, j, k, nCellsI, nCellsJ, nCellsK;
@@ -110,6 +175,55 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
                 gradPhiField(i, j, k).x = b(0, 0);
                 gradPhiField(i, j, k).y = b(1, 0);
                 gradPhiField(i, j, k).z = b(2, 0);
+            }
+        }
+    }
+}
+
+void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField)
+{
+    int i, j, k, l, m, nCellsI, nCellsJ, nCellsK;
+    HexaFvmMesh& mesh = *meshPtr_;
+    Matrix A(6, 3), b(6, 1), x(3, 1);
+
+    nCellsI = mesh.nCellsI();
+    nCellsJ = mesh.nCellsJ();
+    nCellsK = mesh.nCellsK();
+
+    for(k = 0; k < nCellsK; ++k)
+    {
+        for(j = 0; j < nCellsJ; ++j)
+        {
+            for(i = 0; i < nCellsI; ++i)
+            {
+                b.reallocate(6, 1);
+
+                //- Construct the least-squares coefficient matrix for the cell
+
+                A.addVector3DToRow(mesh.rCellE(i, j, k), 0, 0);
+                A.addVector3DToRow(mesh.rCellW(i, j, k), 1, 0);
+                A.addVector3DToRow(mesh.rCellN(i, j, k), 2, 0);
+                A.addVector3DToRow(mesh.rCellS(i, j, k), 3, 0);
+                A.addVector3DToRow(mesh.rCellT(i, j, k), 4, 0);
+                A.addVector3DToRow(mesh.rCellB(i, j, k), 5, 0);
+
+                for(l = 0; l < 3; ++l)
+                {
+                    b(0, 0) = vecField(i + 1, j, k)(l) - vecField(i, j, k)(l);
+                    b(1, 0) = vecField(i - 1, j, k)(l) - vecField(i, j, k)(l);
+                    b(2, 0) = vecField(i, j + 1, k)(l) - vecField(i, j, k)(l);
+                    b(3, 0) = vecField(i, j - 1, k)(l) - vecField(i, j, k)(l);
+                    b(4, 0) = vecField(i, j, k + 1)(l) - vecField(i, j, k)(l);
+                    b(5, 0) = vecField(i, j, k - 1)(l) - vecField(i, j, k)(l);
+
+                    x = solveLeastSquares(A, b);
+
+                    for(m = 0; m < 3; ++m)
+                    {
+                        tensorField(i, j, k)(l, m) = x(m, 0);
+                    }
+                }
+
             }
         }
     }

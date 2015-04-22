@@ -27,15 +27,24 @@
 #define SIMPLE_H
 
 #include "FvScheme.h"
+#include "Tensor3D.h"
 
 class Simple : public FvScheme
 {
 private:
 
-    Field<double> *uFieldPtr_, *vFieldPtr_, *wFieldPtr_, *pFieldPtr_;
-    Field<Vector3D> gradUField_, gradVField_, gradWField_, gradPField_;
+    Field<Vector3D>* uFieldPtr_;
+    Field<double>* pFieldPtr_;
+    Field<Tensor3D> gradUField_;
+    Field<Vector3D> gradPField_;
+    double relaxationFactor_;
+
+    void computePredictedMomentum();
+    void computeCorrectedMomentum();
 
 public:
+
+    Simple();
 
     void initialize(Input &input, HexaFvmMesh &mesh);
 

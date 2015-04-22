@@ -31,6 +31,7 @@
 
 #include "Input.h"
 #include "Vector3D.h"
+#include "Tensor3D.h"
 #include "Field.h"
 #include "HexaFvmMesh.h"
 
@@ -61,11 +62,25 @@ public:
     double getAlpha(int i, int j, int k, int direction);
 
     /**
+     * @brief Compute face centered field values using an upwind scheme. An apropriate cell-centered gradient computation method should be called first.
+     * @param phiField A reference to the scalar field.
+     * @param uField A reference to the convective field.
+     */
+    virtual void computeUpwindFaceCenteredReconstruction(Field<double>& phiField, Field<Vector3D>& gradPhiField, Field<Vector3D>& uField);
+
+    /**
      * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.
      * @param phiField A reference to the scalar field.
      * @param gradPhiField A reference to the vector field that will contain the cell-centered gradients.
      */
     virtual void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
+
+    /**
+     * @brief Compute the Jacobian of a vector field at the cell center using a least-squares reconstruction method.
+     * @param vecField A reference to a vector field.
+     * @param tensorField A reference to a tensor field that will contain the computed jacobians.
+     */
+    virtual void computeCellCenteredJacobians(Field<Vector3D>& vecField, Field<Tensor3D>& tensorField);
 
     /**
      * @brief Compute the gradient of a scalar field at the face center. An apropriate cell-centered gradient computation method should be called first.

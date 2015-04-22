@@ -40,6 +40,7 @@ Input::Input()
     inputDoubles["maxRealTimeHours"] = 48.;
     inputDoubles["maxRealTimeMinutes"] = 0.;
     inputDoubles["maxRealTimeSeconds"] = 0.;
+    inputDoubles["relaxationFactor"] = 0.8;
 
     inputInts["maxItrs"] = 1000;
     inputInts["fileWriteInterval"] = 50;

@@ -24,9 +24,7 @@ int main(int argc, const char* argv[])
         HexaFvmMesh mesh;
         Simple simple;
 
-        mesh.addScalarField("u", CONSERVED);
-        mesh.addScalarField("v", CONSERVED);
-        mesh.addScalarField("w", CONSERVED);
+        mesh.addVectorField("u", CONSERVED);
         mesh.addScalarField("p", CONSERVED);
 
         // Initialize objects
@@ -38,26 +36,12 @@ int main(int argc, const char* argv[])
 
         // Set the boundary conditions
 
-        mesh.findScalarField("u").setAllBoundaries(ZERO_GRADIENT, 0.,
-                                                   FIXED, 1.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.);
-
-        mesh.findScalarField("v").setAllBoundaries(ZERO_GRADIENT, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.);
-
-        mesh.findScalarField("w").setAllBoundaries(ZERO_GRADIENT, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.,
-                                                   FIXED, 0.);
+        mesh.findVectorField("u").setAllBoundaries(ZERO_GRADIENT, Vector3D(0., 0., 0.),
+                                                   FIXED, Vector3D(1., 0., 0.),
+                                                   FIXED, Vector3D(0., 0., 0.),
+                                                   FIXED, Vector3D(0., 0., 0.),
+                                                   FIXED, Vector3D(0., 0., 0.),
+                                                   FIXED, Vector3D(0., 0., 0.));
 
         mesh.findScalarField("p").setAllBoundaries(FIXED, 101325.,
                                                    ZERO_GRADIENT, 0.,

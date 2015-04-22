@@ -24,23 +24,46 @@
 
 #include "Simple.h"
 
+// ************* Constructors and Destructors *************
+
+Simple::Simple()
+    :
+      gradUField_("gradUField", PRIMITIVE),
+      gradPField_("gradPField", PRIMITIVE),
+      relaxationFactor_(0.8)
+{
+
+}
+
+// ************* Private Methods *************
+
+void Simple::computePredictedMomentum()
+{
+
+}
+
+void Simple::computeCorrectedMomentum()
+{
+
+}
+
+// ************* Public Methods *************
+
 void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     int nCellsI, nCellsJ, nCellsK;
 
     FvScheme::initialize(input, mesh, "NA");
-    uFieldPtr_ = &mesh.findScalarField("u");
-    vFieldPtr_ = &mesh.findScalarField("v");
-    wFieldPtr_ = &mesh.findScalarField("w");
+    uFieldPtr_ = &mesh.findVectorField("u");
     pFieldPtr_ = &mesh.findScalarField("p");
+
+    relaxationFactor_ = input.inputDoubles["relaxationFactor"];
 
     nCellsI = mesh.nCellsI();
     nCellsJ = mesh.nCellsJ();
     nCellsK = mesh.nCellsK();
 
     gradUField_.allocate(nCellsI, nCellsJ, nCellsK);
-    gradVField_.allocate(nCellsI, nCellsJ, nCellsK);
-    gradWField_.allocate(nCellsI, nCellsJ, nCellsK);
     gradPField_.allocate(nCellsI, nCellsJ, nCellsK);
 }
 
@@ -52,9 +75,7 @@ int Simple::nConservedVariables()
 void Simple::discretize(std::vector<double> &timeDerivatives_)
 {
     int i, j, k, l, nCellsI, nCellsJ, nCellsK;
-    Field<double>& uField = *uFieldPtr_;
-    Field<double>& vField = *vFieldPtr_;
-    Field<double>& wField = *wFieldPtr_;
+    Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
     HexaFvmMesh& mesh = *meshPtr_;
 
@@ -65,13 +86,11 @@ void Simple::discretize(std::vector<double> &timeDerivatives_)
     //- Set the boundary fields
 
     uField.setBoundaryFields();
-    vField.setBoundaryFields();
-    wField.setBoundaryFields();
     pField.setBoundaryFields();
 
-    computeCellCenteredGradients(uField, gradUField_);
-    computeCellCenteredGradients(vField, gradVField_);
-    computeCellCenteredGradients(wField, gradWField_);
+    //- Compute gradients
+
+    computeCellCenteredJacobians(uField, gradUField_);
     computeCellCenteredGradients(pField, gradPField_);
 
     for(k = 0, l = 0; k < nCellsK; ++k)
@@ -90,92 +109,10 @@ void Simple::discretize(std::vector<double> &timeDerivatives_)
 
 void Simple::copySolution(std::vector<double> &original)
 {
-    int k, l, size;
-    Field<double>& uField = *uFieldPtr_;
-    Field<double>& vField = *vFieldPtr_;
-    Field<double>& wField = *wFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
 
-    size = uField.size();
-
-    for(k = 0, l = 0; k < size; ++k, ++l)
-    {
-        original[l] = uField(k);
-    }
-
-    for(k = 0; k < size; ++k, ++l)
-    {
-        original[l] = vField(k);
-    }
-
-    for(k = 0; k < size; ++k, ++l)
-    {
-        original[l] = wField(k);
-    }
-
-    for(k = 0; k < size; ++k, ++l)
-    {
-        original[l] = pField(k);
-    }
 }
 
 void Simple::updateSolution(std::vector<double> &update, int method)
 {
-    int k, l, size;
-    Field<double>& uField = *uFieldPtr_;
-    Field<double>& vField = *vFieldPtr_;
-    Field<double>& wField = *wFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
 
-    size = uField.size();
-
-    switch (method)
-    {
-    case ADD:
-
-        for(k = 0, l = 0; k < size; ++k, ++l)
-        {
-            uField(k) += update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            vField(k) += update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            wField(k) += update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            pField(k) += update[l];
-        }
-
-        break;
-    case REPLACE:
-
-        for(k = 0, l = 0; k < size; ++k, ++l)
-        {
-            uField(k) = update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            vField(k) = update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            wField(k) = update[l];
-        }
-
-        for(k = 0; k < size; ++k, ++l)
-        {
-            pField(k) = update[l];
-        }
-
-        break;
-    };
 }
