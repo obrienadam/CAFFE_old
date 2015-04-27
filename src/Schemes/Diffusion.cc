@@ -46,27 +46,27 @@ Diffusion::~Diffusion()
 
 void Diffusion::computeFaceFluxes()
 {
-    int i, j, k, nFacesI, nFacesJ, nFacesK;
+    int i, j, k, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& phiField = *phiFieldPtr_;
 
-    nFacesI = mesh.nFacesI();
-    nFacesJ = mesh.nFacesJ();
-    nFacesK = mesh.nFacesK();
+    uI = nFacesI_ - 1;
+    uJ = nFacesJ_ - 1;
+    uK = nFacesK_ - 1;
 
-    for(k = 0; k < nFacesK; ++k)
+    for(k = 0; k < nFacesK_; ++k)
     {
-        for(j = 0; j < nFacesJ; ++j)
+        for(j = 0; j < nFacesJ_; ++j)
         {
-            for(i = 0; i < nFacesI; ++i)
+            for(i = 0; i < nFacesI_; ++i)
             {
-                if(j < nFacesJ - 1 && k < nFacesK - 1)
+                if(j < uJ && k < uK)
                     phiField.fluxI(i, j, k) = dot(gradPhiField_.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
 
-                if(i < nFacesI - 1 && k < nFacesK - 1)
+                if(i < uI && k < uK)
                     phiField.fluxJ(i, j, k) = dot(gradPhiField_.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
 
-                if(i < nFacesI - 1 && j < nFacesJ - 1)
+                if(i < uI && j < uJ)
                     phiField.fluxK(i, j, k) = dot(gradPhiField_.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
@@ -77,17 +77,11 @@ void Diffusion::computeFaceFluxes()
 
 void Diffusion::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
-    int nCellsI, nCellsJ, nCellsK;
-
     FvScheme::initialize(input, mesh, conservedFieldName);
     phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
     mesh.addVectorField("phiGrad");
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
-
-    gradPhiField_.allocate(nCellsI, nCellsJ, nCellsK);
+    gradPhiField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 }
 
 int Diffusion::nConservedVariables()
@@ -97,24 +91,20 @@ int Diffusion::nConservedVariables()
 
 void Diffusion::discretize(std::vector<double>& timeDerivatives)
 {
-    int i, j, k, l, nCellsI, nCellsJ, nCellsK;
+    int i, j, k, l;
     Field<double>& phiField = *phiFieldPtr_;
     HexaFvmMesh& mesh = *meshPtr_;
-
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
 
     phiField.setBoundaryFields();
     computeCellCenteredGradients(phiField, gradPhiField_);
     computeFaceCenteredGradients(phiField, gradPhiField_);
     computeFaceFluxes();
 
-    for(k = 0, l = 0; k < nCellsK; ++k)
+    for(k = 0, l = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 timeDerivatives[l] = phiField.sumFluxes(i, j, k)/mesh.cellVol(i, j, k);
                 mesh.findVectorField("phiGrad")(i, j, k) = gradPhiField_(i, j, k);

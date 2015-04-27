@@ -39,6 +39,13 @@ FvScheme::FvScheme()
 void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     meshPtr_ = &mesh;
+    nCellsI_ = mesh.nCellsI();
+    nCellsJ_ = mesh.nCellsJ();
+    nCellsK_ = mesh.nCellsK();
+    nFacesI_ = mesh.nFacesI();
+    nFacesJ_ = mesh.nFacesJ();
+    nFacesK_ = mesh.nFacesK();
+
     conservedFieldName_ = conservedFieldName;
 }
 
@@ -75,22 +82,18 @@ double FvScheme::getAlpha(int i, int j, int k, int direction)
 
 void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, Field<Vector3D> &gradPhiField, Field<Vector3D> &uField)
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
+    int i, j, k, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
+    uI = nCellsI_ - 1;
+    uJ = nCellsJ_ - 1;
+    uK = nCellsK_ - 1;
 
-    uI = nCellsI - 1;
-    uJ = nCellsJ - 1;
-    uK = nCellsK - 1;
-
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 //- Reconstruct east face
 
@@ -140,22 +143,18 @@ void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, 
 
 void FvScheme::computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField, Field<Tensor3D> &gradUField, Field<Vector3D> &uField)
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
+    int i, j, k, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
+    uI = nCellsI_ - 1;
+    uJ = nCellsJ_ - 1;
+    uK = nCellsK_ - 1;
 
-    uI = nCellsI - 1;
-    uJ = nCellsJ - 1;
-    uK = nCellsK - 1;
-
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 //- Reconstruct east face
 
@@ -203,19 +202,15 @@ void FvScheme::computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField
 
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK;
+    int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
     Matrix A(6, 3), b(6, 1);
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
-
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 b.reallocate(6, 1);
 
@@ -245,19 +240,15 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
 
 void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField)
 {
-    int i, j, k, l, m, nCellsI, nCellsJ, nCellsK;
+    int i, j, k, l, m;
     HexaFvmMesh& mesh = *meshPtr_;
     Matrix A(6, 3), b(6, 1), x(3, 1);
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
-
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 b.reallocate(6, 1);
 
@@ -294,26 +285,22 @@ void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Ten
 
 void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
 {
-    int i, j, k, nCellsI, nCellsJ, nCellsK, uI, uJ, uK;
+    int i, j, k, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
     Vector3D phiBar, A, es, eb;
     double alpha, phi1, phi0, phiB, ds, db;
 
-    nCellsI = mesh.nCellsI();
-    nCellsJ = mesh.nCellsJ();
-    nCellsK = mesh.nCellsK();
-
-    uI = nCellsI - 1;
-    uJ = nCellsJ - 1;
-    uK = nCellsK - 1;
+    uI = nCellsI_ - 1;
+    uJ = nCellsJ_ - 1;
+    uK = nCellsK_ - 1;
 
     //- Reconstruct the interior faces
 
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
-            for(i = 0; i < nCellsI; ++i)
+            for(i = 0; i < nCellsI_; ++i)
             {
                 phi0 = phiField(i, j, k);
 
@@ -365,9 +352,9 @@ void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vecto
     //- Reconstruct the boundary faces
 
     // East and west
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(j = 0; j < nCellsJ; ++j)
+        for(j = 0; j < nCellsJ_; ++j)
         {
             phi0 = phiField(uI, j, k);
             phiB = phiField(uI + 1, j, k);
@@ -388,9 +375,9 @@ void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vecto
     }
 
     // North and south
-    for(k = 0; k < nCellsK; ++k)
+    for(k = 0; k < nCellsK_; ++k)
     {
-        for(i = 0; i < nCellsI; ++i)
+        for(i = 0; i < nCellsI_; ++i)
         {
             phi0 = phiField(i, uJ, k);
             phiB = phiField(i, uJ + 1, k);
@@ -411,9 +398,9 @@ void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vecto
     }
 
     // Top and bottom
-    for(j = 0; j < nCellsJ; ++j)
+    for(j = 0; j < nCellsJ_; ++j)
     {
-        for(i = 0; i < nCellsI; ++i)
+        for(i = 0; i < nCellsI_; ++i)
         {
             phi0 = phiField(i, j, uK);
             phiB = phiField(i, j, uK + 1);

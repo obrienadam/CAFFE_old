@@ -40,7 +40,6 @@ Input::Input()
     inputDoubles["maxRealTimeHours"] = 48.;
     inputDoubles["maxRealTimeMinutes"] = 0.;
     inputDoubles["maxRealTimeSeconds"] = 0.;
-    inputDoubles["relaxationFactor"] = 0.8;
 
     inputInts["maxItrs"] = 1000;
     inputInts["fileWriteInterval"] = 50;
@@ -62,6 +61,12 @@ Input::Input()
     inputDoubles["boundaryRefValueSouth"] = 0.;
     inputDoubles["boundaryRefValueTop"] = 0.;
     inputDoubles["boundaryRefValueBottom"] = 0.;
+
+    //- Simple parameters
+
+    inputDoubles["relaxationFactor"] = 0.8;
+    inputDoubles["rho"] = 998.;
+    inputDoubles["mu"] = 0.1;
 }
 
 Input::Input(std::string filename)

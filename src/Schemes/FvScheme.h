@@ -43,6 +43,7 @@ protected:
 
     std::string conservedFieldName_;
     HexaFvmMesh* meshPtr_;
+    int nCellsI_, nCellsJ_, nCellsK_, nFacesI_, nFacesJ_, nFacesK_;
 
 public:
 

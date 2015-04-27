@@ -35,9 +35,17 @@ private:
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
+    Field<double> massFlow_;
+    Field<double> pCorr_;
+    Field<Tensor3D> dField_;
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
     double relaxationFactor_, rho_, mu_, nu_;
+
+    /**
+     * @brief Compute the face mass fluxes using the Rhie-Chow interpolation.
+     */
+    void computeMassFlux();
 
 public:
 
@@ -50,8 +58,6 @@ public:
     void discretize(std::vector<double>& timeDerivatives_);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
-
-    void computeMomentum(Field<Vector3D>& uField, Field<Tensor3D>& gradUField, Field<Vector3D>& gradPField);
 };
 
 #endif
