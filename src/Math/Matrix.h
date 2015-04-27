@@ -29,7 +29,7 @@
 
 class Matrix
 {
-private:
+protected:
 
     int m_, n_, nElements_, bufferSize_;
     double* elements_;

@@ -28,10 +28,13 @@
 
 #include "FvScheme.h"
 #include "Tensor3D.h"
+#include "SparseMatrix.h"
 
 class Simple : public FvScheme
 {
 private:
+
+    SparseMatrix A_;
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
@@ -46,6 +49,26 @@ private:
      * @brief Compute the face mass fluxes using the Rhie-Chow interpolation.
      */
     void computeMassFlux();
+
+    /**
+     * @brief Compute a predicted momentum using the latest available pressure field.
+     */
+    void computeUStar();
+
+    /**
+     * @brief Compute the pressure corrections.
+     */
+    void computePCorr();
+
+    /**
+     * @brief Correct the pressure field using computed pressure corrections.
+     */
+    void correctPressure();
+
+    /**
+     * @brief Correct the velocity field using the computed pressure corrections.
+     */
+    void correctVelocity();
 
 public:
 

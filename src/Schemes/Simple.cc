@@ -140,6 +140,26 @@ void Simple::computeMassFlux()
     }
 }
 
+void Simple::computeUStar()
+{
+
+}
+
+void Simple::computePCorr()
+{
+
+}
+
+void Simple::correctPressure()
+{
+
+}
+
+void Simple::correctVelocity()
+{
+
+}
+
 // ************* Public Methods *************
 
 void Simple::initialize(Input &input, HexaFvmMesh &mesh)
@@ -166,10 +186,8 @@ int Simple::nConservedVariables()
 
 void Simple::discretize(std::vector<double> &timeDerivatives_)
 {
-    int i, j, k, l;
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
-    HexaFvmMesh& mesh = *meshPtr_;
 
     //- Set the boundary fields
 
@@ -186,6 +204,17 @@ void Simple::discretize(std::vector<double> &timeDerivatives_)
     computeMassFlux();
 
     //- Compute the predicted momentum
+
+    computeUStar();
+
+    //- Compute the pressure corrections
+
+    computePCorr();
+
+    //- Apply the pressure and velocity corrections
+
+    correctPressure();
+    correctVelocity();
 }
 
 void Simple::copySolution(std::vector<double> &original)
