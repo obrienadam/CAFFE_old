@@ -62,11 +62,18 @@ Input::Input()
     inputDoubles["boundaryRefValueTop"] = 0.;
     inputDoubles["boundaryRefValueBottom"] = 0.;
 
+    //- Linear solver parameters
+
+    inputInts["kspMaxItrs"] = 5000;
+    inputDoubles["kspRelativeTolerance"] = 1e-12;
+    inputDoubles["kspAbsoluteTolerance"] = 1e-6;
+
     //- Simple parameters
 
     inputDoubles["relaxationFactor"] = 0.8;
     inputDoubles["rho"] = 998.;
     inputDoubles["mu"] = 0.1;
+    inputInts["maxGsIters"] = 20;
 }
 
 Input::Input(std::string filename)

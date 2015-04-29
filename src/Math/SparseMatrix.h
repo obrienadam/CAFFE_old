@@ -29,6 +29,7 @@
 #include <petsc.h>
 
 #include "SparseVector.h"
+#include "Input.h"
 
 class SparseMatrix
 {
@@ -41,7 +42,8 @@ private:
     KSP ksp_;
     PC pc_;
 
-    PetscScalar toler_;
+    int maxIters_;
+    double rToler_, absToler_;
     PetscErrorCode errorCode_;
 
 public:
@@ -50,8 +52,11 @@ public:
     SparseMatrix(int m, int n);
     ~SparseMatrix();
 
+    void initialize(Input& input);
+
     void allocate(int m, int n);
 
+    void setValue(int i, int j, double value, InsertMode insertMode = INSERT_VALUES);
     void setValues(int m, int* iIndices, int n, int* jIndices, double* values, InsertMode insertMode = INSERT_VALUES);
     void beginAssembly();
     void endAssembly();

@@ -46,6 +46,7 @@ Tensor3D operator+(Tensor3D lhs, const Tensor3D& rhs);
 Tensor3D operator-(Tensor3D lhs, const Tensor3D& rhs);
 
 Tensor3D transpose(Tensor3D tensor);
+Vector3D dot(const Tensor3D& tensor, const Vector3D& vec);
 
 std::ostream& operator<<(std::ostream& os, const Tensor3D& tensor);
 

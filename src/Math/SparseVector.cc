@@ -30,6 +30,11 @@ void SparseVector::allocate(int m)
     VecGetOwnershipRange(vec_, &iStart_, &iEnd_);
 }
 
+void SparseVector::setValue(int i, double value, InsertMode insertMode)
+{
+    VecSetValue(vec_, i, value, insertMode);
+}
+
 void SparseVector::setValues(int n, int *indices, double *values, InsertMode insertMode)
 {
     VecSetValues(vec_, n, indices, values, insertMode);

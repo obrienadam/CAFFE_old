@@ -199,6 +199,13 @@ Tensor3D transpose(Tensor3D tensor)
     return tensor;
 }
 
+Vector3D dot(const Tensor3D &tensor, const Vector3D &vec)
+{
+    return Vector3D(tensor.xx*vec.x + tensor.xy*vec.y + tensor.xz*vec.z,
+                    tensor.yx*vec.x + tensor.yy*vec.y + tensor.yz*vec.z,
+                    tensor.zx*vec.x + tensor.zy*vec.y + tensor.zz*vec.z);
+}
+
 std::ostream& operator<<(std::ostream& os, const Tensor3D& tensor)
 {
     using namespace std;

@@ -77,7 +77,14 @@ double FvScheme::getAlpha(int i, int j, int k, int direction)
         Output::raiseException("FvScheme", "alpha", "Invalid direction specified.");
     };
 
-    return meshPtr_->cellVol(i, j, k)/(meshPtr_->cellVol(i, j, k) + meshPtr_->cellVol(i + deltaI, j + deltaJ, k + deltaK));
+    //- This is a temporary fix and should probably be looked at again in the future.
+
+    if(i + deltaI > 0 && i + deltaI < nCellsI_ - 1
+            && j + deltaJ > 0 && j + deltaJ < nCellsJ_ - 1
+            && k + deltaK > 0 && k + deltaK < nCellsK_ - 1)
+        return meshPtr_->cellVol(i, j, k)/(meshPtr_->cellVol(i, j, k) + meshPtr_->cellVol(i + deltaI, j + deltaJ, k + deltaK));
+    else
+        return 0.5;
 }
 
 void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, Field<Vector3D> &gradPhiField, Field<Vector3D> &uField)

@@ -20,25 +20,24 @@ Vector3D::Vector3D(std::string vectorStr)
 }
 
 double& Vector3D::operator()(int i)
-{
-  if(i < 0 || i > 2)
-    throw "Attempted to acces element outside the bounds of Vector3D.";
-  
-  switch(i)
+{ 
+    switch(i)
     {
     case 0:
 
-      return x;
+        return x;
 
     case 1:
 
-      return y;
+        return y;
 
-    default:
+    case 2:
 
-      return z;
+        return z;
 
     };
+
+    throw "Attempted to access an element outside the range of Vector3D.";
 }
 
 double Vector3D::mag()

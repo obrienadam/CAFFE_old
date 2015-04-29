@@ -29,26 +29,40 @@
 #include "FvScheme.h"
 #include "Tensor3D.h"
 #include "SparseMatrix.h"
+#include "SparseVector.h"
 
 class Simple : public FvScheme
 {
 private:
 
     SparseMatrix A_;
+    SparseVector b_, x_;
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
+    Field<double> aP_, aE_, aW_, aN_, aS_, aT_, aB_;
+    Field<Vector3D> bP_;
     Field<double> massFlow_;
     Field<double> pCorr_;
-    Field<Tensor3D> dField_;
+    Field<Vector3D> gradPCorr_;
+    Field<double> dField_;
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
     double relaxationFactor_, rho_, mu_, nu_;
 
+    int maxGsIters_;
+
     /**
      * @brief Compute the face mass fluxes using the Rhie-Chow interpolation.
      */
-    void computeMassFlux();
+    void computeMassFluxRhieChow();
+
+    /**
+     * @brief Compute the mass fluxes using a simple interpolation.
+     */
+    void computeMassFluxInterpolate();
+
+    void computeDFieldFaces();
 
     /**
      * @brief Compute a predicted momentum using the latest available pressure field.
