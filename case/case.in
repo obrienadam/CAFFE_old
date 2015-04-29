@@ -14,9 +14,9 @@ iterations
 maxItrs
 10000
 screenWriteInterval
-50
+20
 fileWriteInterval
-200
+20
 
 ### Time ###################################################
 
@@ -33,4 +33,6 @@ rho
 mu
 0.1
 maxGsIters
-200
+40
+relaxationFactor
+0.5

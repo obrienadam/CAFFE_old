@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
                                                    FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.));
 
-        mesh.findScalarField("p").setAllBoundaries(FIXED, 101325.,
+        mesh.findScalarField("p").setAllBoundaries(ZERO_GRADIENT, 0.,
                                                    ZERO_GRADIENT, 0.,
                                                    ZERO_GRADIENT, 0.,
                                                    ZERO_GRADIENT, 0.,
