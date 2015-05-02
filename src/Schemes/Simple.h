@@ -52,37 +52,27 @@ private:
 
     int maxGsIters_;
 
-    /**
-     * @brief Compute the face mass fluxes using the Rhie-Chow interpolation.
-     */
-    void computeMassFluxRhieChow();
-
-    /**
-     * @brief Compute the mass fluxes using a simple interpolation.
-     */
-    void computeMassFluxInterpolate();
-
-    void computeDFieldFaces();
+    void computeMassFlow(Field<Vector3D>& uField);
 
     /**
      * @brief Compute a predicted momentum using the latest available pressure field.
      */
-    void computeUStar();
+    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Compute the pressure corrections.
      */
-    void computePCorr();
+    void computePCorr(Field<Vector3D>& uField, Field<double>& dField);
 
     /**
      * @brief Correct the pressure field using computed pressure corrections.
      */
-    void correctPressure();
+    void correctPressure(Field<double>& pCorrField, Field<double>& pField);
 
     /**
      * @brief Correct the velocity field using the computed pressure corrections.
      */
-    void correctVelocity();
+    void correctVelocity(Field<Vector3D> &uField, Field<double>& dField, Field<double>& pCorrField);
 
 public:
 

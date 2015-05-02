@@ -74,7 +74,7 @@ double FvScheme::getAlpha(int i, int j, int k, int direction)
         --deltaK;
         break;
     default:
-        Output::raiseException("FvScheme", "alpha", "Invalid direction specified.");
+        Output::raiseException("FvScheme", "getAlpha", "Invalid direction specified.");
     };
 
     //- This is a temporary fix and should probably be looked at again in the future.
@@ -84,13 +84,13 @@ double FvScheme::getAlpha(int i, int j, int k, int direction)
             && k + deltaK > 0 && k + deltaK < nCellsK_ - 1)
         return meshPtr_->cellVol(i, j, k)/(meshPtr_->cellVol(i, j, k) + meshPtr_->cellVol(i + deltaI, j + deltaJ, k + deltaK));
     else
-        return 0.5;
+        return 1.;
 }
 
-void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, Field<Vector3D> &gradPhiField, Field<Vector3D> &uField)
+void FvScheme::interpolateInteriorFaces(Field<double> &scalarField)
 {
     int i, j, k, uI, uJ, uK;
-    HexaFvmMesh& mesh = *meshPtr_;
+    double alpha;
 
     uI = nCellsI_ - 1;
     uJ = nCellsJ_ - 1;
@@ -102,56 +102,32 @@ void FvScheme::computeUpwindFaceCenteredReconstruction(Field<double> &phiField, 
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                //- Reconstruct east face
-
                 if(i < uI)
                 {
-                    if(dot(mesh.fAreaNormE(i, j, k), uField.faceE(i, j, k)) >= 0.)
-                    {
-                        phiField.faceE(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceE(i, j, k));
-                    }
-                    else
-                    {
-                        phiField.faceE(i, j, k) = phiField(i + 1, j, k) + dot(gradPhiField(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
-                    }
+                    alpha = getAlpha(i, j, k, EAST);
+                    scalarField.faceE(i, j, k) = alpha*scalarField(i, j, k) + (1. - alpha)*scalarField(i + 1, j, k);
                 }
-
-                //- Reconstruct north face
 
                 if(j < uJ)
                 {
-                    if(dot(mesh.fAreaNormN(i, j, k), uField.faceN(i, j, k)) >= 0.)
-                    {
-                        phiField.faceN(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceE(i, j, k));
-                    }
-                    else
-                    {
-                        phiField.faceN(i, j, k) = phiField(i, j + 1, k) + dot(gradPhiField(i, j + 1, k), mesh.rFaceS(i, j + 1, k));
-                    }
+                    alpha = getAlpha(i, j, k, NORTH);
+                    scalarField.faceN(i, j, k) = alpha*scalarField(i, j, k) + (1. - alpha)*scalarField(i, j + 1, k);
                 }
-
-                //- Reconstruct top face
 
                 if(k < uK)
                 {
-                    if(dot(mesh.fAreaNormT(i, j, k), uField.faceT(i, j, k)) >= 0.)
-                    {
-                        phiField.faceT(i, j, k) = phiField(i, j, k) + dot(gradPhiField(i, j, k), mesh.rFaceT(i, j, k));
-                    }
-                    else
-                    {
-                        phiField.faceT(i, j, k) = phiField(i, j, k + 1) + dot(gradPhiField(i, j, k + 1), mesh.rFaceB(i, j, k + 1));
-                    }
+                    alpha = getAlpha(i, j, k, TOP);
+                    scalarField.faceT(i, j, k) = alpha*scalarField(i, j, k) + (1. - alpha)*scalarField(i, j, k + 1);
                 }
             }
         }
     }
 }
 
-void FvScheme::computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField, Field<Tensor3D> &gradUField, Field<Vector3D> &uField)
+void FvScheme::interpolateInteriorFaces(Field<Vector3D> &vectorField)
 {
     int i, j, k, uI, uJ, uK;
-    HexaFvmMesh& mesh = *meshPtr_;
+    double alpha;
 
     uI = nCellsI_ - 1;
     uJ = nCellsJ_ - 1;
@@ -163,44 +139,22 @@ void FvScheme::computeUpwindFaceCenteredReconstruction(Field<Vector3D> &vecField
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                //- Reconstruct east face
-
                 if(i < uI)
                 {
-                    if(dot(uField.faceE(i, j, k), mesh.fAreaNormE(i, j, k)) >= 0.)
-                    {
-                        vecField.faceE(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceE(i, j, k);
-                    }
-                    else
-                    {
-                        vecField.faceE(i, j, k) = vecField(i + 1, j, k) + gradUField(i + 1, j, k)*mesh.rFaceW(i + 1, j, k);
-                    }
+                    alpha = getAlpha(i, j, k, EAST);
+                    vectorField.faceE(i, j, k) = alpha*vectorField(i, j, k) + (1. - alpha)*vectorField(i + 1, j, k);
                 }
-                //- Reconstruct north face
 
                 if(j < uJ)
                 {
-                    if(dot(uField.faceN(i, j, k), mesh.fAreaNormN(i, j, k)) >= 0.)
-                    {
-                        vecField.faceN(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceN(i, j, k);
-                    }
-                    else
-                    {
-                        vecField.faceN(i, j, k) = vecField(i, j + 1, k) + gradUField(i, j + 1, k)*mesh.rFaceS(i, j + 1, k);
-                    }
+                    alpha = getAlpha(i, j, k, NORTH);
+                    vectorField.faceN(i, j, k) = alpha*vectorField(i, j, k) + (1. - alpha)*vectorField(i, j + 1, k);
                 }
-                //- Reconstruct top face
 
                 if(k < uK)
                 {
-                    if(dot(uField.faceT(i, j, k), mesh.fAreaNormT(i, j, k)) >= 0.)
-                    {
-                        vecField.faceT(i, j, k) = vecField(i, j, k) + gradUField(i, j, k)*mesh.rFaceT(i, j, k);
-                    }
-                    else
-                    {
-                        vecField.faceT(i, j, k) = vecField(i, j, k + 1) + gradUField(i, j, k + 1)*mesh.rFaceB(i, j, k + 1);
-                    }
+                    alpha = getAlpha(i, j, k, TOP);
+                    vectorField.faceT(i, j, k) = alpha*vectorField(i, j, k) + (1. - alpha)*vectorField(i, j, k + 1);
                 }
             }
         }
@@ -426,4 +380,70 @@ void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vecto
             gradPhiField.faceB(i, j, 0) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(i, j, 0) - dot(gradPhiField(i, j, 0), eb)*A/dot(A, eb);
         }
     }
+}
+
+void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &faceNorm, Vector3D &cellRelVec, double& alpha)
+{
+    HexaFvmMesh& mesh = *meshPtr_;
+    int deltaI = 0, deltaJ = 0, deltaK = 0;
+
+    switch (direction)
+    {
+    case EAST:
+
+        faceNorm = mesh.fAreaNormE(i, j, k);
+        cellRelVec = mesh.rCellE(i, j, k);
+        ++deltaI;
+
+        break;
+    case WEST:
+
+        faceNorm = mesh.fAreaNormW(i, j, k);
+        cellRelVec = mesh.rCellW(i, j, k);
+        --deltaI;
+
+        break;
+    case NORTH:
+
+        faceNorm = mesh.fAreaNormN(i, j, k);
+        cellRelVec = mesh.rCellN(i, j, k);
+        ++deltaJ;
+
+        break;
+    case SOUTH:
+
+        faceNorm = mesh.fAreaNormS(i, j, k);
+        cellRelVec = mesh.rCellS(i, j, k);
+        --deltaJ;
+
+        break;
+    case TOP:
+
+        faceNorm = mesh.fAreaNormT(i, j, k);
+        cellRelVec = mesh.rCellT(i, j, k);
+        ++deltaK;
+
+        break;
+
+    case BOTTOM:
+
+        faceNorm = mesh.fAreaNormB(i, j, k);
+        cellRelVec = mesh.rCellB(i, j, k);
+        --deltaK;
+
+        break;
+
+    default:
+
+        Output::raiseException("FvScheme", "getMeshStencil", "Invalid direction specified.");
+    };
+
+    if(i + deltaI > 0 && i + deltaI < nCellsI_ - 1
+            && j + deltaJ > 0 && j + deltaJ < nCellsJ_ - 1
+            && k + deltaK > 0 && k + deltaK < nCellsK_ - 1)
+    {
+        alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i + deltaI, j + deltaJ, k + deltaK));
+    }
+    else
+        alpha = 1.;
 }

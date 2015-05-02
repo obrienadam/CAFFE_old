@@ -54,236 +54,40 @@ Simple::Simple()
 
 // ************* Private Methods *************
 
-void Simple::computeMassFluxRhieChow()
+void Simple::computeMassFlow(Field<Vector3D> &uField)
 {
     int i, j, k, uI, uJ, uK;
     HexaFvmMesh& mesh = *meshPtr_;
-    Field<Vector3D>& uField = *uFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
-    double alpha;
-    Vector3D uBar, gradP, gradPBar;
-
-    //- Set the east and west mass fluxes at the boundaries
 
     uI = nFacesI_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            massFlow_.faceI(uI, j, k) = dot(rho_*uField.faceI(uI, j, k), mesh.fAreaNormI(uI, j, k));
-            massFlow_.faceI(0, j, k) = dot(rho_*uField.faceI(0, j, k), mesh.fAreaNormI(0, j, k));
-        }
-    }
-
-    //- Set the north and south mass fluxes at the boundaries
-
     uJ = nFacesJ_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(i = 0; i < nCellsI_; ++i)
-        {
-            massFlow_.faceJ(i, uJ, k) = dot(rho_*uField.faceJ(i, uJ, k), mesh.fAreaNormJ(i, uJ, k));
-            massFlow_.faceJ(i, 0, k) = dot(rho_*uField.faceJ(i, 0, k), mesh.fAreaNormJ(i, 0, k));
-        }
-    }
-
-    //- Set the top and bottom mass fluxes at the boundaries
-
     uK = nFacesK_ - 1;
 
-    for(j = 0; j < nCellsJ_; ++j)
+    for(k = 0; k < nFacesK_; ++k)
     {
-        for(i = 0; i < nCellsI_; ++i)
+        for(j = 0; j < nFacesJ_; ++j)
         {
-            massFlow_.faceK(i, j, uK) = dot(rho_*uField.faceK(i, j, uK), mesh.fAreaNormK(i, j, uK));
-            massFlow_.faceK(i, j, 0) = dot(rho_*uField.faceK(i, j, 0), mesh.fAreaNormK(i, j, 0));
-        }
-    }
-
-    uI = nCellsI_ - 1;
-    uJ = nCellsJ_ - 1;
-    uK = nCellsK_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
+            for(i = 0; i < nFacesI_; ++i)
             {
-                if(i < uI)
-                {
-                    alpha = getAlpha(i, j, k, EAST);
+                if(j < uJ && k < uK)
+                    massFlow_.faceI(i, j, k) = rho_*dot(uField.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
 
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i + 1, j, k);
-                    gradPBar = alpha*gradPField_(i, j, k) + (1. - alpha)*gradPField_(i + 1, j, k);
-                    gradP = (pField(i + 1, j, k) - pField(i, j, k))/mesh.rCellMagE(i, j, k)*mesh.rnCellE(i, j, k);
+                if(i < uI && k < uK)
+                    massFlow_.faceJ(i, j, k) = rho_*dot(uField.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
 
-                    massFlow_.faceE(i, j, k) = dot(rho_*uBar - rho_*dField_.faceE(i, j, k)*(gradP - gradPBar), mesh.fAreaNormE(i, j, k));
-                }
-
-                if(j < uJ)
-                {
-                    alpha = getAlpha(i, j, k, NORTH);
-
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i, j + 1, k);
-                    gradPBar = alpha*gradPField_(i, j, k) + (1. - alpha)*gradPField_(i, j + 1, k);
-                    gradP = (pField(i, j + 1, k) - pField(i, j, k))/mesh.rCellMagN(i, j, k)*mesh.rnCellN(i, j, k);
-
-                    massFlow_.faceN(i, j, k) = dot(rho_*uBar - rho_*dField_.faceN(i, j, k)*(gradP - gradPBar), mesh.fAreaNormN(i, j, k));
-                }
-
-                if(k < uK)
-                {
-                    alpha = getAlpha(i, j, k, TOP);
-
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i, j, k + 1);
-                    gradPBar = alpha*gradPField_(i, j, k) + (1. - alpha)*gradPField_(i, j, k + 1);
-                    gradP = (pField(i, j, k + 1) - pField(i, j, k))/mesh.rCellMagT(i, j, k)*mesh.rnCellT(i, j, k);
-
-                    massFlow_.faceT(i, j, k) = dot(rho_*uBar - rho_*dField_.faceT(i, j, k)*(gradP - gradPBar), mesh.fAreaNormT(i, j, k));
-                }
+                if(i < uI && j < uJ)
+                    massFlow_.faceK(i, j, k) = rho_*dot(uField.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
     }
 }
 
-void Simple::computeMassFluxInterpolate()
-{
-    int i, j, k, uI, uJ, uK;
-    HexaFvmMesh& mesh = *meshPtr_;
-    Field<Vector3D>& uField = *uFieldPtr_;
-    double alpha;
-    Vector3D uBar;
-
-    //- Set the east and west mass fluxes at the boundaries
-
-    uI = nFacesI_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            massFlow_.faceI(uI, j, k) = dot(rho_*uField.faceI(uI, j, k), mesh.fAreaNormI(uI, j, k));
-            massFlow_.faceI(0, j, k) = dot(rho_*uField.faceI(0, j, k), mesh.fAreaNormI(0, j, k));
-        }
-    }
-
-    //- Set the north and south mass fluxes at the boundaries
-
-    uJ = nFacesJ_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(i = 0; i < nCellsI_; ++i)
-        {
-            massFlow_.faceJ(i, uJ, k) = dot(rho_*uField.faceJ(i, uJ, k), mesh.fAreaNormJ(i, uJ, k));
-            massFlow_.faceJ(i, 0, k) = dot(rho_*uField.faceJ(i, 0, k), mesh.fAreaNormJ(i, 0, k));
-        }
-    }
-
-    //- Set the top and bottom mass fluxes at the boundaries
-
-    uK = nFacesK_ - 1;
-
-    for(j = 0; j < nCellsJ_; ++j)
-    {
-        for(i = 0; i < nCellsI_; ++i)
-        {
-            massFlow_.faceK(i, j, uK) = dot(rho_*uField.faceK(i, j, uK), mesh.fAreaNormK(i, j, uK));
-            massFlow_.faceK(i, j, 0) = dot(rho_*uField.faceK(i, j, 0), mesh.fAreaNormK(i, j, 0));
-        }
-    }
-
-    uI = nCellsI_ - 1;
-    uJ = nCellsJ_ - 1;
-    uK = nCellsK_ - 1;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                if(i < uI)
-                {
-                    alpha = getAlpha(i, j, k, EAST);
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i + 1, j, k);
-
-                    massFlow_.faceE(i, j, k) = dot(rho_*uBar, mesh.fAreaNormE(i, j, k));
-                }
-
-                if(j < uJ)
-                {
-                    alpha = getAlpha(i, j, k, NORTH);
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i, j + 1, k);
-
-                    massFlow_.faceN(i, j, k) = dot(rho_*uBar, mesh.fAreaNormN(i, j, k));
-                }
-
-                if(k < uK)
-                {
-                    alpha = getAlpha(i, j, k, TOP);
-                    uBar = alpha*uField(i, j, k) + (1. - alpha)*uField(i, j, k + 1);
-
-                    massFlow_.faceT(i, j, k) = dot(rho_*uBar, mesh.fAreaNormT(i, j, k));
-                }
-            }
-        }
-    }
-}
-
-void Simple::computeDFieldFaces()
-{
-    int i, j, k;
-    double alpha;
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                if(i == 0)
-                {
-                    alpha = getAlpha(i, j, k, WEST);
-                    dField_.faceW(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i - 1, j, k);
-                }
-
-                if(j == 0)
-                {
-                    alpha = getAlpha(i, j, k, SOUTH);
-                    dField_.faceS(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i, j - 1, k);
-                }
-
-                if(k == 0)
-                {
-                    alpha = getAlpha(i, j, k, BOTTOM);
-                    dField_.faceB(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i, j, k - 1);
-                }
-
-                alpha = getAlpha(i, j, k, EAST);
-                dField_.faceE(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i + 1, j, k);
-
-                alpha = getAlpha(i, j, k, NORTH);
-                dField_.faceN(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i, j + 1, k);
-
-                alpha = getAlpha(i, j, k, TOP);
-                dField_.faceT(i, j, k) = alpha*dField_(i, j, k) + (1. - alpha)*dField_(i, j, k + 1);
-            }
-        }
-    }
-}
-
-void Simple::computeUStar()
+void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
 {
     using namespace std;
 
     int i, j, k, l, itrNo;
     HexaFvmMesh& mesh = *meshPtr_;
-    Field<Vector3D>& uField = *uFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
     double alpha;
     Vector3D sf, ds;
     Tensor3D gradUBar;
@@ -291,7 +95,10 @@ void Simple::computeUStar()
     pField.setBoundaryFields();
     uField.setBoundaryFields();
 
-    computeMassFluxInterpolate();
+    FvScheme::interpolateInteriorFaces(uField);
+
+    computeMassFlow(uField);
+
     computeCellCenteredJacobians(uField, gradUField_);
     computeCellCenteredGradients(pField, gradPField_);
 
@@ -322,45 +129,33 @@ void Simple::computeUStar()
 
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
 
-                alpha = getAlpha(i, j, k, EAST);
+                FvScheme::getMeshStencil(i, j, k, EAST, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i + 1, j, k);
-                sf = mesh.fAreaNormE(i, j, k);
-                ds = mesh.rCellE(i, j, k);
 
                 bP_(i, j, k) = dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
-                alpha = getAlpha(i, j, k, WEST);
+                FvScheme::getMeshStencil(i, j, k, WEST, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i - 1, j, k);
-                sf = mesh.fAreaNormW(i, j, k);
-                ds = mesh.rCellW(i, j, k);
 
                 bP_(i, j, k) += dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
-                alpha = getAlpha(i, j, k, NORTH);
+                FvScheme::getMeshStencil(i, j, k, NORTH, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i, j + 1, k);
-                sf = mesh.fAreaNormN(i, j, k);
-                ds = mesh.rCellN(i, j, k);
 
                 bP_(i, j, k) += dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
-                alpha = getAlpha(i, j, k, SOUTH);
+                FvScheme::getMeshStencil(i, j, k, SOUTH, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i, j - 1, k);
-                sf = mesh.fAreaNormS(i, j, k);
-                ds = mesh.rCellS(i, j, k);
 
                 bP_(i, j, k) += dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
-                alpha = getAlpha(i, j, k, TOP);
+                FvScheme::getMeshStencil(i, j, k, TOP, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i, j, k + 1);
-                sf = mesh.fAreaNormT(i, j, k);
-                ds = mesh.rCellT(i, j, k);
 
                 bP_(i, j, k) += dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
-                alpha = getAlpha(i, j, k, BOTTOM);
+                FvScheme::getMeshStencil(i, j, k, BOTTOM, sf, ds, alpha);
                 gradUBar = alpha*gradUField_(i, j, k) + (1. - alpha)*gradUField_(i, j, k - 1);
-                sf = mesh.fAreaNormB(i, j, k);
-                ds = mesh.rCellB(i, j, k);
 
                 bP_(i, j, k) += dot(mu_*gradUBar, sf - ds*dot(sf, sf)/dot(sf, ds));
 
@@ -396,10 +191,7 @@ void Simple::computeUStar()
                 else
                     bP_(i, j, k) += min(massFlow_.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceB(i, j, k));
 
-
-                // Add the pressure source term
-
-                //bP_(i, j, k) += -gradPField_(i, j, k)*mesh.cellVol(i, j, k);
+                bP_(i, j, k) += -gradPField_(i, j, k)*mesh.cellVol(i, j, k);
 
                 // Update D-field
 
@@ -408,10 +200,10 @@ void Simple::computeUStar()
         }
     }
 
-    std::cout << gradPField_(1, 1, 1)*mesh.cellVol(1, 1, 1) << std::endl;
-
     for(itrNo = 0; itrNo < maxGsIters_; ++itrNo)
     {
+        uField.setBoundaryFields();
+
         for(k = 0; k < nCellsK_; ++k)
         {
             for(j = 0; j < nCellsJ_; ++j)
@@ -431,14 +223,17 @@ void Simple::computeUStar()
     }
 }
 
-void Simple::computePCorr()
+void Simple::computePCorr(Field<Vector3D>& uField, Field<double>& dField)
 {
     int i, j, k, itrNo;
     HexaFvmMesh& mesh = *meshPtr_;
     Vector3D sf, ds;
 
-    computeMassFluxInterpolate();
-    computeDFieldFaces();
+    uField.setBoundaryFields();
+    FvScheme::interpolateInteriorFaces(uField);
+    computeMassFlow(uField);
+
+    FvScheme::interpolateInteriorFaces(dField);
 
     Output::print("Simple", "Computing pressure corrections.");
 
@@ -448,12 +243,12 @@ void Simple::computePCorr()
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                aE_(i, j, k) = -rho_*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.rCellE(i, j, k), mesh.fAreaNormE(i, j, k));
-                aW_(i, j, k) = -rho_*dField_.faceW(i, j, k)*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.rCellW(i, j, k), mesh.fAreaNormW(i, j, k));
-                aN_(i, j, k) = -rho_*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.rCellN(i, j, k), mesh.fAreaNormN(i, j, k));
-                aS_(i, j, k) = -rho_*dField_.faceS(i, j, k)*dot(mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.rCellS(i, j, k), mesh.fAreaNormS(i, j, k));
-                aT_(i, j, k) = -rho_*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.rCellT(i, j, k), mesh.fAreaNormT(i, j, k));
-                aB_(i, j, k) = -rho_*dField_.faceB(i, j, k)*dot(mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.rCellB(i, j, k), mesh.fAreaNormB(i, j, k));
+                aE_(i, j, k) = -dot(rho_*dField_.faceE(i, j, k)*mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
+                aW_(i, j, k) = -dot(rho_*dField_.faceW(i, j, k)*mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
+                aN_(i, j, k) = -dot(rho_*dField_.faceN(i, j, k)*mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
+                aS_(i, j, k) = -dot(rho_*dField_.faceS(i, j, k)*mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.fAreaNormS(i, j, k), mesh.rCellS(i, j, k));
+                aT_(i, j, k) = -dot(rho_*dField_.faceT(i, j, k)*mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
+                aB_(i, j, k) = -dot(rho_*dField_.faceB(i, j, k)*mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.fAreaNormB(i, j, k), mesh.rCellB(i, j, k));
                 aP_(i, j, k) = -(aE_(i, j, k) + aW_(i, j, k) + aN_(i, j, k) + aS_(i, j, k) + aT_(i, j, k) + aB_(i, j, k));
 
                 massFlow_(i, j, k) = massFlow_.faceW(i, j, k) - massFlow_.faceE(i, j, k)
@@ -529,10 +324,9 @@ void Simple::computePCorr()
     }
 }
 
-void Simple::correctPressure()
+void Simple::correctPressure(Field<double> &pCorrField, Field<double> &pField)
 {
     int i, j, k;
-    Field<double>& pField = *pFieldPtr_;
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -540,16 +334,15 @@ void Simple::correctPressure()
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                pField(i, j, k) += relaxationFactor_*pCorr_(i, j, k);
+                pField(i, j, k) += relaxationFactor_*pCorrField(i, j, k);
             }
         }
     }
 }
 
-void Simple::correctVelocity()
+void Simple::correctVelocity(Field<Vector3D> &uField, Field<double> &dField, Field<double> &pCorrField)
 {
     int i, j, k;
-    Field<Vector3D>& uField = *uFieldPtr_;
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -612,18 +405,21 @@ int Simple::nConservedVariables()
 
 void Simple::discretize(std::vector<double> &timeDerivatives_)
 {
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+
     //- Compute the predicted momentum
 
-    computeUStar();
+    computeMomentum(uField, pField);
 
     //- Compute the pressure corrections
 
-    computePCorr();
+    computePCorr(uField, dField_);
 
     //- Apply the pressure and velocity corrections
 
-    correctPressure();
-    correctVelocity();
+    correctPressure(pField, pCorr_);
+    correctVelocity(uField, dField_, pCorr_);
 }
 
 void Simple::copySolution(std::vector<double> &original)
