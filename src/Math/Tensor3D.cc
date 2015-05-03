@@ -206,6 +206,11 @@ Vector3D dot(const Tensor3D &tensor, const Vector3D &vec)
                     tensor.zx*vec.x + tensor.zy*vec.y + tensor.zz*vec.z);
 }
 
+double trace(const Tensor3D &tensor)
+{
+    return tensor.xx + tensor.yy + tensor.zz;
+}
+
 std::ostream& operator<<(std::ostream& os, const Tensor3D& tensor)
 {
     using namespace std;

@@ -88,6 +88,7 @@ public:
     T& faceS(int i, int j, int k){ return facesJ_(i, j, k); }
     T& faceT(int i, int j, int k){ return facesK_(i, j, k + 1); }
     T& faceB(int i, int j, int k){ return facesK_(i, j, k); }
+    T& face(int i, int j, int k, int faceNo);
 
     T& faceI(int i, int j, int k){ return facesI_(i, j, k); }
     T& faceJ(int i, int j, int k){ return facesJ_(i, j, k); }

@@ -57,7 +57,10 @@ int main(int argc, const char* argv[])
             runControl.residualNorm = solver.solve(runControl.timeStep(), simple);
 
             if(runControl.writeToScreen())
+            {
                 runControl.displayUpdateMessage();
+                simple.displayUpdateMessage();
+            }
 
             if(runControl.writeToFile())
                 mesh.writeTec360(runControl.simTime(), "solution");

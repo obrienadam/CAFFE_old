@@ -73,7 +73,8 @@ Input::Input()
     inputDoubles["relaxationFactor"] = 0.8;
     inputDoubles["rho"] = 998.;
     inputDoubles["mu"] = 0.1;
-    inputInts["maxGsIters"] = 20;
+    inputInts["maxMomentumSorIters"] = 50;
+    inputInts["maxPCorrSorIters"] = 200;
 }
 
 Input::Input(std::string filename)

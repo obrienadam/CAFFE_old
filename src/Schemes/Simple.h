@@ -44,13 +44,15 @@ private:
     Field<Vector3D> bP_;
     Field<double> massFlow_;
     Field<double> pCorr_;
+    Field<Vector3D> uCorr_;
     Field<Vector3D> gradPCorr_;
     Field<double> dField_;
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
     double relaxationFactor_, rho_, mu_, nu_;
 
-    int maxGsIters_;
+    int maxMomentumSorIters_, maxPCorrSorIters_;
+    double momentumSorConvergence_, pCorrSorConvergence_;
 
     void computeMassFlow(Field<Vector3D>& uField);
 
@@ -62,17 +64,17 @@ private:
     /**
      * @brief Compute the pressure corrections.
      */
-    void computePCorr(Field<Vector3D>& uField, Field<double>& dField);
+    void computePCorr(Field<Vector3D>& uField);
 
     /**
      * @brief Correct the pressure field using computed pressure corrections.
      */
-    void correctPressure(Field<double>& pCorrField, Field<double>& pField);
+    void correctPressure(Field<double>& pField);
 
     /**
      * @brief Correct the velocity field using the computed pressure corrections.
      */
-    void correctVelocity(Field<Vector3D> &uField, Field<double>& dField, Field<double>& pCorrField);
+    void correctVelocity(Field<Vector3D> &uField);
 
 public:
 
@@ -85,6 +87,8 @@ public:
     void discretize(std::vector<double>& timeDerivatives_);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
+
+    void displayUpdateMessage();
 };
 
 #endif

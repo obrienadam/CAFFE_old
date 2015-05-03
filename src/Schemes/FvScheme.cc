@@ -447,3 +447,8 @@ void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &face
     else
         alpha = 1.;
 }
+
+void FvScheme::displayUpdateMessage()
+{
+
+}

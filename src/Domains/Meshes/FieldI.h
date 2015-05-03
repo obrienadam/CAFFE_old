@@ -199,6 +199,28 @@ void Field<T>::print()
 }
 
 template<class T>
+T& Field<T>::face(int i, int j, int k, int faceNo)
+{
+    switch(faceNo)
+    {
+    case 0:
+        return facesI_(i + 1, j, k);
+    case 1:
+        return facesI_(i, j, k);
+    case 2:
+        return facesJ_(i, j + 1, k);
+    case 3:
+        return facesJ_(i, j, k);
+    case 4:
+        return facesK_(i, j, k + 1);
+    case 5:
+        return facesK_(i, j, k);
+    default:
+        Output::raiseException("Field", "face", "attempted to access a face that does not exist.");
+    };
+}
+
+template<class T>
 void Field<T>::setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
                                 BoundaryPatch westBoundaryType, T westBoundaryValue,
                                 BoundaryPatch northBoundaryType, T northBoundaryValue,

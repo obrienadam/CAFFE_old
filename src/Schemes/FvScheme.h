@@ -96,6 +96,8 @@ public:
     virtual void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 
     void getMeshStencil(int i, int j, int k, int direction, Vector3D& faceNorm, Vector3D& cellRelVec, double &alpha);
+
+    virtual void displayUpdateMessage();
 };
 
 #endif
