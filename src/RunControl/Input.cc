@@ -75,6 +75,7 @@ Input::Input()
     inputDoubles["mu"] = 0.1;
     inputInts["maxMomentumSorIters"] = 50;
     inputInts["maxPCorrSorIters"] = 200;
+    inputDoubles["sorOmega"] = 1.91;
 }
 
 Input::Input(std::string filename)

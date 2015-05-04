@@ -52,19 +52,20 @@ private:
     double relaxationFactor_, rho_, mu_, nu_;
 
     int maxMomentumSorIters_, maxPCorrSorIters_;
-    double momentumSorConvergence_, pCorrSorConvergence_;
+    double momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
 
+    void rhieChowInterpolateInteriorFaces(Field<Vector3D>& uField, Field<double>& pField);
     void computeMassFlow(Field<Vector3D>& uField);
 
     /**
      * @brief Compute a predicted momentum using the latest available pressure field.
      */
-    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField);
+    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField, bool updateDField = true);
 
     /**
      * @brief Compute the pressure corrections.
      */
-    void computePCorr(Field<Vector3D>& uField);
+    void computePCorr(Field<Vector3D>& uField, Field<double> &pField);
 
     /**
      * @brief Correct the pressure field using computed pressure corrections.
