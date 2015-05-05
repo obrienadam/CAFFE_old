@@ -144,6 +144,13 @@ public:
     void setTopBoundaryField();
     void setBottomBoundaryField();
 
+    BoundaryPatch getEastBoundaryPatch(){ return eastBoundaryPatch_; }
+    BoundaryPatch getWestBoundaryPatch(){ return westBoundaryPatch_; }
+    BoundaryPatch getNorthBoundaryPatch(){ return northBoundaryPatch_; }
+    BoundaryPatch getSouthBoundaryPatch(){ return southBoundaryPatch_; }
+    BoundaryPatch getTopBoundaryPatch(){ return topBoundaryPatch_; }
+    BoundaryPatch getBottomBoundaryPatch(){ return bottomBoundaryPatch_; }
+
     /**
      * @brief Print the field to the console, for debugging purposes.
      */

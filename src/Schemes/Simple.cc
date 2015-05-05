@@ -473,12 +473,12 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     gradUField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     gradPField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    pCorr_.setAllBoundaries(FIXED, 0.,
-                            ZERO_GRADIENT, 0.,
-                            ZERO_GRADIENT, 0.,
-                            ZERO_GRADIENT, 0.,
-                            ZERO_GRADIENT, 0.,
-                            ZERO_GRADIENT, 0.);
+    pCorr_.setAllBoundaries(pFieldPtr_->getEastBoundaryPatch(), 0.,
+                            pFieldPtr_->getWestBoundaryPatch(), 0.,
+                            pFieldPtr_->getNorthBoundaryPatch(), 0.,
+                            pFieldPtr_->getSouthBoundaryPatch(), 0.,
+                            pFieldPtr_->getTopBoundaryPatch(), 0.,
+                            pFieldPtr_->getBottomBoundaryPatch(), 0.);
 
     dField_.setAllBoundaries(ZERO_GRADIENT, 0.,
                              ZERO_GRADIENT, 0.,

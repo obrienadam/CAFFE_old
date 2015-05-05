@@ -12,11 +12,11 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-10000
+200
 screenWriteInterval
-20
+1
 fileWriteInterval
-100
+5
 
 ### Time ###################################################
 
@@ -31,12 +31,16 @@ maxRealTimeHours
 rho
 1.
 mu
-0.1
+0.01
 maxMomentumSorIters
-40
+2000
 maxPCorrSorIters
 2000
+momentumSorToler
+1e-3
+pCorrSorToler
+1e-3
 relaxationFactorMomentum
-0.5
+0.1
 relaxationFactorPCorr
-0.2
+0.3
