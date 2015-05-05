@@ -16,7 +16,7 @@ maxItrs
 screenWriteInterval
 20
 fileWriteInterval
-20
+100
 
 ### Time ###################################################
 
@@ -36,5 +36,7 @@ maxMomentumSorIters
 40
 maxPCorrSorIters
 2000
-relaxationFactor
+relaxationFactorMomentum
 0.5
+relaxationFactorPCorr
+0.2

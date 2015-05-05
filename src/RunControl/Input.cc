@@ -70,9 +70,12 @@ Input::Input()
 
     //- Simple parameters
 
-    inputDoubles["relaxationFactor"] = 0.8;
+    inputDoubles["relaxationFactorMomentum"] = 0.3;
+    inputDoubles["relaxationFactorPCorr"] = 0.1;
     inputDoubles["rho"] = 998.;
     inputDoubles["mu"] = 0.1;
+    inputDoubles["momentumSorToler"] = 0.01;
+    inputDoubles["pCorrSorToler"] = 0.01;
     inputInts["maxMomentumSorIters"] = 50;
     inputInts["maxPCorrSorIters"] = 200;
     inputDoubles["sorOmega"] = 1.91;

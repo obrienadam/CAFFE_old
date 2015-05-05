@@ -161,11 +161,15 @@ void FvScheme::interpolateInteriorFaces(Field<Vector3D> &vectorField)
     }
 }
 
-void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
+void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField, int method)
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
     Matrix A(6, 3), b(6, 1);
+
+    switch(method)
+    {
+    case LEAST_SQUARES:
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -197,13 +201,39 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
             }
         }
     }
+
+        break;
+    case DIVERGENCE_THEOREM:
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(j = 0; j < nCellsJ_; ++j)
+            {
+                for(i = 0; i < nCellsI_; ++i)
+                {
+                    gradPhiField(i, j, k) = 1./mesh.cellVol(i, j, k)*(0.5*(phiField(i, j, k) + phiField(i + 1, j, k))*mesh.fAreaNormE(i, j, k)
+                                                                      + 0.5*(phiField(i, j, k) + phiField(i - 1, j, k))*mesh.fAreaNormW(i, j, k)
+                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j + 1, k))*mesh.fAreaNormN(i, j, k)
+                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j - 1, k))*mesh.fAreaNormS(i, j, k)
+                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j, k + 1))*mesh.fAreaNormT(i, j, k)
+                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j, k - 1))*mesh.fAreaNormB(i, j, k));
+                }
+            }
+        }
+
+        break;
+    };
 }
 
-void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField)
+void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField, int method)
 {
     int i, j, k, l, m;
     HexaFvmMesh& mesh = *meshPtr_;
     Matrix A(6, 3), b(6, 1), x(3, 1);
+
+    switch(method)
+    {
+    case LEAST_SQUARES:
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -242,6 +272,28 @@ void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Ten
             }
         }
     }
+
+        break;
+    case DIVERGENCE_THEOREM:
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(j = 0; j < nCellsJ_; ++j)
+            {
+                for(i = 0; i < nCellsI_; ++i)
+                {
+                    tensorField(i, j, k) = 1./mesh.cellVol(i, j, k)*(tensor(0.5*(vecField(i, j, k) + vecField(i + 1, j, k)), mesh.fAreaNormE(i, j, k))
+                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i - 1, j, k)), mesh.fAreaNormW(i, j, k))
+                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j + 1, k)), mesh.fAreaNormN(i, j, k))
+                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j - 1, k)), mesh.fAreaNormS(i, j, k))
+                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j, k + 1)), mesh.fAreaNormT(i, j, k))
+                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j, k - 1)), mesh.fAreaNormB(i, j, k)));
+                }
+            }
+        }
+
+        break;
+    };
 }
 
 void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)

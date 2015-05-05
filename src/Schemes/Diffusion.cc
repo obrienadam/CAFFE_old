@@ -96,7 +96,7 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
     HexaFvmMesh& mesh = *meshPtr_;
 
     phiField.setBoundaryFields();
-    computeCellCenteredGradients(phiField, gradPhiField_);
+    computeCellCenteredGradients(phiField, gradPhiField_, DIVERGENCE_THEOREM);
     computeFaceCenteredGradients(phiField, gradPhiField_);
     computeFaceFluxes();
 

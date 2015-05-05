@@ -28,15 +28,11 @@
 
 #include "FvScheme.h"
 #include "Tensor3D.h"
-#include "SparseMatrix.h"
 #include "SparseVector.h"
 
 class Simple : public FvScheme
 {
 private:
-
-    SparseMatrix A_;
-    SparseVector b_, x_;
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
@@ -44,28 +40,32 @@ private:
     Field<Vector3D> bP_;
     Field<double> massFlow_;
     Field<double> pCorr_;
-    Field<Vector3D> uCorr_;
     Field<Vector3D> gradPCorr_;
     Field<double> dField_;
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
-    double relaxationFactor_, rho_, mu_, nu_;
+    double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_, nu_;
 
     int maxMomentumSorIters_, maxPCorrSorIters_;
-    double momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
+    double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
 
-    void rhieChowInterpolateInteriorFaces(Field<Vector3D>& uField, Field<double>& pField);
+    void rhieChowInterpolateFaces(Field<Vector3D>& uField, Field<double>& pField, Field<double> &dField);
     void computeMassFlow(Field<Vector3D>& uField);
 
     /**
      * @brief Compute a predicted momentum using the latest available pressure field.
      */
-    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField, bool updateDField = true);
+    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Compute the pressure corrections.
      */
     void computePCorr(Field<Vector3D>& uField, Field<double> &pField);
+
+    /**
+     * @brief Correct the mass flow at the cell faces using the computed pressure corrections.
+     */
+    void correctMassFlow();
 
     /**
      * @brief Correct the pressure field using computed pressure corrections.

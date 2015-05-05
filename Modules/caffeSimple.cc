@@ -26,6 +26,7 @@ int main(int argc, const char* argv[])
 
         mesh.addVectorField("u", CONSERVED);
         mesh.addScalarField("p", CONSERVED);
+        mesh.addScalarField("pCorr", AUXILLARY);
 
         // Initialize objects
 
@@ -43,7 +44,7 @@ int main(int argc, const char* argv[])
                                                    FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.));
 
-        mesh.findScalarField("p").setAllBoundaries(ZERO_GRADIENT, 0.,
+        mesh.findScalarField("p").setAllBoundaries(FIXED, 0.,
                                                    ZERO_GRADIENT, 0.,
                                                    ZERO_GRADIENT, 0.,
                                                    ZERO_GRADIENT, 0.,
