@@ -7,6 +7,7 @@ set(HEADERS FvScheme.h
 	    Simple.h)
 
 set(SOURCE FvScheme.cc
+		FvSchemeI.h
 	   Diffusion.cc
 	   LinearAdvection.cc
 	   Simple.cc)

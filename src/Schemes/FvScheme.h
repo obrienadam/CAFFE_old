@@ -37,6 +37,7 @@
 
 enum {ADD, REPLACE};
 enum {LEAST_SQUARES, DIVERGENCE_THEOREM};
+enum {VOLUME_WEIGHTED, DISTANCE_WEIGHTED, NON_WEIGHTED};
 
 class FvScheme
 {
@@ -63,17 +64,8 @@ public:
      */
     double getAlpha(int i, int j, int k, int direction);
 
-    /**
-     * @brief Basic interpolation to obtain face centered values of a field.
-     * @param scalarField A reference to the scalar field.
-     */
-    void interpolateInteriorFaces(Field<double>& scalarField);
-
-    /**
-     * @brief Basic interpolation to obtain face centered values of a field.
-     * @param vectorField A reference to the scalar field.
-     */
-    void interpolateInteriorFaces(Field<Vector3D>& vectorField);
+    template <class FIELD>
+    void interpolateInteriorFaces(FIELD& field, int method = NON_WEIGHTED);
 
     /**
      * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.
@@ -100,5 +92,7 @@ public:
 
     virtual void displayUpdateMessage();
 };
+
+#include "FvSchemeI.h"
 
 #endif

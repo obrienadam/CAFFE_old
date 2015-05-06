@@ -12,11 +12,11 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-200
+2000
 screenWriteInterval
 1
 fileWriteInterval
-5
+50
 
 ### Time ###################################################
 

@@ -45,6 +45,7 @@ private:
     Field<Tensor3D> gradUField_;
     Field<Vector3D> gradPField_;
     double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_, nu_;
+    int gradReconstructionMethod_;
 
     int maxMomentumSorIters_, maxPCorrSorIters_;
     double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
