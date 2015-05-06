@@ -64,19 +64,11 @@ private:
     void computePCorr(Field<Vector3D>& uField, Field<double> &pField);
 
     /**
-     * @brief Correct the mass flow at the cell faces using the computed pressure corrections.
+     * @brief Correct the mass flow, pressure and velocity fields using the computed pressure corrections.
+     * @param uField A reference to the velocity field.
+     * @param pField A reference to the pressure field.
      */
-    void correctMassFlow();
-
-    /**
-     * @brief Correct the pressure field using computed pressure corrections.
-     */
-    void correctPressure(Field<double>& pField);
-
-    /**
-     * @brief Correct the velocity field using the computed pressure corrections.
-     */
-    void correctVelocity(Field<Vector3D> &uField);
+    void correctContinuity(Field<Vector3D>& uField, Field<double>& pField);
 
 public:
 
