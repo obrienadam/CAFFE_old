@@ -59,9 +59,6 @@ void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conserved
     conservedFieldName_ = conservedFieldName;
 }
 
-
-
-template<>
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField, int method)
 {
     int i, j, k;
@@ -126,8 +123,7 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
     };
 }
 
-template<>
-void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField, int method)
+void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Tensor3D> &gradVecField, int method)
 {
     int i, j, k, l, m;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -167,7 +163,7 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
 
                     for(m = 0; m < 3; ++m)
                     {
-                        tensorField(i, j, k)(l, m) = x(m, 0);
+                        gradVecField(i, j, k)(l, m) = x(m, 0);
                     }
                 }
 
@@ -184,7 +180,7 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    tensorField(i, j, k) = (tensor(vecField.faceE(i, j, k), mesh.fAreaNormE(i, j, k))
+                    gradVecField(i, j, k) = (tensor(vecField.faceE(i, j, k), mesh.fAreaNormE(i, j, k))
                                             + tensor(vecField.faceW(i, j, k), mesh.fAreaNormW(i, j, k))
                                             + tensor(vecField.faceN(i, j, k), mesh.fAreaNormN(i, j, k))
                                             + tensor(vecField.faceS(i, j, k), mesh.fAreaNormS(i, j, k))

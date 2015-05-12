@@ -68,12 +68,12 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
     double alpha;
     Vector3D sf, ds;
 
-    computeCellCenteredGradients(pField, gradPField_, gradReconstructionMethod_);
-    computeFaceCenteredGradients(pField, gradPField_);
-
     extrapolateInteriorFaces(uField, gradUField_);
     interpolateInteriorFaces(gradPField_, NON_WEIGHTED);
     interpolateInteriorFaces(dField, DISTANCE_WEIGHTED);
+
+    computeCellCenteredGradients(pField, gradPField_, gradReconstructionMethod_);
+    computeFaceCenteredGradients(pField, gradPField_);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -139,13 +139,13 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
     Vector3D old;
 
     uField.setBoundaryFields();
+    pField.setBoundaryFields();
 
+    extrapolateInteriorFaces(uField, gradUField_);
     extrapolateInteriorFaces(pField, gradPField_);
 
     computeCellCenteredGradients(pField, gradPField_, gradReconstructionMethod_);
     computeCellCenteredGradients(uField, gradUField_, gradReconstructionMethod_);
-
-    pField.setBoundaryFields();
 
     for(k = 0; k < nCellsK_; ++k)
     {

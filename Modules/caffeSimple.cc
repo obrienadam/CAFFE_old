@@ -42,7 +42,7 @@ int main(int argc, const char* argv[])
 
         mesh.findVectorField("u").setAllBoundaries(FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(10., 0., 0.),
+                                                   FIXED, Vector3D(1., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.));

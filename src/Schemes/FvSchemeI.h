@@ -131,13 +131,13 @@ void FvScheme::extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradFiel
                 if(j < uCellJ_)
                 {
                     field.faceN(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k))
-                                                + field(i, j, k) + dot(gradField(i, j + 1, k), mesh.rFaceS(i, j + 1, k)));
+                                                + field(i, j + 1, k) + dot(gradField(i, j + 1, k), mesh.rFaceS(i, j + 1, k)));
                 }
 
                 if(k < uCellK_)
                 {
                     field.faceT(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceT(i, j, k))
-                                                + field(i, j, k) + dot(gradField(i, j, k + 1), mesh.rFaceB(i, j, k + 1)));
+                                                + field(i, j, k + 1) + dot(gradField(i, j, k + 1), mesh.rFaceB(i, j, k + 1)));
                 }
 
                 //- Apply limiting

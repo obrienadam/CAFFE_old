@@ -66,12 +66,18 @@ public:
     void extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradField);
 
     /**
-     * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.
+     * @brief Compute the gradient of a scalar field at the cell center.
      * @param phiField A reference to the scalar field.
      * @param gradPhiField A reference to the vector field that will contain the cell-centered gradients.
      */
-    template <class T, class GRAD_T>
-    void computeCellCenteredGradients(Field<T>& phiField, Field<GRAD_T>& gradPhiField, int method = LEAST_SQUARES);
+    void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField, int method);
+
+    /**
+     * @brief Compute the gradient (Jacobian) of a vector field at the cell center.
+     * @param vecField A reference to the scalar field.
+     * @param gradVecField A reference to the tensor field that will contain the cell-centered gradients (Jacobians).
+     */
+    void computeCellCenteredGradients(Field<Vector3D>& vecField, Field<Tensor3D>& gradVecField, int method);
 
     /**
      * @brief Compute the gradient of a scalar field at the face center. An apropriate cell-centered gradient computation method should be called first.
