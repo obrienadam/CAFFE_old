@@ -159,6 +159,30 @@ T& Field<T>::operator()(int i, int j, int k)
 }
 
 template<class T>
+T& Field<T>::operator ()(int i, int j, int k, int faceNo)
+{
+    switch(faceNo)
+    {
+    case 0:
+        return operator ()(i + 1, j, k);
+    case 1:
+        return operator ()(i - 1, j, k);
+    case 2:
+        return operator ()(i, j + 1, k);
+    case 3:
+        return operator ()(i, j - 1, k);
+    case 4:
+        return operator ()(i, j, k + 1);
+    case 5:
+        return operator ()(i, j, k - 1);
+    default:
+        Output::raiseException("Field", "operator()", "invalid face number specified.");
+    };
+
+    return operator ()(i, j, k);
+}
+
+template<class T>
 T& Field<T>::operator ()(int k)
 {
     if(k < 0 || k >= Array3D<T>::n_)
@@ -170,7 +194,43 @@ T& Field<T>::operator ()(int k)
 template<class T>
 T Field<T>::sumFluxes(int i, int j, int k)
 {
-    return faceFluxesI_(i + 1, j, k) - faceFluxesI_(i, j, k) + faceFluxesJ_(i, j + 1, k) - faceFluxesJ_(i, j, k) + faceFluxesK_(i, j, k + 1) - faceFluxesK_(i, j, k);
+    return faceFluxesI_(i + 1, j, k) - faceFluxesI_(i, j, k)
+            + faceFluxesJ_(i, j + 1, k) - faceFluxesJ_(i, j, k)
+            + faceFluxesK_(i, j, k + 1) - faceFluxesK_(i, j, k);
+}
+
+template<class T>
+T Field<T>::maxNeighbour(int i, int j, int k)
+{
+    using namespace std;
+
+    T maxNb = operator ()(i, j, k);
+
+    maxNb = max(maxNb, operator()(i + 1, j, k));
+    maxNb = max(maxNb, operator()(i - 1, j, k));
+    maxNb = max(maxNb, operator()(i, j + 1, k));
+    maxNb = max(maxNb, operator()(i, j - 1, k));
+    maxNb = max(maxNb, operator()(i, j, k + 1));
+    maxNb = max(maxNb, operator()(i, j, k - 1));
+
+    return maxNb;
+}
+
+template<class T>
+T Field<T>::minNeighbour(int i, int j, int k)
+{
+    using namespace std;
+
+    T minNb = operator ()(i, j, k);
+
+    minNb = min(minNb, operator()(i + 1, j, k));
+    minNb = min(minNb, operator()(i - 1, j, k));
+    minNb = min(minNb, operator()(i, j + 1, k));
+    minNb = min(minNb, operator()(i, j - 1, k));
+    minNb = min(minNb, operator()(i, j, k + 1));
+    minNb = min(minNb, operator()(i, j, k - 1));
+
+    return minNb;
 }
 
 template<class T>
@@ -352,7 +412,8 @@ void Field<T>::setEastBoundaryField()
 
     switch(eastBoundaryPatch_)
     {
-    case FIXED:
+
+    case FIXED: case EXTRAPOLATE:
 
         break;
 
@@ -382,7 +443,7 @@ void Field<T>::setWestBoundaryField()
     switch(westBoundaryPatch_)
     {
 
-    case FIXED:
+    case FIXED: case EXTRAPOLATE:
 
         break;
 
@@ -411,7 +472,7 @@ void Field<T>::setNorthBoundaryField()
     switch(northBoundaryPatch_)
     {
 
-    case FIXED:
+    case FIXED: case EXTRAPOLATE:
 
         break;
 
@@ -440,7 +501,7 @@ void Field<T>::setSouthBoundaryField()
 
     switch(southBoundaryPatch_)
     {
-    case FIXED:
+    case FIXED: case EXTRAPOLATE:
 
         break;
 
@@ -468,7 +529,7 @@ void Field<T>::setTopBoundaryField()
 
     switch(topBoundaryPatch_)
     {
-    case FIXED:
+    case FIXED: case EXTRAPOLATE:
 
         break;
 
@@ -497,7 +558,7 @@ void Field<T>::setBottomBoundaryField()
 
     switch(bottomBoundaryPatch_)
     {
-    case FIXED:
+    case FIXED: case EXTRAPOLATE:
 
         break;
 

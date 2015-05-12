@@ -577,228 +577,41 @@ void HexaFvmMesh::writeDebug()
 {
     using namespace std;
 
-    uint i, j, k, nI, nJ, nK;
+    uint i, j, k;
     ofstream debugFout;
 
     Output::print("HexaFvmMesh", "writing a debugging file...");
 
+    i = 0;
+    j = 0;
+    k = 0;
+
     debugFout.open((name + "_debug" + ".msh").c_str());
-    debugFout << "HexaFvm Mesh Data:\n"
-              << "\nCell Positions:\n";
-
-    nI = cellCenters_.sizeI();
-    nJ = cellCenters_.sizeJ();
-    nK = cellCenters_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << cellCenters_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nCell Volumes:\n";
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << cellVolumes_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Centers I:\n";
-
-    nI = faceCentersI_.sizeI();
-    nJ = faceCentersI_.sizeJ();
-    nK = faceCentersI_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceCentersI_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Centers J:\n";
-
-    nI = faceCentersJ_.sizeI();
-    nJ = faceCentersJ_.sizeJ();
-    nK = faceCentersJ_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceCentersJ_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Centers K:\n";
-
-    nI = faceCentersK_.sizeI();
-    nJ = faceCentersK_.sizeJ();
-    nK = faceCentersK_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceCentersK_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Normals I:\n";
-
-    nI = faceUnitNormalsI_.sizeI();
-    nJ = faceUnitNormalsI_.sizeJ();
-    nK = faceUnitNormalsI_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceUnitNormalsI_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Normals J:\n";
-
-    nI = faceUnitNormalsJ_.sizeI();
-    nJ = faceUnitNormalsJ_.sizeJ();
-    nK = faceUnitNormalsJ_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceUnitNormalsJ_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-    } // end for k
-
-    debugFout << "\nFace Normals K:\n";
-
-    nI = faceUnitNormalsK_.sizeI();
-    nJ = faceUnitNormalsK_.sizeJ();
-    nK = faceUnitNormalsK_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << faceUnitNormalsK_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-
-        debugFout << endl;
-    } // end for k
-
-    // Print cell-to-cell parameters
-
-    debugFout << "\nCell to Cell Vectors I:\n";
-
-    nI = cellToCellDistancesI_.sizeI();
-    nJ = cellToCellDistancesI_.sizeJ();
-    nK = cellToCellDistancesI_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << cellToCellRelativeVectorsI_(i,j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-
-        debugFout << endl;
-    } // end for k
-
-    debugFout << "\nCell to Cell Vectors J:\n";
-
-    nI = cellToCellDistancesJ_.sizeI();
-    nJ = cellToCellDistancesJ_.sizeJ();
-    nK = cellToCellDistancesJ_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << cellToCellRelativeVectorsJ_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-
-        debugFout << endl;
-    } // end for k
-
-    debugFout << "\nCell to Cell Vectors K:\n";
-
-    nI = cellToCellDistancesK_.sizeI();
-    nJ = cellToCellDistancesK_.sizeJ();
-    nK = cellToCellDistancesK_.sizeK();
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                debugFout << cellToCellRelativeVectorsK_(i, j, k) << " ";
-            } // end for i
-
-            debugFout << endl;
-        } // end for j
-
-        debugFout << endl;
-    } // end for k
+    debugFout << "Cell " << i << ", " << j << ", " << k << endl
+              << endl
+              << "Center: " << cellXc(i, j, k) << endl
+              << "Volume: " << cellVol(i, j, k) << endl
+              << endl
+              << "rCellE: " << rCellE(i, j, k) << endl
+              << "rCellW: " << rCellW(i, j, k) << endl
+              << "rCellN: " << rCellN(i, j, k) << endl
+              << "rCellS: " << rCellS(i, j, k) << endl
+              << "rCellT: " << rCellT(i, j, k) << endl
+              << "rCellB: " << rCellB(i, j, k) << endl
+              << endl
+              << "rFaceE: " << rFaceE(i, j, k) << endl
+              << "rFaceW: " << rFaceW(i, j, k) << endl
+              << "rFaceN: " << rFaceN(i, j, k) << endl
+              << "rFaceS: " << rFaceS(i, j, k) << endl
+              << "rFaceT: " << rFaceT(i, j, k) << endl
+              << "rFaceB: " << rFaceB(i, j, k) << endl
+              << endl
+              << "fAreaNormE: " << fAreaNormE(i, j, k) << endl
+              << "fAreaNormW: " << fAreaNormW(i, j, k) << endl
+              << "fAreaNormN: " << fAreaNormN(i, j, k) << endl
+              << "fAreaNormS: " << fAreaNormS(i, j, k) << endl
+              << "fAreaNormT: " << fAreaNormT(i, j, k) << endl
+              << "fAreaNormB: " << fAreaNormB(i, j, k) << endl;
 
     debugFout.close();
 

@@ -30,14 +30,16 @@
 
 #include "Array2D.h"
 #include "Array3D.h"
+#include "Vector3D.h"
+#include "Tensor3D.h"
 
-enum BoundaryPatch{FIXED, ZERO_GRADIENT};
+enum BoundaryPatch{FIXED, ZERO_GRADIENT, EXTRAPOLATE};
 enum{CONSERVED, AUXILLARY, PRIMITIVE};
 
 template <class T>
 class Field : public Array3D<T>
 {
-private:
+protected:
 
     //- Face nodes for primitive and conserved fields
 
@@ -80,6 +82,7 @@ public:
     //- Access
 
     T& operator()(int i, int j, int k);
+    T& operator()(int i, int j, int k, int faceNo);
     T& operator()(int k);
 
     T& faceE(int i, int j, int k){ return facesI_(i + 1, j, k); }
@@ -105,6 +108,9 @@ public:
     T fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
     T fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
     T sumFluxes(int i, int j, int k);
+
+    T maxNeighbour(int i, int j, int k);
+    T minNeighbour(int i, int j, int k);
 
     /**
      * @brief Get a stencil from the specified cell

@@ -50,6 +50,9 @@ Vector3D operator-(const Vector3D& rhs);
 Vector3D operator*(Vector3D lhs, double rhs);
 Vector3D operator*(double lhs, Vector3D rhs);
 Vector3D operator/(Vector3D lhs, double rhs);
+Vector3D max(Vector3D u, const Vector3D& v);
+Vector3D min(Vector3D u, const Vector3D& v);
+
 std::ostream& operator<<(std::ostream& os, const Vector3D& vec);
 
 //- Vector3D related functions

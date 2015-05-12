@@ -44,6 +44,7 @@ Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs);
 Tensor3D operator*(const Tensor3D& lhs, const Tensor3D& rhs);
 Tensor3D operator+(Tensor3D lhs, const Tensor3D& rhs);
 Tensor3D operator-(Tensor3D lhs, const Tensor3D& rhs);
+Tensor3D operator/(Tensor3D lhs, const double& rhs);
 
 Tensor3D transpose(Tensor3D tensor);
 Vector3D dot(const Tensor3D& tensor, const Vector3D& vec);

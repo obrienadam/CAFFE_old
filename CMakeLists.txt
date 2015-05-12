@@ -16,7 +16,7 @@ set(CMAKE_CXX_COMPILER "g++")
 
 # Compiler flags
 
-set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -std=c++11 -O3")
+set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -Wno-switch -std=c++11 -O3")
 
 # Output paths
 

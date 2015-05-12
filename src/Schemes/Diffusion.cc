@@ -78,8 +78,6 @@ void Diffusion::computeFaceFluxes()
 void Diffusion::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     FvScheme::initialize(input, mesh, conservedFieldName);
-    phiFieldPtr_ = &mesh.findScalarField(conservedFieldName_);
-    mesh.addVectorField("phiGrad");
 
     gradPhiField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 }
@@ -107,7 +105,6 @@ void Diffusion::discretize(std::vector<double>& timeDerivatives)
             for(i = 0; i < nCellsI_; ++i)
             {
                 timeDerivatives[l] = phiField.sumFluxes(i, j, k)/mesh.cellVol(i, j, k);
-                mesh.findVectorField("phiGrad")(i, j, k) = gradPhiField_(i, j, k);
                 ++l;
             }
         }

@@ -70,6 +70,7 @@ Input::Input()
 
     //- Simple parameters
 
+    inputStrings["timeAccurate"] = "OFF";
     inputDoubles["relaxationFactorMomentum"] = 0.3;
     inputDoubles["relaxationFactorPCorr"] = 0.1;
     inputDoubles["rho"] = 998.;

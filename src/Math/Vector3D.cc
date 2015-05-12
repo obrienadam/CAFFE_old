@@ -1,6 +1,7 @@
 #include <math.h>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 #include <boost/algorithm/string.hpp>
 
@@ -142,6 +143,24 @@ Vector3D operator*(double lhs, Vector3D rhs)
 Vector3D operator/(Vector3D lhs, double rhs)
 {
   return lhs /= rhs;
+}
+
+Vector3D max(Vector3D u, const Vector3D &v)
+{
+    u.x = std::max(u.x, v.x);
+    u.y = std::max(u.y, v.y);
+    u.z = std::max(u.z, v.z);
+
+    return u;
+}
+
+Vector3D min(Vector3D u, const Vector3D &v)
+{
+    u.x = std::min(u.x, v.x);
+    u.y = std::min(u.y, v.y);
+    u.z = std::min(u.z, v.z);
+
+    return u;
 }
 
 std::ostream& operator<<(std::ostream& os, const Vector3D& vec)

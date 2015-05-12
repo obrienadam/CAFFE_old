@@ -36,13 +36,15 @@ int main(int argc, const char* argv[])
         mesh.initialize(input);
         simple.initialize(input, mesh);
 
+        mesh.writeDebug();
+
         // Set the boundary conditions
 
         mesh.findVectorField("u").setAllBoundaries(FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
+                                                   FIXED, Vector3D(10., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
                                                    FIXED, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(1., 1., 0.),
                                                    FIXED, Vector3D(0., 0., 0.));
 
         mesh.findScalarField("p").setAllBoundaries(ZERO_GRADIENT, 0.,

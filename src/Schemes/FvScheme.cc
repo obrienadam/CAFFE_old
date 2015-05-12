@@ -39,54 +39,29 @@ FvScheme::FvScheme()
 void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
     meshPtr_ = &mesh;
+
     nCellsI_ = mesh.nCellsI();
     nCellsJ_ = mesh.nCellsJ();
     nCellsK_ = mesh.nCellsK();
+
     nFacesI_ = mesh.nFacesI();
     nFacesJ_ = mesh.nFacesJ();
     nFacesK_ = mesh.nFacesK();
 
+    uCellI_ = nCellsI_ - 1;
+    uCellJ_ = nCellsJ_ - 1;
+    uCellK_ = nCellsK_ - 1;
+
+    uFaceI_ = nFacesI_ - 1;
+    uFaceJ_ = nFacesJ_ - 1;
+    uFaceK_ = nFacesK_ - 1;
+
     conservedFieldName_ = conservedFieldName;
 }
 
-double FvScheme::getAlpha(int i, int j, int k, int direction)
-{
-    int deltaI = 0, deltaJ = 0, deltaK = 0;
 
-    switch (direction)
-    {
-    case EAST:
-        ++deltaI;
-        break;
-    case WEST:
-        --deltaI;
-        break;
-    case NORTH:
-        ++deltaJ;
-        break;
-    case SOUTH:
-        --deltaJ;
-        break;
-    case TOP:
-        ++deltaK;
-        break;
-    case BOTTOM:
-        --deltaK;
-        break;
-    default:
-        Output::raiseException("FvScheme", "getAlpha", "Invalid direction specified.");
-    };
 
-    //- This is a temporary fix and should probably be looked at again in the future.
-
-    if(i + deltaI > 0 && i + deltaI < nCellsI_ - 1
-            && j + deltaJ > 0 && j + deltaJ < nCellsJ_ - 1
-            && k + deltaK > 0 && k + deltaK < nCellsK_ - 1)
-        return meshPtr_->cellVol(i, j, k)/(meshPtr_->cellVol(i, j, k) + meshPtr_->cellVol(i + deltaI, j + deltaJ, k + deltaK));
-    else
-        return 1.;
-}
-
+template<>
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField, int method)
 {
     int i, j, k;
@@ -137,12 +112,12 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    gradPhiField(i, j, k) = 1./mesh.cellVol(i, j, k)*(0.5*(phiField(i, j, k) + phiField(i + 1, j, k))*mesh.fAreaNormE(i, j, k)
-                                                                      + 0.5*(phiField(i, j, k) + phiField(i - 1, j, k))*mesh.fAreaNormW(i, j, k)
-                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j + 1, k))*mesh.fAreaNormN(i, j, k)
-                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j - 1, k))*mesh.fAreaNormS(i, j, k)
-                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j, k + 1))*mesh.fAreaNormT(i, j, k)
-                                                                      + 0.5*(phiField(i, j, k) + phiField(i, j, k - 1))*mesh.fAreaNormB(i, j, k));
+                    gradPhiField(i, j, k) = (phiField.faceE(i, j, k)*mesh.fAreaNormE(i, j, k)
+                                             + phiField.faceW(i, j, k)*mesh.fAreaNormW(i, j, k)
+                                             + phiField.faceN(i, j, k)*mesh.fAreaNormN(i, j, k)
+                                             + phiField.faceS(i, j, k)*mesh.fAreaNormS(i, j, k)
+                                             + phiField.faceT(i, j, k)*mesh.fAreaNormT(i, j, k)
+                                             + phiField.faceB(i, j, k)*mesh.fAreaNormB(i, j, k))/mesh.cellVol(i, j, k);
                 }
             }
         }
@@ -151,7 +126,8 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
     };
 }
 
-void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField, int method)
+template<>
+void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Tensor3D> &tensorField, int method)
 {
     int i, j, k, l, m;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -208,12 +184,12 @@ void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Ten
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    tensorField(i, j, k) = 1./mesh.cellVol(i, j, k)*(tensor(0.5*(vecField(i, j, k) + vecField(i + 1, j, k)), mesh.fAreaNormE(i, j, k))
-                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i - 1, j, k)), mesh.fAreaNormW(i, j, k))
-                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j + 1, k)), mesh.fAreaNormN(i, j, k))
-                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j - 1, k)), mesh.fAreaNormS(i, j, k))
-                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j, k + 1)), mesh.fAreaNormT(i, j, k))
-                                                                     + tensor(0.5*(vecField(i, j, k) + vecField(i, j, k - 1)), mesh.fAreaNormB(i, j, k)));
+                    tensorField(i, j, k) = (tensor(vecField.faceE(i, j, k), mesh.fAreaNormE(i, j, k))
+                                            + tensor(vecField.faceW(i, j, k), mesh.fAreaNormW(i, j, k))
+                                            + tensor(vecField.faceN(i, j, k), mesh.fAreaNormN(i, j, k))
+                                            + tensor(vecField.faceS(i, j, k), mesh.fAreaNormS(i, j, k))
+                                            + tensor(vecField.faceT(i, j, k), mesh.fAreaNormT(i, j, k))
+                                            + tensor(vecField.faceB(i, j, k), mesh.fAreaNormB(i, j, k)))/mesh.cellVol(i, j, k);
                 }
             }
         }
@@ -224,140 +200,7 @@ void FvScheme::computeCellCenteredJacobians(Field<Vector3D> &vecField, Field<Ten
 
 void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField)
 {
-    int i, j, k, uI, uJ, uK;
-    HexaFvmMesh& mesh = *meshPtr_;
-    Vector3D phiBar, A, es, eb;
-    double alpha, phi1, phi0, phiB, ds, db;
 
-    uI = nCellsI_ - 1;
-    uJ = nCellsJ_ - 1;
-    uK = nCellsK_ - 1;
-
-    //- Reconstruct the interior faces
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                phi0 = phiField(i, j, k);
-
-                // East faces
-                if(i < uI)
-                {
-                    alpha = FvScheme::getAlpha(i, j, k, EAST);
-
-                    phiBar = alpha*gradPhiField(i, j, k) + (1. - alpha)*gradPhiField(i + 1, j, k);
-                    A = mesh.fAreaNormE(i, j, k);
-                    es = mesh.rnCellE(i, j, k);
-                    phi1 = phiField(i + 1, j, k);
-                    ds = mesh.rCellMagE(i, j, k);
-
-                    gradPhiField.faceE(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
-                }
-
-                // North faces
-                if(j < uJ)
-                {
-                    alpha = FvScheme::getAlpha(i, j, k, NORTH);
-
-                    phiBar = alpha*gradPhiField(i, j, k) + (1. - alpha)*gradPhiField(i, j + 1, k);
-                    A = mesh.fAreaNormN(i, j, k);
-                    es = mesh.rnCellN(i, j, k);
-                    phi1 = phiField(i, j + 1, k);
-                    ds = mesh.rCellMagN(i, j, k);
-
-                    gradPhiField.faceN(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
-                }
-
-                // Top faces
-                if(k < uK)
-                {
-                    alpha = FvScheme::getAlpha(i, j, k, TOP);
-
-                    phiBar = alpha*gradPhiField(i, j, k) + (1. - alpha)*gradPhiField(i, j, k + 1);
-                    A = mesh.fAreaNormT(i, j, k);
-                    es = mesh.rnCellT(i, j, k);
-                    phi1 = phiField(i, j, k + 1);
-                    ds = mesh.rCellMagT(i, j, k);
-
-                    gradPhiField.faceT(i, j, k) = (phi1 - phi0)*A/(ds*dot(A, es)) + phiBar - dot(phiBar, es)*A/dot(A, es);
-                }
-            }
-        }
-    }
-
-    //- Reconstruct the boundary faces
-
-    // East and west
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            phi0 = phiField(uI, j, k);
-            phiB = phiField(uI + 1, j, k);
-            db = mesh.rFaceMagE(uI, j, k);
-            eb = mesh.rnFaceE(uI, j, k);
-            A = mesh.fAreaNormE(uI, j, k);
-
-            gradPhiField.faceE(uI, j, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(uI, j, k) - dot(gradPhiField(uI, j, k), eb)*A/dot(A, eb);
-
-            phi0 = phiField(0, j, k);
-            phiB = phiField(-1, j, k);
-            db = mesh.rFaceMagW(0, j, k);
-            eb = mesh.rnFaceW(0, j, k);
-            A = mesh.fAreaNormW(0, j, k);
-
-            gradPhiField.faceW(0, j, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(0, j, k) - dot(gradPhiField(0, j, k), eb)*A/dot(A, eb);
-        }
-    }
-
-    // North and south
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(i = 0; i < nCellsI_; ++i)
-        {
-            phi0 = phiField(i, uJ, k);
-            phiB = phiField(i, uJ + 1, k);
-            db = mesh.rFaceMagN(i, uJ, k);
-            eb = mesh.rnFaceN(i, uJ, k);
-            A = mesh.fAreaNormN(i, uJ, k);
-
-            gradPhiField.faceN(i, uJ, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(i, uJ, k) - dot(gradPhiField(i, uJ, k), eb)*A/dot(A, eb);
-
-            phi0 = phiField(i, 0, k);
-            phiB = phiField(i, -1, k);
-            db = mesh.rFaceMagS(i, 0, k);
-            eb = mesh.rnFaceS(i, 0, k);
-            A = mesh.fAreaNormS(i, 0, k);
-
-            gradPhiField.faceS(i, 0, k) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(i, 0, k) - dot(gradPhiField(i, 0, k), eb)*A/dot(A, eb);
-        }
-    }
-
-    // Top and bottom
-    for(j = 0; j < nCellsJ_; ++j)
-    {
-        for(i = 0; i < nCellsI_; ++i)
-        {
-            phi0 = phiField(i, j, uK);
-            phiB = phiField(i, j, uK + 1);
-            db = mesh.rFaceMagT(i, j, uK);
-            eb = mesh.rnFaceT(i, j, uK);
-            A = mesh.fAreaNormT(i, j, uK);
-
-            gradPhiField.faceT(i, j, uK) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(i, j, uK) - dot(gradPhiField(i, j, uK), eb)*A/dot(A, eb);
-
-            phi0 = phiField(i, j, 0);
-            phiB = phiField(i, j, -1);
-            db = mesh.rFaceMagB(i, j, 0);
-            eb = mesh.rnFaceB(i, j, 0);
-            A = mesh.fAreaNormB(i, j, 0);
-
-            gradPhiField.faceB(i, j, 0) = (phiB - phi0)*A/(db*dot(A, eb)) + gradPhiField(i, j, 0) - dot(gradPhiField(i, j, 0), eb)*A/dot(A, eb);
-        }
-    }
 }
 
 void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &faceNorm, Vector3D &cellRelVec, double& alpha)

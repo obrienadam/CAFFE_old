@@ -152,6 +152,21 @@ Tensor3D& Tensor3D::operator-=(const Tensor3D& rhs)
     return *this;
 }
 
+Tensor3D& Tensor3D::operator/=(const double& rhs)
+{
+    xx /= rhs;
+    xy /= rhs;
+    xz /= rhs;
+    yx /= rhs;
+    yy /= rhs;
+    yz /= rhs;
+    zx /= rhs;
+    zy /= rhs;
+    zz /= rhs;
+
+    return *this;
+}
+
 void Tensor3D::print()
 {
     using namespace std;
@@ -190,6 +205,12 @@ Tensor3D operator+(Tensor3D lhs, const Tensor3D& rhs)
 Tensor3D operator-(Tensor3D lhs, const Tensor3D& rhs)
 {
     lhs -= rhs;
+    return lhs;
+}
+
+Tensor3D operator/(Tensor3D lhs, const double& rhs)
+{
+    lhs /= rhs;
     return lhs;
 }
 

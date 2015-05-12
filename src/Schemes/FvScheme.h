@@ -46,6 +46,7 @@ protected:
     std::string conservedFieldName_;
     HexaFvmMesh* meshPtr_;
     int nCellsI_, nCellsJ_, nCellsK_, nFacesI_, nFacesJ_, nFacesK_;
+    int uCellI_, uCellJ_, uCellK_, uFaceI_, uFaceJ_, uFaceK_;
 
 public:
 
@@ -58,28 +59,19 @@ public:
     virtual void copySolution(std::vector<double>& original) = 0;
     virtual void updateSolution(std::vector<double>& timeDerivatives_, int method) = 0;
 
-    /**
-     * @brief This method is used for computing a weighted averaging coefficient based on a specified criteria.
-     * @return An interpolation factor.
-     */
-    double getAlpha(int i, int j, int k, int direction);
+    template <class T>
+    void interpolateInteriorFaces(Field<T>& field, int method);
 
-    template <class FIELD>
-    void interpolateInteriorFaces(FIELD& field, int method = NON_WEIGHTED);
+    template <class T, class GRAD_T>
+    void extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradField);
 
     /**
      * @brief Compute the gradient of a scalar field at the cell center using a least-squares reconstruction method.
      * @param phiField A reference to the scalar field.
      * @param gradPhiField A reference to the vector field that will contain the cell-centered gradients.
      */
-    virtual void computeCellCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField, int method = LEAST_SQUARES);
-
-    /**
-     * @brief Compute the Jacobian of a vector field at the cell center using a least-squares reconstruction method.
-     * @param vecField A reference to a vector field.
-     * @param tensorField A reference to a tensor field that will contain the computed jacobians.
-     */
-    virtual void computeCellCenteredJacobians(Field<Vector3D>& vecField, Field<Tensor3D>& tensorField, int method = LEAST_SQUARES);
+    template <class T, class GRAD_T>
+    void computeCellCenteredGradients(Field<T>& phiField, Field<GRAD_T>& gradPhiField, int method = LEAST_SQUARES);
 
     /**
      * @brief Compute the gradient of a scalar field at the face center. An apropriate cell-centered gradient computation method should be called first.
@@ -89,6 +81,20 @@ public:
     virtual void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 
     void getMeshStencil(int i, int j, int k, int direction, Vector3D& faceNorm, Vector3D& cellRelVec, double &alpha);
+
+    Vector3D sfE(int i, int j, int k){ return meshPtr_->fAreaNormE(i, j, k); }
+    Vector3D sfW(int i, int j, int k){ return meshPtr_->fAreaNormW(i, j, k); }
+    Vector3D sfN(int i, int j, int k){ return meshPtr_->fAreaNormN(i, j, k); }
+    Vector3D sfS(int i, int j, int k){ return meshPtr_->fAreaNormS(i, j, k); }
+    Vector3D sfT(int i, int j, int k){ return meshPtr_->fAreaNormT(i, j, k); }
+    Vector3D sfB(int i, int j, int k){ return meshPtr_->fAreaNormB(i, j, k); }
+
+    Vector3D dsE(int i, int j, int k){ return meshPtr_->rCellE(i, j, k); }
+    Vector3D dsW(int i, int j, int k){ return meshPtr_->rCellW(i, j, k); }
+    Vector3D dsN(int i, int j, int k){ return meshPtr_->rCellN(i, j, k); }
+    Vector3D dsS(int i, int j, int k){ return meshPtr_->rCellS(i, j, k); }
+    Vector3D dsT(int i, int j, int k){ return meshPtr_->rCellT(i, j, k); }
+    Vector3D dsB(int i, int j, int k){ return meshPtr_->rCellB(i, j, k); }
 
     virtual void displayUpdateMessage();
 };
