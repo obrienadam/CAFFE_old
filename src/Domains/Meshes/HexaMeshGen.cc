@@ -58,7 +58,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
 
         // buffer should contain a bracketed vector
 
-        vertices_.push_back(Point3D(buffer));
+        vertices_.push_back(Point3D(buffer)*metricConversion_);
     }
 
     Output::print("HexaMeshGen: Successfully initialized domain vertices.");

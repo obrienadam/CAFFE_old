@@ -86,7 +86,7 @@ public:
      */
     virtual void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 
-    void getMeshStencil(int i, int j, int k, int direction, Vector3D& faceNorm, Vector3D& cellRelVec, double &alpha);
+    void getFaceStencil(int i, int j, int k, int direction, Vector3D& faceNorm, Vector3D& cellRelVec);
 
     Vector3D sfE(int i, int j, int k){ return meshPtr_->fAreaNormE(i, j, k); }
     Vector3D sfW(int i, int j, int k){ return meshPtr_->fAreaNormW(i, j, k); }

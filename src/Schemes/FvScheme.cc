@@ -199,10 +199,9 @@ void FvScheme::computeFaceCenteredGradients(Field<double> &phiField, Field<Vecto
 
 }
 
-void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &faceNorm, Vector3D &cellRelVec, double& alpha)
+void FvScheme::getFaceStencil(int i, int j, int k, int direction, Vector3D &faceNorm, Vector3D &cellRelVec)
 {
     HexaFvmMesh& mesh = *meshPtr_;
-    int deltaI = 0, deltaJ = 0, deltaK = 0;
 
     switch (direction)
     {
@@ -210,35 +209,30 @@ void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &face
 
         faceNorm = mesh.fAreaNormE(i, j, k);
         cellRelVec = mesh.rCellE(i, j, k);
-        ++deltaI;
 
         break;
     case WEST:
 
         faceNorm = mesh.fAreaNormW(i, j, k);
         cellRelVec = mesh.rCellW(i, j, k);
-        --deltaI;
 
         break;
     case NORTH:
 
         faceNorm = mesh.fAreaNormN(i, j, k);
         cellRelVec = mesh.rCellN(i, j, k);
-        ++deltaJ;
 
         break;
     case SOUTH:
 
         faceNorm = mesh.fAreaNormS(i, j, k);
         cellRelVec = mesh.rCellS(i, j, k);
-        --deltaJ;
 
         break;
     case TOP:
 
         faceNorm = mesh.fAreaNormT(i, j, k);
         cellRelVec = mesh.rCellT(i, j, k);
-        ++deltaK;
 
         break;
 
@@ -246,7 +240,6 @@ void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &face
 
         faceNorm = mesh.fAreaNormB(i, j, k);
         cellRelVec = mesh.rCellB(i, j, k);
-        --deltaK;
 
         break;
 
@@ -254,15 +247,6 @@ void FvScheme::getMeshStencil(int i, int j, int k, int direction, Vector3D &face
 
         Output::raiseException("FvScheme", "getMeshStencil", "Invalid direction specified.");
     };
-
-    if(i + deltaI > 0 && i + deltaI < nCellsI_ - 1
-            && j + deltaJ > 0 && j + deltaJ < nCellsJ_ - 1
-            && k + deltaK > 0 && k + deltaK < nCellsK_ - 1)
-    {
-        alpha = mesh.cellVol(i, j, k)/(mesh.cellVol(i, j, k) + mesh.cellVol(i + deltaI, j + deltaJ, k + deltaK));
-    }
-    else
-        alpha = 1.;
 }
 
 void FvScheme::displayUpdateMessage()
