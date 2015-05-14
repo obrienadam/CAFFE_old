@@ -234,7 +234,7 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
             {
                 hField_(i, j, k) = -(aE_(i, j, k)*uField(i + 1, j, k) + aW_(i, j, k)*uField(i - 1, j, k)
                                      + aN_(i, j, k)*uField(i, j + 1, k) + aS_(i, j, k)*uField(i, j - 1, k)
-                                     + aT_(i, j, k)*uField(i, j, k + 1) + aB_(i, j, k)*uField(i, j, k - 1))/aP_(i, j, k);
+                                     + aT_(i, j, k)*uField(i, j, k + 1) + aB_(i, j, k)*uField(i, j, k - 1) + mesh.cellVol(i, j, k)*gradPField_(i, j, k))/aP_(i, j, k);
             }
         }
     }
@@ -259,22 +259,19 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
                 if(i < uCellI_)
                 {
                     getFaceStencil(i, j, k, EAST, sf, ds);
-                    uField.faceE(i, j, k) = (hField_.faceE(i, j, k) - dField_.faceE(i, j, k)*(pField(i + 1, j, k) - pField(i, j, k))*sf/dot(sf, ds)
-                            + (1. - relaxationFactorMomentum_)/relaxationFactorMomentum_*uStar_.faceE(i, j, k))*relaxationFactorMomentum_;
+                    uField.faceE(i, j, k) = hField_.faceE(i, j, k) - dField_.faceE(i, j, k)*(pField(i + 1, j, k) - pField(i, j, k))*sf/dot(sf, ds);
                 }
 
                 if(j < uCellJ_)
                 {
                     getFaceStencil(i, j, k, NORTH, sf, ds);
-                    uField.faceN(i, j, k) = (hField_.faceN(i, j, k) - dField_.faceN(i, j, k)*(pField(i, j + 1, k) - pField(i, j, k))*sf/dot(sf, ds)
-                            + (1. - relaxationFactorMomentum_)/relaxationFactorMomentum_*uStar_.faceN(i, j, k))*relaxationFactorMomentum_;
+                    uField.faceN(i, j, k) = hField_.faceN(i, j, k) - dField_.faceN(i, j, k)*(pField(i, j + 1, k) - pField(i, j, k))*sf/dot(sf, ds);
                 }
 
                 if(k < uCellK_)
                 {
                     getFaceStencil(i, j, k, TOP, sf, ds);
-                    uField.faceT(i, j, k) = (hField_.faceT(i, j, k) - dField_.faceT(i, j, k)*(pField(i, j, k + 1) - pField(i, j, k))*sf/dot(sf, ds)
-                            + (1. - relaxationFactorMomentum_)/relaxationFactorMomentum_*uStar_.faceT(i, j, k))*relaxationFactorMomentum_;
+                    uField.faceT(i, j, k) = hField_.faceT(i, j, k) - dField_.faceT(i, j, k)*(pField(i, j, k + 1) - pField(i, j, k))*sf/dot(sf, ds);
                 }
             }
         }
