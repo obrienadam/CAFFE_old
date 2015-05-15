@@ -56,8 +56,6 @@ private:
 
     bool timeAccurate_;
 
-    FlowBoundary eastFlowBoundary_, westFlowBoundary_, northFlowBoundary_, southFlowBoundary_, topFlowBoundary_, bottomFlowBoundary_;
-
     double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_, nu_;
     int gradReconstructionMethod_;
 
@@ -102,6 +100,7 @@ public:
     Simple();
 
     void initialize(Input &input, HexaFvmMesh &mesh);
+    void setBoundaryConditions(Input& input);
 
     int nConservedVariables();
 

@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "Simple.h"
+#include "InputStringProcessing.h"
 
 // ************* Constructors and Destructors *************
 
@@ -517,12 +518,95 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     gradVecField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     gradScalarField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    pCorr_.setAllBoundaries(pFieldPtr_->getEastBoundaryPatch(), 0.,
-                            pFieldPtr_->getWestBoundaryPatch(), 0.,
-                            pFieldPtr_->getNorthBoundaryPatch(), 0.,
-                            pFieldPtr_->getSouthBoundaryPatch(), 0.,
-                            pFieldPtr_->getTopBoundaryPatch(), 0.,
-                            pFieldPtr_->getBottomBoundaryPatch(), 0.);
+    setBoundaryConditions(input);
+}
+
+void Simple::setBoundaryConditions(Input &input)
+{
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+    BoundaryPatch uBoundaryTypes[6], pBoundaryTypes[6];
+    Vector3D uBoundaryRefValues[6];
+    std::string key1, key2, flowBoundaryType, buffer;
+
+    for(int i = 0; i < 6; ++i)
+    {
+        switch(i)
+        {
+        case 0:
+            key1 = "boundaryTypeEast";
+            key2 = "boundaryRefValueEast";
+            break;
+        case 1:
+            key1 = "boundaryTypeWest";
+            key2 = "boundaryRefValueWest";
+            break;
+        case 2:
+            key1 = "boundaryTypeNorth";
+            key2 = "boundaryRefValueNorth";
+            break;
+        case 3:
+            key1 = "boundaryTypeSouth";
+            key2 = "boundaryRefValueSouth";
+            break;
+        case 4:
+            key1 = "boundaryTypeTop";
+            key2 = "boundaryRefValueTop";
+            break;
+        case 5:
+            key1 = "boundaryTypeBottom";
+            key2 = "boundaryRefValueBottom";
+            break;
+        };
+
+        flowBoundaryType = input.inputStrings[key1];
+
+        buffer = input.inputStrings[key2];
+        InputStringProcessing::processBuffer(buffer, true);
+
+        uBoundaryRefValues[i] = Vector3D(buffer);
+
+        if(flowBoundaryType == "inlet")
+        {
+            uBoundaryTypes[i] = FIXED;
+            pBoundaryTypes[i] = ZERO_GRADIENT;
+        }
+        else if(flowBoundaryType == "outlet")
+        {
+            uBoundaryTypes[i] = ZERO_GRADIENT;
+            pBoundaryTypes[i] = FIXED;
+        }
+        else if (flowBoundaryType == "wall")
+        {
+            uBoundaryTypes[i] = FIXED;
+            pBoundaryTypes[i] = ZERO_GRADIENT;
+        }
+        else
+        {
+            Output::raiseException("Simple", "setBoundaryConditions", "boundary type \"" + flowBoundaryType + "\" is not a valid flow boundary.");
+        }
+    }
+
+    uField.setAllBoundaries(uBoundaryTypes[0], uBoundaryRefValues[0],
+            uBoundaryTypes[1], uBoundaryRefValues[1],
+            uBoundaryTypes[2], uBoundaryRefValues[2],
+            uBoundaryTypes[3], uBoundaryRefValues[3],
+            uBoundaryTypes[4], uBoundaryRefValues[4],
+            uBoundaryTypes[5], uBoundaryRefValues[5]);
+
+    pField.setAllBoundaries(pBoundaryTypes[0], 0.,
+            pBoundaryTypes[1], 0.,
+            pBoundaryTypes[2], 0.,
+            pBoundaryTypes[3], 0.,
+            pBoundaryTypes[4], 0.,
+            pBoundaryTypes[5], 0.);
+
+    pCorr_.setAllBoundaries(pBoundaryTypes[0], 0.,
+            pBoundaryTypes[1], 0.,
+            pBoundaryTypes[2], 0.,
+            pBoundaryTypes[3], 0.,
+            pBoundaryTypes[4], 0.,
+            pBoundaryTypes[5], 0.);
 
     dField_.setAllBoundaries(ZERO_GRADIENT, 0.,
                              ZERO_GRADIENT, 0.,

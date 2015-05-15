@@ -59,6 +59,11 @@ void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conserved
     conservedFieldName_ = conservedFieldName;
 }
 
+void FvScheme::setBoundaryConditions(Input &input)
+{
+
+}
+
 void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vector3D> &gradPhiField, int method)
 {
     int i, j, k;

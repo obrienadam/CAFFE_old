@@ -55,12 +55,12 @@ Input::Input()
     inputStrings["boundaryTypeTop"] = "fixed";
     inputStrings["boundaryTypeBottom"] = "fixed";
 
-    inputDoubles["boundaryRefValueEast"] = 0.;
-    inputDoubles["boundaryRefValueWest"] = 0.;
-    inputDoubles["boundaryRefValueNorth"] = 0.;
-    inputDoubles["boundaryRefValueSouth"] = 0.;
-    inputDoubles["boundaryRefValueTop"] = 0.;
-    inputDoubles["boundaryRefValueBottom"] = 0.;
+    inputStrings["boundaryRefValueEast"] = "(0., 0., 0.)";
+    inputStrings["boundaryRefValueWest"] = "(0., 0., 0.)";
+    inputStrings["boundaryRefValueNorth"] = "(0., 0., 0.)";
+    inputStrings["boundaryRefValueSouth"] = "(0., 0., 0.)";
+    inputStrings["boundaryRefValueTop"] = "(0., 0., 0.)";
+    inputStrings["boundaryRefValueBottom"] = "(0., 0., 0.)";
 
     //- Linear solver parameters
 

@@ -38,22 +38,6 @@ int main(int argc, const char* argv[])
 
         mesh.writeDebug();
 
-        // Set the boundary conditions
-
-        mesh.findVectorField("u").setAllBoundaries(FIXED, Vector3D(-1., 0., 0.),
-                                                   ZERO_GRADIENT, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(0., 0., 0.),
-                                                   FIXED, Vector3D(0., 0., 0.));
-
-        mesh.findScalarField("p").setAllBoundaries(ZERO_GRADIENT, 0.,
-                                                   FIXED, 0.,
-                                                   ZERO_GRADIENT, 0.,
-                                                   ZERO_GRADIENT, 0.,
-                                                   ZERO_GRADIENT, 0.,
-                                                   ZERO_GRADIENT, 0.);
-
         runControl.displayStartMessage();
 
         while(runControl.continueRun())

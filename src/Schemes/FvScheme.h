@@ -53,6 +53,8 @@ public:
     FvScheme();
 
     virtual void initialize(Input& input, HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
+    virtual void setBoundaryConditions(Input& input);
+
     virtual int nConservedVariables() = 0;
 
     virtual void discretize(std::vector<double>& timeDerivatives_) = 0;
