@@ -25,3 +25,6 @@ lib
 # Doxygen directories
 html
 latex
+
+# Case output
+*.dat

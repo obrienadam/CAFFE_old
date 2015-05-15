@@ -163,6 +163,16 @@ Vector3D min(Vector3D u, const Vector3D &v)
     return u;
 }
 
+Vector3D sqr(const Vector3D &u)
+{
+    return Vector3D(u.x*u.x, u.y*u.y, u.z*u.z);
+}
+
+Vector3D sqrt(const Vector3D& u)
+{
+    return Vector3D(sqrt(u.x), sqrt(u.y), sqrt(u.z));
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector3D& vec)
 {
     os << vec.x << "," << vec.y << "," << vec.z;

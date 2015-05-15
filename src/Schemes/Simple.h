@@ -61,6 +61,7 @@ private:
 
     int momentumSorItrs_, pCorrSorItrs_, maxMomentumSorIters_, maxPCorrSorIters_;
     double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
+    Vector3D momentumResidual_;
 
     void storeUStar(Field<Vector3D>& uField);
 
@@ -94,6 +95,8 @@ private:
      * @param pField A reference to the pressure field.
      */
     void correctContinuity(Field<Vector3D>& uField, Field<double>& pField);
+
+    Vector3D computeResidual(Field<Vector3D>& uField);
 
 public:
 

@@ -241,6 +241,8 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
     }
 
     hField_.setBoundaryFields();
+
+    momentumResidual_ = computeResidual(uStar_);
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -451,8 +453,9 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
     }
 
     pField.setBoundaryFields();
-/*
+
     // Correct the velocity field
+/*
     interpolateInteriorFaces(pCorr_, VOLUME_WEIGHTED);
     computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 
@@ -462,12 +465,42 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                uField(i, j, k) += -dField_(i, j, k)*gradPCorr_(i, j, k);
+                uField(i, j, k) += -relaxationFactorPCorr_*dField_(i, j, k)*gradPCorr_(i, j, k);
             }
         }
     }
 
-    uField.setBoundaryFields();*/
+    uField.setBoundaryFields();
+*/
+}
+
+Vector3D Simple::computeResidual(Field<Vector3D> &uField)
+{
+    HexaFvmMesh& mesh = *meshPtr_;
+    int i, j, k;
+    Vector3D sumMomentumResidualSqr = Vector3D(0., 0., 0.);
+    double sumVol = 0.;
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                sumVol += mesh.cellVol(i, j, k);
+                sumMomentumResidualSqr += mesh.cellVol(i, j, k)*sqr(aP_(i, j, k)/relaxationFactorMomentum_*uField(i, j, k)
+                                                                    + aE_(i, j, k)*uField(i + 1, j, k)
+                                                                    + aW_(i, j, k)*uField(i - 1, j, k)
+                                                                    + aN_(i, j, k)*uField(i, j + 1, k)
+                                                                    + aS_(i, j, k)*uField(i, j - 1, k)
+                                                                    + aT_(i, j, k)*uField(i, j, k + 1)
+                                                                    + aB_(i, j, k)*uField(i, j, k - 1)
+                                                                    - bP_(i, j, k));
+            }
+        }
+    }
+
+    return sqrt(sumMomentumResidualSqr/sumVol);
 }
 
 // ************* Public Methods *************
@@ -664,9 +697,12 @@ void Simple::displayUpdateMessage()
         }
     }
 
-    Output::print("Simple", "Momentum Prediction SOR Iterations  : " + std::to_string(momentumSorItrs_));
-    Output::print("Simple", "Momentum Prediction SOR Convergence : " + std::to_string(momentumSorConvergence_));
-    Output::print("Simple", "Pressure Correction SOR Iterations  : " + std::to_string(pCorrSorItrs_));
-    Output::print("Simple", "Pressure Correction SOR Convergence : " + std::to_string(pCorrSorConvergence_));
+    Output::print("Simple", "Momentum prediction SOR iterations  : " + std::to_string(momentumSorItrs_));
+    Output::print("Simple", "Momentum prediction SOR convergence : " + std::to_string(momentumSorConvergence_));
+    Output::print("Simple", "Pressure correction SOR iterations  : " + std::to_string(pCorrSorItrs_));
+    Output::print("Simple", "Pressure correction SOR convergence : " + std::to_string(pCorrSorConvergence_) + "\n");
+    Output::print("Simple", "U-Momentum residual                 : " + std::to_string(momentumResidual_.x));
+    Output::print("Simple", "V-Momentum residual                 : " + std::to_string(momentumResidual_.y));
+    Output::print("Simple", "W-Momentum residual                 : " + std::to_string(momentumResidual_.z));
     Output::print("Simple", "Maximum cell continuity error       : " + std::to_string(maxContinuityError) + "\n");
 }

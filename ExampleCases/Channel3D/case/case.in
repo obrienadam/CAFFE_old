@@ -46,7 +46,7 @@ pCorrSorToler
 maxMomentumSorIters
 200
 maxPCorrSorIters
-200
+2000
 sorOmega
 1.8
 
