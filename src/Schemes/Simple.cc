@@ -32,6 +32,7 @@
 Simple::Simple()
     :
       uStar_("uStar", PRIMITIVE),
+      a0P_("a0P", AUXILLARY),
       aP_("aP", AUXILLARY),
       aE_("aE", AUXILLARY),
       aW_("aW", AUXILLARY),
@@ -143,12 +144,12 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
                 aB_(i, j, k) =  -max(massFlow_.faceB(i, j, k), 0.) - dB;
 
                 // Central coefficient
-                aP_(i, j, k) = max(massFlow_.faceE(i, j, k), 0.) + dE
-                        - min(massFlow_.faceW(i, j, k), 0.) + dW
-                        + max(massFlow_.faceN(i, j, k), 0.) + dN
-                        - min(massFlow_.faceS(i, j, k), 0.) + dS
-                        + max(massFlow_.faceT(i, j, k), 0.) + dT
-                        - min(massFlow_.faceB(i, j, k), 0.) + dB;
+                aP_(i, j, k) = (max(massFlow_.faceE(i, j, k), 0.) + dE
+                                - min(massFlow_.faceW(i, j, k), 0.) + dW
+                                + max(massFlow_.faceN(i, j, k), 0.) + dN
+                                - min(massFlow_.faceS(i, j, k), 0.) + dS
+                                + max(massFlow_.faceT(i, j, k), 0.) + dT
+                                - min(massFlow_.faceB(i, j, k), 0.) + dB)/relaxationFactorMomentum_;
 
                 bP_(i, j, k) = Vector3D(0., 0., 0.);
 
@@ -178,7 +179,7 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
 
                 // Relaxation source term
 
-                bP_(i, j, k) += (1. - relaxationFactorMomentum_)/relaxationFactorMomentum_*aP_(i, j, k)*uField(i, j, k);
+                bP_(i, j, k) += (1. - relaxationFactorMomentum_)*aP_(i, j, k)*uStar_(i, j, k);
 
                 // Update D-field
 
@@ -205,13 +206,13 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
 
                     for(l = 0; l < 3; ++l)
                     {
-                        uField(i, j, k)(l) = (1. - sorOmega_)*uField(i, j, k)(l) + relaxationFactorMomentum_*sorOmega_/aP_(i, j, k)*(bP_(i, j, k)(l)
-                                                                                                                                     - aE_(i, j, k)*uField(i + 1, j, k)(l)
-                                                                                                                                     - aW_(i, j, k)*uField(i - 1, j, k)(l)
-                                                                                                                                     - aN_(i, j, k)*uField(i, j + 1, k)(l)
-                                                                                                                                     - aS_(i, j, k)*uField(i, j - 1, k)(l)
-                                                                                                                                     - aT_(i, j, k)*uField(i, j, k + 1)(l)
-                                                                                                                                     - aB_(i, j, k)*uField(i, j, k - 1)(l));
+                        uField(i, j, k)(l) = (1. - sorOmega_)*uField(i, j, k)(l) + sorOmega_*(- aE_(i, j, k)*uField(i + 1, j, k)(l)
+                                                                                              - aW_(i, j, k)*uField(i - 1, j, k)(l)
+                                                                                              - aN_(i, j, k)*uField(i, j + 1, k)(l)
+                                                                                              - aS_(i, j, k)*uField(i, j - 1, k)(l)
+                                                                                              - aT_(i, j, k)*uField(i, j, k + 1)(l)
+                                                                                              - aB_(i, j, k)*uField(i, j, k - 1)(l)
+                                                                                              + bP_(i, j, k)(l))/aP_(i, j, k);
                     }
 
                     momentumSorConvergence_ = max((uField(i, j, k) - old).mag(), momentumSorConvergence_);
@@ -233,9 +234,14 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                hField_(i, j, k) = -(aE_(i, j, k)*uField(i + 1, j, k) + aW_(i, j, k)*uField(i - 1, j, k)
-                                     + aN_(i, j, k)*uField(i, j + 1, k) + aS_(i, j, k)*uField(i, j - 1, k)
-                                     + aT_(i, j, k)*uField(i, j, k + 1) + aB_(i, j, k)*uField(i, j, k - 1) + mesh.cellVol(i, j, k)*gradPField_(i, j, k))/aP_(i, j, k);
+                hField_(i, j, k) = (- aE_(i, j, k)*uField(i + 1, j, k)
+                                    - aW_(i, j, k)*uField(i - 1, j, k)
+                                    - aN_(i, j, k)*uField(i, j + 1, k)
+                                    - aS_(i, j, k)*uField(i, j - 1, k)
+                                    - aT_(i, j, k)*uField(i, j, k + 1)
+                                    - aB_(i, j, k)*uField(i, j, k - 1)
+                                    + bP_(i, j, k)
+                                    + mesh.cellVol(i, j, k)*gradPField_(i, j, k))/aP_(i, j, k);
             }
         }
     }
@@ -250,8 +256,8 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
     int i, j, k;
     Vector3D sf, ds;
 
-    interpolateInteriorFaces(hField_, VOLUME_WEIGHTED);
-    interpolateInteriorFaces(dField_, VOLUME_WEIGHTED);
+    interpolateInteriorFaces(hField_, NON_WEIGHTED);
+    interpolateInteriorFaces(dField_, NON_WEIGHTED);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -455,7 +461,7 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
     pField.setBoundaryFields();
 
     // Correct the velocity field
-/*
+
     interpolateInteriorFaces(pCorr_, VOLUME_WEIGHTED);
     computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 
@@ -465,13 +471,12 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                uField(i, j, k) += -relaxationFactorPCorr_*dField_(i, j, k)*gradPCorr_(i, j, k);
+                uField(i, j, k) += -dField_(i, j, k)*gradPCorr_(i, j, k);
             }
         }
     }
 
     uField.setBoundaryFields();
-*/
 }
 
 Vector3D Simple::computeResidual(Field<Vector3D> &uField)
@@ -488,7 +493,7 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
             for(i = 0; i < nCellsI_; ++i)
             {
                 sumVol += mesh.cellVol(i, j, k);
-                sumMomentumResidualSqr += mesh.cellVol(i, j, k)*sqr(aP_(i, j, k)/relaxationFactorMomentum_*uField(i, j, k)
+                sumMomentumResidualSqr += mesh.cellVol(i, j, k)*sqr(aP_(i, j, k)*uField(i, j, k)
                                                                     + aE_(i, j, k)*uField(i + 1, j, k)
                                                                     + aW_(i, j, k)*uField(i - 1, j, k)
                                                                     + aN_(i, j, k)*uField(i, j + 1, k)
@@ -529,6 +534,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 
     uStar_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
+    a0P_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     aP_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     aE_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     aW_.allocate(nCellsI_, nCellsJ_, nCellsK_);

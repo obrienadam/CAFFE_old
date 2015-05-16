@@ -32,9 +32,9 @@ maxRealTimeHours
 timeAccurate
 OFF
 relaxationFactorMomentum
-0.2
+0.9
 relaxationFactorPCorr
-0.8
+0.1
 rho
 1
 mu
@@ -48,7 +48,7 @@ maxMomentumSorIters
 maxPCorrSorIters
 20000
 sorOmega
-1.8
+1.92
 
 ### Boundaries ##############################################
 

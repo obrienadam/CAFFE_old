@@ -39,7 +39,7 @@ private:
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
     Field<Vector3D> uStar_;
-    Field<double> aP_, aE_, aW_, aN_, aS_, aT_, aB_;
+    Field<double> a0P_, aP_, aE_, aW_, aN_, aS_, aT_, aB_;
     Field<Vector3D> bP_;
     Field<Vector3D> hField_;
     Field<double> dField_;

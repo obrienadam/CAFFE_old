@@ -34,7 +34,7 @@ OFF
 relaxationFactorMomentum
 0.1
 relaxationFactorPCorr
-0.1
+0.3
 rho
 1
 mu
@@ -42,13 +42,13 @@ mu
 momentumSorToler
 1e-8
 pCorrSorToler
-1e-8
+1e-12
 maxMomentumSorIters
-400
+500
 maxPCorrSorIters
-800
+500
 sorOmega
-1.85
+1.8
 
 ### Boundaries #############################################
 
