@@ -34,7 +34,7 @@ OFF
 relaxationFactorMomentum
 0.9
 relaxationFactorPCorr
-0.1
+0.8
 rho
 1
 mu

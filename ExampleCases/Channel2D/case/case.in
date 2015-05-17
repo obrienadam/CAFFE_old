@@ -17,7 +17,6 @@ screenWriteInterval
 1
 fileWriteInterval
 15
-
 ### Time ###################################################
 
 timeStep
@@ -32,9 +31,9 @@ maxRealTimeHours
 timeAccurate
 OFF
 relaxationFactorMomentum
-0.1
+1.
 relaxationFactorPCorr
-0.3
+0.5
 rho
 1
 mu
@@ -46,9 +45,9 @@ pCorrSorToler
 maxMomentumSorIters
 500
 maxPCorrSorIters
-500
+1000
 sorOmega
-1.8
+1.9
 
 ### Boundaries #############################################
 

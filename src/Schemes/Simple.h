@@ -68,7 +68,7 @@ private:
     /**
      * @brief Compute a predicted momentum using the latest available pressure field.
      */
-    void computeMomentum(Field<Vector3D>& uField, Field<double>& pField);
+    void computeMomentum(double timeStep, Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Interpolate the face centered velocities using the Rhie-Chow interpolation method

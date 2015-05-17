@@ -101,7 +101,7 @@ void Simple::storeUField(Field<Vector3D> &uField)
     }
 }
 
-void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
+void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<double>& pField)
 {
     using namespace std;
 
@@ -127,6 +127,11 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                // Time term
+
+                if(true)
+                    a0P_(i, j, k) = rho_*mesh.cellVol(i, j, k)/timeStep;
+
                 // Diffusion terms (these are technically constants and could be stored)
                 dE = mu_*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
                 dW = mu_*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
@@ -149,9 +154,10 @@ void Simple::computeMomentum(Field<Vector3D>& uField, Field<double>& pField)
                                 + max(massFlow_.faceN(i, j, k), 0.) + dN
                                 - min(massFlow_.faceS(i, j, k), 0.) + dS
                                 + max(massFlow_.faceT(i, j, k), 0.) + dT
-                                - min(massFlow_.faceB(i, j, k), 0.) + dB)/relaxationFactorMomentum_;
+                                - min(massFlow_.faceB(i, j, k), 0.) + dB
+                                + a0P_(i, j, k))/relaxationFactorMomentum_;
 
-                bP_(i, j, k) = Vector3D(0., 0., 0.);
+                bP_(i, j, k) = a0P_(i, j, k)*uStar_(i, j, k);
 
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
 /*
@@ -256,8 +262,8 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
     int i, j, k;
     Vector3D sf, ds;
 
-    interpolateInteriorFaces(hField_, NON_WEIGHTED);
-    interpolateInteriorFaces(dField_, NON_WEIGHTED);
+    extrapolateInteriorFaces(hField_, gradVecField_);
+    extrapolateInteriorFaces(dField_, gradScalarField_);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -672,7 +678,7 @@ void Simple::discretize(std::vector<double> &timeDerivatives_)
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
 
-    computeMomentum(uField, pField);
+    computeMomentum(2e-5, uField, pField);
     computePCorr(uField, pField);
     correctContinuity(uField, pField);
 }
