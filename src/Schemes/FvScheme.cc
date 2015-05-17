@@ -43,6 +43,7 @@ void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conserved
     nCellsI_ = mesh.nCellsI();
     nCellsJ_ = mesh.nCellsJ();
     nCellsK_ = mesh.nCellsK();
+    nCells_ = nCellsI_*nCellsJ_*nCellsK_;
 
     nFacesI_ = mesh.nFacesI();
     nFacesJ_ = mesh.nFacesJ();

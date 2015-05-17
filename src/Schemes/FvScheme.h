@@ -45,7 +45,7 @@ protected:
 
     std::string conservedFieldName_;
     HexaFvmMesh* meshPtr_;
-    int nCellsI_, nCellsJ_, nCellsK_, nFacesI_, nFacesJ_, nFacesK_;
+    int nCellsI_, nCellsJ_, nCellsK_, nCells_, nFacesI_, nFacesJ_, nFacesK_;
     int uCellI_, uCellJ_, uCellK_, uFaceI_, uFaceJ_, uFaceK_;
 
 public:
@@ -57,7 +57,7 @@ public:
 
     virtual int nConservedVariables() = 0;
 
-    virtual void discretize(std::vector<double>& timeDerivatives_) = 0;
+    virtual void discretize(double timeStep, std::vector<double>& timeDerivatives) = 0;
     virtual void copySolution(std::vector<double>& original) = 0;
     virtual void updateSolution(std::vector<double>& timeDerivatives_, int method) = 0;
 

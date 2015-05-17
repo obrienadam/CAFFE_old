@@ -13,7 +13,7 @@ double Euler::solve(double timeStep, FvScheme &scheme)
         timeDerivatives_.resize(scheme.nConservedVariables());
 
     end = timeDerivatives_.size();
-    scheme.discretize(timeDerivatives_);
+    scheme.discretize(timeStep, timeDerivatives_);
 
     for(i = 0; i < end; ++i)
     {

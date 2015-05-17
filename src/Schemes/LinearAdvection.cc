@@ -16,7 +16,7 @@ int LinearAdvection::nConservedVariables()
     return phiFieldPtr_->size();
 }
 
-void LinearAdvection::discretize(std::vector<double> &timeDerivatives)
+void LinearAdvection::discretize(double timeStep, std::vector<double> &timeDerivatives)
 {
 
 }

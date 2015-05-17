@@ -519,9 +519,25 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
 void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     FvScheme::initialize(input, mesh, "NA");
+
+    //- Set respective index parameters
+    uxStartI_ = 0;
+    uxEndI_ = nCells_ - 1;
+
+    uyStartI_ = uxEndI_ + 1;
+    uyEndI_ = uyStartI_ + nCells_ - 1;
+
+    uzStartI_ = uyEndI_ + 1;
+    uzEndI_ = uzStartI_ + nCells_ - 1;
+
+    pStartI_ = uzEndI_ + 1;
+    pEndI_ = pStartI_ + nCells_ - 1;
+
+    //- Find the relevant fields
     uFieldPtr_ = &mesh.findVectorField("u");
     pFieldPtr_ = &mesh.findScalarField("p");
 
+    //- Read all relevant input parameters
     if(input.inputStrings["timeAccurate"] == "ON")
         timeAccurate_ = true;
     else if (input.inputStrings["timeAccurate"] == "OFF")
@@ -538,6 +554,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     sorOmega_ = input.inputDoubles["sorOmega"];
     nu_ = mu_/rho_;
 
+    //- Allocate memory
     uStar_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
     a0P_.allocate(nCellsI_, nCellsJ_, nCellsK_);
@@ -563,6 +580,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     gradVecField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     gradScalarField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
+    //- Set the boundary conditions
     setBoundaryConditions(input);
 }
 
@@ -673,24 +691,81 @@ int Simple::nConservedVariables()
     return 4*meshPtr_->size();
 }
 
-void Simple::discretize(std::vector<double> &timeDerivatives_)
+void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 {
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
 
-    computeMomentum(2e-5, uField, pField);
+    computeMomentum(timeStep, uField, pField);
     computePCorr(uField, pField);
     correctContinuity(uField, pField);
 }
 
 void Simple::copySolution(std::vector<double> &original)
 {
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+    int uxNo, uyNo, uzNo, pNo, i;
 
+    for(i = 0,
+        uxNo = uxStartI_,
+        uyNo = uyStartI_,
+        uzNo = uzStartI_,
+        pNo = pStartI_;
+        i < nCells_;
+        ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
+    {
+        original[uxNo] = uField(i).x;
+        original[uyNo] = uField(i).y;
+        original[uzNo] = uField(i).z;
+        original[pNo] = pField(i);
+    }
 }
 
 void Simple::updateSolution(std::vector<double> &update, int method)
 {
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+    int uxNo, uyNo, uzNo, pNo, i;
 
+    switch(method)
+    {
+
+    case ADD:
+
+        for(i = 0,
+            uxNo = uxStartI_,
+            uyNo = uyStartI_,
+            uzNo = uzStartI_,
+            pNo = pStartI_;
+            i < nCells_;
+            ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
+        {
+            uField(i).x += update[uxNo];
+            uField(i).y += update[uyNo];
+            uField(i).z += update[uzNo];
+            pField(i) += update[pNo];
+        }
+
+        break;
+    case REPLACE:
+
+        for(i = 0,
+            uxNo = uxStartI_,
+            uyNo = uyStartI_,
+            uzNo = uzStartI_,
+            pNo = pStartI_;
+            i < nCells_;
+            ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
+        {
+            uField(i).x = update[uxNo];
+            uField(i).y = update[uyNo];
+            uField(i).z = update[uzNo];
+            pField(i) = update[pNo];
+        }
+
+        break;
+    };
 }
 
 void Simple::displayUpdateMessage()

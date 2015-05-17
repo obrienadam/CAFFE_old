@@ -87,7 +87,7 @@ int Diffusion::nConservedVariables()
     return phiFieldPtr_->size();
 }
 
-void Diffusion::discretize(std::vector<double>& timeDerivatives)
+void Diffusion::discretize(double timeStep, std::vector<double>& timeDerivatives)
 {
     int i, j, k, l;
     Field<double>& phiField = *phiFieldPtr_;

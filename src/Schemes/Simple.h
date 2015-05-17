@@ -63,6 +63,13 @@ private:
     double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
     Vector3D momentumResidual_;
 
+    int uxStartI_, uyStartI_, uzStartI_, pStartI_;
+    int uxEndI_, uyEndI_, uzEndI_, pEndI_;
+
+    /**
+     * @brief Store the solution from the previous time-step/iteration.
+     * @param uField A reference to the velocity field.
+     */
     void storeUStar(Field<Vector3D>& uField);
 
     /**
@@ -109,7 +116,7 @@ public:
 
     void storeUField(Field<Vector3D>& uField);
 
-    void discretize(std::vector<double>& timeDerivatives_);
+    void discretize(double timeStep, std::vector<double>& timeDerivatives);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
 

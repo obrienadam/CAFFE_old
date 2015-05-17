@@ -21,7 +21,7 @@ double PredictorCorrector::solve(double timeStep, FvScheme &scheme)
     scheme.copySolution(original_);
 
     end = pTimeDerivatives_.size();
-    scheme.discretize(pTimeDerivatives_);
+    scheme.discretize(timeStep, pTimeDerivatives_);
 
     for(i = 0; i < end; ++i)
     {
@@ -29,7 +29,7 @@ double PredictorCorrector::solve(double timeStep, FvScheme &scheme)
     }
 
     scheme.updateSolution(update_, ADD);
-    scheme.discretize(cTimeDerivatives_);
+    scheme.discretize(timeStep, cTimeDerivatives_);
 
     for(i = 0; i < end; ++i)
     {

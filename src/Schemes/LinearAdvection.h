@@ -19,7 +19,7 @@ public:
     void initialize(Input& input, HexaFvmMesh &mesh, std::string conservedFieldName = "phi", std::string velocityFieldName = "a");
     int nConservedVariables();
 
-    void discretize(std::vector<double>& timeDerivatives);
+    void discretize(double timeStep, std::vector<double>& timeDerivatives);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& timeDerivatives, int method);
 };

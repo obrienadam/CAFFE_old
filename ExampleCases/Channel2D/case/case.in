@@ -12,15 +12,15 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-5000
+10000
 screenWriteInterval
 1
 fileWriteInterval
-15
+30
 ### Time ###################################################
 
 timeStep
-2e-5
+5e-5
 maxSimTime
 48
 maxRealTimeHours
