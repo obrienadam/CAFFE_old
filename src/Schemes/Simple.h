@@ -38,7 +38,8 @@ private:
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
-    Field<Vector3D> uStar_;
+    Field<Vector3D> uField0_;
+    Field<Vector3D> uFieldStar_;
     Field<double> a0P_, aP_, aE_, aW_, aN_, aS_, aT_, aB_;
     Field<Vector3D> bP_;
     Field<Vector3D> hField_;
@@ -56,10 +57,10 @@ private:
 
     bool timeAccurate_;
 
-    double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_, nu_;
+    double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_;
     int gradReconstructionMethod_;
 
-    int momentumSorItrs_, pCorrSorItrs_, maxMomentumSorIters_, maxPCorrSorIters_;
+    int maxInnerItrs_, momentumSorItrs_, pCorrSorItrs_, maxMomentumSorIters_, maxPCorrSorIters_;
     double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
     Vector3D momentumResidual_;
 
@@ -114,7 +115,7 @@ public:
 
     int nConservedVariables();
 
-    void storeUField(Field<Vector3D>& uField);
+    void storeUField(Field<Vector3D>& uField, Field<Vector3D>& uFieldOld);
 
     void discretize(double timeStep, std::vector<double>& timeDerivatives);
     void copySolution(std::vector<double>& original);

@@ -77,6 +77,7 @@ Input::Input()
     inputDoubles["mu"] = 0.1;
     inputDoubles["momentumSorToler"] = 0.01;
     inputDoubles["pCorrSorToler"] = 0.01;
+    inputInts["maxInnerIters"] = 10;
     inputInts["maxMomentumSorIters"] = 50;
     inputInts["maxPCorrSorIters"] = 200;
     inputDoubles["sorOmega"] = 1.91;

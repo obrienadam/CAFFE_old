@@ -31,7 +31,8 @@
 
 Simple::Simple()
     :
-      uStar_("uStar", PRIMITIVE),
+      uField0_("u0", PRIMITIVE),
+      uFieldStar_("uStar", PRIMITIVE),
       a0P_("a0P", AUXILLARY),
       aP_("aP", AUXILLARY),
       aE_("aE", AUXILLARY),
@@ -58,16 +59,17 @@ Simple::Simple()
       mu_(0.1),
       momentumSorToler_(0.01),
       pCorrSorToler_(0.01),
+      maxInnerItrs_(20),
       maxPCorrSorIters_(200),
       maxMomentumSorIters_(50),
       sorOmega_(1.91)
 {
-    nu_ = mu_/rho_;
+
 }
 
 // ************* Private Methods *************
 
-void Simple::storeUField(Field<Vector3D> &uField)
+void Simple::storeUField(Field<Vector3D> &uField, Field<Vector3D> &uFieldOld)
 {
     int i, j, k;
 
@@ -78,13 +80,13 @@ void Simple::storeUField(Field<Vector3D> &uField)
             for(i = 0; i < nFacesI_; ++i)
             {
                 if(j < uFaceJ_ && k < uFaceK_)
-                    uStar_.faceI(i, j, k) = uField.faceI(i, j, k);
+                    uFieldOld.faceI(i, j, k) = uField.faceI(i, j, k);
 
                 if(i < uFaceI_ && k < uFaceK_)
-                    uStar_.faceJ(i, j, k) = uField.faceJ(i, j, k);
+                    uFieldOld.faceJ(i, j, k) = uField.faceJ(i, j, k);
 
                 if(i < uFaceI_ && j < uFaceJ_)
-                    uStar_.faceK(i, j, k) = uField.faceK(i, j, k);
+                    uFieldOld.faceK(i, j, k) = uField.faceK(i, j, k);
             }
         }
     }
@@ -95,7 +97,7 @@ void Simple::storeUField(Field<Vector3D> &uField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                uStar_(i, j, k) = uField(i, j, k);
+                uFieldOld(i, j, k) = uField(i, j, k);
             }
         }
     }
@@ -111,7 +113,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
     Vector3D sf, ds;
     Vector3D old;
 
-    storeUField(uField);
+    storeUField(uField, uFieldStar_);
 
     interpolateInteriorFaces(uField, VOLUME_WEIGHTED);
     interpolateInteriorFaces(pField, VOLUME_WEIGHTED);
@@ -129,8 +131,10 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
             {
                 // Time term
 
-                if(true)
+                if(timeAccurate_)
                     a0P_(i, j, k) = rho_*mesh.cellVol(i, j, k)/timeStep;
+                else
+                    a0P_(i, j, k) = 0.;
 
                 // Diffusion terms (these are technically constants and could be stored)
                 dE = mu_*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
@@ -157,7 +161,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
                                 - min(massFlow_.faceB(i, j, k), 0.) + dB
                                 + a0P_(i, j, k))/relaxationFactorMomentum_;
 
-                bP_(i, j, k) = a0P_(i, j, k)*uStar_(i, j, k);
+                bP_(i, j, k) = a0P_(i, j, k)*uField0_(i, j, k);
 
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
 /*
@@ -185,7 +189,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
 
                 // Relaxation source term
 
-                bP_(i, j, k) += (1. - relaxationFactorMomentum_)*aP_(i, j, k)*uStar_(i, j, k);
+                bP_(i, j, k) += (1. - relaxationFactorMomentum_)*aP_(i, j, k)*uFieldStar_(i, j, k);
 
                 // Update D-field
 
@@ -195,6 +199,8 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
     }
 
     dField_.setBoundaryFields();
+
+    momentumResidual_ = computeResidual(uFieldStar_);
 
     momentumSorItrs_ = 0;
 
@@ -253,8 +259,6 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
     }
 
     hField_.setBoundaryFields();
-
-    momentumResidual_ = computeResidual(uStar_);
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -549,13 +553,14 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     mu_ = input.inputDoubles["mu"];
     momentumSorToler_ = input.inputDoubles["momentumSorToler"];
     pCorrSorToler_ = input.inputDoubles["pCorrSorToler"];
+    maxInnerItrs_ = input.inputInts["maxInnerIters"];
     maxMomentumSorIters_ = input.inputInts["maxMomentumSorIters"];
     maxPCorrSorIters_ = input.inputInts["maxPCorrSorIters"];
     sorOmega_ = input.inputDoubles["sorOmega"];
-    nu_ = mu_/rho_;
 
     //- Allocate memory
-    uStar_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    uField0_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    uFieldStar_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
     a0P_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     aP_.allocate(nCellsI_, nCellsJ_, nCellsK_);
@@ -695,14 +700,20 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 {
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
+    int i;
 
-    computeMomentum(timeStep, uField, pField);
-    computePCorr(uField, pField);
-    correctContinuity(uField, pField);
+    storeUField(uField, uField0_);
+
+    for(i = 0; i < maxInnerItrs_; ++i)
+    {
+        computeMomentum(timeStep, uField, pField);
+        computePCorr(uField, pField);
+        correctContinuity(uField, pField);
+    }
 }
 
 void Simple::copySolution(std::vector<double> &original)
-{
+{/*
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
     int uxNo, uyNo, uzNo, pNo, i;
@@ -719,11 +730,11 @@ void Simple::copySolution(std::vector<double> &original)
         original[uyNo] = uField(i).y;
         original[uzNo] = uField(i).z;
         original[pNo] = pField(i);
-    }
+    }*/
 }
 
 void Simple::updateSolution(std::vector<double> &update, int method)
-{
+{/*
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
     int uxNo, uyNo, uzNo, pNo, i;
@@ -765,7 +776,7 @@ void Simple::updateSolution(std::vector<double> &update, int method)
         }
 
         break;
-    };
+    };*/
 }
 
 void Simple::displayUpdateMessage()
