@@ -6,12 +6,14 @@ set(HEADERS DomainIncludes.h
             StructuredMesh.h
 	    HexaFvmMesh.h
             HexaMeshGen.h
-            Field.h)
+            Field.h
+            InitialConditions.h)
 
 set(SOURCE HexaMeshGen.cc
 	   StructuredMesh.cc
            HexaFvmMesh.cc
-           FieldI.h)
+           FieldI.h
+           InitialConditions.cc)
 
 add_library(HexaMesh ${HEADERS} ${SOURCE})
 

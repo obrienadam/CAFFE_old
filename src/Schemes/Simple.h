@@ -34,7 +34,7 @@ enum FlowBoundary{INLET, OUTLET, WALL};
 
 class Simple : public FvScheme
 {
-private:
+protected:
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
@@ -71,12 +71,6 @@ private:
     int uxEndI_, uyEndI_, uzEndI_, pEndI_;
 
     void setConstantFields(Input &input);
-
-    /**
-     * @brief Store the solution from the previous time-step/iteration.
-     * @param uField A reference to the velocity field.
-     */
-    void storeUStar(Field<Vector3D>& uField);
 
     /**
      * @brief Solve the momentum equation using the latest available velocity and pressure fields.
@@ -121,7 +115,7 @@ public:
 
     Simple();
 
-    void initialize(Input &input, HexaFvmMesh &mesh);
+    virtual void initialize(Input &input, HexaFvmMesh &mesh);
     void setBoundaryConditions(Input& input);
 
     int nConservedVariables();

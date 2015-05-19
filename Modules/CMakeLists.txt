@@ -15,9 +15,20 @@ target_link_libraries(caffeAdvectionDiffusion RunControl
                                               HexaMesh
                                               Schemes)
 
+# Build the basic simple solver
+
 add_executable(caffeSimple caffeSimple.cc)
 target_link_libraries(caffeSimple RunControl
                                   Math
                                   Solvers
                                   HexaMesh
                                   Schemes)
+
+# Build the multiphase simple solver
+
+add_executable(caffeMultiphaseSimple caffeMultiphaseSimple.cc)
+target_link_libraries(caffeMultiphaseSimple RunControl
+                                            Math
+                                            Solvers
+                                            HexaMesh
+                                            Schemes)

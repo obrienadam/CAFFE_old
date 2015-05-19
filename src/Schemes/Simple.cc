@@ -199,7 +199,6 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, do
                 bP_(i, j, k) = a0P_(i, j, k)*uField0_(i, j, k);
 
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
-/*
                 getFaceStencil(i, j, k, EAST, sf, ds);
                 bP_(i, j, k) += muField.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
@@ -217,7 +216,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, do
 
                 getFaceStencil(i, j, k, BOTTOM, sf, ds);
                 bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
-*/
+
                 // Higher order terms go here
 
                 bP_(i, j, k) += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
@@ -480,7 +479,6 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
     }
 
     // Correct the pressure field
-
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
@@ -495,7 +493,6 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
     extrapolateBoundaryFaces(pField, gradPField_);
 
     // Correct the velocity field
-
     extrapolateInteriorFaces(pCorr_, gradPCorr_);
     computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 
