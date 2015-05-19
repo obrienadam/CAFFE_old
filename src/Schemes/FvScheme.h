@@ -67,6 +67,12 @@ public:
     template <class T, class GRAD_T>
     void extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradField);
 
+    template <class T, class GRAD_T>
+    void extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradField);
+
+    template <class T, class GRAD_T>
+    void extrapolateAllFaces(Field<T>& field, Field<GRAD_T>& gradField);
+
     /**
      * @brief Compute the gradient of a scalar field at the cell center.
      * @param phiField A reference to the scalar field.

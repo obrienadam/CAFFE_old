@@ -151,3 +151,95 @@ void FvScheme::extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         }
     }
 }
+
+template <class T, class GRAD_T>
+void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradField)
+{
+    HexaFvmMesh& mesh = *meshPtr_;
+    int i, j, k;
+
+    if(field.getEastBoundaryPatch() == ZERO_GRADIENT)
+    {
+        i = nCellsI_ - 1;
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(j = 0; j < nCellsJ_; ++j)
+            {
+                field.faceE(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceE(i, j, k));
+            }
+        }
+    }
+
+    if(field.getWestBoundaryPatch() == ZERO_GRADIENT)
+    {
+        i = 0;
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(j = 0; j < nCellsJ_; ++j)
+            {
+                field.faceW(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceW(i, j, k));
+            }
+        }
+    }
+
+    if(field.getNorthBoundaryPatch() == ZERO_GRADIENT)
+    {
+        j = nCellsJ_ - 1;
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                field.faceN(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k));
+            }
+        }
+    }
+
+    if(field.getSouthBoundaryPatch() == ZERO_GRADIENT)
+    {
+        j = 0;
+
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                field.faceS(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k));
+            }
+        }
+    }
+
+    if(field.getTopBoundaryPatch() == ZERO_GRADIENT)
+    {
+        k = nCellsK_ - 1;
+
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                field.faceN(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k));
+            }
+        }
+    }
+
+    if(field.getBottomBoundaryPatch() == ZERO_GRADIENT)
+    {
+        k = 0;
+
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                field.faceS(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k));
+            }
+        }
+    }
+}
+
+template <class T, class GRAD_T>
+void FvScheme::extrapolateAllFaces(Field<T>& field, Field<GRAD_T>& gradField)
+{
+    extrapolateInteriorFaces(field, gradField);
+    extrapolateBoundaryFaces(field, gradField);
+}

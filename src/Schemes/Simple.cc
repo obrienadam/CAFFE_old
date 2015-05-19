@@ -55,8 +55,6 @@ Simple::Simple()
       relaxationFactorMomentum_(0.3),
       relaxationFactorPCorr_(0.1),
       gradReconstructionMethod_(DIVERGENCE_THEOREM),
-      rho_(998.),
-      mu_(0.1),
       momentumSorToler_(0.01),
       pCorrSorToler_(0.01),
       maxInnerItrs_(20),
@@ -68,6 +66,44 @@ Simple::Simple()
 }
 
 // ************* Private Methods *************
+
+void Simple::setConstantFields(Input& input)
+{
+    Field<double>& rhoField = *rhoFieldPtr_;
+    Field<double>& muField = *muFieldPtr_;
+    int i, j, k;
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                rhoField(i, j, k) = input.inputDoubles["rho"];
+                muField(i, j, k) = input.inputDoubles["mu"];
+            }
+        }
+    }
+
+    rhoField.setAllBoundaries(ZERO_GRADIENT, 0.,
+                              ZERO_GRADIENT, 0.,
+                              ZERO_GRADIENT, 0.,
+                              ZERO_GRADIENT, 0.,
+                              ZERO_GRADIENT, 0.,
+                              ZERO_GRADIENT, 0.);
+
+    muField.setAllBoundaries(ZERO_GRADIENT, 0.,
+                             ZERO_GRADIENT, 0.,
+                             ZERO_GRADIENT, 0.,
+                             ZERO_GRADIENT, 0.,
+                             ZERO_GRADIENT, 0.,
+                             ZERO_GRADIENT, 0.);
+
+    rhoField.setBoundaryFields();
+    muField.setBoundaryFields();
+    interpolateInteriorFaces(rhoField, NON_WEIGHTED);
+    interpolateInteriorFaces(muField, NON_WEIGHTED);
+}
 
 void Simple::storeUField(Field<Vector3D> &uField, Field<Vector3D> &uFieldOld)
 {
@@ -103,7 +139,7 @@ void Simple::storeUField(Field<Vector3D> &uField, Field<Vector3D> &uFieldOld)
     }
 }
 
-void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<double>& pField)
+void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, double timeStep, Field<Vector3D>& uField, Field<double>& pField)
 {
     using namespace std;
 
@@ -115,8 +151,8 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
 
     storeUField(uField, uFieldStar_);
 
-    interpolateInteriorFaces(uField, VOLUME_WEIGHTED);
-    interpolateInteriorFaces(pField, VOLUME_WEIGHTED);
+    extrapolateInteriorFaces(uField, gradUField_);
+    extrapolateInteriorFaces(pField, gradPField_);
 
     computeCellCenteredGradients(uField, gradUField_, DIVERGENCE_THEOREM);
     computeCellCenteredGradients(pField, gradPField_, DIVERGENCE_THEOREM);
@@ -129,20 +165,19 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                // Time term
-
+                // Time coefficient
                 if(timeAccurate_)
-                    a0P_(i, j, k) = rho_*mesh.cellVol(i, j, k)/timeStep;
+                    a0P_(i, j, k) = rhoField(i, j, k)*mesh.cellVol(i, j, k)/timeStep;
                 else
                     a0P_(i, j, k) = 0.;
 
                 // Diffusion terms (these are technically constants and could be stored)
-                dE = mu_*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
-                dW = mu_*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
-                dN = mu_*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
-                dS = mu_*dot(mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.fAreaNormS(i, j, k), mesh.rCellS(i, j, k));
-                dT = mu_*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
-                dB = mu_*dot(mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.fAreaNormB(i, j, k), mesh.rCellB(i, j, k));
+                dE = muField.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
+                dW = muField.faceW(i, j, k)*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
+                dN = muField.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
+                dS = muField.faceS(i, j, k)*dot(mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.fAreaNormS(i, j, k), mesh.rCellS(i, j, k));
+                dT = muField.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
+                dB = muField.faceB(i, j, k)*dot(mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.fAreaNormB(i, j, k), mesh.rCellB(i, j, k));
 
                 // Face coefficients
                 aE_(i, j, k) =  min(massFlow_.faceE(i, j, k), 0.) - dE;
@@ -166,22 +201,22 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
 /*
                 getFaceStencil(i, j, k, EAST, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceE(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
                 getFaceStencil(i, j, k, WEST, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceW(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceW(i, j, k)*dot(gradUField_.faceW(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
                 getFaceStencil(i, j, k, NORTH, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceN(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceN(i, j, k)*dot(gradUField_.faceN(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
                 getFaceStencil(i, j, k, SOUTH, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceS(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceS(i, j, k)*dot(gradUField_.faceS(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
                 getFaceStencil(i, j, k, TOP, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceT(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 
                 getFaceStencil(i, j, k, BOTTOM, sf, ds);
-                bP_(i, j, k) += mu_*dot(gradUField_.faceB(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
+                bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), sf - ds*dot(sf, sf)/dot(sf, ds));
 */
                 // Higher order terms go here
 
@@ -198,7 +233,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
         }
     }
 
-    dField_.setBoundaryFields();
+    extrapolateBoundaryFaces(dField_, gradScalarField_);
 
     momentumResidual_ = computeResidual(uFieldStar_);
 
@@ -232,7 +267,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
             }
         }
 
-        uField.setBoundaryFields();
+        extrapolateBoundaryFaces(uField, gradUField_);
 
         ++momentumSorItrs_;
 
@@ -258,7 +293,7 @@ void Simple::computeMomentum(double timeStep, Field<Vector3D>& uField, Field<dou
         }
     }
 
-    hField_.setBoundaryFields();
+    extrapolateBoundaryFaces(hField_, gradVecField_);
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -297,7 +332,7 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
     }
 }
 
-void Simple::computeMassFlowFaces(Field<Vector3D> &uField)
+void Simple::computeMassFlowFaces(Field<double>& rhoField, Field<Vector3D> &uField)
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -309,19 +344,19 @@ void Simple::computeMassFlowFaces(Field<Vector3D> &uField)
             for(i = 0; i < nFacesI_; ++i)
             {
                 if(j < uFaceJ_ && k < uFaceK_)
-                    massFlow_.faceI(i, j, k) = rho_*dot(uField.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
+                    massFlow_.faceI(i, j, k) = rhoField.faceI(i, j, k)*dot(uField.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
 
                 if(i < uFaceI_ && k < uFaceK_)
-                    massFlow_.faceJ(i, j, k) = rho_*dot(uField.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
+                    massFlow_.faceJ(i, j, k) = rhoField.faceJ(i, j, k)*dot(uField.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
 
                 if(i < uFaceI_ && j < uFaceJ_)
-                    massFlow_.faceK(i, j, k) = rho_*dot(uField.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
+                    massFlow_.faceK(i, j, k) = rhoField.faceK(i, j, k)*dot(uField.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
     }
 }
 
-void Simple::computePCorr(Field<Vector3D>& uField, Field<double>& pField)
+void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Field<double>& pField)
 {
     int i, j, k, itrNo;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -329,7 +364,7 @@ void Simple::computePCorr(Field<Vector3D>& uField, Field<double>& pField)
     double old = 0.;
 
     rhieChowInterpolateInteriorFaces(uField, pField);
-    computeMassFlowFaces(uField);
+    computeMassFlowFaces(rhoField, uField);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -337,12 +372,12 @@ void Simple::computePCorr(Field<Vector3D>& uField, Field<double>& pField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                aE_(i, j, k) = rho_*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
-                aW_(i, j, k) = rho_*dField_.faceW(i, j, k)*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
-                aN_(i, j, k) = rho_*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
-                aS_(i, j, k) = rho_*dField_.faceS(i, j, k)*dot(mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.fAreaNormS(i, j, k), mesh.rCellS(i, j, k));
-                aT_(i, j, k) = rho_*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
-                aB_(i, j, k) = rho_*dField_.faceB(i, j, k)*dot(mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.fAreaNormB(i, j, k), mesh.rCellB(i, j, k));
+                aE_(i, j, k) = rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
+                aW_(i, j, k) = rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dot(mesh.fAreaNormW(i, j, k), mesh.fAreaNormW(i, j, k))/dot(mesh.fAreaNormW(i, j, k), mesh.rCellW(i, j, k));
+                aN_(i, j, k) = rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
+                aS_(i, j, k) = rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dot(mesh.fAreaNormS(i, j, k), mesh.fAreaNormS(i, j, k))/dot(mesh.fAreaNormS(i, j, k), mesh.rCellS(i, j, k));
+                aT_(i, j, k) = rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
+                aB_(i, j, k) = rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dot(mesh.fAreaNormB(i, j, k), mesh.fAreaNormB(i, j, k))/dot(mesh.fAreaNormB(i, j, k), mesh.rCellB(i, j, k));
 
                 aP_(i, j, k) = -(aE_(i, j, k) + aW_(i, j, k) + aN_(i, j, k) + aS_(i, j, k) + aT_(i, j, k) + aB_(i, j, k));
 
@@ -394,26 +429,16 @@ void Simple::computePCorr(Field<Vector3D>& uField, Field<double>& pField)
             }
         }
 
-        pCorr_.setBoundaryFields();
+        extrapolateBoundaryFaces(pCorr_, gradPCorr_);
+
         ++pCorrSorItrs_;
 
         if(pCorrSorConvergence_ < pCorrSorToler_)
             break;
     }
-
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                mesh.findScalarField("pCorr")(i, j, k) = pCorr_(i, j, k);
-            }
-        }
-    }
 }
 
-void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
+void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField, Field<double> &pField)
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -421,7 +446,6 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
     double a;
 
     // Correct the mass flow field
-
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
@@ -430,19 +454,19 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
             {
                 if(i < uCellI_)
                 {
-                    a = -rho_*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
+                    a = -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
                     massFlow_.faceE(i, j, k) += a*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
                 }
 
                 if(j < uCellJ_)
                 {
-                    a = -rho_*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
+                    a = -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
                     massFlow_.faceN(i, j, k) += a*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
                 }
 
                 if(k < uCellK_)
                 {
-                    a = -rho_*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
+                    a = -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
                     massFlow_.faceT(i, j, k) += a*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
                 }
 
@@ -468,11 +492,11 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
         }
     }
 
-    pField.setBoundaryFields();
+    extrapolateBoundaryFaces(pField, gradPField_);
 
     // Correct the velocity field
 
-    interpolateInteriorFaces(pCorr_, VOLUME_WEIGHTED);
+    extrapolateInteriorFaces(pCorr_, gradPCorr_);
     computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 
     for(k = 0; k < nCellsK_; ++k)
@@ -486,7 +510,7 @@ void Simple::correctContinuity(Field<Vector3D> &uField, Field<double> &pField)
         }
     }
 
-    uField.setBoundaryFields();
+    extrapolateBoundaryFaces(uField, gradUField_);
 }
 
 Vector3D Simple::computeResidual(Field<Vector3D> &uField)
@@ -515,6 +539,9 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
         }
     }
 
+    if(isnan(sumMomentumResidualSqr.x) || isnan(sumMomentumResidualSqr.y) || isnan(sumMomentumResidualSqr.z))
+        Output::raiseException("Simple", "computeResidual", "a NaN value was detected.");
+
     return sqrt(sumMomentumResidualSqr/sumVol);
 }
 
@@ -540,6 +567,8 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     //- Find the relevant fields
     uFieldPtr_ = &mesh.findVectorField("u");
     pFieldPtr_ = &mesh.findScalarField("p");
+    rhoFieldPtr_ = &mesh.findScalarField("rho");
+    muFieldPtr_ = &mesh.findScalarField("mu");
 
     //- Read all relevant input parameters
     if(input.inputStrings["timeAccurate"] == "ON")
@@ -549,8 +578,6 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 
     relaxationFactorMomentum_ = input.inputDoubles["relaxationFactorMomentum"];
     relaxationFactorPCorr_ = input.inputDoubles["relaxationFactorPCorr"];
-    rho_ = input.inputDoubles["rho"];
-    mu_ = input.inputDoubles["mu"];
     momentumSorToler_ = input.inputDoubles["momentumSorToler"];
     pCorrSorToler_ = input.inputDoubles["pCorrSorToler"];
     maxInnerItrs_ = input.inputInts["maxInnerIters"];
@@ -587,6 +614,12 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 
     //- Set the boundary conditions
     setBoundaryConditions(input);
+
+    //- Set constant fields
+    setConstantFields(input);
+
+    Output::print("Simple", "Time accurate : " + input.inputStrings["timeAccurate"]);
+    Output::print("Simple", "initialization complete.");
 }
 
 void Simple::setBoundaryConditions(Input &input)
@@ -700,15 +733,17 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 {
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
+    Field<double>& rhoField = *rhoFieldPtr_;
+    Field<double>& muField = *muFieldPtr_;
     int i;
 
     storeUField(uField, uField0_);
 
     for(i = 0; i < maxInnerItrs_; ++i)
     {
-        computeMomentum(timeStep, uField, pField);
-        computePCorr(uField, pField);
-        correctContinuity(uField, pField);
+        computeMomentum(rhoField, muField, timeStep, uField, pField);
+        computePCorr(rhoField, uField, pField);
+        correctContinuity(rhoField, uField, pField);
     }
 }
 

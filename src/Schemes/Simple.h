@@ -38,6 +38,9 @@ private:
 
     Field<Vector3D>* uFieldPtr_;
     Field<double>* pFieldPtr_;
+    Field<double>* rhoFieldPtr_;
+    Field<double>* muFieldPtr_;
+
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
     Field<double> a0P_, aP_, aE_, aW_, aN_, aS_, aT_, aB_;
@@ -57,7 +60,7 @@ private:
 
     bool timeAccurate_;
 
-    double relaxationFactorMomentum_, relaxationFactorPCorr_, rho_, mu_;
+    double relaxationFactorMomentum_, relaxationFactorPCorr_;
     int gradReconstructionMethod_;
 
     int maxInnerItrs_, momentumSorItrs_, pCorrSorItrs_, maxMomentumSorIters_, maxPCorrSorIters_;
@@ -67,6 +70,8 @@ private:
     int uxStartI_, uyStartI_, uzStartI_, pStartI_;
     int uxEndI_, uyEndI_, uzEndI_, pEndI_;
 
+    void setConstantFields(Input &input);
+
     /**
      * @brief Store the solution from the previous time-step/iteration.
      * @param uField A reference to the velocity field.
@@ -74,9 +79,14 @@ private:
     void storeUStar(Field<Vector3D>& uField);
 
     /**
-     * @brief Compute a predicted momentum using the latest available pressure field.
+     * @brief Solve the momentum equation using the latest available velocity and pressure fields.
+     * @param rhoField A reference to the density field.
+     * @param muField A reference to the viscosity field.
+     * @param timeStep The time step.
+     * @param uField A reference to the velocity field.
+     * @param pField A reference to the pressure field.
      */
-    void computeMomentum(double timeStep, Field<Vector3D>& uField, Field<double>& pField);
+    void computeMomentum(Field<double> &rhoField, Field<double> &muField, double timeStep, Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Interpolate the face centered velocities using the Rhie-Chow interpolation method
@@ -88,21 +98,22 @@ private:
 
     /**
      * @brief Compute the mass fluxes at the interior faces from the known velocity field.
+     * @param rhoField A reference to the density field.
      * @param uField A reference to the velocity field.
      */
-    void computeMassFlowFaces(Field<Vector3D>& uField);
+    void computeMassFlowFaces(Field<double> &rhoField, Field<Vector3D>& uField);
 
     /**
      * @brief Compute the pressure corrections.
      */
-    void computePCorr(Field<Vector3D>& uField, Field<double> &pField);
+    void computePCorr(Field<double> &rhoField, Field<Vector3D>& uField, Field<double> &pField);
 
     /**
      * @brief Correct the mass flow, pressure and velocity fields using the computed pressure corrections.
      * @param uField A reference to the velocity field.
      * @param pField A reference to the pressure field.
      */
-    void correctContinuity(Field<Vector3D>& uField, Field<double>& pField);
+    void correctContinuity(Field<double> &rhoField, Field<Vector3D>& uField, Field<double>& pField);
 
     Vector3D computeResidual(Field<Vector3D>& uField);
 

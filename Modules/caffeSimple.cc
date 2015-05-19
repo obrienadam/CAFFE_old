@@ -26,7 +26,8 @@ int main(int argc, const char* argv[])
 
         mesh.addVectorField("u", CONSERVED);
         mesh.addScalarField("p", CONSERVED);
-        mesh.addScalarField("pCorr", AUXILLARY);
+        mesh.addScalarField("rho", PRIMITIVE);
+        mesh.addScalarField("mu", PRIMITIVE);
         mesh.addScalarField("massFlow", AUXILLARY);
 
         // Initialize objects
