@@ -1,0 +1,27 @@
+############################################################
+#
+# This is just a sample file for initial conditions set-up
+#
+############################################################
+
+MetricConversion = 1.
+
+
+
+alpha
+{
+	Sphere
+	{
+		radius = 1
+		center = (0 0 0)
+		value = 1
+	}
+}
+
+u
+{
+	Uniform
+	{
+		value = (1 0 0)
+	}
+}

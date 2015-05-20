@@ -27,12 +27,17 @@
 #define MULTIPHASE_SIMPLE_H
 
 #include "Simple.h"
+#include "Vector3D.h"
 
 class MultiphaseSimple : public Simple
 {
 private:
 
     Field<double>* alphaFieldPtr_;
+    Field<Vector3D> interfaceNormals_;
+    Field<Vector3D> kField_;
+
+    double tau_;
 
 public:
 

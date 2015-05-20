@@ -107,7 +107,6 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         if(buffer == "}")
             break;
 
-
         // Extract the bracketed coordinate
 
         buffer = buffer.substr(buffer.find_first_of("("), buffer.find_first_of(")") + 1);

@@ -41,16 +41,31 @@ private:
 
     int nCellsI_, nCellsJ_, nCellsK_;
 
+    double metricConversion_;
+
+    void findOpeningBrace();
+
 public:
 
     InitialConditions();
 
     void initialize(HexaFvmMesh& mesh);
 
-    void openInputFile(std::string filename, std::string directory);
+    void readInputFile(std::string filename);
+
+    void setInitialConditions(Field<double>& scalarField);
+    void setInitialConditions(Field<Vector3D>& vectorField);
+
+    void setSphere(Field<double>& scalarField);
+    void setBox(Field<double>& scalarField);
+    void setUniform(Field<double>& scalarField);
+
+    void setSphere(Field<Vector3D>& scalarField);
+    void setBox(Field<Vector3D>& scalarField);
+    void setUniform(Field<Vector3D>& scalarField);
 
     void createUniform(double value, Field<double>& phiField);
-    void createSphere(double radius, Point3D center, double sphereInnerValue, Field<double>& phiField);
+    void createSphere(double radius, Point3D center, double sphereInnerValue, Field<double>& scalarField);
     void createBox(double xLength, double yLength, double zLength, Point3D center, double boxInnerValue, Field<double>& phiField);
 
 };

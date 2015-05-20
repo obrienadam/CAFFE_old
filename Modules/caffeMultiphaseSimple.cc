@@ -34,15 +34,15 @@ int main(int argc, const char* argv[])
         mesh.addScalarField("massFlow", AUXILLARY);
 
         // Initialize objects
-
         runControl.initialize(input);
         solver.initialize(input);
         mesh.initialize(input);
         multiphaseSimple.initialize(input, mesh);
         initialConditions.initialize(mesh);
 
-        mesh.writeDebug();
+        initialConditions.readInputFile("case/initialConditions.in");
 
+        // Begin run
         runControl.displayStartMessage();
 
         while(runControl.continueRun())
@@ -60,12 +60,10 @@ int main(int argc, const char* argv[])
         }
 
         // Display end message, the run ended normally
-
         runControl.displayEndMessage();
     }
 
     // Catch any exceptions thrown during the run
-
     catch(const char* errorMessage)
     {
         cerr << "Error: " << errorMessage << endl;

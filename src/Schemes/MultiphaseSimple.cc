@@ -29,4 +29,7 @@ void MultiphaseSimple::initialize(Input &input, HexaFvmMesh& mesh)
     Simple::initialize(input, mesh);
 
     alphaFieldPtr_ = &mesh.findScalarField("alpha");
+
+    interfaceNormals_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    kField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 }

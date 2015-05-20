@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @file    InitialConditions.cc
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
@@ -22,14 +22,39 @@
  * InitialConditions.
  */
 
+#include <vector>
+
 #include "InitialConditions.h"
 #include "Output.h"
+#include "InputStringProcessing.h"
 
 InitialConditions::InitialConditions()
     :
-      meshPtr_(NULL)
+      meshPtr_(NULL),
+      metricConversion_(1.)
 {
 
+}
+
+void InitialConditions::findOpeningBrace()
+{
+    using namespace std;
+
+    string buffer;
+
+    while(!inputFile_.eof())
+    {
+        getline(inputFile_, buffer);
+
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer == "{")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setInitialConditions", "received \"" + buffer + "\" but expected \"{\".");
+    }
 }
 
 void InitialConditions::initialize(HexaFvmMesh &mesh)
@@ -41,12 +66,156 @@ void InitialConditions::initialize(HexaFvmMesh &mesh)
     nCellsK_ = mesh.nCellsK();
 }
 
-void InitialConditions::openInputFile(std::string filename, std::string directory)
+void InitialConditions::readInputFile(std::string filename)
 {
-    inputFile_.open((directory + "/" + filename).c_str());
+    using namespace std;
+
+    HexaFvmMesh& mesh = *meshPtr_;
+    string buffer;
+
+    inputFile_.open(filename.c_str());
 
     if(!inputFile_.good())
-        Output::raiseException("InitialConditions", "openInputFile", "file \"" + directory + "/" + filename + "\" does not exist.");
+        Output::raiseException("InitialConditions", "openInputFile", "file \"" + filename + "\" does not exist.");
+
+    while(!inputFile_.eof())
+    {
+        getline(inputFile_, buffer);
+
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "MetricConversion")
+        {
+            metricConversion_ = std::stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            continue;
+        }
+
+        //- This is a bit shady. May want to look at improving this
+        try
+        {
+            setInitialConditions(mesh.findScalarField(buffer));
+        }
+        catch(const char* errorMessage)
+        {
+            setInitialConditions(mesh.findVectorField(buffer));
+        }
+    }
+
+    inputFile_.close();
+}
+
+void InitialConditions::setInitialConditions(Field<double> &scalarField)
+{
+    std::string buffer;
+
+    findOpeningBrace();
+
+    while(!inputFile_.eof())
+    {
+        getline(inputFile_, buffer);
+
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer == "Sphere")
+            setSphere(scalarField);
+        else if(buffer == "Box")
+            setBox(scalarField);
+        else if(buffer == "Uniform")
+            setUniform(scalarField);
+        else if(buffer == "}")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setInitialConditions", "unrecognized initial condition \"" + buffer + "\"");
+    }
+}
+
+void InitialConditions::setInitialConditions(Field<Vector3D> &vectorField)
+{
+
+}
+
+void InitialConditions::setSphere(Field<double> &scalarField)
+{
+    using namespace std;
+
+    string buffer;
+    vector<string> partitionedBuffer;
+    double radius = 0., sphereInnerValue = 0.;
+    Point3D center;
+    bool radiusSet = false, sphereInnerValueSet = false, centerSet = false;
+
+    findOpeningBrace();
+
+    while(!inputFile_.eof())
+    {
+        getline(inputFile_, buffer);
+
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "radius")
+        {
+            radius = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            radiusSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "value")
+        {
+            sphereInnerValue = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            sphereInnerValueSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "center")
+        {
+            buffer = buffer.substr(buffer.find_first_of("=") + 1, buffer.length());
+            partitionedBuffer = InputStringProcessing::partition(buffer, "(,)");
+            center.x = stod(partitionedBuffer[1]);
+            center.y = stod(partitionedBuffer[2]);
+            center.z = stod(partitionedBuffer[3]);
+            centerSet = true;
+        }
+        else if(buffer == "}")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setSphere", "unrecognized initial condition \"" + buffer + "\"");
+    }
+
+    if(!(radiusSet && sphereInnerValueSet && centerSet))
+        Output::raiseException("InitialConditions", "setSphere", "one or more required parameters not specified.");
+
+    radius *= metricConversion_;
+    center *= metricConversion_;
+
+    createSphere(radius, center, sphereInnerValue, scalarField);
+    Output::print("InitialConditions", "set spherical initial conditions for field \"" + scalarField.name + "\".");
+}
+
+void InitialConditions::setBox(Field<double> &scalarField)
+{
+
+}
+
+void InitialConditions::setUniform(Field<double> &scalarField)
+{
+
+}
+
+void InitialConditions::setSphere(Field<Vector3D> &scalarField)
+{
+
+}
+
+void InitialConditions::setBox(Field<Vector3D> &scalarField)
+{
+
+}
+
+void InitialConditions::setUniform(Field<Vector3D> &scalarField)
+{
+
 }
 
 void InitialConditions::createUniform(double value, Field<double> &phiField)
@@ -65,7 +234,7 @@ void InitialConditions::createUniform(double value, Field<double> &phiField)
     }
 }
 
-void InitialConditions::createSphere(double radius, Point3D center, double sphereInnerValue, Field<double> &phiField)
+void InitialConditions::createSphere(double radius, Point3D center, double sphereInnerValue, Field<double> &scalarField)
 {
     HexaFvmMesh& mesh = *meshPtr_;
     int i, j, k;
@@ -78,7 +247,7 @@ void InitialConditions::createSphere(double radius, Point3D center, double spher
             {
                 if((mesh.cellXc(i, j, k) - center).mag() <= radius)
                 {
-                    phiField(i, j, k) = sphereInnerValue;
+                    scalarField(i, j, k) = sphereInnerValue;
                 }
             }
         }

@@ -16,7 +16,7 @@ maxItrs
 screenWriteInterval
 1
 fileWriteInterval
-10
+1
 
 ### Time ###################################################
 
