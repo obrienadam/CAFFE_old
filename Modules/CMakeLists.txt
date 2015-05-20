@@ -24,6 +24,15 @@ target_link_libraries(caffeSimple RunControl
                                   HexaMesh
                                   Schemes)
 
+# Build the immersed boundary simple solver
+
+add_executable(caffeIbSimple caffeIbSimple.cc)
+target_link_libraries(caffeIbSimple RunControl
+                                    Math
+                                    Solvers
+                                    HexaMesh
+                                    Schemes)
+
 # Build the multiphase simple solver
 
 add_executable(caffeMultiphaseSimple caffeMultiphaseSimple.cc)

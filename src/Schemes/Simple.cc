@@ -232,7 +232,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, do
         }
     }
 
-    extrapolateBoundaryFaces(dField_, gradScalarField_);
+    dField_.setBoundaryFields();
 
     momentumResidual_ = computeResidual(uFieldStar_);
 
@@ -266,7 +266,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, do
             }
         }
 
-        extrapolateBoundaryFaces(uField, gradUField_);
+        uField.setBoundaryFields();
 
         ++momentumSorItrs_;
 
@@ -292,7 +292,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, do
         }
     }
 
-    extrapolateBoundaryFaces(hField_, gradVecField_);
+    hField_.setBoundaryFields();
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -428,7 +428,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
             }
         }
 
-        extrapolateBoundaryFaces(pCorr_, gradPCorr_);
+        pCorr_.setBoundaryFields();
 
         ++pCorrSorItrs_;
 
@@ -490,7 +490,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
         }
     }
 
-    extrapolateBoundaryFaces(pField, gradPField_);
+    pField.setBoundaryFields();
 
     // Correct the velocity field
     extrapolateInteriorFaces(pCorr_, gradPCorr_);
@@ -507,7 +507,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
         }
     }
 
-    extrapolateBoundaryFaces(uField, gradUField_);
+    uField.setBoundaryFields();
 }
 
 Vector3D Simple::computeResidual(Field<Vector3D> &uField)

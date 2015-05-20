@@ -1,0 +1,20 @@
+## hexaMesh input file
+
+MetricConversion = 0.1
+
+Vertices
+{
+	(0 0 0)
+	(1 0 0)
+	(1.8 1 0)
+	(0 1 0)
+	(0 0 1)
+	(1 0 1)
+	(1.8 1 1)
+	(0 1 1)
+}
+
+Resolution
+{
+	(51 31 31)
+}

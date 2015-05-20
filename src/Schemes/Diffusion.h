@@ -38,8 +38,6 @@ private:
     Field<Vector3D> gradPhiField_;
     Array3D<double> stencil_;
 
-public:
-
     /**
      * @brief Helper function that computes all of the face fluxes after the reconstructions are complete.
      */
