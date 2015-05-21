@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "Input.h"
 #include "Vector3D.h"
@@ -38,6 +39,7 @@
 enum {ADD, REPLACE};
 enum {LEAST_SQUARES, DIVERGENCE_THEOREM};
 enum {VOLUME_WEIGHTED, DISTANCE_WEIGHTED, NON_WEIGHTED};
+enum {ACTIVE, INACTIVE, BOUNDARY};
 
 class FvScheme
 {
@@ -48,9 +50,12 @@ protected:
     int nCellsI_, nCellsJ_, nCellsK_, nCells_, nFacesI_, nFacesJ_, nFacesK_;
     int uCellI_, uCellJ_, uCellK_, uFaceI_, uFaceJ_, uFaceK_;
 
+    Field<int> cellStatus_;
+
 public:
 
     FvScheme();
+    ~FvScheme();
 
     virtual void initialize(Input& input, HexaFvmMesh& mesh, std::string conservedFieldName = "phi");
     virtual void setBoundaryConditions(Input& input);
@@ -95,20 +100,6 @@ public:
     virtual void computeFaceCenteredGradients(Field<double>& phiField, Field<Vector3D>& gradPhiField);
 
     void getFaceStencil(int i, int j, int k, int direction, Vector3D& faceNorm, Vector3D& cellRelVec);
-
-    Vector3D sfE(int i, int j, int k){ return meshPtr_->fAreaNormE(i, j, k); }
-    Vector3D sfW(int i, int j, int k){ return meshPtr_->fAreaNormW(i, j, k); }
-    Vector3D sfN(int i, int j, int k){ return meshPtr_->fAreaNormN(i, j, k); }
-    Vector3D sfS(int i, int j, int k){ return meshPtr_->fAreaNormS(i, j, k); }
-    Vector3D sfT(int i, int j, int k){ return meshPtr_->fAreaNormT(i, j, k); }
-    Vector3D sfB(int i, int j, int k){ return meshPtr_->fAreaNormB(i, j, k); }
-
-    Vector3D dsE(int i, int j, int k){ return meshPtr_->rCellE(i, j, k); }
-    Vector3D dsW(int i, int j, int k){ return meshPtr_->rCellW(i, j, k); }
-    Vector3D dsN(int i, int j, int k){ return meshPtr_->rCellN(i, j, k); }
-    Vector3D dsS(int i, int j, int k){ return meshPtr_->rCellS(i, j, k); }
-    Vector3D dsT(int i, int j, int k){ return meshPtr_->rCellT(i, j, k); }
-    Vector3D dsB(int i, int j, int k){ return meshPtr_->rCellB(i, j, k); }
 
     virtual void displayUpdateMessage();
 };

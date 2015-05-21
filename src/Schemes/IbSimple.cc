@@ -24,9 +24,67 @@
 
 #include "IbSimple.h"
 
+IbSimple::IbSimple()
+    :
+      ibField_("ib", AUXILLARY),
+      ibSourceField_("ibSource", AUXILLARY)
+{
+
+}
+
+bool IbSimple::isSolidCell(int i, int j, int k, HexaFvmMesh& mesh)
+{
+    if(ibSphere_.isInside(mesh.cellXc(i, j, k)))
+        return true;
+    else
+        return false;
+}
+
+bool IbSimple::isFluidCell(int i, int j, int k, HexaFvmMesh &mesh)
+{
+    for(int l = 0; i < 8; ++i)
+    {
+        if(ibSphere_.isInside(mesh.node(i, j, k, l)))
+            return false;
+    }
+
+    return true;
+}
+
+void IbSimple::computeIbField()
+{
+    HexaFvmMesh& mesh = *meshPtr_;
+    int i, j, k;
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(isFluidCell(i, j, k, mesh))
+                    ibField_(i, j, k) = FLUID;
+                else if (isSolidCell(i, j, k, mesh))
+                    ibField_(i, j, k) = SOLID;
+                else
+                    ibField_(i, j, k) = IB;
+            }
+        }
+    }
+}
+
+void IbSimple::computeIbSourceTerm()
+{
+
+}
+
 void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     Simple::initialize(input, mesh);
 
+    ibSphere_.radius = input.inputDoubles["ibSphereRadius"];
+    ibSphere_.center = Point3D(input.inputStrings["ibSphereCenter"]);
 
+    ibField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    ibSourceField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 }

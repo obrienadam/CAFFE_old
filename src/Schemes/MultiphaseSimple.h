@@ -41,6 +41,8 @@ private:
 
 public:
 
+    MultiphaseSimple();
+
     void initialize(Input& input, HexaFvmMesh& mesh);
 };
 

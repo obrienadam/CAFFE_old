@@ -44,6 +44,8 @@ protected:
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
     Field<double> a0P_, aP_, aE_, aW_, aN_, aS_, aT_, aB_;
+    Field<double> dE_, dW_, dN_, dS_, dT_, dB_;
+    Field<Vector3D> cE_, cW_, cN_, cS_, cT_, cB_;
     Field<Vector3D> bP_;
     Field<Vector3D> hField_;
     Field<double> dField_;
@@ -76,11 +78,12 @@ protected:
      * @brief Solve the momentum equation using the latest available velocity and pressure fields.
      * @param rhoField A reference to the density field.
      * @param muField A reference to the viscosity field.
+     * @param sFieldPtr A pointer to any additional source terms to be included in the momentum computation.
      * @param timeStep The time step.
      * @param uField A reference to the velocity field.
      * @param pField A reference to the pressure field.
      */
-    void computeMomentum(Field<double> &rhoField, Field<double> &muField, double timeStep, Field<Vector3D>& uField, Field<double>& pField);
+    void computeMomentum(Field<double> &rhoField, Field<double> &muField, Field<Vector3D>* sFieldPtr, double timeStep, Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Interpolate the face centered velocities using the Rhie-Chow interpolation method

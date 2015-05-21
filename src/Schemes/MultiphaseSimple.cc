@@ -24,6 +24,14 @@
 
 #include "MultiphaseSimple.h"
 
+MultiphaseSimple::MultiphaseSimple()
+    :
+      interfaceNormals_("interfaceNormals", AUXILLARY),
+      kField_("k", AUXILLARY)
+{
+
+}
+
 void MultiphaseSimple::initialize(Input &input, HexaFvmMesh& mesh)
 {
     Simple::initialize(input, mesh);

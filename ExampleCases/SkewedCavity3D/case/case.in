@@ -1,6 +1,6 @@
 ############################################################
 #
-# Example Case: Cavity 2D
+# Example Case: Cavity 3D
 #
 ############################################################
 
@@ -42,7 +42,7 @@ mu
 momentumSorToler
 1e-5
 pCorrSorToler
-1e-5
+1e-4
 maxInnerIters
 20
 maxMomentumSorIters

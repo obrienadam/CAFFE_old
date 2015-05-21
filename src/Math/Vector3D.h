@@ -16,6 +16,7 @@ class Vector3D
  public:
 
   Vector3D(double x = 0., double y = 0., double z = 0.);
+  Vector3D(const Vector3D& other);
   Vector3D(std::string vectorStr);
 
   double x, y, z;

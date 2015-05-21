@@ -19,6 +19,9 @@ void FvScheme::interpolateInteriorFaces(Field<T>& field, int method)
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
+                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                        continue;
+
                     if(i < uCellI_)
                     {
                         alpha = mesh.cellVol(i + 1, j, k)/(mesh.cellVol(i + 1, j, k) + mesh.cellVol(i, j, k));
@@ -49,6 +52,9 @@ void FvScheme::interpolateInteriorFaces(Field<T>& field, int method)
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
+                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                        continue;
+
                     if(i < uCellI_)
                     {
                         alpha = mesh.rFaceMagW(i + 1, j, k)/(mesh.rFaceMagW(i + 1, j, k) + mesh.rFaceMagE(i, j, k));
@@ -81,6 +87,9 @@ void FvScheme::interpolateInteriorFaces(Field<T>& field, int method)
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
+                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                        continue;
+
                     if(i < uCellI_)
                     {
                         field.faceE(i, j, k) = alpha*field(i, j, k) + (1. - alpha)*field(i + 1, j, k);
@@ -120,6 +129,8 @@ void FvScheme::extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
 
                 //- Extrapolate the faces
                 if(i < uCellI_)
@@ -166,6 +177,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(j = 0; j < nCellsJ_; ++j)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceE(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceE(i, j, k));
             }
         }
@@ -179,6 +193,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(j = 0; j < nCellsJ_; ++j)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceW(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceW(i, j, k));
             }
         }
@@ -192,6 +209,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceN(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k));
             }
         }
@@ -205,6 +225,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceS(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k));
             }
         }
@@ -218,6 +241,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceN(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k));
             }
         }
@@ -231,6 +257,9 @@ void FvScheme::extrapolateBoundaryFaces(Field<T>& field, Field<GRAD_T>& gradFiel
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 field.faceS(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k));
             }
         }

@@ -28,6 +28,22 @@ public:
 
     static double computeTetrahedronVolume(Point3D* points);
     static Point3D computeTetrahedronCentroid(Point3D* points);
+
+    //- Basic geometric methods
+    virtual double surfaceArea() = 0;
+    virtual double volume() = 0;
+
+    //- Intersections
+    virtual Point3D nearestIntersect(const Point3D& origin, const Point3D& point) = 0;
+
+    //- Tests
+    virtual bool isInside(const Point3D& point) = 0;
+
+    //- Operators and movement
+    virtual Geometry& operator+=(const Vector3D& translationVec) = 0;
+    virtual Geometry& operator-=(const Vector3D& translationVec) = 0;
+    virtual Geometry& rotate(const double radians) = 0;
+    virtual Geometry& scale(const double a) = 0;
 };
 
 #endif

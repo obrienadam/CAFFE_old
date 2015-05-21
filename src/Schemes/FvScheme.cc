@@ -31,7 +31,13 @@
 FvScheme::FvScheme()
     :
       conservedFieldName_("phi"),
-      meshPtr_(NULL)
+      meshPtr_(NULL),
+      cellStatus_("cellStatus", AUXILLARY)
+{
+
+}
+
+FvScheme::~FvScheme()
 {
 
 }
@@ -58,6 +64,11 @@ void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conserved
     uFaceK_ = nFacesK_ - 1;
 
     conservedFieldName_ = conservedFieldName;
+
+    cellStatus_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+
+    for(int i = 0; i < nCells_; ++i)
+        cellStatus_(i) = ACTIVE;
 }
 
 void FvScheme::setBoundaryConditions(Input &input)
@@ -81,6 +92,9 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 b.reallocate(6, 1);
 
                 A.addVector3DToRow(mesh.rCellE(i, j, k), 0, 0);
@@ -115,6 +129,9 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
+                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                        continue;
+
                     gradPhiField(i, j, k) = (phiField.faceE(i, j, k)*mesh.fAreaNormE(i, j, k)
                                              + phiField.faceW(i, j, k)*mesh.fAreaNormW(i, j, k)
                                              + phiField.faceN(i, j, k)*mesh.fAreaNormN(i, j, k)
@@ -145,6 +162,9 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(!(cellStatus_(i, j, k) == ACTIVE))
+                    continue;
+
                 b.reallocate(6, 1);
 
                 //- Construct the least-squares coefficient matrix for the cell
@@ -186,6 +206,9 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
+                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                        continue;
+
                     gradVecField(i, j, k) = (tensor(vecField.faceE(i, j, k), mesh.fAreaNormE(i, j, k))
                                             + tensor(vecField.faceW(i, j, k), mesh.fAreaNormW(i, j, k))
                                             + tensor(vecField.faceN(i, j, k), mesh.fAreaNormN(i, j, k))

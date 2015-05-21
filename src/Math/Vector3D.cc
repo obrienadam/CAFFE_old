@@ -15,6 +15,15 @@ Vector3D::Vector3D(double x, double y, double z) :
 
 }
 
+Vector3D::Vector3D(const Vector3D &other)
+    :
+      x(other.x),
+      y(other.y),
+      z(other.z)
+{
+
+}
+
 Vector3D::Vector3D(std::string vectorStr)
 {
     initialize(vectorStr);

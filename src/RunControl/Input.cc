@@ -33,7 +33,6 @@
 Input::Input()
 {
     //- Set-up default input values
-
     inputDoubles["simStartTime"] = 0.;
     inputDoubles["maxSimTime"] = 1.;
     inputDoubles["timeStep"] = 1e-4;
@@ -63,13 +62,11 @@ Input::Input()
     inputStrings["boundaryRefValueBottom"] = "(0., 0., 0.)";
 
     //- Linear solver parameters
-
     inputInts["kspMaxItrs"] = 5000;
     inputDoubles["kspRelativeTolerance"] = 1e-12;
     inputDoubles["kspAbsoluteTolerance"] = 1e-6;
 
     //- Simple parameters
-
     inputStrings["timeAccurate"] = "OFF";
     inputDoubles["relaxationFactorMomentum"] = 0.3;
     inputDoubles["relaxationFactorPCorr"] = 0.1;
@@ -81,6 +78,10 @@ Input::Input()
     inputInts["maxMomentumSorIters"] = 50;
     inputInts["maxPCorrSorIters"] = 200;
     inputDoubles["sorOmega"] = 1.91;
+
+    //- ibSimple parameters
+    inputDoubles["ibSphereRadius"] = 0.5;
+    inputStrings["ibSphereCenter"] = "(0.5 0.5 0.5)";
 }
 
 Input::Input(std::string filename)

@@ -28,10 +28,28 @@
 #define IB_SIMPLE_H
 
 #include "Simple.h"
+#include "Sphere.h"
+
+enum CellType{FLUID, SOLID, IB};
 
 class IbSimple : public Simple
 {
+private:
+
+    Field<CellType> ibField_;
+    Field<Vector3D> ibSourceField_;
+
+    Sphere ibSphere_;
+
+    bool isSolidCell(int i, int j, int k, HexaFvmMesh& mesh);
+    bool isFluidCell(int i, int j, int k, HexaFvmMesh& mesh);
+
+    void computeIbField();
+    void computeIbSourceTerm();
+
 public:
+
+    IbSimple();
 
     void initialize(Input& input, HexaFvmMesh& mesh);
 };

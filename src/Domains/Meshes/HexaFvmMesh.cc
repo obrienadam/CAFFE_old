@@ -417,6 +417,31 @@ Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
     return vectorFields[end];
 }
 
+Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
+{
+    switch(nodeNo)
+    {
+    case BSW:
+        return nodes_(i, j, k);
+    case BSE:
+        return nodes_(i + 1, j, k);
+    case BNE:
+        return nodes_(i + 1, j + 1, k);
+    case BNW:
+        return nodes_(i, j + 1, k);
+    case TSW:
+        return nodes_(i, j, k + 1);
+    case TSE:
+        return nodes_(i + 1, j, k + 1);
+    case TNE:
+        return nodes_(i + 1, j + 1, k + 1);
+    case TNW:
+        return nodes_(i, j + 1, k + 1);
+    default:
+        Output::raiseException("HexaFvmMesh", "node", "invalid node specified.");
+    };
+}
+
 int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)
 {
     switch(vectorOrdering)

@@ -36,6 +36,7 @@
 #include "Field.h"
 
 enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
 enum Ordering{ROW, COLUMN, LAYER};
 
 class HexaFvmMesh : public StructuredMesh
@@ -154,6 +155,8 @@ public:
     // Retrieve cell parameters
     Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
     double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }
+
+    Point3D node(int i, int j, int k, int nodeNo);
 
     // Retrive face parameters
     Point3D faceXcE(int i, int j, int k){ return faceCentersI_(i + 1, j, k); }
