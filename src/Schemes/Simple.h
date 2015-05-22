@@ -125,7 +125,7 @@ public:
 
     void storeUField(Field<Vector3D>& uField, Field<Vector3D>& uFieldOld);
 
-    void discretize(double timeStep, std::vector<double>& timeDerivatives);
+    virtual void discretize(double timeStep, std::vector<double>& timeDerivatives);
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
 

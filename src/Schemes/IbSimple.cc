@@ -63,11 +63,20 @@ void IbSimple::computeIbField()
             for(i = 0; i < nCellsI_; ++i)
             {
                 if(isFluidCell(i, j, k, mesh))
+                {
                     ibField_(i, j, k) = FLUID;
+                    cellStatus_(i, j, k) = ACTIVE;
+                }
                 else if (isSolidCell(i, j, k, mesh))
+                {
                     ibField_(i, j, k) = SOLID;
+                    cellStatus_(i, j, k) = INACTIVE;
+                }
                 else
+                {
                     ibField_(i, j, k) = IB;
+                    cellStatus_(i, j, k) = BOUNDARY;
+                }
             }
         }
     }
@@ -87,4 +96,24 @@ void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
 
     ibField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     ibSourceField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+}
+
+void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
+{
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+    Field<double>& rhoField = *rhoFieldPtr_;
+    Field<double>& muField = *muFieldPtr_;
+    int i;
+
+    storeUField(uField, uField0_);
+
+    for(i = 0; i < maxInnerItrs_; ++i)
+    {
+        computeIbField();
+        computeIbSourceTerm();
+        computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);
+        computePCorr(rhoField, uField, pField);
+        correctContinuity(rhoField, uField, pField);
+    }
 }

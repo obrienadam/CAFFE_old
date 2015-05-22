@@ -1,6 +1,6 @@
 ############################################################
 #
-# Example Case: Cavity 3D
+# This is just a sample file for testing the file reading.
 #
 ############################################################
 
@@ -12,7 +12,7 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-6000
+1000
 screenWriteInterval
 1
 fileWriteInterval
@@ -21,7 +21,7 @@ fileWriteInterval
 ### Time ###################################################
 
 timeStep
-5e-4
+2e-3
 maxSimTime
 48
 maxRealTimeHours
@@ -32,42 +32,42 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.6
+0.05
 relaxationFactorPCorr
-0.4
+0.05
 rho
-1
+998
 mu
-0.01
+8.94e-4
 momentumSorToler
-1e-7
+1e-8
 pCorrSorToler
-1e-7
-maxInnerIters
-20
+1e-4
 maxMomentumSorIters
 100
 maxPCorrSorIters
-100
+200
+maxInnerIters
+20
 sorOmega
-1.92
+1.9
 
-### Boundaries ##############################################
+### Boundaries #############################################
 
 boundaryTypeEast
-wall
+outlet
 boundaryRefValueEast
 (0,0,0)
 
 boundaryTypeWest
-wall
+inlet
 boundaryRefValueWest
-(0,0,0)
+(3,0,0)
 
 boundaryTypeNorth
 wall
 boundaryRefValueNorth
-(1,0,1)
+(0,0,0)
 
 boundaryTypeSouth
 wall

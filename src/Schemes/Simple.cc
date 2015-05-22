@@ -460,7 +460,6 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& massFlow = mesh.findScalarField("massFlow");
-    double a;
 
     extrapolateInteriorFaces(pCorr_, gradPCorr_);
     computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
@@ -476,22 +475,13 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
 
                 // Correct mass-flow
                 if(i < uCellI_)
-                {
-                    a = -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dot(mesh.fAreaNormE(i, j, k), mesh.fAreaNormE(i, j, k))/dot(mesh.fAreaNormE(i, j, k), mesh.rCellE(i, j, k));
-                    massFlow_.faceE(i, j, k) += a*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
-                }
+                    massFlow_.faceE(i, j, k) += -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k)*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
 
                 if(j < uCellJ_)
-                {
-                    a = -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dot(mesh.fAreaNormN(i, j, k), mesh.fAreaNormN(i, j, k))/dot(mesh.fAreaNormN(i, j, k), mesh.rCellN(i, j, k));
-                    massFlow_.faceN(i, j, k) += a*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
-                }
+                    massFlow_.faceN(i, j, k) += -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k)*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
 
                 if(k < uCellK_)
-                {
-                    a = -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dot(mesh.fAreaNormT(i, j, k), mesh.fAreaNormT(i, j, k))/dot(mesh.fAreaNormT(i, j, k), mesh.rCellT(i, j, k));
-                    massFlow_.faceT(i, j, k) += a*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
-                }
+                    massFlow_.faceT(i, j, k) += -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k)*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
 
                 massFlow_(i, j, k) = massFlow_.faceE(i, j, k) - massFlow_.faceW(i, j, k)
                         + massFlow_.faceN(i, j, k) - massFlow_.faceS(i, j, k)

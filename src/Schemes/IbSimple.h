@@ -52,6 +52,8 @@ public:
     IbSimple();
 
     void initialize(Input& input, HexaFvmMesh& mesh);
+
+    void discretize(double timeStep, std::vector<double>& timeDerivatives);
 };
 
 #endif
