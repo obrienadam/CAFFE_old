@@ -46,6 +46,7 @@ private:
 
     void computeIbField();
     void computeIbSourceTerm();
+    void interpolateIbCellCenters(Field<Vector3D>& uField, Field<double>& pField);
 
 public:
 

@@ -26,7 +26,7 @@
 
 IbSimple::IbSimple()
     :
-      ibField_("ib", AUXILLARY),
+      ibField_("ib", PRIMITIVE),
       ibSourceField_("ibSource", AUXILLARY)
 {
 
@@ -62,21 +62,63 @@ void IbSimple::computeIbField()
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(isFluidCell(i, j, k, mesh))
-                {
-                    ibField_(i, j, k) = FLUID;
-                    cellStatus_(i, j, k) = ACTIVE;
-                }
-                else if (isSolidCell(i, j, k, mesh))
+                if(ibSphere_.isInside(mesh.cellXc(i, j, k)))
                 {
                     ibField_(i, j, k) = SOLID;
                     cellStatus_(i, j, k) = INACTIVE;
+                }
+                else if (isFluidCell(i, j, k, mesh))
+                {
+                    ibField_(i, j, k) = FLUID;
+                    cellStatus_(i, j, k) = ACTIVE;
                 }
                 else
                 {
                     ibField_(i, j, k) = IB;
                     cellStatus_(i, j, k) = BOUNDARY;
                 }
+
+                if(ibSphere_.isInside(mesh.faceXcW(i, j, k)))
+                    ibField_.faceW(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceW(i, j, k) = IB;
+                else
+                    ibField_.faceW(i, j, k) = FLUID;
+
+                if(ibSphere_.isInside(mesh.faceXcE(i, j, k)))
+                    ibField_.faceE(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceE(i, j, k) = IB;
+                else
+                    ibField_.faceE(i, j, k) = FLUID;
+
+                if(ibSphere_.isInside(mesh.faceXcN(i, j, k)))
+                    ibField_.faceN(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceN(i, j, k) = IB;
+                else
+                    ibField_.faceN(i, j, k) = FLUID;
+
+                if(ibSphere_.isInside(mesh.faceXcS(i, j, k)))
+                    ibField_.faceS(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceS(i, j, k) = IB;
+                else
+                    ibField_.faceS(i, j, k) = FLUID;
+
+                if(ibSphere_.isInside(mesh.faceXcT(i, j, k)))
+                    ibField_.faceT(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceT(i, j, k) = IB;
+                else
+                    ibField_.faceT(i, j, k) = FLUID;
+
+                if(ibSphere_.isInside(mesh.faceXcB(i, j, k)))
+                    ibField_.faceB(i, j, k) = SOLID;
+                else if (ibField_(i, j, k) == IB)
+                    ibField_.faceB(i, j, k) = IB;
+                else
+                    ibField_.faceB(i, j, k) = FLUID;
             }
         }
     }
@@ -85,6 +127,33 @@ void IbSimple::computeIbField()
 void IbSimple::computeIbSourceTerm()
 {
 
+}
+
+void IbSimple::interpolateIbCellCenters(Field<Vector3D> &uField, Field<double> &pField)
+{
+    HexaFvmMesh& mesh = *meshPtr_;
+    int i, j, k, faceNo;
+    Point3D points[6];
+    double values[6];
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(ibField_(i, j, k) == IB)
+                {
+                    points[0] = mesh.faceXcE(i, j, k);
+                    points[1] = mesh.faceXcW(i, j, k);
+                    points[2] = mesh.faceXcN(i, j, k);
+                    points[3] = mesh.faceXcS(i, j, k);
+                    points[4] = mesh.faceXcT(i, j, k);
+                    points[5] = mesh.faceXcB(i, j, k);
+                }
+            }
+        }
+    }
 }
 
 void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
