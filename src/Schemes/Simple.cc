@@ -190,7 +190,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
         for(j = 0; j < nCellsJ_; ++j)
         {
             for(i = 0; i < nCellsI_; ++i)
-            {   
+            {
                 if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
@@ -263,7 +263,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                    if(cellStatus_(i, j, k) != ACTIVE)
                         continue;
 
                     old = uField(i, j, k);
@@ -330,7 +330,7 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(!(cellStatus_(i, j, k) == ACTIVE))
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 if(i < uCellI_)
@@ -406,11 +406,11 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
 
                 aP_(i, j, k) = -(aE_(i, j, k) + aW_(i, j, k) + aN_(i, j, k) + aS_(i, j, k) + aT_(i, j, k) + aB_(i, j, k));
 
-                massFlow_(i, j, k) = massFlow_.faceW(i, j, k) - massFlow_.faceE(i, j, k)
-                        + massFlow_.faceS(i, j, k) - massFlow_.faceN(i, j, k)
-                        + massFlow_.faceB(i, j, k) - massFlow_.faceT(i, j, k);
+                massFlow_(i, j, k) = massFlow_.faceE(i, j, k) - massFlow_.faceW(i, j, k)
+                        + massFlow_.faceN(i, j, k) - massFlow_.faceS(i, j, k)
+                        + massFlow_.faceT(i, j, k) - massFlow_.faceB(i, j, k);
 
-                bP_(i, j, k).x = -massFlow_(i, j, k);
+                bP_(i, j, k).x = massFlow_(i, j, k);
             }
         }
     }
@@ -428,7 +428,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                    if(cellStatus_(i, j, k) != ACTIVE)
                         continue;
 
                     old = pCorr_(i, j, k);
@@ -470,7 +470,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(!(cellStatus_(i, j, k) == ACTIVE))
+                if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
                 // Correct mass-flow
@@ -515,7 +515,7 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(!(cellStatus_(i, j, k) == ACTIVE))
+                if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
                 sumVol += mesh.cellVol(i, j, k);
@@ -831,6 +831,9 @@ void Simple::displayUpdateMessage()
         {
             for(i = 0; i < nCellsI_; ++i)
             {
+                if(cellStatus_(i, j, k) != ACTIVE)
+                    continue;
+
                 maxContinuityError = std::max(fabs(massFlow_(i, j, k)), maxContinuityError);
             }
         }

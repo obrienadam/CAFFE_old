@@ -11,7 +11,7 @@ int main()
 {
     using namespace std;
 
-    int i, j, nIters;
+    int i, nIters;
     int cols[3];
     double bValue[SIZE], vals[3];
 

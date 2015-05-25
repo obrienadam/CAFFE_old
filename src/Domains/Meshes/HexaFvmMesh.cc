@@ -440,6 +440,8 @@ Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
     default:
         Output::raiseException("HexaFvmMesh", "node", "invalid node specified.");
     };
+
+    return Point3D();
 }
 
 int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)

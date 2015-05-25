@@ -92,7 +92,7 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(!(cellStatus_(i, j, k) == ACTIVE))
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 b.reallocate(6, 1);
@@ -129,7 +129,7 @@ void FvScheme::computeCellCenteredGradients(Field<double> &phiField, Field<Vecto
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                    if(cellStatus_(i, j, k) == INACTIVE)
                         continue;
 
                     gradPhiField(i, j, k) = (phiField.faceE(i, j, k)*mesh.fAreaNormE(i, j, k)
@@ -162,7 +162,7 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(!(cellStatus_(i, j, k) == ACTIVE))
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 b.reallocate(6, 1);
@@ -206,7 +206,7 @@ void FvScheme::computeCellCenteredGradients(Field<Vector3D> &vecField, Field<Ten
             {
                 for(i = 0; i < nCellsI_; ++i)
                 {
-                    if(!(cellStatus_(i, j, k) == ACTIVE))
+                    if(cellStatus_(i, j, k) == INACTIVE)
                         continue;
 
                     gradVecField(i, j, k) = (tensor(vecField.faceE(i, j, k), mesh.fAreaNormE(i, j, k))

@@ -81,7 +81,7 @@ Input::Input()
 
     //- ibSimple parameters
     inputDoubles["ibSphereRadius"] = 0.5;
-    inputStrings["ibSphereCenter"] = "(0.5 0.5 0.5)";
+    inputStrings["ibSphereCenter"] = "(0.5, 0.5, 0.5)";
 }
 
 Input::Input(std::string filename)

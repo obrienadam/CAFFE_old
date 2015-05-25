@@ -41,12 +41,8 @@ private:
 
     Sphere ibSphere_;
 
-    bool isSolidCell(int i, int j, int k, HexaFvmMesh& mesh);
-    bool isFluidCell(int i, int j, int k, HexaFvmMesh& mesh);
-
-    void computeIbField();
-    void computeIbSourceTerm();
-    void interpolateIbCellCenters(Field<Vector3D>& uField, Field<double>& pField);
+    void computeIbField(Field<Vector3D>& uField, Field<double>& pField);
+    void setIbCells(Field<Vector3D> &uField, Field<double>& pField);
 
 public:
 

@@ -98,7 +98,7 @@ protected:
      * @param rhoField A reference to the density field.
      * @param uField A reference to the velocity field.
      */
-    void computeMassFlowFaces(Field<double> &rhoField, Field<Vector3D>& uField);
+    virtual void computeMassFlowFaces(Field<double> &rhoField, Field<Vector3D>& uField);
 
     /**
      * @brief Compute the pressure corrections.
