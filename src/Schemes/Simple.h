@@ -28,6 +28,8 @@
 
 #include "FvScheme.h"
 #include "Tensor3D.h"
+
+#include "SparseMatrix.h"
 #include "SparseVector.h"
 
 enum FlowBoundary{INLET, OUTLET, WALL};
@@ -59,6 +61,9 @@ protected:
 
     Field<Tensor3D> gradVecField_;
     Field<Vector3D> gradScalarField_;
+
+    SparseMatrix A_;
+    SparseVector x_, b_;
 
     bool timeAccurate_;
 

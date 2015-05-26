@@ -58,6 +58,7 @@ public:
 
     void setValue(int i, int j, double value, InsertMode insertMode = INSERT_VALUES);
     void setValues(int m, int* iIndices, int n, int* jIndices, double* values, InsertMode insertMode = INSERT_VALUES);
+
     void beginAssembly();
     void endAssembly();
     void assemble();

@@ -234,31 +234,6 @@ T Field<T>::minNeighbour(int i, int j, int k)
 }
 
 template<class T>
-void Field<T>::print()
-{
-    using namespace std;
-
-    int i, j, k, l;
-
-    cout << "Field name = " << "\"" << name << "\"\n";
-
-    for(k = 0, l = 0; k < Array3D<T>::nK_; ++k)
-    {
-        for(j = 0; j < Array3D<T>::nJ_; ++j)
-        {
-            for(i = 0; i < Array3D<T>::nI_; ++i, ++l)
-            {
-                cout << Array3D<T>::data_[l] << " ";
-            } // end for i
-
-            cout << endl;
-        } // end for j
-
-        cout << endl;
-    } // end for k
-}
-
-template<class T>
 T& Field<T>::face(int i, int j, int k, int faceNo)
 {
     switch(faceNo)
@@ -577,4 +552,29 @@ void Field<T>::setBottomBoundaryField()
 
         break;
     };
+}
+
+template<class T>
+void Field<T>::print()
+{
+    using namespace std;
+
+    int i, j, k, l;
+
+    cout << "Field name = " << "\"" << name << "\"\n";
+
+    for(k = 0, l = 0; k < Array3D<T>::nK_; ++k)
+    {
+        for(j = 0; j < Array3D<T>::nJ_; ++j)
+        {
+            for(i = 0; i < Array3D<T>::nI_; ++i, ++l)
+            {
+                cout << Array3D<T>::data_[l] << " ";
+            } // end for i
+
+            cout << endl;
+        } // end for j
+
+        cout << endl;
+    } // end for k
 }

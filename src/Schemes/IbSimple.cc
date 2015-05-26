@@ -123,7 +123,7 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                         tmpValues[5] = uField(i, j, k - 1)(l);
 
                         uField(i, j, k)(l) = Interpolation::linear(tmpPoints, tmpValues, 6, mesh.cellXc(i, j, k));
-                        uField(i, j, k)(l) - 0.;
+                        uField(i, j, k)(l) = 0.;
                     }
 
                     if(ibField_(i + 1, j, k) == FLUID)
