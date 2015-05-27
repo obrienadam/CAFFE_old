@@ -12,16 +12,16 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-5000
+1000
 screenWriteInterval
 1
 fileWriteInterval
-15
+1
 
 ### Time ###################################################
 
 timeStep
-2e-5
+2e-3
 maxSimTime
 48
 maxRealTimeHours
@@ -30,19 +30,21 @@ maxRealTimeHours
 ### Scheme #################################################
 
 timeAccurate
-OFF
+ON
 relaxationFactorMomentum
-0.1
+0.5
 relaxationFactorPCorr
-0.1
+0.5
 rho
-1
+998
 mu
-0.01
+8.94e-4
 momentumSorToler
 1e-8
 pCorrSorToler
 1e-8
+maxInnerIters
+10
 maxMomentumSorIters
 400
 maxPCorrSorIters

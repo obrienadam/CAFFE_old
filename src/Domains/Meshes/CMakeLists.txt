@@ -7,13 +7,15 @@ set(HEADERS DomainIncludes.h
 	    HexaFvmMesh.h
             HexaMeshGen.h
             Field.h
-            InitialConditions.h)
+            InitialConditions.h
+            IndexMap.h)
 
 set(SOURCE HexaMeshGen.cc
 	   StructuredMesh.cc
            HexaFvmMesh.cc
            FieldI.h
-           InitialConditions.cc)
+           InitialConditions.cc
+           IndexMap.cc)
 
 add_library(HexaMesh ${HEADERS} ${SOURCE})
 

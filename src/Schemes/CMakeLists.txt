@@ -17,3 +17,4 @@ set(SOURCE FvScheme.cc
            MultiphaseSimple.cc)
 
 add_library(Schemes ${HEADERS} ${SOURCE})
+target_link_libraries(Schemes HexaMesh)

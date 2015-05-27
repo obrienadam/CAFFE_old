@@ -67,12 +67,9 @@ Simple::Simple()
       relaxationFactorMomentum_(0.3),
       relaxationFactorPCorr_(0.1),
       gradReconstructionMethod_(DIVERGENCE_THEOREM),
-      momentumSorToler_(0.01),
-      pCorrSorToler_(0.01),
-      maxInnerItrs_(20),
-      maxPCorrSorIters_(200),
-      maxMomentumSorIters_(50),
-      sorOmega_(1.91)
+      maxInnerIters_(20),
+      momentumGmresIters_(0),
+      pCorrGmresIters_(0)
 {
 
 }
@@ -170,10 +167,12 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 {
     using namespace std;
 
-    int i, j, k, l, itrNo;
+    int i, j, k, l;
     HexaFvmMesh& mesh = *meshPtr_;
     Vector3D sf, ds;
     Vector3D old;
+    SparseMatrix A;
+    SparseVector x, b;
 
     storeUField(uField, uFieldStar_);
 
@@ -228,20 +227,86 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
 
                 // Higher order terms go here
-
                 bP_(i, j, k) += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
 
                 // Relaxation source term
-
                 bP_(i, j, k) += (1. - relaxationFactorMomentum_)*aP_(i, j, k)*uFieldStar_(i, j, k);
 
                 // Additional source terms
-
                 if(sFieldPtr != NULL)
                     bP_(i, j, k) += (*sFieldPtr)(i, j, k);
 
-                // Update D-field
+                //- Boundary conditions
+                // I-direction bcs
+                if(i == uCellI_ && uField.getEastBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aE_(i, j, k);
+                    aE_(i, j, k) = 0.;
+                }
+                else if(i == uCellI_ || cellStatus_(i + 1, j, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aE_(i, j, k)*uField(i + 1, j, k);
+                    aE_(i, j, k) = 0.;
+                }
 
+                if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aW_(i, j, k);
+                    aW_(i, j, k) = 0.;
+                }
+                else if(i == 0 || cellStatus_(i - 1, j, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aW_(i, j, k)*uField(i - 1, j, k);
+                    aW_(i, j, k) = 0.;
+                }
+
+                // J-direction bcs
+                if(j == uCellJ_ && uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aN_(i, j, k);
+                    aN_(i, j, k) = 0.;
+                }
+                else if(j == uCellJ_ || cellStatus_(i, j + 1, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aN_(i, j, k)*uField(i, j + 1, k);
+                    aN_(i, j, k) = 0.;
+                }
+
+                if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aS_(i, j, k);
+                    aS_(i, j, k) = 0.;
+                }
+                else if(j == 0 || cellStatus_(i, j - 1, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aS_(i, j, k)*uField(i, j - 1, k);
+                    aS_(i, j, k) = 0.;
+                }
+
+                // K-direction bcs
+                if(k == uCellK_ && uField.getTopBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aT_(i, j, k);
+                    aT_(i, j, k) = 0.;
+                }
+                else if(k == uCellK_ || cellStatus_(i, j, k + 1) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aT_(i, j, k)*uField(i, j, k + 1);
+                    aT_(i, j, k) = 0.;
+                }
+
+                if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aB_(i, j, k);
+                    aB_(i, j, k) = 0.;
+                }
+                else if(k == 0 || cellStatus_(i, j, k - 1) == INTERPOLATION)
+                {
+                    bP_(i, j, k) += -aB_(i, j, k)*uField(i, j, k - 1);
+                    aB_(i, j, k) = 0.;
+                }
+
+                // Update D-field
                 dField_(i, j, k) = mesh.cellVol(i, j, k)/aP_(i, j, k);
             }
         }
@@ -251,12 +316,17 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     momentumResidual_ = computeResidual(uFieldStar_);
 
-    momentumSorItrs_ = 0;
+    // Set-up the solution matrix
+    indexMap.generateMap(cellStatus_);
+    A.setSize(3*indexMap.nActive(), 3*indexMap.nActive());
+    x.setSize(3*indexMap.nActive());
+    b.setSize(3*indexMap.nActive());
 
-    for(itrNo = 1; itrNo <= maxMomentumSorIters_; ++itrNo)
+    A.preallocate(7, 0);
+
+    // Add coefficients to the solution matrix (this process is a little memory intensive, may need to redo this later)
+    for(l = 0; l < 3; ++l)
     {
-        momentumSorConvergence_ = 0.;
-
         for(k = 0; k < nCellsK_; ++k)
         {
             for(j = 0; j < nCellsJ_; ++j)
@@ -266,32 +336,73 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     if(cellStatus_(i, j, k) != ACTIVE)
                         continue;
 
-                    old = uField(i, j, k);
+                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), aP_(i, j, k), INSERT_VALUES);
 
-                    for(l = 0; l < 3; ++l)
+                    // I-direction coefficients
+                    if(i < uCellI_)
                     {
-                        uField(i, j, k)(l) = (1. - sorOmega_)*uField(i, j, k)(l) + sorOmega_*(- aE_(i, j, k)*uField(i + 1, j, k)(l)
-                                                                                              - aW_(i, j, k)*uField(i - 1, j, k)(l)
-                                                                                              - aN_(i, j, k)*uField(i, j + 1, k)(l)
-                                                                                              - aS_(i, j, k)*uField(i, j - 1, k)(l)
-                                                                                              - aT_(i, j, k)*uField(i, j, k + 1)(l)
-                                                                                              - aB_(i, j, k)*uField(i, j, k - 1)(l)
-                                                                                              + bP_(i, j, k)(l))/aP_(i, j, k);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k), INSERT_VALUES);
                     }
 
-                    momentumSorConvergence_ = max((uField(i, j, k) - old).mag(), momentumSorConvergence_);
+                    if(i > 0)
+                    {
+                        A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k), INSERT_VALUES);
+                    }
+
+                    // J-direction coefficients
+                    if(j < uCellJ_)
+                    {
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k), INSERT_VALUES);
+                    }
+
+                    if(j > 0)
+                    {
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k), INSERT_VALUES);
+                    }
+
+                    // K-direction coefficents
+                    if(k < uCellK_)
+                    {
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k), INSERT_VALUES);
+                    }
+
+                    if(k > 0)
+                    {
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k), INSERT_VALUES);
+                    }
+
+                    x.setValue(indexMap(i, j, k, l), uField(i, j, k)(l), INSERT_VALUES);
+                    b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l), INSERT_VALUES);
                 }
             }
         }
-
-        uField.setBoundaryFields();
-
-        ++momentumSorItrs_;
-
-        if(momentumSorConvergence_ < momentumSorToler_)
-            break;
     }
 
+    // Assemble and solve
+    A.assemble();
+    x.assemble();
+    b.assemble();
+    momentumGmresIters_ += A.solve(b, x);
+
+    // Map solution back to the domain
+    for(l = 0; l < 3; ++l)
+    {
+        for(k = 0; k < nCellsK_; ++k)
+        {
+            for(j = 0; j < nCellsJ_; ++j)
+            {
+                for(i = 0; i < nCellsI_; ++i)
+                {
+                    if(cellStatus_(i, j, k) != ACTIVE)
+                        continue;
+
+                    uField(i, j, k)(l) = x(indexMap(i, j, k, l));
+                }
+            }
+        }
+    }
+
+    // Assemble the pseudo-velocity vector, to be used for the Rhie-Chow interpolation
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
@@ -314,6 +425,8 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
     }
 
     hField_.setBoundaryFields();
+
+    Output::print("Simple", "finished solving momentum.");
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -381,9 +494,10 @@ void Simple::computeMassFlowFaces(Field<double>& rhoField, Field<Vector3D> &uFie
 
 void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Field<double>& pField)
 {
-    int i, j, k, itrNo;
+    int i, j, k;
     Vector3D sf, ds, gradPCorrBar;
-    double old = 0.;
+    SparseMatrix A;
+    SparseVector x, b;
 
     rhieChowInterpolateInteriorFaces(uField, pField);
     computeMassFlowFaces(rhoField, uField);
@@ -411,48 +525,159 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
                         + massFlow_.faceT(i, j, k) - massFlow_.faceB(i, j, k);
 
                 bP_(i, j, k).x = massFlow_(i, j, k);
-            }
-        }
-    }
 
-    //- iterate using successive over-relaxation
-    pCorrSorItrs_ = 0;
-
-    for(itrNo = 1; itrNo <= maxPCorrSorIters_; ++itrNo)
-    {
-        pCorrSorConvergence_ = 0.;
-
-        for(k = 0; k < nCellsK_; ++k)
-        {
-            for(j = 0; j < nCellsJ_; ++j)
-            {
-                for(i = 0; i < nCellsI_; ++i)
+                //- Boundary conditions
+                // I-direction bcs
+                if(i == uCellI_ && pCorr_.getEastBoundaryPatch() == ZERO_GRADIENT)
                 {
-                    if(cellStatus_(i, j, k) != ACTIVE)
-                        continue;
+                    aP_(i, j, k) += aE_(i, j, k);
+                    aE_(i, j, k) = 0.;
+                }
+                else if(i == uCellI_ || cellStatus_(i + 1, j, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aE_(i, j, k)*pCorr_(i + 1, j, k);
+                    aE_(i, j, k) = 0.;
+                }
 
-                    old = pCorr_(i, j, k);
+                if(i == 0 && pCorr_.getWestBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aW_(i, j, k);
+                    aW_(i, j, k) = 0.;
+                }
+                else if(i == 0 || cellStatus_(i - 1, j, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aW_(i, j, k)*pCorr_(i - 1, j, k);
+                    aW_(i, j, k) = 0.;
+                }
 
-                    pCorr_(i, j, k) = (1. - sorOmega_)*pCorr_(i, j, k) + sorOmega_/aP_(i, j, k)*(bP_(i, j, k).x
-                                                                                                 - aE_(i, j, k)*pCorr_(i + 1, j, k)
-                                                                                                 - aW_(i, j, k)*pCorr_(i - 1, j, k)
-                                                                                                 - aN_(i, j, k)*pCorr_(i, j + 1, k)
-                                                                                                 - aS_(i, j, k)*pCorr_(i, j - 1, k)
-                                                                                                 - aT_(i, j, k)*pCorr_(i, j, k + 1)
-                                                                                                 - aB_(i, j, k)*pCorr_(i, j, k - 1));
+                // J-direction bcs
+                if(j == uCellJ_ && pCorr_.getNorthBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aN_(i, j, k);
+                    aN_(i, j, k) = 0.;
+                }
+                else if(j == uCellJ_ || cellStatus_(i, j + 1, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aN_(i, j, k)*pCorr_(i, j + 1, k);
+                    aN_(i, j, k) = 0.;
+                }
 
-                    pCorrSorConvergence_ = std::max(fabs(pCorr_(i, j, k) - old), pCorrSorConvergence_);
+                if(j == 0 && pCorr_.getSouthBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aS_(i, j, k);
+                    aS_(i, j, k) = 0.;
+                }
+                else if(j == 0 || cellStatus_(i, j - 1, k) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aS_(i, j, k)*pCorr_(i, j - 1, k);
+                    aS_(i, j, k) = 0.;
+                }
+
+                // K-direction bcs
+                if(k == uCellK_ && pCorr_.getTopBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aT_(i, j, k);
+                    aT_(i, j, k) = 0.;
+                }
+                else if(k == uCellK_ || cellStatus_(i, j, k + 1) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aT_(i, j, k)*pCorr_(i, j, k + 1);
+                    aT_(i, j, k) = 0.;
+                }
+
+                if(k == 0 && pCorr_.getBottomBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    aP_(i, j, k) += aB_(i, j, k);
+                    aB_(i, j, k) = 0.;
+                }
+                else if(k == 0 || cellStatus_(i, j, k - 1) == INTERPOLATION)
+                {
+                    bP_(i, j, k).x += -aB_(i, j, k)*pCorr_(i, j, k - 1);
+                    aB_(i, j, k) = 0.;
                 }
             }
         }
-
-        pCorr_.setBoundaryFields();
-
-        ++pCorrSorItrs_;
-
-        if(pCorrSorConvergence_ < pCorrSorToler_)
-            break;
     }
+
+    // Set-up the solution matrix
+    indexMap.generateMap(cellStatus_);
+    A.setSize(indexMap.nActive(), indexMap.nActive());
+    x.setSize(indexMap.nActive());
+    b.setSize(indexMap.nActive());
+
+    A.preallocate(7, 0);
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(cellStatus_(i, j, k) != ACTIVE)
+                    continue;
+
+                A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k, 0), aP_(i, j, k), INSERT_VALUES);
+
+                // I-direction coefficients
+                if(i < uCellI_)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k), INSERT_VALUES);
+                }
+
+                if(i > 0)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k), INSERT_VALUES);
+                }
+
+                // J-direction coefficients
+                if(j < uCellJ_)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k), INSERT_VALUES);
+                }
+
+                if(j > 0)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k), INSERT_VALUES);
+                }
+
+                // K-direction coefficients
+                if(k < uCellK_)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k), INSERT_VALUES);
+                }
+
+                if(k > 0)
+                {
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k), INSERT_VALUES);
+                }
+
+                x.setValue(indexMap(i, j, k, 0), pCorr_(i, j, k));
+                b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x, INSERT_VALUES);
+            }
+        }
+    }
+
+    // Assemble and solve
+    A.assemble();
+    x.assemble();
+    b.assemble();
+    pCorrGmresIters_ += A.solve(b, x);
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(cellStatus_(i, j, k) != ACTIVE)
+                    continue;
+
+                pCorr_(i, j, k) = x(indexMap(i, j, k, 0));
+            }
+        }
+    }
+
+    Output::print("Simple", "Finished solving pressure corrections.");
 }
 
 void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField, Field<double> &pField)
@@ -473,14 +698,25 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                // Correct mass-flow
-                if(i < uCellI_)
+                //- Correct mass flow
+                // Correct west, south and bottom boundary mass flows if they are outlets
+                if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
+                    massFlow_.faceW(i, j, k) += -rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k)*(pCorr_(i - 1, j, k) - pCorr_(i, j, k));
+
+                if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
+                    massFlow_.faceS(i, j, k) += -rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k)*(pCorr_(i, j - 1, k) - pCorr_(i, j, k));
+
+                if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
+                    massFlow_.faceB(i, j, k) += -rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k)*(pCorr_(i, j, k - 1) - pCorr_(i, j, k));
+
+                // Correct all interior faces and east, north and top boundary mass flows if they are outlets
+                if(i < uCellI_ || uField.getEastBoundaryPatch() == ZERO_GRADIENT)
                     massFlow_.faceE(i, j, k) += -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k)*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
 
-                if(j < uCellJ_)
+                if(j < uCellJ_ || uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
                     massFlow_.faceN(i, j, k) += -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k)*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
 
-                if(k < uCellK_)
+                if(k < uCellK_ || uField.getTopBoundaryPatch() == ZERO_GRADIENT)
                     massFlow_.faceT(i, j, k) += -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k)*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
 
                 massFlow_(i, j, k) = massFlow_.faceE(i, j, k) - massFlow_.faceW(i, j, k)
@@ -570,12 +806,8 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 
     relaxationFactorMomentum_ = input.inputDoubles["relaxationFactorMomentum"];
     relaxationFactorPCorr_ = input.inputDoubles["relaxationFactorPCorr"];
-    momentumSorToler_ = input.inputDoubles["momentumSorToler"];
-    pCorrSorToler_ = input.inputDoubles["pCorrSorToler"];
-    maxInnerItrs_ = input.inputInts["maxInnerIters"];
-    maxMomentumSorIters_ = input.inputInts["maxMomentumSorIters"];
-    maxPCorrSorIters_ = input.inputInts["maxPCorrSorIters"];
-    sorOmega_ = input.inputDoubles["sorOmega"];
+
+    maxInnerIters_ = input.inputInts["maxInnerIters"];
 
     //- Allocate memory
     uField0_.allocate(nCellsI_, nCellsJ_, nCellsK_);
@@ -745,7 +977,7 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 
     storeUField(uField, uField0_);
 
-    for(i = 0; i < maxInnerItrs_; ++i)
+    for(i = 0; i < maxInnerIters_; ++i)
     {
         computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);
         computePCorr(rhoField, uField, pField);
@@ -754,70 +986,13 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 }
 
 void Simple::copySolution(std::vector<double> &original)
-{/*
-    Field<Vector3D>& uField = *uFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
-    int uxNo, uyNo, uzNo, pNo, i;
+{
 
-    for(i = 0,
-        uxNo = uxStartI_,
-        uyNo = uyStartI_,
-        uzNo = uzStartI_,
-        pNo = pStartI_;
-        i < nCells_;
-        ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
-    {
-        original[uxNo] = uField(i).x;
-        original[uyNo] = uField(i).y;
-        original[uzNo] = uField(i).z;
-        original[pNo] = pField(i);
-    }*/
 }
 
 void Simple::updateSolution(std::vector<double> &update, int method)
-{/*
-    Field<Vector3D>& uField = *uFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
-    int uxNo, uyNo, uzNo, pNo, i;
+{
 
-    switch(method)
-    {
-
-    case ADD:
-
-        for(i = 0,
-            uxNo = uxStartI_,
-            uyNo = uyStartI_,
-            uzNo = uzStartI_,
-            pNo = pStartI_;
-            i < nCells_;
-            ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
-        {
-            uField(i).x += update[uxNo];
-            uField(i).y += update[uyNo];
-            uField(i).z += update[uzNo];
-            pField(i) += update[pNo];
-        }
-
-        break;
-    case REPLACE:
-
-        for(i = 0,
-            uxNo = uxStartI_,
-            uyNo = uyStartI_,
-            uzNo = uzStartI_,
-            pNo = pStartI_;
-            i < nCells_;
-            ++i, ++uxNo, ++uyNo, ++uzNo, ++pNo)
-        {
-            uField(i).x = update[uxNo];
-            uField(i).y = update[uyNo];
-            uField(i).z = update[uzNo];
-            pField(i) = update[pNo];
-        }
-
-        break;
-    };*/
 }
 
 void Simple::displayUpdateMessage()
@@ -839,12 +1014,13 @@ void Simple::displayUpdateMessage()
         }
     }
 
-    Output::print("Simple", "Momentum prediction SOR iterations  : " + std::to_string(momentumSorItrs_));
-    Output::print("Simple", "Momentum prediction SOR convergence : " + std::to_string(momentumSorConvergence_));
-    Output::print("Simple", "Pressure correction SOR iterations  : " + std::to_string(pCorrSorItrs_));
-    Output::print("Simple", "Pressure correction SOR convergence : " + std::to_string(pCorrSorConvergence_) + "\n");
-    Output::print("Simple", "U-Momentum residual                 : " + std::to_string(momentumResidual_.x));
-    Output::print("Simple", "V-Momentum residual                 : " + std::to_string(momentumResidual_.y));
-    Output::print("Simple", "W-Momentum residual                 : " + std::to_string(momentumResidual_.z));
-    Output::print("Simple", "Maximum cell continuity error       : " + std::to_string(maxContinuityError) + "\n");
+    Output::print("Simple", "Momentum prediction total GMRES iterations : " + std::to_string(momentumGmresIters_));
+    Output::print("Simple", "Pressure correction total GMRES iterations : " + std::to_string(pCorrGmresIters_) + "\n");
+    Output::print("Simple", "U-Momentum residual           : " + std::to_string(momentumResidual_.x));
+    Output::print("Simple", "V-Momentum residual           : " + std::to_string(momentumResidual_.y));
+    Output::print("Simple", "W-Momentum residual           : " + std::to_string(momentumResidual_.z));
+    Output::print("Simple", "Maximum cell continuity error : " + std::to_string(maxContinuityError) + "\n");
+
+    momentumGmresIters_ = 0;
+    pCorrGmresIters_ = 0;
 }

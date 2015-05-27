@@ -189,7 +189,7 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     storeUField(uField, uField0_);
     computeIbField(uField, pField);
 
-    for(i = 0; i < maxInnerItrs_; ++i)
+    for(i = 0; i < maxInnerIters_; ++i)
     {
         setIbCells(uField, pField);
         computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);

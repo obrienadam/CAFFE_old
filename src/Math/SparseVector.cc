@@ -15,7 +15,7 @@ SparseVector::SparseVector(int m)
     :
       SparseVector()
 {
-    allocate(m);
+    setSize(m);
 }
 
 SparseVector::~SparseVector()
@@ -23,7 +23,7 @@ SparseVector::~SparseVector()
     VecDestroy(&vec_);
 }
 
-void SparseVector::allocate(int m)
+void SparseVector::setSize(int m)
 {
     m_ = m;
     VecSetSizes(vec_, PETSC_DECIDE, m_);
@@ -38,6 +38,15 @@ void SparseVector::setValue(int i, double value, InsertMode insertMode)
 void SparseVector::setValues(int n, int *indices, double *values, InsertMode insertMode)
 {
     VecSetValues(vec_, n, indices, values, insertMode);
+}
+
+double SparseVector::operator ()(int i)
+{
+    double value;
+
+    errorCode_ = VecGetValues(vec_, 1, &i, &value);
+
+    return value;
 }
 
 void SparseVector::beginAssembly()

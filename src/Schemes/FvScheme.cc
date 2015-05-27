@@ -44,6 +44,8 @@ FvScheme::~FvScheme()
 
 void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conservedFieldName)
 {
+    int i;
+
     meshPtr_ = &mesh;
 
     nCellsI_ = mesh.nCellsI();
@@ -67,7 +69,7 @@ void FvScheme::initialize(Input &input, HexaFvmMesh &mesh, std::string conserved
 
     cellStatus_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    for(int i = 0; i < nCells_; ++i)
+    for(i = 0; i < nCells_; ++i)
         cellStatus_(i) = ACTIVE;
 }
 

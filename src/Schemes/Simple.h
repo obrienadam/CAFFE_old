@@ -31,6 +31,7 @@
 
 #include "SparseMatrix.h"
 #include "SparseVector.h"
+#include "IndexMap.h"
 
 enum FlowBoundary{INLET, OUTLET, WALL};
 
@@ -62,16 +63,15 @@ protected:
     Field<Tensor3D> gradVecField_;
     Field<Vector3D> gradScalarField_;
 
-    SparseMatrix A_;
-    SparseVector x_, b_;
+    IndexMap indexMap;
 
     bool timeAccurate_;
 
     double relaxationFactorMomentum_, relaxationFactorPCorr_;
     int gradReconstructionMethod_;
 
-    int maxInnerItrs_, momentumSorItrs_, pCorrSorItrs_, maxMomentumSorIters_, maxPCorrSorIters_;
-    double momentumSorToler_, pCorrSorToler_, momentumSorConvergence_, pCorrSorConvergence_, sorOmega_;
+    int maxInnerIters_, momentumGmresIters_, pCorrGmresIters_;
+
     Vector3D momentumResidual_;
 
     int uxStartI_, uyStartI_, uzStartI_, pStartI_;

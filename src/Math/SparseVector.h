@@ -20,10 +20,13 @@ public:
     SparseVector(int m);
     ~SparseVector();
 
-    void allocate(int m);
+    void setSize(int m);
 
     void setValue(int i, double value, InsertMode insertMode = INSERT_VALUES);
     void setValues(int n, int* indices, double* values, InsertMode insertMode = INSERT_VALUES);
+
+    double operator()(int i);
+
     void beginAssembly();
     void endAssembly();
     void assemble();

@@ -54,7 +54,8 @@ public:
 
     void initialize(Input& input);
 
-    void allocate(int m, int n);
+    void setSize(int m, int n);
+    void preallocate(int dnz, int onz);
 
     void setValue(int i, int j, double value, InsertMode insertMode = INSERT_VALUES);
     void setValues(int m, int* iIndices, int n, int* jIndices, double* values, InsertMode insertMode = INSERT_VALUES);
