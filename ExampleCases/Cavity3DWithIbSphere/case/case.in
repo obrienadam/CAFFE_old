@@ -45,12 +45,6 @@ pCorrSorToler
 1e-6
 maxInnerIters
 30
-maxMomentumSorIters
-200
-maxPCorrSorIters
-200
-sorOmega
-1.85
 
 ### Immersed Boundaries #####################################
 

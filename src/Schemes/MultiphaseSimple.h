@@ -39,11 +39,15 @@ private:
 
     double tau_;
 
+    void computeSurfaceTensionForce(Field<double>& alphaField);
+    void advectAlphaField(Field<Vector3D>& uField, double timeStep, Field<double>& alphaField);
+
 public:
 
     MultiphaseSimple();
 
     void initialize(Input& input, HexaFvmMesh& mesh);
+    void discretize(double timeStep, std::vector<double>& timeDerivatives);
 };
 
 #endif

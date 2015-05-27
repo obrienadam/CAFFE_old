@@ -27,7 +27,7 @@ SparseMatrix::SparseMatrix()
     :
       maxIters_(50000),
       rToler_(1e-8),
-      absToler_(1e-8)
+      absToler_(1e-10)
 {
     PetscInitializeNoArguments();
     errorCode_ = MatCreate(PETSC_COMM_WORLD, &A_);

@@ -339,34 +339,34 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), aP_(i, j, k), INSERT_VALUES);
 
                     // I-direction coefficients
-                    if(i < uCellI_)
+                    if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k), INSERT_VALUES);
                     }
 
-                    if(i > 0)
+                    if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k), INSERT_VALUES);
                     }
 
                     // J-direction coefficients
-                    if(j < uCellJ_)
+                    if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k), INSERT_VALUES);
                     }
 
-                    if(j > 0)
+                    if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k), INSERT_VALUES);
                     }
 
                     // K-direction coefficents
-                    if(k < uCellK_)
+                    if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k), INSERT_VALUES);
                     }
 
-                    if(k > 0)
+                    if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
                     {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k), INSERT_VALUES);
                     }
@@ -619,34 +619,34 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
                 A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k, 0), aP_(i, j, k), INSERT_VALUES);
 
                 // I-direction coefficients
-                if(i < uCellI_)
+                if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k), INSERT_VALUES);
                 }
 
-                if(i > 0)
+                if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k), INSERT_VALUES);
                 }
 
                 // J-direction coefficients
-                if(j < uCellJ_)
+                if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k), INSERT_VALUES);
                 }
 
-                if(j > 0)
+                if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k), INSERT_VALUES);
                 }
 
                 // K-direction coefficients
-                if(k < uCellK_)
+                if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k), INSERT_VALUES);
                 }
 
-                if(k > 0)
+                if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
                 {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k), INSERT_VALUES);
                 }

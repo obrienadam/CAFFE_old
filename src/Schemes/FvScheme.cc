@@ -32,7 +32,7 @@ FvScheme::FvScheme()
     :
       conservedFieldName_("phi"),
       meshPtr_(NULL),
-      cellStatus_("cellStatus", AUXILLARY)
+      cellStatus_("cellStatus", PRIMITIVE)
 {
 
 }

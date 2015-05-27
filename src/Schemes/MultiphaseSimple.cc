@@ -41,3 +41,24 @@ void MultiphaseSimple::initialize(Input &input, HexaFvmMesh& mesh)
     interfaceNormals_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     kField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 }
+
+void MultiphaseSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
+{
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+    Field<double>& rhoField = *rhoFieldPtr_;
+    Field<double>& muField = *muFieldPtr_;
+    Field<double>& alphaField = *alphaFieldPtr_;
+    int i;
+
+    storeUField(uField, uField0_);
+
+    for(i = 0; i < maxInnerIters_; ++i)
+    {
+        //computeSurfaceTension(alphaField);
+        computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);
+        computePCorr(rhoField, uField, pField);
+        correctContinuity(rhoField, uField, pField);
+        //advectAlphaField(uField, timeStep, alphaField);
+    }
+}
