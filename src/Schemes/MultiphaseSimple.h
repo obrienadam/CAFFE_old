@@ -34,19 +34,28 @@ class MultiphaseSimple : public Simple
 private:
 
     Field<double>* alphaFieldPtr_;
+    Field<double> alphaField0_;
+    Field<Vector3D> gradAlphaField_;
     Field<Vector3D> interfaceNormals_;
-    Field<Vector3D> kField_;
+    Field<double> kField_;
+    Field<Vector3D> bF_;
 
-    double tau_;
+    double sigma_;
 
-    void computeSurfaceTensionForce(Field<double>& alphaField);
-    void advectAlphaField(Field<Vector3D>& uField, double timeStep, Field<double>& alphaField);
+    int alphaGmresIters_;
+
+    void computeCurvature(Field<double>& alphaField);
+    void computeSurfaceTensionSource();
+    void advectAlphaField(Field<double> &rhoField, Field<Vector3D>& uField, double timeStep, Field<double>& alphaField);
 
 public:
 
     MultiphaseSimple();
 
     void initialize(Input& input, HexaFvmMesh& mesh);
+
+    void storeAlphaField(Field<double>& alphaField);
+
     void discretize(double timeStep, std::vector<double>& timeDerivatives);
 };
 

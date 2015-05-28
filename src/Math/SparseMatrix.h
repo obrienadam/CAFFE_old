@@ -64,7 +64,7 @@ public:
     void endAssembly();
     void assemble();
 
-    int solve(const SparseVector &b, SparseVector& x);
+    int solve(const SparseVector &b, SparseVector& x, PCType pcType = PCSOR);
 
     void print();
 };

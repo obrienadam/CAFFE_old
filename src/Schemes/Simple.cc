@@ -169,8 +169,6 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     int i, j, k, l;
     HexaFvmMesh& mesh = *meshPtr_;
-    Vector3D sf, ds;
-    Vector3D old;
     SparseMatrix A;
     SparseVector x, b;
 

@@ -94,7 +94,7 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
     using namespace std;
 
     HexaFvmMesh& mesh = *meshPtr_;
-    int i, j, k, l;
+    int i, j, k, l, n;
     Point3D tmpPoints[6];
     double tmpValues[6];
 
@@ -126,41 +126,54 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                         uField(i, j, k)(l) = 0.;
                     }
 
+                    n = 0;
+                    pField(i, j, k) = 0.;
+                    pCorr_(i, j, k) = 0.;
+
                     if(ibField_(i + 1, j, k) == FLUID)
                     {
-                        pField(i, j, k) = pField(i + 1, j, k);// + dot(gradPField_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
-                        pCorr_(i, j, k) = pCorr_(i + 1, j, k);// + dot(gradPCorr_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
+                        pField(i, j, k) += pField(i + 1, j, k);// + dot(gradPField_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
+                        pCorr_(i, j, k) += pCorr_(i + 1, j, k);// + dot(gradPCorr_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
+                        ++n;
                     }
 
                     if(ibField_(i - 1, j, k) == FLUID)
                     {
-                        pField(i, j, k) = pField(i - 1, j, k);// + dot(gradPField_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
-                        pCorr_(i, j, k) = pCorr_(i - 1, j, k);// + dot(gradPCorr_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
+                        pField(i, j, k) += pField(i - 1, j, k);// + dot(gradPField_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
+                        pCorr_(i, j, k) += pCorr_(i - 1, j, k);// + dot(gradPCorr_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
+                        ++n;
                     }
 
                     if(ibField_(i, j + 1, k) == FLUID)
                     {
-                        pField(i, j, k) = pField(i, j + 1, k);// + dot(gradPField_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
-                        pCorr_(i, j, k) = pCorr_(i, j + 1, k);// + dot(gradPCorr_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
+                        pField(i, j, k) += pField(i, j + 1, k);// + dot(gradPField_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
+                        pCorr_(i, j, k) += pCorr_(i, j + 1, k);// + dot(gradPCorr_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
+                        ++n;
                     }
 
                     if(ibField_(i, j - 1, k) == FLUID)
                     {
-                        pField(i, j, k) = pField(i, j - 1, k);/// + dot(gradPField_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
-                        pCorr_(i, j, k) = pCorr_(i, j - 1, k);// + dot(gradPCorr_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
+                        pField(i, j, k) += pField(i, j - 1, k);/// + dot(gradPField_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
+                        pCorr_(i, j, k) += pCorr_(i, j - 1, k);// + dot(gradPCorr_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
+                        ++n;
                     }
 
                     if(ibField_(i, j, k + 1) == FLUID)
                     {
-                        pField(i, j, k) = pField(i, j, k + 1);// + dot(gradPField_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
-                        pCorr_(i, j, k) = pCorr_(i, j, k + 1);// + dot(gradPCorr_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
+                        pField(i, j, k) += pField(i, j, k + 1);// + dot(gradPField_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
+                        pCorr_(i, j, k) += pCorr_(i, j, k + 1);// + dot(gradPCorr_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
+                        ++n;
                     }
 
                     if(ibField_(i, j, k - 1) == FLUID)
                     {
-                        pField(i, j, k) = pField(i, j, k - 1);// + dot(gradPField_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
-                        pCorr_(i, j, k) = pCorr_(i, j, k - 1);// + dot(gradPCorr_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
+                        pField(i, j, k) += pField(i, j, k - 1);// + dot(gradPField_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
+                        pCorr_(i, j, k) += pCorr_(i, j, k - 1);// + dot(gradPCorr_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
+                        ++n;
                     }
+
+                    pField(i, j, k) /= double(n);
+                    pCorr_(i, j, k) /= double(n);
                 }
             }
         }

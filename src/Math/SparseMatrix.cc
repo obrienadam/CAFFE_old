@@ -26,8 +26,8 @@
 SparseMatrix::SparseMatrix()
     :
       maxIters_(50000),
-      rToler_(1e-8),
-      absToler_(1e-10)
+      rToler_(1e-10),
+      absToler_(1e-8)
 {
     PetscInitializeNoArguments();
     errorCode_ = MatCreate(PETSC_COMM_WORLD, &A_);
@@ -50,7 +50,7 @@ SparseMatrix::~SparseMatrix()
 
 void SparseMatrix::initialize(Input &input)
 {
-    maxIters_ = input.inputInts["kspMaxItrs"];
+    maxIters_ = input.inputInts["kspMaxIters"];
     rToler_ = input.inputDoubles["kspRelativeTolerance"];
     absToler_ = input.inputDoubles["kspAbsoluteTolerance"];
 }
@@ -86,12 +86,6 @@ void SparseMatrix::beginAssembly()
 void SparseMatrix::endAssembly()
 {
     MatAssemblyEnd(A_, MAT_FINAL_ASSEMBLY);
-    KSPSetOperators(ksp_, A_, A_);
-    KSPGetPC(ksp_, &pc_);
-    PCSetType(pc_, PCJACOBI);
-    KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
-    KSPSetInitialGuessNonzero(ksp_, PETSC_TRUE);
-    KSPSetUp(ksp_);
 }
 
 void SparseMatrix::assemble()
@@ -100,9 +94,18 @@ void SparseMatrix::assemble()
     endAssembly();
 }
 
-int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
+int SparseMatrix::solve(const SparseVector& b, SparseVector& x, PCType pcType)
 {
     int nIters;
+
+    KSPSetOperators(ksp_, A_, A_);
+    KSPGetPC(ksp_, &pc_);
+
+    PCSetType(pc_, pcType);
+
+    KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
+    KSPSetInitialGuessNonzero(ksp_, PETSC_TRUE);
+    KSPSetUp(ksp_);
 
     KSPSolve(ksp_, b.vec_, x.vec_);
     KSPGetIterationNumber(ksp_, &nIters);

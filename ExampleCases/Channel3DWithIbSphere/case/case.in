@@ -32,9 +32,9 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.5
+0.1
 relaxationFactorPCorr
-0.5
+0.1
 rho
 998
 mu
@@ -44,7 +44,7 @@ momentumSorToler
 pCorrSorToler
 1e-3
 maxInnerIters
-30
+15
 maxMomentumSorIters
 300
 maxPCorrSorIters
@@ -69,7 +69,7 @@ boundaryRefValueEast
 boundaryTypeWest
 inlet
 boundaryRefValueWest
-(3,0,0)
+(0.1,0,0)
 
 boundaryTypeNorth
 wall
