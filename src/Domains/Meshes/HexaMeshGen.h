@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <fstream>
+#include <string>
 
 #include "Array3D.h"
 #include "Point3D.h"
@@ -15,6 +16,7 @@ private:
 
     std::vector<Point3D> vertices_;
     Array3D<Point3D> nodes_;
+    std::string meshName_;
 
     //- Helper functions for reading mesh files
 

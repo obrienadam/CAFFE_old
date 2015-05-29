@@ -687,31 +687,38 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
             }
         }
 
-        foutTec360_ << endl;
-    }
+        // Special header only for the first zone. This enables the nodes to be shared by subsequent zones
+        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
+                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
+                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+                    << "DATAPACKING = BLOCK" << endl
+                    << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
 
-    foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
-                << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
-                << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
-                << "DATAPACKING = BLOCK" << endl
-                << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
-
-    // Output the mesh data
-
-    for(componentNo = 0; componentNo < 3; ++componentNo)
-    {
-        for(k = 0; k < nodes_.sizeK(); ++k)
+        // Output the mesh data
+        for(componentNo = 0; componentNo < 3; ++componentNo)
         {
-            for(j = 0; j < nodes_.sizeJ(); ++j)
+            for(k = 0; k < nodes_.sizeK(); ++k)
             {
-                for(i = 0; i < nodes_.sizeI(); ++i)
+                for(j = 0; j < nodes_.sizeJ(); ++j)
                 {
-                    foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
-                }
+                    for(i = 0; i < nodes_.sizeI(); ++i)
+                    {
+                        foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
+                    }
 
-                foutTec360_ << endl;
+                    foutTec360_ << endl;
+                }
             }
         }
+    }
+    else
+    {
+        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
+                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
+                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+                    << "DATAPACKING = BLOCK" << endl
+                    << "VARSHARELIST = ([1-3] = 1)" << endl
+                    << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
     }
 
     // Output the solution data for scalars

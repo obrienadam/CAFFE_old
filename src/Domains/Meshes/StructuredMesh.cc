@@ -30,7 +30,7 @@ void StructuredMesh::initialize(Input &input)
 {
     Output::print("StructuredMesh", "Initializing structured mesh...");
 
-    initialize("mesh/structuredMesh.msh");
+    initialize("mesh/structuredMesh.dat");
 
     Output::print("StructuredMesh", "Initialization of structured mesh complete.");
     Output::print(meshStats());
@@ -63,50 +63,12 @@ void StructuredMesh::initialize(std::string filename)
     vector<string> bufferVec;
     ifstream fin;
 
-    int i, j, k;
-    int nI(0), nJ(0), nK(0);
+    int i, j, k, l;
+    int nI, nJ, nK;
 
     fin.open(filename.c_str());
 
-    while(!fin.eof())
-    {
-        getline(fin, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer);
-
-        if(buffer.empty())
-            continue;
-
-        bufferVec = InputStringProcessing::partition(buffer, "=");
-
-        if(bufferVec[0] == "nNodesI")
-        {
-            nI = stoi(bufferVec[1]);
-        }
-        else if(bufferVec[0] == "nNodesJ")
-        {
-            nJ = stoi(bufferVec[1]);
-        }
-        else if(bufferVec[0] == "nNodesK")
-        {
-            nK = stoi(bufferVec[1]);
-            break;
-        }
-        else
-        {
-            Output::raiseException("StructuredMesh", "initialize", "unrecognized structured mesh dimension \"" + bufferVec[0] + "\".");
-        }
-    }
-
-    nodes_.allocate(nI, nJ, nK);
-
-    // Check to see if a dimension was not allocated
-
-    if(nI == 0 || nJ == 0 || nK == 0)
-    {
-        Output::raiseException("StructuredMesh", "initialize", "one or more structured mesh dimensions was not found in file \"" + filename + "\".");
-    }
-
-    i = j = k = 0;
+    nI = nJ = nK = 0;
 
     while(!fin.eof())
     {
@@ -116,60 +78,56 @@ void StructuredMesh::initialize(std::string filename)
         if(buffer.empty())
             continue;
 
-        bufferVec = InputStringProcessing::partition(buffer, " ");
+        bufferVec = InputStringProcessing::partition(buffer, " ,=\"");
 
-        for(i = 0; i < nI; ++i)
+        if(bufferVec[0] == "TITLE")
+            name = bufferVec[1];
+        else if(bufferVec[0] == "VARIABLES")
+            continue;
+        else if(bufferVec[0] == "ZONE")
         {
-            nodes_(i, j, k) = Point3D(bufferVec[i]);
+            for(i = 1; i < 7; i += 2)
+            {
+                if(bufferVec[i] == "I")
+                    nI = stoi(bufferVec[i + 1]);
+                else if(bufferVec[i] == "J")
+                    nJ = stoi(bufferVec[i + 1]);
+                else if(bufferVec[i] == "K")
+                    nK = stoi(bufferVec[i + 1]);
+                else
+                    Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + bufferVec[i] + "\".");
+            }
+            std::cout << nI << std::endl;
         }
+        else if(bufferVec[0] == "FILETYPE")
+            continue;
+        else if(bufferVec[0] == "DATAPACKING")
+            break;
+        else
+            Output::raiseException("StructuredMesh", "initialize", "invalid mesh header \"" + bufferVec[0] + "\".");
+    }
 
-        ++j;
+    // Check to see if a dimension was not allocated
+    if(nI == 0 || nJ == 0 || nK == 0)
+        Output::raiseException("StructuredMesh", "initialize", "one or more structured mesh dimensions was not found in file \"" + filename + "\".");
 
-        if(j == nJ)
+    nodes_.allocate(nI, nJ, nK);
+
+    for(l = 0; l < 3; ++l)
+    {
+        for(k = 0; k < nK; ++k)
         {
-            j = 0;
-            ++k;
+            for(j = 0; j < nJ; ++j)
+            {
+                for(i = 0; i < nI; ++i)
+                {
+                    fin >> nodes_(i, j, k)(l);
+                }
+            }
         }
     }
 
     fin.close();
-
-    write();
-}
-
-void StructuredMesh::write(double time)
-{
-    int nI, nJ, nK;
-    int i, j, k;
-
-    nI = nodes_.sizeI();
-    nJ = nodes_.sizeJ();
-    nK = nodes_.sizeK();
-
-    if(DomainInterface::nOutputs_ == 0)
-    {
-        foutRestart_.open((name + ".msh").c_str());
-
-        foutRestart_ << "nNodesI=" << nI << "\n"
-                     << "nNodesJ=" << nJ << "\n"
-                     << "nNodesK=" << nK << "\n";
-    }
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-
-            {
-                 foutRestart_ << "(" << nodes_(i, j, k) << ") ";
-            } // end for i
-
-            foutRestart_ << "\n";
-        } // end for j
-    } // end for k
-
-    foutRestart_.close();
 }
 
 void StructuredMesh::writeTec360(double time)

@@ -47,8 +47,6 @@ public:
     virtual void initialize(std::string filename);
 
     //- Output methods
-
-    virtual void write(double time = 0.);
     virtual void writeTec360(double time = 0.);
 };
 

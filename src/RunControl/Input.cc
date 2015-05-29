@@ -72,12 +72,10 @@ Input::Input()
     inputDoubles["relaxationFactorPCorr"] = 0.1;
     inputDoubles["rho"] = 998.;
     inputDoubles["mu"] = 0.1;
-    inputDoubles["momentumSorToler"] = 0.01;
-    inputDoubles["pCorrSorToler"] = 0.01;
     inputInts["maxInnerIters"] = 10;
-    inputInts["maxMomentumSorIters"] = 50;
-    inputInts["maxPCorrSorIters"] = 200;
-    inputDoubles["sorOmega"] = 1.91;
+
+    //- multiphaseSimple parameters
+    inputDoubles["sigma"] = 0.07;
 
     //- ibSimple parameters
     inputDoubles["ibSphereRadius"] = 0.5;
@@ -101,7 +99,7 @@ void Input::openInputFile(std::string filename)
 {
     using namespace std;
 
-    string buffer;
+    string buffer, buffer2;
 
     if(fin_.is_open())
         fin_.close();
@@ -127,20 +125,40 @@ void Input::openInputFile(std::string filename)
 
         if(inputInts.find(buffer) != inputInts.end())
         {
-            if(!(fin_ >> inputInts[buffer]))
+            getline(fin_, buffer2);
+            buffer2 = InputStringProcessing::processBuffer(buffer2);
+
+            try
+            {
+                inputInts[buffer] = stoi(buffer2);
+            }
+            catch(...)
+            {
                 Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects an integer value.");
+            }
         }
 
         else if (inputDoubles.find(buffer) != inputDoubles.end())
         {
-            if(!(fin_ >> inputDoubles[buffer]))
+            getline(fin_, buffer2);
+            buffer2 = InputStringProcessing::processBuffer(buffer2);
+
+            try
+            {
+                inputDoubles[buffer] = stod(buffer2);
+            }
+            catch(...)
+            {
                 Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects a double value.");
+            }
         }
 
         else if (inputStrings.find(buffer) != inputStrings.end())
         {
-            if(!(fin_ >> inputStrings[buffer]))
-                Output::raiseException("Input", "openInputFile", "Input field \"" + buffer + "\" expects a string.");
+            getline(fin_, buffer2);
+            buffer2 = InputStringProcessing::processBuffer(buffer2, false);
+
+            inputStrings[buffer] = buffer2;
         }
         else
         {

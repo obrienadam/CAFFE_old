@@ -7,7 +7,8 @@
 
 HexaMeshGen::HexaMeshGen()
     :
-      metricConversion_(1.)
+      metricConversion_(1.),
+      meshName_("UnnamedMesh")
 {
     
 }
@@ -30,13 +31,9 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         buffer = InputStringProcessing::processBuffer(buffer);
         
         if(buffer.empty())
-        {
             continue;
-        }
         else if(buffer != "{")
-        {
             Output::raiseException("HexaMeshGen", "readVertices", "Expected a \"{\", but received a \"" + buffer + "\".");
-        }
 
         // Input is good, break
 
@@ -44,7 +41,6 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
     }
 
     // Begin reading the vertices
-
     while(true)
     {
         getline(inputFile, buffer);
@@ -52,12 +48,15 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
 
         if(buffer.empty())
             continue;
-
-        if(buffer == "}")
-            break;
+        else if(buffer == "}")
+        {
+            if(vertices_.size() != 8)
+                Output::raiseException("HexaMeshGen", "readVertices", "invalid number of vertices specified.");
+            else
+                break;
+        }
 
         // buffer should contain a bracketed vector
-
         vertices_.push_back(Point3D(buffer)*metricConversion_);
     }
 
@@ -81,16 +80,11 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         buffer = InputStringProcessing::processBuffer(buffer);
 
         if(buffer.empty())
-        {
             continue;
-        }
         else if(buffer != "{")
-        {
             Output::raiseException("HexaMeshGen", "readResolution", "Expected a \"{\", but received a \"" + buffer + "\".");
-        }
 
         // Input is good, break
-
         break;
     }
 
@@ -103,15 +97,10 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
 
         if(buffer.empty())
             continue;
-
-        if(buffer == "}")
+        else if(buffer == "}")
             break;
 
-        // Extract the bracketed coordinate
-
         buffer = buffer.substr(buffer.find_first_of("("), buffer.find_first_of(")") + 1);
-
-        // Begin extracting the vertex coordinates from the buffer
 
         nI = int(InputStringProcessing::getNextElement(buffer));
         nJ = int(InputStringProcessing::getNextElement(buffer));
@@ -155,23 +144,20 @@ void HexaMeshGen::readMeshInputFile(std::string filename)
         
         if(buffer.substr(0, buffer.find("=")) == "MetricConversion")
         {
-            // Extract the metric conversion floating point number and store
-            
-            buffer = buffer.substr(buffer.find("=") + 1, buffer.back());
+            buffer = buffer.substr(buffer.find("=") + 1, buffer.length());
             metricConversion_ = stod(buffer);
         }
+        else if(buffer.substr(0, buffer.find("=")) == "MeshName")
+        {
+            buffer = buffer.substr(buffer.find("=") + 1, buffer.length());
+            meshName_ = buffer;
+        }
         else if(buffer == "Vertices")
-        {
             readVertices(inputFile);
-        }
         else if(buffer == "Resolution")
-        {
             readResolution(inputFile);
-        }
         else
-        {
             Output::raiseException("HexaMeshGen", "readMeshInputFile", "Unrecognized input field header " + buffer + ".");
-        }
     }
 }
 
@@ -179,27 +165,31 @@ void HexaMeshGen::writeMeshFile()
 {
     using namespace std;
 
-    int i, j, k;
+    int i, j, k, l;
 
-    ofstream fout("mesh/structuredMesh.msh");
+    ofstream fout("mesh/structuredMesh.dat");
 
-    fout << "# CAFFE structured mesh file\n\n"
-         << "nNodesI=" << nodes_.sizeI() << endl
-         << "nNodesJ=" << nodes_.sizeJ() << endl
-         << "nNodesK=" << nodes_.sizeK() << endl;
+    fout << "TITLE = " << "\"" + meshName_ + "\"" << endl
+         << "VARIABLES = \"x\", \"y\", \"z\"" << endl
+         << "FILETYPE = GRID" << endl
+         << "ZONE I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+         << "DATAPACKING = BLOCK" << endl;
 
-    for(k = 0; k < nodes_.sizeK(); ++k)
+    for(l = 0; l < 3; ++l)
     {
-        for(j = 0; j < nodes_.sizeJ(); ++j)
+        for(k = 0; k < nodes_.sizeK(); ++k)
         {
-            for(i = 0; i < nodes_.sizeI(); ++i)
+            for(j = 0; j < nodes_.sizeJ(); ++j)
             {
-                fout << "(" << nodes_(i, j, k) << ") ";
-            } // end for i
+                for(i = 0; i < nodes_.sizeI(); ++i)
+                {
+                    fout << nodes_(i, j, k)(l) << " ";
+                }
 
-            fout << endl;
-        } // end for j
-    } // end for k
+                fout << endl;
+            }
+        }
+    }
 
     fout.close();
 }

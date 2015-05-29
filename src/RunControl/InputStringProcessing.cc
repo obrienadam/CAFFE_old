@@ -80,5 +80,14 @@ std::vector<std::string> InputStringProcessing::partition(std::string buffer, st
 
     split(partitionedString, buffer, is_any_of(delimiter));
 
+    for(int i = 0; i < partitionedString.size(); ++i)
+    {
+        if(partitionedString[i].empty())
+        {
+            partitionedString.erase(partitionedString.begin() + i);
+            --i;
+        }
+    }
+
     return partitionedString;
 }

@@ -1,5 +1,6 @@
 ## hexaMesh input file
 
+MeshName = Cavity2D
 MetricConversion = 0.1
 
 Vertices

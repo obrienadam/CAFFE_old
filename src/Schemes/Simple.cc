@@ -338,36 +338,24 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
                     // I-direction coefficients
                     if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k), INSERT_VALUES);
-                    }
 
                     if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k), INSERT_VALUES);
-                    }
 
                     // J-direction coefficients
                     if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k), INSERT_VALUES);
-                    }
 
                     if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k), INSERT_VALUES);
-                    }
 
                     // K-direction coefficents
                     if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k), INSERT_VALUES);
-                    }
 
                     if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                    {
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k), INSERT_VALUES);
-                    }
 
                     x.setValue(indexMap(i, j, k, l), uField(i, j, k)(l), INSERT_VALUES);
                     b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l), INSERT_VALUES);
@@ -444,19 +432,37 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
                 if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
-                if(i < uCellI_)
+                if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    getFaceStencil(i, j, k, WEST, sf, ds);
+                    uField.faceW(i, j, k) = hField_.faceW(i, j, k) - dField_.faceW(i, j, k)*(pField(i - 1, j, k) - pField(i, j, k))*sf/dot(sf, ds);
+                }
+
+                if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    getFaceStencil(i, j, k, SOUTH, sf, ds);
+                    uField.faceS(i, j, k) = hField_.faceS(i, j, k) - dField_.faceS(i, j, k)*(pField(i, j - 1, k) - pField(i, j, k))*sf/dot(sf, ds);
+                }
+
+                if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
+                {
+                    getFaceStencil(i, j, k, BOTTOM, sf, ds);
+                    uField.faceB(i, j, k) = hField_.faceB(i, j, k) - dField_.faceB(i, j, k)*(pField(i, j, k - 1) - pField(i, j, k))*sf/dot(sf, ds);
+                }
+
+                if(i < uCellI_ || uField.getEastBoundaryPatch() == ZERO_GRADIENT)
                 {
                     getFaceStencil(i, j, k, EAST, sf, ds);
                     uField.faceE(i, j, k) = hField_.faceE(i, j, k) - dField_.faceE(i, j, k)*(pField(i + 1, j, k) - pField(i, j, k))*sf/dot(sf, ds);
                 }
 
-                if(j < uCellJ_)
+                if(j < uCellJ_ || uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
                 {
                     getFaceStencil(i, j, k, NORTH, sf, ds);
                     uField.faceN(i, j, k) = hField_.faceN(i, j, k) - dField_.faceN(i, j, k)*(pField(i, j + 1, k) - pField(i, j, k))*sf/dot(sf, ds);
                 }
 
-                if(k < uCellK_)
+                if(k < uCellK_ || uField.getTopBoundaryPatch() == ZERO_GRADIENT)
                 {
                     getFaceStencil(i, j, k, TOP, sf, ds);
                     uField.faceT(i, j, k) = hField_.faceT(i, j, k) - dField_.faceT(i, j, k)*(pField(i, j, k + 1) - pField(i, j, k))*sf/dot(sf, ds);
@@ -618,36 +624,24 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
 
                 // I-direction coefficients
                 if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k), INSERT_VALUES);
-                }
 
                 if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k), INSERT_VALUES);
-                }
 
                 // J-direction coefficients
                 if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k), INSERT_VALUES);
-                }
 
                 if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k), INSERT_VALUES);
-                }
 
                 // K-direction coefficients
                 if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k), INSERT_VALUES);
-                }
 
                 if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                {
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k), INSERT_VALUES);
-                }
 
                 x.setValue(indexMap(i, j, k, 0), pCorr_(i, j, k));
                 b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x, INSERT_VALUES);
