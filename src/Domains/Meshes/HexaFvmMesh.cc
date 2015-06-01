@@ -417,6 +417,11 @@ Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
     return vectorFields[end];
 }
 
+Point3D HexaFvmMesh::cellXc(int i, int j, int k)
+{
+    return cellCenters_(i, j, k);
+}
+
 Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
 {
     switch(nodeNo)

@@ -39,18 +39,8 @@ rho
 1
 mu
 0.01
-momentumSorToler
-1e-7
-pCorrSorToler
-1e-7
 maxInnerIters
 20
-maxMomentumSorIters
-100
-maxPCorrSorIters
-100
-sorOmega
-1.92
 
 ### Boundaries ##############################################
 

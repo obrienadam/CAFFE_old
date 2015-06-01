@@ -112,7 +112,6 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                     tmpPoints[3] = mesh.cellXc(i, j - 1, k);
                     tmpPoints[4] = mesh.cellXc(i, j, k + 1);
                     tmpPoints[5] = mesh.cellXc(i, j, k - 1);
-
                     for(l = 0; l < 3; ++l)
                     {
                         tmpValues[0] = uField(i + 1, j, k)(l);
@@ -123,7 +122,6 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                         tmpValues[5] = uField(i, j, k - 1)(l);
 
                         uField(i, j, k)(l) = Interpolation::linear(tmpPoints, tmpValues, 6, mesh.cellXc(i, j, k));
-                        uField(i, j, k)(l) = 0.;
                     }
 
                     n = 0;
@@ -197,6 +195,7 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     Field<double>& pField = *pFieldPtr_;
     Field<double>& rhoField = *rhoFieldPtr_;
     Field<double>& muField = *muFieldPtr_;
+    Field<double>& massFlowField = *massFlowFieldPtr_;
     int i;
 
     storeUField(uField, uField0_);
@@ -205,8 +204,8 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     for(i = 0; i < maxInnerIters_; ++i)
     {
         setIbCells(uField, pField);
-        computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);
-        computePCorr(rhoField, uField, pField);
-        correctContinuity(rhoField, uField, pField);
+        computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
+        computePCorr(rhoField, massFlowField, uField, pField);
+        correctContinuity(rhoField, massFlowField, uField, pField);
     }
 }

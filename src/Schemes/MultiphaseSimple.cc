@@ -96,7 +96,7 @@ void MultiphaseSimple::computeSurfaceTensionSource()
     }
 }
 
-void MultiphaseSimple::advectAlphaField(Field<double>& rhoField, Field<Vector3D> &uField, double timeStep, Field<double> &alphaField)
+void MultiphaseSimple::advectAlphaField(Field<double>& rhoField, Field<double>& massFlowField, Field<Vector3D> &uField, double timeStep, Field<double> &alphaField)
 {
     using namespace std;
 
@@ -120,20 +120,20 @@ void MultiphaseSimple::advectAlphaField(Field<double>& rhoField, Field<Vector3D>
                     a0P_(i, j, k) = 0.;
 
                 // Face coefficients
-                aE_(i, j, k) =  min(massFlow_.faceE(i, j, k), 0.)/rhoField.faceE(i, j, k);
-                aW_(i, j, k) =  -max(massFlow_.faceW(i, j, k), 0.)/rhoField.faceW(i, j, k);
-                aN_(i, j, k) =  min(massFlow_.faceN(i, j, k), 0.)/rhoField.faceN(i, j, k);
-                aS_(i, j, k) =  -max(massFlow_.faceS(i, j, k), 0.)/rhoField.faceS(i, j, k);
-                aT_(i, j, k) =  min(massFlow_.faceT(i, j, k), 0.)/rhoField.faceT(i, j, k);
-                aB_(i, j, k) =  -max(massFlow_.faceB(i, j, k), 0.)/rhoField.faceB(i, j, k);
+                aE_(i, j, k) =  min(massFlowField.faceE(i, j, k), 0.)/rhoField.faceE(i, j, k);
+                aW_(i, j, k) =  -max(massFlowField.faceW(i, j, k), 0.)/rhoField.faceW(i, j, k);
+                aN_(i, j, k) =  min(massFlowField.faceN(i, j, k), 0.)/rhoField.faceN(i, j, k);
+                aS_(i, j, k) =  -max(massFlowField.faceS(i, j, k), 0.)/rhoField.faceS(i, j, k);
+                aT_(i, j, k) =  min(massFlowField.faceT(i, j, k), 0.)/rhoField.faceT(i, j, k);
+                aB_(i, j, k) =  -max(massFlowField.faceB(i, j, k), 0.)/rhoField.faceB(i, j, k);
 
                 // Central coefficient
-                aP_(i, j, k) = max(massFlow_.faceE(i, j, k), 0.)/rhoField.faceE(i, j, k)
-                        - min(massFlow_.faceW(i, j, k), 0.)/rhoField.faceW(i, j, k)
-                        + max(massFlow_.faceN(i, j, k), 0.)/rhoField.faceN(i, j, k)
-                        - min(massFlow_.faceS(i, j, k), 0.)/rhoField.faceS(i, j, k)
-                        + max(massFlow_.faceT(i, j, k), 0.)/rhoField.faceT(i, j, k)
-                        - min(massFlow_.faceB(i, j, k), 0.)/rhoField.faceB(i, j, k)
+                aP_(i, j, k) = max(massFlowField.faceE(i, j, k), 0.)/rhoField.faceE(i, j, k)
+                        - min(massFlowField.faceW(i, j, k), 0.)/rhoField.faceW(i, j, k)
+                        + max(massFlowField.faceN(i, j, k), 0.)/rhoField.faceN(i, j, k)
+                        - min(massFlowField.faceS(i, j, k), 0.)/rhoField.faceS(i, j, k)
+                        + max(massFlowField.faceT(i, j, k), 0.)/rhoField.faceT(i, j, k)
+                        - min(massFlowField.faceB(i, j, k), 0.)/rhoField.faceB(i, j, k)
                         + a0P_(i, j, k);
 
                 bP_(i, j, k).x = a0P_(i, j, k)*alphaField0_(i, j, k);
@@ -325,6 +325,7 @@ void MultiphaseSimple::discretize(double timeStep, std::vector<double> &timeDeri
 {
     Field<double>& rhoField = *rhoFieldPtr_;
     Field<double>& muField = *muFieldPtr_;
+    Field<double>& massFlowField = *massFlowFieldPtr_;
     Field<Vector3D>& uField = *uFieldPtr_;
     Field<double>& pField = *pFieldPtr_;
     Field<double>& alphaField = *alphaFieldPtr_;
@@ -336,10 +337,10 @@ void MultiphaseSimple::discretize(double timeStep, std::vector<double> &timeDeri
     for(i = 0; i < maxInnerIters_; ++i)
     {
         computeCurvature(alphaField);
-        computeMomentum(rhoField, muField, &bF_, timeStep, uField, pField);
-        computePCorr(rhoField, uField, pField);
-        correctContinuity(rhoField, uField, pField);
+        computeMomentum(rhoField, muField, massFlowField, &bF_, timeStep, uField, pField);
+        computePCorr(rhoField, massFlowField, uField, pField);
+        correctContinuity(rhoField, massFlowField, uField, pField);
     }
 
-    advectAlphaField(rhoField, uField, timeStep, alphaField);
+    advectAlphaField(rhoField, massFlowField, uField, timeStep, alphaField);
 }

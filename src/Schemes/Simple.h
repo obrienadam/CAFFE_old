@@ -43,6 +43,7 @@ protected:
     Field<double>* pFieldPtr_;
     Field<double>* rhoFieldPtr_;
     Field<double>* muFieldPtr_;
+    Field<double>* massFlowFieldPtr_;
 
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
@@ -53,7 +54,6 @@ protected:
     Field<Vector3D> hField_;
     Field<double> dField_;
 
-    Field<double> massFlow_;
     Field<double> pCorr_;
     Field<Vector3D> gradPCorr_;
 
@@ -88,7 +88,7 @@ protected:
      * @param uField A reference to the velocity field.
      * @param pField A reference to the pressure field.
      */
-    void computeMomentum(Field<double> &rhoField, Field<double> &muField, Field<Vector3D>* sFieldPtr, double timeStep, Field<Vector3D>& uField, Field<double>& pField);
+    void computeMomentum(Field<double> &rhoField, Field<double> &muField, Field<double> &massFlowField, Field<Vector3D>* sFieldPtr, double timeStep, Field<Vector3D>& uField, Field<double>& pField);
 
     /**
      * @brief Interpolate the face centered velocities using the Rhie-Chow interpolation method
@@ -103,19 +103,19 @@ protected:
      * @param rhoField A reference to the density field.
      * @param uField A reference to the velocity field.
      */
-    virtual void computeMassFlowFaces(Field<double> &rhoField, Field<Vector3D>& uField);
+    virtual void computeMassFlowFaces(Field<double> &rhoField, Field<Vector3D>& uField, Field<double> &massFlowField);
 
     /**
      * @brief Compute the pressure corrections.
      */
-    void computePCorr(Field<double> &rhoField, Field<Vector3D>& uField, Field<double> &pField);
+    void computePCorr(Field<double> &rhoField, Field<double> &massFlow, Field<Vector3D>& uField, Field<double> &pField);
 
     /**
      * @brief Correct the mass flow, pressure and velocity fields using the computed pressure corrections.
      * @param uField A reference to the velocity field.
      * @param pField A reference to the pressure field.
      */
-    void correctContinuity(Field<double> &rhoField, Field<Vector3D>& uField, Field<double>& pField);
+    void correctContinuity(Field<double> &rhoField, Field<double> &massFlowField, Field<Vector3D>& uField, Field<double>& pField);
 
     Vector3D computeResidual(Field<Vector3D>& uField);
 

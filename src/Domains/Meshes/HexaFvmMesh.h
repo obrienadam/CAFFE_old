@@ -153,7 +153,7 @@ public:
     Field<Vector3D>& findVectorField(const std::string &fieldName);
 
     // Retrieve cell parameters
-    Point3D cellXc(int i, int j, int k){ return cellCenters_(i, j, k); }
+    Point3D cellXc(int i, int j, int k);
     double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }
 
     Point3D node(int i, int j, int k, int nodeNo);

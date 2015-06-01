@@ -54,7 +54,6 @@ Simple::Simple()
       cT_("dT", AUXILLARY),
       cB_("dB", AUXILLARY),
       bP_("bP", AUXILLARY),
-      massFlow_("massFlow", PRIMITIVE),
       pCorr_("pCorr", PRIMITIVE),
       gradPCorr_("gradPCorr", PRIMITIVE),
       hField_("hField", PRIMITIVE),
@@ -163,7 +162,7 @@ void Simple::storeUField(Field<Vector3D> &uField, Field<Vector3D> &uFieldOld)
     }
 }
 
-void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Field<Vector3D> *sFieldPtr, double timeStep, Field<Vector3D>& uField, Field<double>& pField)
+void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Field<double>& massFlowField, Field<Vector3D> *sFieldPtr, double timeStep, Field<Vector3D>& uField, Field<double>& pField)
 {
     using namespace std;
 
@@ -198,20 +197,20 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     a0P_(i, j, k) = 0.;
 
                 // Face coefficients
-                aE_(i, j, k) =  min(massFlow_.faceE(i, j, k), 0.) - muField.faceE(i, j, k)*dE_(i, j, k);
-                aW_(i, j, k) =  -max(massFlow_.faceW(i, j, k), 0.) - muField.faceW(i, j, k)*dW_(i, j, k);
-                aN_(i, j, k) =  min(massFlow_.faceN(i, j, k), 0.) - muField.faceN(i, j, k)*dN_(i, j, k);
-                aS_(i, j, k) =  -max(massFlow_.faceS(i, j, k), 0.) - muField.faceS(i, j, k)*dS_(i, j, k);
-                aT_(i, j, k) =  min(massFlow_.faceT(i, j, k), 0.) - muField.faceT(i, j, k)*dT_(i, j, k);
-                aB_(i, j, k) =  -max(massFlow_.faceB(i, j, k), 0.) - muField.faceB(i, j, k)*dB_(i, j, k);
+                aE_(i, j, k) =  min(massFlowField.faceE(i, j, k), 0.) - muField.faceE(i, j, k)*dE_(i, j, k);
+                aW_(i, j, k) =  -max(massFlowField.faceW(i, j, k), 0.) - muField.faceW(i, j, k)*dW_(i, j, k);
+                aN_(i, j, k) =  min(massFlowField.faceN(i, j, k), 0.) - muField.faceN(i, j, k)*dN_(i, j, k);
+                aS_(i, j, k) =  -max(massFlowField.faceS(i, j, k), 0.) - muField.faceS(i, j, k)*dS_(i, j, k);
+                aT_(i, j, k) =  min(massFlowField.faceT(i, j, k), 0.) - muField.faceT(i, j, k)*dT_(i, j, k);
+                aB_(i, j, k) =  -max(massFlowField.faceB(i, j, k), 0.) - muField.faceB(i, j, k)*dB_(i, j, k);
 
                 // Central coefficient
-                aP_(i, j, k) = (max(massFlow_.faceE(i, j, k), 0.) + muField.faceE(i, j, k)*dE_(i, j, k)
-                                - min(massFlow_.faceW(i, j, k), 0.) + muField.faceW(i, j, k)*dW_(i, j, k)
-                                + max(massFlow_.faceN(i, j, k), 0.) + muField.faceN(i, j, k)*dN_(i, j, k)
-                                - min(massFlow_.faceS(i, j, k), 0.) + muField.faceS(i, j, k)*dS_(i, j, k)
-                                + max(massFlow_.faceT(i, j, k), 0.) + muField.faceT(i, j, k)*dT_(i, j, k)
-                                - min(massFlow_.faceB(i, j, k), 0.) + muField.faceB(i, j, k)*dB_(i, j, k)
+                aP_(i, j, k) = (max(massFlowField.faceE(i, j, k), 0.) + muField.faceE(i, j, k)*dE_(i, j, k)
+                                - min(massFlowField.faceW(i, j, k), 0.) + muField.faceW(i, j, k)*dW_(i, j, k)
+                                + max(massFlowField.faceN(i, j, k), 0.) + muField.faceN(i, j, k)*dN_(i, j, k)
+                                - min(massFlowField.faceS(i, j, k), 0.) + muField.faceS(i, j, k)*dS_(i, j, k)
+                                + max(massFlowField.faceT(i, j, k), 0.) + muField.faceT(i, j, k)*dT_(i, j, k)
+                                - min(massFlowField.faceB(i, j, k), 0.) + muField.faceB(i, j, k)*dB_(i, j, k)
                                 + a0P_(i, j, k))/relaxationFactorMomentum_;
 
                 bP_(i, j, k) = a0P_(i, j, k)*uField0_(i, j, k);
@@ -224,7 +223,33 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 bP_(i, j, k) += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
                 bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
 
-                // Higher order terms go here
+                // Higher convection order terms go here (these need to be limited!)
+                if(i < uCellI_)
+                    bP_(i, j, k) += -min(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
+
+                if(i > 0)
+                    bP_(i, j, k) += max(massFlowField.faceW(i, j, k), 0.)*dot(gradUField_(i - 1, j, k), mesh.rFaceE(i - 1, j, k));
+
+                if(j < uCellJ_)
+                    bP_(i, j, k) += -min(massFlowField.faceN(i, j, k), 0.)*dot(gradUField_(i, j + 1, k), mesh.rFaceS(i, j + 1, k));
+
+                if(j > 0)
+                    bP_(i, j, k) += max(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j - 1, k), mesh.rFaceN(i, j - 1, k));
+
+                if(k < uCellK_)
+                    bP_(i, j, k) += -min(massFlowField.faceT(i, j, k), 0.)*dot(gradUField_(i, j, k + 1), mesh.rFaceB(i, j, k + 1));
+
+                if(k > 0)
+                    bP_(i, j, k) += max(massFlowField.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k - 1), mesh.rFaceT(i, j, k - 1));
+
+                bP_(i, j, k) += (-max(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceE(i, j, k))
+                                 + min(massFlowField.faceW(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceW(i, j, k))
+                                 - max(massFlowField.faceN(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceN(i, j, k))
+                                 + min(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceS(i, j, k))
+                                 - max(massFlowField.faceT(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceT(i, j, k))
+                                 + min(massFlowField.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceB(i, j, k)))/relaxationFactorMomentum_;
+
+                // Pressure term
                 bP_(i, j, k) += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
 
                 // Relaxation source term
@@ -239,6 +264,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(i == uCellI_ && uField.getEastBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aE_(i, j, k);
+                    bP_(i, j, k) += -aE_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceE(i, j, k));
                     aE_(i, j, k) = 0.;
                 }
                 else if(i == uCellI_ || cellStatus_(i + 1, j, k) == INTERPOLATION)
@@ -250,6 +276,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aW_(i, j, k);
+                    bP_(i, j, k) += -aW_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceW(i, j, k));
                     aW_(i, j, k) = 0.;
                 }
                 else if(i == 0 || cellStatus_(i - 1, j, k) == INTERPOLATION)
@@ -262,6 +289,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(j == uCellJ_ && uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aN_(i, j, k);
+                    bP_(i, j, k) += -aN_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceN(i, j, k));
                     aN_(i, j, k) = 0.;
                 }
                 else if(j == uCellJ_ || cellStatus_(i, j + 1, k) == INTERPOLATION)
@@ -273,6 +301,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aS_(i, j, k);
+                    bP_(i, j, k) += -aS_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceS(i, j, k));
                     aS_(i, j, k) = 0.;
                 }
                 else if(j == 0 || cellStatus_(i, j - 1, k) == INTERPOLATION)
@@ -285,6 +314,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(k == uCellK_ && uField.getTopBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aT_(i, j, k);
+                    bP_(i, j, k) += -aT_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceT(i, j, k));
                     aT_(i, j, k) = 0.;
                 }
                 else if(k == uCellK_ || cellStatus_(i, j, k + 1) == INTERPOLATION)
@@ -296,6 +326,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
                 {
                     aP_(i, j, k) += aB_(i, j, k);
+                    bP_(i, j, k) += -aB_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceB(i, j, k));
                     aB_(i, j, k) = 0.;
                 }
                 else if(k == 0 || cellStatus_(i, j, k - 1) == INTERPOLATION)
@@ -472,7 +503,7 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
     }
 }
 
-void Simple::computeMassFlowFaces(Field<double>& rhoField, Field<Vector3D> &uField)
+void Simple::computeMassFlowFaces(Field<double>& rhoField, Field<Vector3D> &uField, Field<double>& massFlowField)
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -484,19 +515,19 @@ void Simple::computeMassFlowFaces(Field<double>& rhoField, Field<Vector3D> &uFie
             for(i = 0; i < nFacesI_; ++i)
             {
                 if(j < uFaceJ_ && k < uFaceK_)
-                    massFlow_.faceI(i, j, k) = rhoField.faceI(i, j, k)*dot(uField.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
+                    massFlowField.faceI(i, j, k) = rhoField.faceI(i, j, k)*dot(uField.faceI(i, j, k), mesh.fAreaNormI(i, j, k));
 
                 if(i < uFaceI_ && k < uFaceK_)
-                    massFlow_.faceJ(i, j, k) = rhoField.faceJ(i, j, k)*dot(uField.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
+                    massFlowField.faceJ(i, j, k) = rhoField.faceJ(i, j, k)*dot(uField.faceJ(i, j, k), mesh.fAreaNormJ(i, j, k));
 
                 if(i < uFaceI_ && j < uFaceJ_)
-                    massFlow_.faceK(i, j, k) = rhoField.faceK(i, j, k)*dot(uField.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
+                    massFlowField.faceK(i, j, k) = rhoField.faceK(i, j, k)*dot(uField.faceK(i, j, k), mesh.fAreaNormK(i, j, k));
             }
         }
     }
 }
 
-void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Field<double>& pField)
+void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField, Field<Vector3D>& uField, Field<double>& pField)
 {
     int i, j, k;
     Vector3D sf, ds, gradPCorrBar;
@@ -504,7 +535,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
     SparseVector x, b;
 
     rhieChowInterpolateInteriorFaces(uField, pField);
-    computeMassFlowFaces(rhoField, uField);
+    computeMassFlowFaces(rhoField, uField, massFlowField);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -524,11 +555,11 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
 
                 aP_(i, j, k) = -(aE_(i, j, k) + aW_(i, j, k) + aN_(i, j, k) + aS_(i, j, k) + aT_(i, j, k) + aB_(i, j, k));
 
-                massFlow_(i, j, k) = massFlow_.faceE(i, j, k) - massFlow_.faceW(i, j, k)
-                        + massFlow_.faceN(i, j, k) - massFlow_.faceS(i, j, k)
-                        + massFlow_.faceT(i, j, k) - massFlow_.faceB(i, j, k);
+                massFlowField(i, j, k) = massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
+                        + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
+                        + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k);
 
-                bP_(i, j, k).x = massFlow_(i, j, k);
+                bP_(i, j, k).x = massFlowField(i, j, k);
 
                 //- Boundary conditions
                 // I-direction bcs
@@ -672,7 +703,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<Vector3D>& uField, Fiel
     Output::print("Simple", "Finished solving pressure corrections.");
 }
 
-void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField, Field<double> &pField)
+void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowField, Field<Vector3D> &uField, Field<double> &pField)
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
@@ -693,29 +724,29 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<Vector3D> &uField,
                 //- Correct mass flow
                 // Correct west, south and bottom boundary mass flows if they are outlets
                 if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceW(i, j, k) += -rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k)*(pCorr_(i - 1, j, k) - pCorr_(i, j, k));
+                    massFlowField.faceW(i, j, k) += -rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k)*(pCorr_(i - 1, j, k) - pCorr_(i, j, k));
 
                 if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceS(i, j, k) += -rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k)*(pCorr_(i, j - 1, k) - pCorr_(i, j, k));
+                    massFlowField.faceS(i, j, k) += -rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k)*(pCorr_(i, j - 1, k) - pCorr_(i, j, k));
 
                 if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceB(i, j, k) += -rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k)*(pCorr_(i, j, k - 1) - pCorr_(i, j, k));
+                    massFlowField.faceB(i, j, k) += -rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k)*(pCorr_(i, j, k - 1) - pCorr_(i, j, k));
 
                 // Correct all interior faces and east, north and top boundary mass flows if they are outlets
                 if(i < uCellI_ || uField.getEastBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceE(i, j, k) += -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k)*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
+                    massFlowField.faceE(i, j, k) += -rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k)*(pCorr_(i + 1, j, k) - pCorr_(i, j, k));
 
                 if(j < uCellJ_ || uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceN(i, j, k) += -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k)*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
+                    massFlowField.faceN(i, j, k) += -rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k)*(pCorr_(i, j + 1, k) - pCorr_(i, j, k));
 
                 if(k < uCellK_ || uField.getTopBoundaryPatch() == ZERO_GRADIENT)
-                    massFlow_.faceT(i, j, k) += -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k)*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
+                    massFlowField.faceT(i, j, k) += -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k)*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
 
-                massFlow_(i, j, k) = massFlow_.faceE(i, j, k) - massFlow_.faceW(i, j, k)
-                        + massFlow_.faceN(i, j, k) - massFlow_.faceS(i, j, k)
-                        + massFlow_.faceT(i, j, k) - massFlow_.faceB(i, j, k);
+                massFlow(i, j, k) = massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
+                        + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
+                        + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k);
 
-                massFlow(i, j, k) = fabs(massFlow_(i, j, k));
+                massFlow(i, j, k) = fabs(massFlow(i, j, k));
 
                 // Correct the pressure field
                 pField(i, j, k) += relaxationFactorPCorr_*pCorr_(i, j, k);
@@ -789,6 +820,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     pFieldPtr_ = &mesh.findScalarField("p");
     rhoFieldPtr_ = &mesh.findScalarField("rho");
     muFieldPtr_ = &mesh.findScalarField("mu");
+    massFlowFieldPtr_ = &mesh.findScalarField("massFlow");
 
     //- Read all relevant input parameters
     if(input.inputStrings["timeAccurate"] == "ON")
@@ -832,7 +864,6 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     hField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     dField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    massFlow_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     pCorr_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
     gradPCorr_.allocate(nCellsI_, nCellsJ_, nCellsK_);
@@ -965,15 +996,16 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     Field<double>& pField = *pFieldPtr_;
     Field<double>& rhoField = *rhoFieldPtr_;
     Field<double>& muField = *muFieldPtr_;
+    Field<double>& massFlowField = *massFlowFieldPtr_;
     int i;
 
     storeUField(uField, uField0_);
 
     for(i = 0; i < maxInnerIters_; ++i)
     {
-        computeMomentum(rhoField, muField, NULL, timeStep, uField, pField);
-        computePCorr(rhoField, uField, pField);
-        correctContinuity(rhoField, uField, pField);
+        computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
+        computePCorr(rhoField, massFlowField, uField, pField);
+        correctContinuity(rhoField, massFlowField, uField, pField);
     }
 }
 
@@ -1001,7 +1033,7 @@ void Simple::displayUpdateMessage()
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                maxContinuityError = std::max(fabs(massFlow_(i, j, k)), maxContinuityError);
+                maxContinuityError = 0.;
             }
         }
     }

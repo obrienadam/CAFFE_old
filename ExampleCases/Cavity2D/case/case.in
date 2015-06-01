@@ -30,11 +30,13 @@ maxRealTimeHours
 ### Scheme #################################################
 
 timeAccurate
-ON
+OFF
 relaxationFactorMomentum
-0.9
+0.7
 relaxationFactorPCorr
-0.8
+0.3
+maxInnerIters
+1
 rho
 1
 mu

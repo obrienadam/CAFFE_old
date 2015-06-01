@@ -12,15 +12,15 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-200
+3200
 screenWriteInterval
 1
 fileWriteInterval
-1
+2
 ### Time ###################################################
 
 timeStep
-5e-3
+0.25e-1
 maxSimTime
 48
 maxRealTimeHours
@@ -33,23 +33,20 @@ ON
 relaxationFactorMomentum
 0.3
 relaxationFactorPCorr
-0.1
+0.3
 rho
 1
 mu
-0.01
-momentumSorToler
-1e-8
-pCorrSorToler
-1e-8
+0.0001
 maxInnerIters
-50
-maxMomentumSorIters
-200
-maxPCorrSorIters
-200
-sorOmega
-1.9
+20
+
+### Immersed Boundaries ####################################
+
+ibSphereRadius
+0.1
+ibSphereCenter
+(1.,0.5,0.5)
 
 ### Boundaries #############################################
 
@@ -61,7 +58,7 @@ boundaryRefValueEast
 boundaryTypeWest
 inlet
 boundaryRefValueWest
-(1,0,0)
+(0.5,0,0)
 
 boundaryTypeNorth
 wall
@@ -74,11 +71,11 @@ boundaryRefValueSouth
 (0,0,0)
 
 boundaryTypeTop
-wall
+outlet
 boundaryRefValueTop
 (0,0,0)
 
 boundaryTypeBottom
-wall
+outlet
 boundaryRefValueBottom
 (0,0,0)

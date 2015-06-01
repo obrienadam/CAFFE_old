@@ -132,20 +132,34 @@ void FvScheme::extrapolateInteriorFaces(Field<T>& field, Field<GRAD_T>& gradFiel
                 if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
-                //- Extrapolate the faces
-                if(i < uCellI_)
+                if(i == 0 && field.getWestBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceW(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceW(i, j, k));
+
+                if(j == 0 && field.getSouthBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceS(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k));
+
+                if(k == 0 && field.getBottomBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceB(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceB(i, j, k));
+
+                if(i == uCellI_ && field.getEastBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceE(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceE(i, j, k));
+                else if(i < uCellI_)
                 {
                     field.faceE(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceE(i, j, k))
                                                 + field(i + 1, j, k) + dot(gradField(i + 1, j, k), mesh.rFaceW(i + 1, j, k)));
                 }
 
-                if(j < uCellJ_)
+                if(j == uCellJ_ && field.getNorthBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceN(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k));
+                else if(j < uCellJ_)
                 {
                     field.faceN(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k))
                                                 + field(i, j + 1, k) + dot(gradField(i, j + 1, k), mesh.rFaceS(i, j + 1, k)));
                 }
 
-                if(k < uCellK_)
+                if(k == uCellK_ && field.getTopBoundaryPatch() == ZERO_GRADIENT)
+                    field.faceT(i, j, k) = field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceT(i, j, k));
+                else if(k < uCellK_)
                 {
                     field.faceT(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceT(i, j, k))
                                                 + field(i, j, k + 1) + dot(gradField(i, j, k + 1), mesh.rFaceB(i, j, k + 1)));

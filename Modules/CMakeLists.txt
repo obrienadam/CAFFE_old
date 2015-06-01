@@ -24,6 +24,14 @@ target_link_libraries(caffeSimple RunControl
                                   HexaMesh
                                   Schemes)
 
+# Build the basic piso solver
+add_executable(caffePiso caffePiso.cc)
+target_link_libraries(caffePiso RunControl
+                                Math
+                                Solvers
+                                HexaMesh
+                                Schemes)
+
 # Build the immersed boundary simple solver
 
 add_executable(caffeIbSimple caffeIbSimple.cc)

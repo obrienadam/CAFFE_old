@@ -6,7 +6,7 @@
 
 #include "SolverIncludes.h"
 #include "HexaFvmMesh.h"
-#include "IbSimple.h"
+#include "Piso.h"
 
 int main(int argc, const char* argv[])
 {
@@ -22,21 +22,20 @@ int main(int argc, const char* argv[])
         RunControl runControl;
         Euler solver;
         HexaFvmMesh mesh;
-        IbSimple ibSimple;
+        Piso piso;
 
         mesh.addVectorField("u", CONSERVED);
         mesh.addScalarField("p", CONSERVED);
         mesh.addScalarField("rho", PRIMITIVE);
         mesh.addScalarField("mu", PRIMITIVE);
         mesh.addScalarField("massFlow", PRIMITIVE);
-        mesh.addScalarField("ibField", AUXILLARY);
 
         // Initialize objects
 
         runControl.initialize(input);
         solver.initialize(input);
         mesh.initialize(input);
-        ibSimple.initialize(input, mesh);
+        piso.initialize(input, mesh);
 
         mesh.writeDebug();
 
@@ -44,12 +43,12 @@ int main(int argc, const char* argv[])
 
         while(runControl.continueRun())
         {
-            runControl.residualNorm = solver.solve(runControl.timeStep(), ibSimple);
+            runControl.residualNorm = solver.solve(runControl.timeStep(), piso);
 
             if(runControl.writeToScreen())
             {
                 runControl.displayUpdateMessage();
-                ibSimple.displayUpdateMessage();
+                piso.displayUpdateMessage();
             }
 
             if(runControl.writeToFile())

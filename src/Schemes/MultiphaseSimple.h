@@ -46,7 +46,7 @@ private:
 
     void computeCurvature(Field<double>& alphaField);
     void computeSurfaceTensionSource();
-    void advectAlphaField(Field<double> &rhoField, Field<Vector3D>& uField, double timeStep, Field<double>& alphaField);
+    void advectAlphaField(Field<double> &rhoField, Field<double> &massFlowField, Field<Vector3D>& uField, double timeStep, Field<double>& alphaField);
 
 public:
 

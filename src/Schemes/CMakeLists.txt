@@ -6,6 +6,7 @@ set(HEADERS FvScheme.h
 	    Diffusion.h
 	    LinearAdvection.h
             Simple.h
+            Piso.h
             IbSimple.h
             MultiphaseSimple.h)
 
@@ -13,6 +14,7 @@ set(SOURCE FvScheme.cc
 	   Diffusion.cc
 	   LinearAdvection.cc
            Simple.cc
+           Piso.cc
            IbSimple.cc
            MultiphaseSimple.cc)
 
