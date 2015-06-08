@@ -43,12 +43,6 @@ public:
     static std::string processBuffer(std::string& buffer, bool removeAllWhitespace = true);
 
     /**
-     * @brief Read in a string, and return the next floating point number found.
-     * @return A floating point number found in the buffer string.
-     */
-    static double getNextElement(std::string &buffer);
-
-    /**
      * @brief Partition a string into sections, which are delimited on a specified delimiter.
      * @param delimiter The string to be used for delimination.
      * @return A vector containing the partitioned string.

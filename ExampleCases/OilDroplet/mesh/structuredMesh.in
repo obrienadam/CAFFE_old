@@ -1,7 +1,7 @@
 ## hexaMesh input file
 
-MeshName = Cavity3D
-MetricConversion = 0.1
+MeshName = OilDroplet
+MetricConversion = 0.01
 
 Vertices
 {

@@ -53,21 +53,28 @@ public:
 
     void readInputFile(std::string filename);
 
-    void setInitialConditions(Field<double>& scalarField);
-    void setInitialConditions(Field<Vector3D>& vectorField);
+    template <class T>
+    void setInitialConditions(Field<T>& field);
 
-    void setSphere(Field<double>& scalarField);
-    void setBox(Field<double>& scalarField);
-    void setUniform(Field<double>& scalarField);
+    template <class T>
+    void setSphere(Field<T>& field);
 
-    void setSphere(Field<Vector3D>& scalarField);
-    void setBox(Field<Vector3D>& scalarField);
-    void setUniform(Field<Vector3D>& scalarField);
+    template <class T>
+    void setUniform(Field<T>& field);
 
-    void createUniform(double value, Field<double>& phiField);
-    void createSphere(double radius, Point3D center, double sphereInnerValue, Field<double>& scalarField);
-    void createBox(double xLength, double yLength, double zLength, Point3D center, double boxInnerValue, Field<double>& phiField);
+    template <class T>
+    void setBox(Field<T>& field);
 
+    template <class T>
+    void createUniform(T value, Field<T>& field);
+
+    template <class T>
+    void createSphere(double radius, Point3D center, T sphereInnerValue, Field<T>& field);
+
+    template <class T>
+    void createBox(double xLength, double yLength, double zLength, Point3D center, T boxInnerValue, Field<T>& field);
 };
+
+#include "InitialConditionsI.h"
 
 #endif

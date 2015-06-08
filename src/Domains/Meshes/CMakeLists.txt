@@ -15,6 +15,7 @@ set(SOURCE HexaMeshGen.cc
            HexaFvmMesh.cc
            FieldI.h
            InitialConditions.cc
+           InitialConditionsI.h
            IndexMap.cc)
 
 add_library(HexaMesh ${HEADERS} ${SOURCE})

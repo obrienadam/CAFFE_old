@@ -7,6 +7,7 @@
 #include "SolverIncludes.h"
 #include "HexaFvmMesh.h"
 #include "Simple.h"
+#include "InitialConditions.h"
 
 int main(int argc, const char* argv[])
 {
@@ -23,6 +24,8 @@ int main(int argc, const char* argv[])
         Euler solver;
         HexaFvmMesh mesh;
         Simple simple;
+        InitialConditions initialConditions;
+
 
         mesh.addVectorField("u", CONSERVED);
         mesh.addScalarField("p", CONSERVED);
@@ -36,8 +39,9 @@ int main(int argc, const char* argv[])
         solver.initialize(input);
         mesh.initialize(input);
         simple.initialize(input, mesh);
+        initialConditions.initialize(mesh);
 
-        mesh.writeDebug();
+        initialConditions.readInputFile("case/initialConditions.in");
 
         runControl.displayStartMessage();
 

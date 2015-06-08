@@ -3,8 +3,6 @@
 #include <vector>
 #include <algorithm>
 
-#include <boost/algorithm/string.hpp>
-
 #include "Vector3D.h"
 
 Vector3D::Vector3D(double x, double y, double z) :
@@ -24,27 +22,16 @@ Vector3D::Vector3D(const Vector3D &other)
 
 }
 
-Vector3D::Vector3D(std::string vectorStr)
-{
-    initialize(vectorStr);
-}
-
 double& Vector3D::operator()(int i)
 { 
     switch(i)
     {
     case 0:
-
         return x;
-
     case 1:
-
         return y;
-
     case 2:
-
         return z;
-
     };
 
     throw "Attempted to access an element outside the range of Vector3D.";
@@ -59,26 +46,6 @@ Vector3D Vector3D::unitVector()
 {
   double invMag(1./mag());
   return Vector3D(invMag*x, invMag*y, invMag*z);
-}
-
-void Vector3D::initialize(std::string vectorStr)
-{
-    using namespace std;
-    using namespace boost::algorithm;
-
-    vector<string> vectorStrComponents;
-
-    // Extract everything within the bracket
-
-    vectorStr = vectorStr.substr(vectorStr.find_first_of("(") + 1, vectorStr.find_first_of(")") - 1);
-
-    // Delimination characters can be either spaces or commas
-
-    split(vectorStrComponents, vectorStr, is_any_of(" ,"));
-
-    x = stod(vectorStrComponents[0]);
-    y = stod(vectorStrComponents[1]);
-    z = stod(vectorStrComponents[2]);
 }
 
 void Vector3D::print()
@@ -154,24 +121,6 @@ Vector3D operator/(Vector3D lhs, double rhs)
   return lhs /= rhs;
 }
 
-Vector3D max(Vector3D u, const Vector3D &v)
-{
-    u.x = std::max(u.x, v.x);
-    u.y = std::max(u.y, v.y);
-    u.z = std::max(u.z, v.z);
-
-    return u;
-}
-
-Vector3D min(Vector3D u, const Vector3D &v)
-{
-    u.x = std::min(u.x, v.x);
-    u.y = std::min(u.y, v.y);
-    u.z = std::min(u.z, v.z);
-
-    return u;
-}
-
 Vector3D sqr(const Vector3D &u)
 {
     return Vector3D(u.x*u.x, u.y*u.y, u.z*u.z);
@@ -211,4 +160,51 @@ Vector3D cross(const Vector3D& u, const Vector3D& v)
 Vector3D relativeVector(const Vector3D& u, const Vector3D& v)
 {
   return v - u;
+}
+
+namespace std
+{
+Vector3D max(Vector3D u, const Vector3D &v)
+{
+    u.x = max(u.x, v.x);
+    u.y = max(u.y, v.y);
+    u.z = max(u.z, v.z);
+
+    return u;
+}
+
+Vector3D min(Vector3D u, const Vector3D &v)
+{
+    u.x = min(u.x, v.x);
+    u.y = min(u.y, v.y);
+    u.z = min(u.z, v.z);
+
+    return u;
+}
+
+Vector3D stov(string vecStr)
+{
+    Vector3D vec;
+    string nextElement, delim = ", ";
+    vecStr = vecStr.substr(vecStr.find_first_of("(") + 1, vecStr.find_first_of(")") - 1);
+
+    //- Extract x-component
+    vecStr = vecStr.substr(vecStr.find_first_not_of(delim), vecStr.length());
+    nextElement = vecStr.substr(0, vecStr.find_first_of(delim));
+    vec.x = stod(nextElement);
+
+    //- Extract y-component
+    vecStr = vecStr.substr(vecStr.find_first_of(delim), vecStr.length());
+    vecStr = vecStr.substr(vecStr.find_first_not_of(delim), vecStr.length());
+    nextElement = vecStr.substr(0, vecStr.find_first_of(delim));
+    vec.y = stod(nextElement);
+
+    //- Extract z-component
+    vecStr = vecStr.substr(vecStr.find_first_of(delim), vecStr.length());
+    vecStr = vecStr.substr(vecStr.find_first_not_of(delim), vecStr.length());
+    nextElement = vecStr.substr(0, vecStr.find_first_of(delim));
+    vec.z = stod(nextElement);
+
+    return vec;
+}
 }

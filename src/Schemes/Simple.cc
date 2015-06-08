@@ -23,6 +23,7 @@
  */
 
 #include <algorithm>
+#include <iomanip>
 
 #include "Simple.h"
 #include "InputStringProcessing.h"
@@ -223,7 +224,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 bP_(i, j, k) += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
                 bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
 
-                // Higher convection order terms go here (these need to be limited!)
+                // Higher-order convection order terms go here (these need to be limited!)
                 if(i < uCellI_)
                     bP_(i, j, k) += -min(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
 
@@ -442,8 +443,6 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
     }
 
     hField_.setBoundaryFields();
-
-    Output::print("Simple", "finished solving momentum.");
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -463,6 +462,7 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
                 if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
+                // Check if west, south and bottom bcs require the face mass-flux to be computed
                 if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
                 {
                     getFaceStencil(i, j, k, WEST, sf, ds);
@@ -481,6 +481,7 @@ void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<dou
                     uField.faceB(i, j, k) = hField_.faceB(i, j, k) - dField_.faceB(i, j, k)*(pField(i, j, k - 1) - pField(i, j, k))*sf/dot(sf, ds);
                 }
 
+                // Check if the east, south and top bcs require the face mass-flux to be computed
                 if(i < uCellI_ || uField.getEastBoundaryPatch() == ZERO_GRADIENT)
                 {
                     getFaceStencil(i, j, k, EAST, sf, ds);
@@ -699,8 +700,6 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
             }
         }
     }
-
-    Output::print("Simple", "Finished solving pressure corrections.");
 }
 
 void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowField, Field<Vector3D> &uField, Field<double> &pField)
@@ -926,7 +925,7 @@ void Simple::setBoundaryConditions(Input &input)
         buffer = input.inputStrings[key2];
         InputStringProcessing::processBuffer(buffer, true);
 
-        uBoundaryRefValues[i] = Vector3D(buffer);
+        uBoundaryRefValues[i] = stov(buffer);
 
         if(flowBoundaryType == "inlet")
         {
@@ -1006,6 +1005,7 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
         computePCorr(rhoField, massFlowField, uField, pField);
         correctContinuity(rhoField, massFlowField, uField, pField);
+        std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
 }
 

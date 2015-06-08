@@ -17,7 +17,6 @@ class Vector3D
 
   Vector3D(double x = 0., double y = 0., double z = 0.);
   Vector3D(const Vector3D& other);
-  Vector3D(std::string vectorStr);
 
   double x, y, z;
 
@@ -26,16 +25,10 @@ class Vector3D
   double mag();
   Vector3D unitVector();
 
-  //- Special initializations
-
-  void initialize(std::string vectorStr);
-
   //- Print to screen
-
   void print();
 
   //- Member operators
-
   Vector3D& operator+=(const Vector3D& rhs);
   Vector3D& operator-=(const Vector3D& rhs);
   Vector3D& operator*=(double rhs);
@@ -44,7 +37,6 @@ class Vector3D
 };
 
 //- Vector3D related operators
-
 Vector3D operator+(Vector3D lhs, const Vector3D& rhs);
 Vector3D operator-(Vector3D lhs, const Vector3D& rhs);
 Vector3D operator-(const Vector3D& rhs);
@@ -52,18 +44,23 @@ Vector3D operator*(Vector3D lhs, double rhs);
 Vector3D operator*(double lhs, Vector3D rhs);
 Vector3D operator/(Vector3D lhs, double rhs);
 
-Vector3D max(Vector3D u, const Vector3D& v);
-Vector3D min(Vector3D u, const Vector3D& v);
 Vector3D sqr(const Vector3D& u);
 Vector3D sqrt(const Vector3D &u);
 
 std::ostream& operator<<(std::ostream& os, const Vector3D& vec);
 
 //- Vector3D related functions
-
 double dot(const Vector3D& u, const Vector3D& v);
 Tensor3D tensor(const Vector3D& u, const Vector3D& v);
 Vector3D cross(const Vector3D& u, const Vector3D& v);
 Vector3D relativeVector(const Vector3D& u, const Vector3D& v);
+
+//- function with the std interface
+namespace std
+{
+Vector3D max(Vector3D u, const Vector3D& v);
+Vector3D min(Vector3D u, const Vector3D& v);
+Vector3D stov(string vecStr);
+}
 
 #endif

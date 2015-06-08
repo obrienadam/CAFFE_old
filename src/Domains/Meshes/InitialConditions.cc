@@ -1,5 +1,5 @@
-﻿/**
- * @file    InitialConditions.cc
+/**
+ * @file    InitialConditionsI.h
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
  *
@@ -22,11 +22,7 @@
  * InitialConditions.
  */
 
-#include <vector>
-
 #include "InitialConditions.h"
-#include "Output.h"
-#include "InputStringProcessing.h"
 
 InitialConditions::InitialConditions()
     :
@@ -106,45 +102,77 @@ void InitialConditions::readInputFile(std::string filename)
     inputFile_.close();
 }
 
-void InitialConditions::setInitialConditions(Field<double> &scalarField)
+template <>
+void InitialConditions::setUniform(Field<double>& field)
 {
-    std::string buffer;
+    using namespace std;
+
+    string buffer;
+    double value;
+    bool valueSet = false;
 
     findOpeningBrace();
 
     while(!inputFile_.eof())
     {
         getline(inputFile_, buffer);
-
         InputStringProcessing::processBuffer(buffer, true);
 
         if(buffer.empty())
             continue;
-        else if(buffer == "Sphere")
-            setSphere(scalarField);
-        else if(buffer == "Box")
-            setBox(scalarField);
-        else if(buffer == "Uniform")
-            setUniform(scalarField);
-        else if(buffer == "}")
-            break;
-        else
-            Output::raiseException("InitialConditions", "setInitialConditions", "unrecognized initial condition \"" + buffer + "\"");
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "value")
+        {
+            value = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            valueSet = true;
+        }
     }
+
+    if(!valueSet)
+        Output::raiseException("InitialConditions", "setUniform", "uniform field value not set.");
+
+    createUniform(value, field);
 }
 
-void InitialConditions::setInitialConditions(Field<Vector3D> &vectorField)
-{
-
-}
-
-void InitialConditions::setSphere(Field<double> &scalarField)
+template <>
+void InitialConditions::setUniform(Field<Vector3D>& field)
 {
     using namespace std;
 
     string buffer;
-    vector<string> partitionedBuffer;
-    double radius = 0., sphereInnerValue = 0.;
+    Vector3D value;
+    bool valueSet = false;
+
+    findOpeningBrace();
+
+    while(!inputFile_.eof())
+    {
+        getline(inputFile_, buffer);
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "value")
+        {
+            value = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            valueSet = true;
+        }
+    }
+
+    if(!valueSet)
+        Output::raiseException("InitialConditions", "setUniform", "uniform field value not set.");
+
+    createUniform(value, field);
+    Output::print("InitialConditions", "set uniform initial conditions for field \"" + field.name + "\".");
+}
+
+template <>
+void InitialConditions::setSphere(Field<double>& field)
+{
+    using namespace std;
+
+    string buffer;
+    double radius = 0.;
+    double sphereInnerValue = 0.;
     Point3D center;
     bool radiusSet = false, sphereInnerValueSet = false, centerSet = false;
 
@@ -153,7 +181,6 @@ void InitialConditions::setSphere(Field<double> &scalarField)
     while(!inputFile_.eof())
     {
         getline(inputFile_, buffer);
-
         InputStringProcessing::processBuffer(buffer, true);
 
         if(buffer.empty())
@@ -170,11 +197,7 @@ void InitialConditions::setSphere(Field<double> &scalarField)
         }
         else if(buffer.substr(0, buffer.find_first_of("=")) == "center")
         {
-            buffer = buffer.substr(buffer.find_first_of("=") + 1, buffer.length());
-            partitionedBuffer = InputStringProcessing::partition(buffer, "(,)");
-            center.x = stod(partitionedBuffer[1]);
-            center.y = stod(partitionedBuffer[2]);
-            center.z = stod(partitionedBuffer[3]);
+            center = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
             centerSet = true;
         }
         else if(buffer == "}")
@@ -189,89 +212,183 @@ void InitialConditions::setSphere(Field<double> &scalarField)
     radius *= metricConversion_;
     center *= metricConversion_;
 
-    createSphere(radius, center, sphereInnerValue, scalarField);
-    Output::print("InitialConditions", "set spherical initial conditions for field \"" + scalarField.name + "\".");
+    createSphere(radius, center, sphereInnerValue, field);
+    Output::print("InitialConditions", "set spherical initial conditions for field \"" + field.name + "\".");
 }
 
-void InitialConditions::setBox(Field<double> &scalarField)
+template <>
+void InitialConditions::setSphere(Field<Vector3D>& field)
 {
+    using namespace std;
 
-}
+    string buffer;
+    double radius = 0.;
+    Vector3D sphereInnerValue;
+    Point3D center;
+    bool radiusSet = false, sphereInnerValueSet = false, centerSet = false;
 
-void InitialConditions::setUniform(Field<double> &scalarField)
-{
+    findOpeningBrace();
 
-}
-
-void InitialConditions::setSphere(Field<Vector3D> &scalarField)
-{
-
-}
-
-void InitialConditions::setBox(Field<Vector3D> &scalarField)
-{
-
-}
-
-void InitialConditions::setUniform(Field<Vector3D> &scalarField)
-{
-
-}
-
-void InitialConditions::createUniform(double value, Field<double> &phiField)
-{
-    int i, j, k;
-
-    for(k = 0; k < nCellsK_; ++k)
+    while(!inputFile_.eof())
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        getline(inputFile_, buffer);
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "radius")
         {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                phiField(i, j, k) = value;
-            }
+            radius = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            radiusSet = true;
         }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "value")
+        {
+            sphereInnerValue = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            sphereInnerValueSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "center")
+        {
+            center = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            centerSet = true;
+        }
+        else if(buffer == "}")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setSphere", "unrecognized initial condition \"" + buffer + "\"");
     }
+
+    if(!(radiusSet && sphereInnerValueSet && centerSet))
+        Output::raiseException("InitialConditions", "setSphere", "one or more required parameters not specified.");
+
+    radius *= metricConversion_;
+    center *= metricConversion_;
+
+    createSphere(radius, center, sphereInnerValue, field);
+    Output::print("InitialConditions", "set spherical initial conditions for field \"" + field.name + "\".");
 }
 
-void InitialConditions::createSphere(double radius, Point3D center, double sphereInnerValue, Field<double> &scalarField)
+template <>
+void InitialConditions::setBox(Field<double>& field)
 {
-    HexaFvmMesh& mesh = *meshPtr_;
-    int i, j, k;
+    using namespace std;
 
-    for(k = 0; k < nCellsK_; ++k)
+    string buffer;
+    double xLength = 0., yLength = 0., zLength = 0.;
+    double boxInnerValue = 0.;
+    Point3D center;
+    bool xLengthSet = false, yLengthSet = false, zLengthSet = false, centerSet = false, boxInnerValueSet = false;
+
+    findOpeningBrace();
+
+    while(!inputFile_.eof())
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        getline(inputFile_, buffer);
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "xLength")
         {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                if((mesh.cellXc(i, j, k) - center).mag() <= radius)
-                {
-                    scalarField(i, j, k) = sphereInnerValue;
-                }
-            }
+            xLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            xLengthSet = true;
         }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "yLength")
+        {
+            yLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            yLengthSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "zLength")
+        {
+            zLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            zLengthSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "center")
+        {
+            center = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            centerSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "boxInnerValue")
+        {
+            boxInnerValue = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            boxInnerValueSet = true;
+        }
+        else if(buffer == "}")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setBox", "unrecognized initial condition \"" + buffer + "\"");
     }
+
+    if(!(xLengthSet && yLengthSet && zLengthSet && centerSet && boxInnerValueSet))
+        Output::raiseException("InitialConditions", "setBox", "one or more required parameters not specified.");
+
+    xLength *= metricConversion_;
+    yLength *= metricConversion_;
+    zLength *= metricConversion_;
+    center *= metricConversion_;
+
+    createBox(xLength, yLength, zLength, center, boxInnerValue, field);
+    Output::print("InitialConditions", "set box initial conditions for field \"" + field.name + "\".");
 }
 
-void InitialConditions::createBox(double xLength, double yLength, double zLength, Point3D center, double boxInnerValue, Field<double> &phiField)
+template <>
+void InitialConditions::setBox(Field<Vector3D>& field)
 {
-    HexaFvmMesh& mesh = *meshPtr_;
-    int i, j, k;
+    using namespace std;
 
-    for(k = 0; k < nCellsK_; ++k)
+    string buffer;
+    double xLength = 0., yLength = 0., zLength = 0.;
+    Vector3D boxInnerValue = Vector3D(0., 0., 0.);
+    Point3D center;
+    bool xLengthSet = false, yLengthSet = false, zLengthSet = false, centerSet = false, boxInnerValueSet = false;
+
+    findOpeningBrace();
+
+    while(!inputFile_.eof())
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        getline(inputFile_, buffer);
+        InputStringProcessing::processBuffer(buffer, true);
+
+        if(buffer.empty())
+            continue;
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "xLength")
         {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                if(mesh.cellXc(i, j, k).x >= center.x - 0.5*xLength && mesh.cellXc(i, j, k).x <= center.x + 0.5*xLength &&
-                        mesh.cellXc(i, j, k).y >= center.y - 0.5*yLength && mesh.cellXc(i, j, k).y <= center.y + 0.5*yLength &&
-                        mesh.cellXc(i, j, k).z >= center.z - 0.5*zLength && mesh.cellXc(i, j, k).z <= center.z + 0.5*zLength)
-                {
-                    phiField(i, j, k) = boxInnerValue;
-                }
-            }
+            xLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            xLengthSet = true;
         }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "yLength")
+        {
+            yLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            yLengthSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "zLength")
+        {
+            zLength = stod(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            zLengthSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "center")
+        {
+            center = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            centerSet = true;
+        }
+        else if(buffer.substr(0, buffer.find_first_of("=")) == "boxInnerValue")
+        {
+            boxInnerValue = stov(buffer.substr(buffer.find_first_of("=") + 1, buffer.length()));
+            boxInnerValueSet = true;
+        }
+        else if(buffer == "}")
+            break;
+        else
+            Output::raiseException("InitialConditions", "setBox", "unrecognized initial condition \"" + buffer + "\"");
     }
+
+    if(!(xLengthSet && yLengthSet && zLengthSet && centerSet && boxInnerValueSet))
+        Output::raiseException("InitialConditions", "setBox", "one or more required parameters not specified.");
+
+    xLength *= metricConversion_;
+    yLength *= metricConversion_;
+    zLength *= metricConversion_;
+    center *= metricConversion_;
+
+    createBox(xLength, yLength, zLength, center, boxInnerValue, field);
+    Output::print("InitialConditions", "set box initial conditions for field \"" + field.name + "\".");
 }

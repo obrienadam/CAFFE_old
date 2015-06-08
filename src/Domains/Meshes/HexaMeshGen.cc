@@ -57,7 +57,7 @@ void HexaMeshGen::readVertices(std::ifstream& inputFile)
         }
 
         // buffer should contain a bracketed vector
-        vertices_.push_back(Point3D(buffer)*metricConversion_);
+        vertices_.push_back(stov(buffer));
     }
 
     Output::print("HexaMeshGen: Successfully initialized domain vertices.");
@@ -70,6 +70,7 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
     using namespace std;
 
     int nI, nJ, nK;
+    Vector3D tmpVec;
     string buffer;
 
     while(!inputFile.eof())
@@ -100,20 +101,15 @@ void HexaMeshGen::readResolution(std::ifstream& inputFile)
         else if(buffer == "}")
             break;
 
-        buffer = buffer.substr(buffer.find_first_of("("), buffer.find_first_of(")") + 1);
+        tmpVec = stov(buffer);
 
-        nI = int(InputStringProcessing::getNextElement(buffer));
-        nJ = int(InputStringProcessing::getNextElement(buffer));
-        nK = int(InputStringProcessing::getNextElement(buffer));
+        nI = int(tmpVec.x);
+        nJ = int(tmpVec.y);
+        nK = int(tmpVec.z);
         nodes_.allocate(nI, nJ, nK);
-
-        if(buffer != ")")
-        {
-            Output::raiseException("HexaMeshGen", "readResolution", "expected a \")\"");
-        }
     }
 
-    Output::print("HexaMeshGen: Successfully allocated mesh nodes.");
+    Output::print("HexaMeshGen", "Successfully allocated mesh nodes.");
 }
 
 void HexaMeshGen::readMeshInputFile(std::string filename)
@@ -242,7 +238,7 @@ void HexaMeshGen::generateMesh()
         } // end for j
     } // end for k
 
-    Output::print("HexaMeshGen: Mesh generation complete.");
+    Output::print("HexaMeshGen", "Mesh generation complete.");
 }
 
 void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)

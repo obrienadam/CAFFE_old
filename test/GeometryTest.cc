@@ -1,4 +1,5 @@
 #include <iostream>
+#include <math.h>
 
 #include "../src/Math/Point3D.h"
 #include "../src/Math/Geometry.h"
@@ -19,10 +20,10 @@ int main()
   cubeVertices[6] = Point3D(dx, dy, dz);
   cubeVertices[7] = Point3D(0., dy, dz);
 
-  cout << "Cube Volume: " << dx*dy*dz << endl
+  cout << "Cube Volume: " << fabs(dx*dy*dz) << endl
        << "Computed: " << Geometry::computeHexahedronVolume(cubeVertices) << endl;
 
-  cout << "XY-plane Area: " << dx*dy << endl
+  cout << "XY-plane Area: " << fabs(dx*dy) << endl
        << "Computed: " << Geometry::computeQuadrilateralArea(cubeVertices) << endl;
   
   return 0;

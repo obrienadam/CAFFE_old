@@ -183,7 +183,7 @@ void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
     Simple::initialize(input, mesh);
 
     ibSphere_.radius = input.inputDoubles["ibSphereRadius"];
-    ibSphere_.center = Point3D(input.inputStrings["ibSphereCenter"]);
+    ibSphere_.center = stov(input.inputStrings["ibSphereCenter"]);
 
     ibField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     ibSourceField_.allocate(nCellsI_, nCellsJ_, nCellsK_);

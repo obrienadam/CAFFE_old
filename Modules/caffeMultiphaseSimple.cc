@@ -18,7 +18,6 @@ int main(int argc, const char* argv[])
     try
     {
         // Declare the basic program objects
-
         Input input("case/case.in");
         RunControl runControl;
         Euler solver;

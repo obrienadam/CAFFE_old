@@ -51,26 +51,6 @@ std::string InputStringProcessing::processBuffer(std::string &buffer, bool remov
     return buffer;
 }
 
-double InputStringProcessing::getNextElement(std::string &buffer)
-{
-    using namespace boost::algorithm;
-
-    double element;
-
-    // Ensure the buffer is trimmed
-
-    trim_left_if(buffer, is_any_of("( "));
-
-    // Extract a double element from the string
-
-    element = stod(buffer.substr(0, buffer.find_first_of(" )")));
-
-    // Remove the extracted element from the string
-
-    buffer = buffer.substr(buffer.find_first_of(" )"), buffer.back());
-    return element;
-}
-
 std::vector<std::string> InputStringProcessing::partition(std::string buffer, std::string delimiter)
 {
     using namespace std;
