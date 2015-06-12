@@ -22,6 +22,8 @@
  * Simple.
  */
 
+#include <iomanip>
+
 #include "MultiphaseSimple.h"
 
 MultiphaseSimple::MultiphaseSimple()
@@ -34,6 +36,26 @@ MultiphaseSimple::MultiphaseSimple()
       sigma_(0.073)
 {
 
+}
+
+void MultiphaseSimple::computePhysicalConstants(Field<double> &alphaField, Field<double> &rhoField, Field<double>& muField)
+{
+    int i, j, k;
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(cellStatus_(i, j, k) != ACTIVE)
+                    continue;
+
+                rhoField(i, j, k) = (1. - alphaField(i, j, k))*rho1_ + alphaField(i, j, k)*rho2_;
+                muField(i, j, k) = (1. - alphaField(i, j, k))*mu1_ + alphaField(i, j, k)*mu2_;
+            }
+        }
+    }
 }
 
 void MultiphaseSimple::computeCurvature(Field<double> &alphaField)
@@ -300,9 +322,16 @@ void MultiphaseSimple::initialize(Input &input, HexaFvmMesh& mesh)
 
     alphaFieldPtr_ = &mesh.findScalarField("alpha");
 
+    alphaField0_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     gradAlphaField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     interfaceNormals_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     kField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    bF_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+
+    rho1_ = input.inputDoubles["rho"];
+    mu1_ = input.inputDoubles["mu"];
+    rho2_ = input.inputDoubles["rho2"];
+    mu2_ = input.inputDoubles["mu2"];
 }
 
 void MultiphaseSimple::storeAlphaField(Field<double> &alphaField)
@@ -332,15 +361,18 @@ void MultiphaseSimple::discretize(double timeStep, std::vector<double> &timeDeri
     int i;
 
     storeUField(uField, uField0_);
-    storeAlphaField(alphaField);
+    //storeAlphaField(alphaField);
+
+    //computePhysicalConstants(alphaField, rhoField, muField);
 
     for(i = 0; i < maxInnerIters_; ++i)
     {
-        computeCurvature(alphaField);
+        //computeCurvature(alphaField);
         computeMomentum(rhoField, muField, massFlowField, &bF_, timeStep, uField, pField);
         computePCorr(rhoField, massFlowField, uField, pField);
         correctContinuity(rhoField, massFlowField, uField, pField);
+        std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
 
-    advectAlphaField(rhoField, massFlowField, uField, timeStep, alphaField);
+    //advectAlphaField(rhoField, massFlowField, uField, timeStep, alphaField);
 }

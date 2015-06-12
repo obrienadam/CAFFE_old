@@ -32,32 +32,22 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.1
+0.3
 relaxationFactorPCorr
-0.1
+0.3
 rho
 998
 mu
 8.94e-4
-momentumSorToler
-1e-3
-pCorrSorToler
-1e-3
 maxInnerIters
-15
-maxMomentumSorIters
-300
-maxPCorrSorIters
-500
-sorOmega
-1.9
+10
 
 ### Immersed Boundaries ####################################
 
 ibSphereRadius
 0.15
 ibSphereCenter
-(1,0.5,0.5)
+(1.5,0.5,0.5)
 
 ### Boundaries #############################################
 
@@ -69,7 +59,7 @@ boundaryRefValueEast
 boundaryTypeWest
 inlet
 boundaryRefValueWest
-(0.5,0,0)
+(1,0,0)
 
 boundaryTypeNorth
 wall

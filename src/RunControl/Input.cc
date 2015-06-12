@@ -71,11 +71,13 @@ Input::Input()
     inputDoubles["relaxationFactorMomentum"] = 0.3;
     inputDoubles["relaxationFactorPCorr"] = 0.1;
     inputDoubles["rho"] = 998.;
-    inputDoubles["mu"] = 0.1;
+    inputDoubles["mu"] = 8.94e-4;
     inputInts["maxInnerIters"] = 10;
 
     //- multiphaseSimple parameters
     inputDoubles["sigma"] = 0.07;
+    inputDoubles["rho2"] = 782.;
+    inputDoubles["mu2"] = 8.94e-3;
 
     //- ibSimple parameters
     inputDoubles["ibSphereRadius"] = 0.5;

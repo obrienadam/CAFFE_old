@@ -40,9 +40,13 @@ private:
     Field<double> kField_;
     Field<Vector3D> bF_;
 
+    double rho1_, rho2_, mu1_, mu2_;
+
     double sigma_;
 
     int alphaGmresIters_;
+
+    void computePhysicalConstants(Field<double>& alphaField, Field<double>& rhoField, Field<double>& muField);
 
     void computeCurvature(Field<double>& alphaField);
     void computeSurfaceTensionSource();

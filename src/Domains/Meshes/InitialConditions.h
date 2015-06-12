@@ -45,13 +45,13 @@ private:
 
     void findOpeningBrace();
 
+    void readInputFile(std::string filename);
+
 public:
 
     InitialConditions();
 
     void initialize(HexaFvmMesh& mesh);
-
-    void readInputFile(std::string filename);
 
     template <class T>
     void setInitialConditions(Field<T>& field);

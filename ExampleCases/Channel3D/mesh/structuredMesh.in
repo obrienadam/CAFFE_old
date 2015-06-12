@@ -1,7 +1,7 @@
 ## hexaMesh input file
 
-MetricConversion = 1.
 MeshName = Channel3D
+MetricConversion = 1.
 
 Vertices
 {

@@ -41,8 +41,6 @@ int main(int argc, const char* argv[])
         simple.initialize(input, mesh);
         initialConditions.initialize(mesh);
 
-        initialConditions.readInputFile("case/initialConditions.in");
-
         runControl.displayStartMessage();
 
         while(runControl.continueRun())

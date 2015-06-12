@@ -29,3 +29,6 @@ latex
 
 # Case output
 *.dat
+
+# Callgrind
+callgrind.*

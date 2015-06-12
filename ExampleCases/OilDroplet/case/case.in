@@ -12,7 +12,7 @@ iterations
 ### Iterations #############################################
 
 maxItrs
-1000
+2
 screenWriteInterval
 1
 fileWriteInterval
@@ -35,10 +35,16 @@ relaxationFactorMomentum
 0.5
 relaxationFactorPCorr
 0.5
+
 rho
 998
 mu
 8.94e-4
+rho2
+782
+mu
+8.94e-3
+
 maxInnerIters
 10
 

@@ -97,7 +97,6 @@ void StructuredMesh::initialize(std::string filename)
                 else
                     Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + bufferVec[i] + "\".");
             }
-            std::cout << nI << std::endl;
         }
         else if(bufferVec[0] == "FILETYPE")
             continue;

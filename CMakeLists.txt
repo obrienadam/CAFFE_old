@@ -12,11 +12,13 @@ set(CAFFE_VERSION_MINOR 0)
 
 # Compiler
 
-set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_C_COMPILER "mpicc")
+set(CMAKE_CXX_COMPILER "mpic++")
 
 # Compiler flags
 
 set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -Wno-switch -std=c++11 -O3")
+set(CMAKE_C_FLAGS "-Wall")
 
 # Output paths
 

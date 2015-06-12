@@ -1,3 +1,5 @@
+#include <iomanip>
+
 #include "Piso.h"
 
 void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
@@ -20,6 +22,8 @@ void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
             computePCorr(rhoField, massFlowField, uField, pField);
             correctContinuity(rhoField, massFlowField, uField, pField);
         }
+
+        std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
 }
 

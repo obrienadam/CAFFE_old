@@ -53,15 +53,6 @@ void InitialConditions::findOpeningBrace()
     }
 }
 
-void InitialConditions::initialize(HexaFvmMesh &mesh)
-{
-    meshPtr_ = &mesh;
-
-    nCellsI_ = mesh.nCellsI();
-    nCellsJ_ = mesh.nCellsJ();
-    nCellsK_ = mesh.nCellsK();
-}
-
 void InitialConditions::readInputFile(std::string filename)
 {
     using namespace std;
@@ -100,6 +91,17 @@ void InitialConditions::readInputFile(std::string filename)
     }
 
     inputFile_.close();
+}
+
+void InitialConditions::initialize(HexaFvmMesh &mesh)
+{
+    meshPtr_ = &mesh;
+
+    nCellsI_ = mesh.nCellsI();
+    nCellsJ_ = mesh.nCellsJ();
+    nCellsK_ = mesh.nCellsK();
+
+    readInputFile("case/initialConditions.in");
 }
 
 template <>

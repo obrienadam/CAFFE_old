@@ -1,5 +1,6 @@
 ## hexaMesh input file
 
+MeshName = Channel3DWithIbSphere
 MetricConversion = 1.
 
 Vertices

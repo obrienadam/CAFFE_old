@@ -1,7 +1,14 @@
 ############################################################
 #
-# This is just a sample file for initial conditions set-up
+# Initial conditions
 #
 ############################################################
 
-MetricConversion = 1.
+
+u
+{
+	Uniform
+	{
+		value = (1, 0, 0)
+	}
+}

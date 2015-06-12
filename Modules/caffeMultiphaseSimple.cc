@@ -39,8 +39,6 @@ int main(int argc, const char* argv[])
         multiphaseSimple.initialize(input, mesh);
         initialConditions.initialize(mesh);
 
-        initialConditions.readInputFile("case/initialConditions.in");
-
         // Begin run
         runControl.displayStartMessage();
 

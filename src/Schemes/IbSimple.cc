@@ -22,6 +22,8 @@
  * IbSimple.
  */
 
+#include <iomanip>
+
 #include "IbSimple.h"
 #include "Interpolation.h"
 
@@ -207,5 +209,6 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
         computePCorr(rhoField, massFlowField, uField, pField);
         correctContinuity(rhoField, massFlowField, uField, pField);
+        std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
 }
