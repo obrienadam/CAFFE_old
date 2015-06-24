@@ -35,9 +35,6 @@ class SparseMatrix
 {
 private:
 
-    int m_, n_;
-    int iStart_, iEnd_;
-
     Mat A_;
     KSP ksp_;
     PC pc_;
@@ -49,22 +46,13 @@ private:
 public:
 
     SparseMatrix();
-    SparseMatrix(int m, int n);
+    SparseMatrix(int m, int n, int nnz);
     ~SparseMatrix();
 
-    void initialize(Input& input);
-
-    void setSize(int m, int n);
-    void preallocate(int dnz, int onz);
-
+    void allocate(int m, int n, int nnz);
     void setValue(int i, int j, double value, InsertMode insertMode = INSERT_VALUES);
-    void setValues(int m, int* iIndices, int n, int* jIndices, double* values, InsertMode insertMode = INSERT_VALUES);
 
-    void beginAssembly();
-    void endAssembly();
-    void assemble();
-
-    int solve(const SparseVector &b, SparseVector& x, PCType pcType = PCSOR);
+    int solve(const SparseVector &b, SparseVector& x);
 
     void print();
 };

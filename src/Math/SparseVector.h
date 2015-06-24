@@ -7,9 +7,6 @@ class SparseVector
 {
 private:
 
-    int m_;
-    int iStart_, iEnd_;
-
     Vec vec_;
 
     PetscErrorCode errorCode_;
@@ -20,16 +17,10 @@ public:
     SparseVector(int m);
     ~SparseVector();
 
-    void setSize(int m);
-
+    void allocate(int m);
+    void allocate(const SparseVector& other);
     void setValue(int i, double value, InsertMode insertMode = INSERT_VALUES);
-    void setValues(int n, int* indices, double* values, InsertMode insertMode = INSERT_VALUES);
-
     double operator()(int i);
-
-    void beginAssembly();
-    void endAssembly();
-    void assemble();
 
     void print();
 

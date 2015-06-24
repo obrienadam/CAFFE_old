@@ -224,6 +224,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 bP_(i, j, k) += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
                 bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
 
+                /*
                 // Higher-order convection order terms go here (these need to be limited!)
                 if(i < uCellI_)
                     bP_(i, j, k) += -min(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
@@ -249,6 +250,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                                  + min(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceS(i, j, k))
                                  - max(massFlowField.faceT(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceT(i, j, k))
                                  + min(massFlowField.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceB(i, j, k)))/relaxationFactorMomentum_;
+                */
 
                 // Pressure term
                 bP_(i, j, k) += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
@@ -348,11 +350,9 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     // Set-up the solution matrix
     indexMap.generateMap(cellStatus_);
-    A.setSize(3*indexMap.nActive(), 3*indexMap.nActive());
-    x.setSize(3*indexMap.nActive());
-    b.setSize(3*indexMap.nActive());
-
-    A.preallocate(7, 0);
+    A.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
+    x.allocate(3*indexMap.nActive());
+    b.allocate(3*indexMap.nActive());
 
     // Add coefficients to the solution matrix (this process is a little memory intensive, may need to redo this later)
     for(l = 0; l < 3; ++l)
@@ -389,17 +389,12 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
                         A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k), INSERT_VALUES);
 
-                    x.setValue(indexMap(i, j, k, l), uField(i, j, k)(l), INSERT_VALUES);
                     b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l), INSERT_VALUES);
                 }
             }
         }
     }
 
-    // Assemble and solve
-    A.assemble();
-    x.assemble();
-    b.assemble();
     momentumGmresIters_ += A.solve(b, x);
 
     // Map solution back to the domain
@@ -637,11 +632,9 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
 
     // Set-up the solution matrix
     indexMap.generateMap(cellStatus_);
-    A.setSize(indexMap.nActive(), indexMap.nActive());
-    x.setSize(indexMap.nActive());
-    b.setSize(indexMap.nActive());
-
-    A.preallocate(7, 0);
+    A.allocate(indexMap.nActive(), indexMap.nActive(), 7);
+    x.allocate(indexMap.nActive());
+    b.allocate(indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -675,16 +668,11 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
                 if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
                     A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k), INSERT_VALUES);
 
-                x.setValue(indexMap(i, j, k, 0), pCorr_(i, j, k));
                 b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x, INSERT_VALUES);
             }
         }
     }
 
-    // Assemble and solve
-    A.assemble();
-    x.assemble();
-    b.assemble();
     pCorrGmresIters_ += A.solve(b, x);
 
     for(k = 0; k < nCellsK_; ++k)
