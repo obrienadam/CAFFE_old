@@ -27,7 +27,13 @@ SparseMatrix::SparseMatrix()
     :
       maxIters_(50000),
       rToler_(1e-5),
-      absToler_(1e-8)
+      absToler_(1e-8),
+      values_(NULL),
+      cols_(NULL),
+      rows_(NULL),
+      nRows_(0),
+      nCols_(0),
+      entryNo_(0)
 {
     PetscInitializeNoArguments();
 }
@@ -43,23 +49,29 @@ SparseMatrix::~SparseMatrix()
 {
     MatDestroy(&A_);
     KSPDestroy(&ksp_);
+    delete[] values_;
+    delete[] cols_;
+    delete[] rows_;
 }
 
 void SparseMatrix::allocate(int m, int n, int nnz)
 {
     MatCreate(PETSC_COMM_WORLD, &A_);
-    MatSetSizes(A_, PETSC_DECIDE, PETSC_DECIDE, m, m);
+    MatSetSizes(A_, PETSC_DECIDE, PETSC_DECIDE, m, n);
     // Should be MATMPIAIJ if parallel or MATSEQAIJ if single
     MatSetType(A_, MATAIJ);
     // Both of these need to be called to ensure it works with MPI and single processor (very weird)
     MatMPIAIJSetPreallocation(A_, nnz, NULL, nnz, NULL);
     MatSeqAIJSetPreallocation(A_, nnz, NULL);
     MatSetUp(A_);
-}
 
-void SparseMatrix::setValue(int i, int j, double value, InsertMode insertMode)
+    // Get MPI ranges
+    MatGetOwnershipRange(A_, &iLower_, &iUpper_);
+}
+#include <iostream>
+void SparseMatrix::setValue(int i, int j, double value)
 {
-    MatSetValues(A_, 1, &i, 1, &j, &value, insertMode);
+    MatSetValues(A_, 1, &i, 1, &j, &value, INSERT_VALUES);
 }
 
 int SparseMatrix::solve(const SparseVector& b, SparseVector& x)

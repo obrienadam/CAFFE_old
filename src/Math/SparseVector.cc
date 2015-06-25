@@ -24,6 +24,9 @@ void SparseVector::allocate(int m)
     VecCreate(PETSC_COMM_WORLD, &vec_);
     VecSetSizes(vec_, PETSC_DECIDE, m);
     VecSetType(vec_, VECSTANDARD);
+
+    // Get MPI ranges
+    VecGetOwnershipRange(vec_, &iLower_, &iUpper_);
 }
 
 void SparseVector::allocate(const SparseVector& other)
@@ -31,9 +34,9 @@ void SparseVector::allocate(const SparseVector& other)
     VecDuplicate(other.vec_, &vec_);
 }
 
-void SparseVector::setValue(int i, double value, InsertMode insertMode)
+void SparseVector::setValue(int i, double value)
 {
-    VecSetValues(vec_, 1, &i, &value, insertMode);
+    VecSetValues(vec_, 1, &i, &value, INSERT_VALUES);
 }
 
 double SparseVector::operator ()(int i)

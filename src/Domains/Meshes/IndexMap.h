@@ -42,7 +42,6 @@ public:
     int operator()(int i, int j, int k, int varSetNo);
     void generateMap(Field<int>& cellStatus);
     int nActive(){ return nActive_; }
-
 };
 
 #endif

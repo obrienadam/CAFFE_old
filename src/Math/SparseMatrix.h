@@ -43,6 +43,14 @@ private:
     double rToler_, absToler_;
     PetscErrorCode errorCode_;
 
+    // Testing making the assembly more efficient
+    double* values_;
+    int* cols_, *rows_;
+    int nRows_, nCols_, entryNo_;
+
+    // MPI related
+    int iLower_, iUpper_;
+
 public:
 
     SparseMatrix();
@@ -50,7 +58,7 @@ public:
     ~SparseMatrix();
 
     void allocate(int m, int n, int nnz);
-    void setValue(int i, int j, double value, InsertMode insertMode = INSERT_VALUES);
+    void setValue(int i, int j, double value);
 
     int solve(const SparseVector &b, SparseVector& x);
 

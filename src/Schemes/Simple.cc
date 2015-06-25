@@ -366,30 +366,30 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     if(cellStatus_(i, j, k) != ACTIVE)
                         continue;
 
-                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), aP_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), aP_(i, j, k));
 
                     // I-direction coefficients
                     if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k));
 
                     if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k));
 
                     // J-direction coefficients
                     if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k));
 
                     if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k));
 
                     // K-direction coefficents
                     if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k));
 
                     if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k), INSERT_VALUES);
+                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k));
 
-                    b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l), INSERT_VALUES);
+                    b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l));
                 }
             }
         }
@@ -645,30 +645,30 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k, 0), aP_(i, j, k), INSERT_VALUES);
+                A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k, 0), aP_(i, j, k));
 
                 // I-direction coefficients
                 if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k));
 
                 if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k));
 
                 // J-direction coefficients
                 if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k));
 
                 if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k));
 
                 // K-direction coefficients
                 if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k));
 
                 if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k), INSERT_VALUES);
+                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k));
 
-                b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x, INSERT_VALUES);
+                b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x);
             }
         }
     }
@@ -1026,8 +1026,8 @@ void Simple::displayUpdateMessage()
         }
     }
 
-    Output::print("Simple", "Momentum prediction total GMRES iterations : " + std::to_string(momentumGmresIters_));
-    Output::print("Simple", "Pressure correction total GMRES iterations : " + std::to_string(pCorrGmresIters_) + "\n");
+    Output::print("Simple", "Momentum prediction total BiCGStab iterations : " + std::to_string(momentumGmresIters_));
+    Output::print("Simple", "Pressure correction total BiCGStab iterations : " + std::to_string(pCorrGmresIters_) + "\n");
     Output::print("Simple", "U-Momentum residual           : " + std::to_string(momentumResidual_.x));
     Output::print("Simple", "V-Momentum residual           : " + std::to_string(momentumResidual_.y));
     Output::print("Simple", "W-Momentum residual           : " + std::to_string(momentumResidual_.z));

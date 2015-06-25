@@ -38,7 +38,7 @@ relaxationFactorPCorr
 rho
 998
 mu
-8.94e-4
+0.01
 maxInnerIters
 1
 

@@ -11,6 +11,9 @@ private:
 
     PetscErrorCode errorCode_;
 
+    // MPI related
+    int iLower_, iUpper_;
+
 public:
 
     SparseVector();
@@ -19,7 +22,7 @@ public:
 
     void allocate(int m);
     void allocate(const SparseVector& other);
-    void setValue(int i, double value, InsertMode insertMode = INSERT_VALUES);
+    void setValue(int i, double value);
     double operator()(int i);
 
     void print();
