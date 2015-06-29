@@ -61,7 +61,7 @@ void SparseMatrix::allocate(int m, int n, int nnz)
     // Should be MATMPIAIJ if parallel or MATSEQAIJ if single
     MatSetType(A_, MATAIJ);
     // Both of these need to be called to ensure it works with MPI and single processor (very weird)
-    MatMPIAIJSetPreallocation(A_, nnz, NULL, nnz, NULL);
+    MatMPIAIJSetPreallocation(A_, nnz, NULL, 0, NULL);
     MatSeqAIJSetPreallocation(A_, nnz, NULL);
     MatSetUp(A_);
 
@@ -85,7 +85,7 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
     PCSetType(pc_, PCILU);
-    PCFactorSetFill(pc_, 2);
+    //PCFactorSetFill(pc_, 2);
     KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
     KSPSetType(ksp_, KSPBCGS);
 

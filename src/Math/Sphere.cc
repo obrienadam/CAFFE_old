@@ -20,23 +20,30 @@ double Sphere::volume()
     return 4.*M_PI*radius*radius*radius/3.;
 }
 
-Point3D Sphere::nearestIntersect(const Point3D &origin, const Point3D &point)
+Point3D Sphere::nearestIntersect(const Point3D &point)
 {
-    Vector3D l, oc;
-    double a, b, d1, d2;
+    Vector3D l;
 
-    l = (point - origin).unitVector();
-    oc = origin - center;
-    a = -dot(l, oc);
-    b = sqrt(a*a - dot(oc, oc) + radius*radius);
+    l = (point - center).unitVector();
 
-    d1 = a + b;
-    d2 = a - b;
+    return center + radius*l;
+}
 
-    if(fabs(d1) < fabs(d2))
-        return origin + d1*l;
-    else
-        return origin + d2*l;
+std::pair<Point3D, Point3D> Sphere::lineIntersect(const Point3D &pt1, const Point3D &pt2)
+{
+    Vector3D l;
+    double a, b, c, d1, d2;
+
+    l = (pt2 - pt1).unitVector();
+
+    a = dot(l, l);
+    b = 2.*dot(l, pt1 - center);
+    c = dot(pt1 - center, pt1 - center) - radius*radius;
+
+    d1 = (-b + sqrt(b*b - 4.*a*c))/(2.*a);
+    d2 = (-b - sqrt(b*b - 4.*a*c))/(2.*a);
+
+    return std::pair<Point3D, Point3D>(pt1 + l*d1, pt1 + l*d2);
 }
 
 bool Sphere::isInside(const Point3D &point)

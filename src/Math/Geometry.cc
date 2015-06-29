@@ -25,19 +25,7 @@ Point3D Geometry::computeQuadrilateralCentroid(Point3D* points)
 
 Vector3D Geometry::computeQuadrilateralNormal(Point3D* points)
 {
-    // This function uses Newell's method to approximately compute the normal
-    // to a slightly non-planar surface
-
-    Vector3D normal;
-
-    for(int i = 0; i < 4; ++i)
-    {
-
-        normal += cross(points[0], points[(i + 1)%4]);
-
-    }
-
-    return normal.unitVector();
+    return 0.5*(cross(points[1] - points[0], points[2] - points[0]) + cross(points[1] - points[0], points[2] - points[0]));
 }
 
 bool Geometry::checkQuadrilateralIsPlanar(Point3D *points)
@@ -191,6 +179,86 @@ bool Geometry::checkHexahedronSurfacesIsPlanar(Point3D *points)
     tmpVertices[3] = points[1];
 
     if(!checkQuadrilateralIsPlanar(tmpVertices))
+        return false;
+
+    return true;
+}
+
+bool Geometry::isInsideHexahedron(const Point3D &point, const Point3D *points)
+{
+    Point3D tmpVertices[4], faceXc;
+    Vector3D faceNorm;
+
+    // Check east face
+    tmpVertices[0] = points[1];
+    tmpVertices[1] = points[2];
+    tmpVertices[2] = points[6];
+    tmpVertices[3] = points[5];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
+        return false;
+
+    // Check west face
+    tmpVertices[0] = points[0];
+    tmpVertices[1] = points[4];
+    tmpVertices[2] = points[7];
+    tmpVertices[3] = points[3];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
+        return false;
+
+    // Check north face
+    tmpVertices[0] = points[2];
+    tmpVertices[1] = points[3];
+    tmpVertices[2] = points[7];
+    tmpVertices[3] = points[6];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
+        return false;
+
+    // Check south face
+    tmpVertices[0] = points[0];
+    tmpVertices[1] = points[1];
+    tmpVertices[2] = points[5];
+    tmpVertices[3] = points[4];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
+        return false;
+
+    // Check top face
+    tmpVertices[0] = points[4];
+    tmpVertices[1] = points[5];
+    tmpVertices[2] = points[6];
+    tmpVertices[3] = points[7];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
+        return false;
+
+    // Check bottom face
+    tmpVertices[0] = points[0];
+    tmpVertices[1] = points[3];
+    tmpVertices[2] = points[2];
+    tmpVertices[3] = points[1];
+
+    faceXc = computeQuadrilateralCentroid(tmpVertices);
+    faceNorm = computeQuadrilateralNormal(tmpVertices);
+
+    if(dot(faceXc - point, faceNorm) < 0.)
         return false;
 
     return true;

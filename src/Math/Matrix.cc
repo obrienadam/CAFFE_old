@@ -26,12 +26,11 @@
 #include <iostream>
 #include <algorithm>
 
-// The following directives are to work around a bug in lapack-3.4.2 versions and earlier
-
-#define lapack_complex_float    float _Complex
-#define lapack_complex_double   double _Complex
-
-#include <lapacke/lapacke.h>
+extern "C"
+{
+    #include <cblas.h>
+    #include <clapack.h>
+}
 
 #include "Matrix.h"
 #include "Output.h"
@@ -74,11 +73,8 @@ Matrix::Matrix(double *elements, int m, int n)
 
 Matrix::Matrix(const Matrix &other)
     :
-      elements_(NULL),
-      ipiv_(NULL)
+      Matrix(other.m_, other.n_)
 {
-    allocate(other.m_, other.n_);
-
     for(int i = 0; i < nElements_; ++i)
         elements_[i] = other.elements_[i];
 }
@@ -95,13 +91,7 @@ Matrix& Matrix::operator=(const Matrix& rhs)
     if(this == &rhs)
         return *this;
 
-    if(nElements_ < rhs.nElements_)
-    {
-        allocate(rhs.m_, rhs.n_);
-    }
-
-    m_ = rhs.m_;
-    n_ = rhs.n_;
+    reallocate(rhs.m_, rhs.n_);
 
     for(i = 0; i < nElements_; ++i)
         elements_[i] = rhs.elements_[i];
@@ -151,15 +141,6 @@ void Matrix::deallocate()
     bufferSize_ = nElements_ = m_ = n_ = 0;
 }
 
-void Matrix::reshape(int m, int n)
-{
-    if(m*n != nElements_)
-        Output::raiseException("Matrix", "reshape", "invalid number of rows and/or columns selected.");
-
-    m_ = m;
-    n_ = n;
-}
-
 void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
 {
     elements_[n_*i + j] = vec.x;
@@ -177,7 +158,7 @@ double& Matrix::operator()(int i, int j)
 
 void Matrix::solveLeastSquares(Matrix &b)
 {
-    LAPACKE_dgels(LAPACK_ROW_MAJOR, 'N', m_, n_, b.n_, elements_, n_, b.elements_, b.n_);
+    clapack_dgels(CblasRowMajor, CblasNoTrans, m_, n_, b.n_, elements_, m_, b.elements_, b.m_);
 
     // Modify the dimensions of vector b to reflect the number of unknowns. Note that this doesn't release memory,
     // but it shouldn't matter. Also, this function will change the values of both A and b.
@@ -187,31 +168,13 @@ void Matrix::solveLeastSquares(Matrix &b)
 
 void Matrix::solve(Matrix &b)
 {
-    LAPACKE_dgesv(LAPACK_ROW_MAJOR, m_, b.n_, elements_, n_, ipiv_, b.elements_, b.n_);
+    clapack_dgesv(CblasRowMajor, m_, b.n_, elements_, m_, ipiv_, b.elements_, b.m_);
 }
 
 Matrix& Matrix::inverse()
 {
-    LAPACKE_dgetrf(LAPACK_ROW_MAJOR, m_, n_, elements_, n_, ipiv_);
-    LAPACKE_dgetri(LAPACK_ROW_MAJOR, m_, elements_, n_, ipiv_);
-    return *this;
-}
-
-Matrix& Matrix::transpose()
-{
-    Matrix tmp(*this);
-    int i, j;
-
-    reshape(n_, m_);
-
-    for(i = 0; i < m_; ++i)
-    {
-        for(j = 0; j < n_; ++j)
-        {
-            std::swap(operator ()(i, j), tmp(j, i));
-        }
-    }
-
+    clapack_dgetrf(CblasRowMajor, m_, n_, elements_, n_, ipiv_);
+    clapack_dgetri(CblasRowMajor, m_, elements_, n_, ipiv_);
     return *this;
 }
 
@@ -233,6 +196,7 @@ void Matrix::print()
 Matrix solveLeastSquares(Matrix A, Matrix b)
 {
     A.solveLeastSquares(b);
+    int k; std::cin >> k;
     return b;
 }
 
@@ -269,43 +233,23 @@ Matrix random(int m, int n, double min, double max)
     return mat;
 }
 
-Matrix transpose(Matrix matrix)
-{
-    matrix.transpose();
-    return matrix;
-}
-
 Matrix inverse(Matrix matrix)
 {
     matrix.inverse();
     return matrix;
 }
 
-Matrix operator*(Matrix A, Matrix& B)
+Matrix operator*(const Matrix& A, const Matrix& B)
 {
     Matrix C(A.m_, B.n_);
-    return multiply(A, B, C);
-}
 
-Matrix& multiply(Matrix &A, Matrix &B, Matrix& C)
-{
-    int i, j, k;
-
-    std::cout << A.nCols() << " " << B.nRows() << std::endl;
-
-    if (A.n_ != B.m_)
-        Output::raiseException("Matrix", "operator*", "Number of columns of A different than number of rows of B.");
-
-    for(j = 0; j < B.n_; ++j)
-    {
-        for(i = 0; i < A.m_; ++i)
-        {
-            for(k = 0; k < A.n_; ++k)
-            {
-                C(i, j) += A(i, k)*B(k, j);
-            }
-        }
-    }
+    multiply(A, B, C);
 
     return C;
 }
+
+void multiply(const Matrix &A, const Matrix &B, Matrix &C)
+{
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_, B.n_, A.n_, 1., A.elements_, A.n_, B.elements_, B.n_, 1., C.elements_, C.n_);
+}
+

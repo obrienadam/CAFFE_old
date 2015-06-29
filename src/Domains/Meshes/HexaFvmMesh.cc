@@ -605,6 +605,40 @@ double HexaFvmMesh::rCellMagB(int i, int j, int k)
     return cellToCellDistancesK_(i, j, k - 1);
 }
 
+void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk)
+{
+    int i, j, k;
+    Point3D tmpPoints[8];
+
+    for(k = 0; k < nCellsK(); ++k)
+    {
+        for(j = 0; j < nCellsJ(); ++j)
+        {
+            for(i = 0; i < nCellsI(); ++i)
+            {
+                tmpPoints[0] = nodes_(i, j, k);
+                tmpPoints[1] = nodes_(i + 1, j, k);
+                tmpPoints[2] = nodes_(i + 1, j + 1, k);
+                tmpPoints[3] = nodes_(i, j + 1, k);
+                tmpPoints[4] = nodes_(i, j, k);
+                tmpPoints[5] = nodes_(i + 1, j, k + 1);
+                tmpPoints[6] = nodes_(i + 1, j + 1, k + 1);
+                tmpPoints[7] = nodes_(i, j + 1, k + 1);
+
+                if(Geometry::isInsideHexahedron(cellCenters_(i, j, k), tmpPoints))
+                {
+                    ii = i;
+                    jj = j;
+                    kk = k;
+                    return;
+                }
+            }
+        }
+    }
+
+    Output::raiseException("HexaFvmMesh", "locateCell", "the specified point is not in the domain.");
+}
+
 void HexaFvmMesh::writeDebug()
 {
     using namespace std;

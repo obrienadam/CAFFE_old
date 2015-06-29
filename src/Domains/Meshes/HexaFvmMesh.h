@@ -250,6 +250,15 @@ public:
     int nFacesK(){ return faceCentersK_.sizeK(); }
 
     /**
+     * @brief Locate the cell whose center is closest to a point, and store the indices.
+     * @param point The point to be considered.
+     * @param ii The i index of the cell closest to point.
+     * @param jj The j index of the cell closest to point.
+     * @param kk The k index of the cell closest to point.
+     */
+    void locateCell(const Point3D& point, int& ii, int& jj, int& kk);
+
+    /**
      * @brief Output all mesh data to a file for debugging purposes.
      */
     void writeDebug();

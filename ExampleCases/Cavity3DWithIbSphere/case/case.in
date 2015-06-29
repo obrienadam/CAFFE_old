@@ -45,9 +45,9 @@ maxInnerIters
 ### Immersed Boundaries #####################################
 
 ibSphereRadius
-0.025
+0.25
 ibSphereCenter
-(0.05,0.05,0.05)
+(0.5,0.5,0.5)
 
 ### Boundaries ##############################################
 

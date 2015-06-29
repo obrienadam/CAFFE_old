@@ -19,7 +19,8 @@ public:
     double volume();
     double diameter(){ return 2.*radius; }
 
-    Point3D nearestIntersect(const Point3D& origin, const Point3D& point);
+    Point3D nearestIntersect(const Point3D& point);
+    std::pair<Point3D, Point3D> lineIntersect(const Point3D& pt1, const Point3D& pt2);
 
     bool isInside(const Point3D& point);
 

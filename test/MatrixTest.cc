@@ -46,24 +46,16 @@ int main()
         C = inverse(A);
         C.print();
 
-        cout << "Multiplying A*A^-1:" << endl;
-
-        B = A*C;
-        B.print();
-
-        cout << "Multiplying A*A-1*A:" << endl;
-
-        C = B*A;
-        C.print();
-
         cout << "Allocating a large matrix:" << endl;
 
         A = random(1000, 1000, 0, 9);
         B = random(1000, 1000, -5, 9);
 
-        cout << "Solving large matrix with a large number of rhs vectors:" << endl;
+        cout << "Solving large matrix with a large number of rhs vectors..." << endl;
 
         A.solve(B);
+
+        cout << "Finished solving a large matrix with a large number of rhs vectors." << endl;
 
         cout << "Setting up a least squares problem:" << endl;
 
@@ -78,17 +70,10 @@ int main()
 
         B.print();
 
-        C = solveLeastSquares(A, B);
+        A.solve(B);
 
         cout << "Solution:" << endl;
 
-        C.print();
-
-        cout << "Solution when computed second way:" << endl;
-
-        B = transpose(A)*B;
-        A = transpose(A)*A;
-        C = solve(A, B);
         C.print();
 
         cout << "Test the interpolation methods:" << endl;
@@ -140,9 +125,9 @@ int main()
             pt.z = rand()/double(RAND_MAX) + 1.;
 
             pt *= a;
-
-            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 12, pt) << endl;
-            cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
+            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 6, pt) << endl;
+            //cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
+            //cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
         }
     }
     catch (const char* errorMessage)

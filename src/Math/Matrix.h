@@ -65,13 +65,6 @@ public:
     void reallocate(int m, int n);
     void deallocate();
 
-    /**
-     * @brief reshape change the shape of the matrix
-     * @param m new number of rows
-     * @param n new number of columns
-     */
-    void reshape(int m, int n);
-
     double& operator()(int i, int j);
     int nRows() const {return m_;}
     int nCols() const {return n_;}
@@ -95,10 +88,6 @@ public:
      */
     Matrix& inverse();
 
-    /** Transpose the matrix.
-     */
-    Matrix& transpose();
-
     Matrix& operator+=(Matrix& rhs);
     Matrix& operator-=(Matrix& rhs);
     Matrix& operator*=(double alpha);
@@ -108,8 +97,8 @@ public:
      */
     void print();
 
-    friend Matrix operator*(Matrix A, Matrix& B);
-    friend Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
+    friend Matrix operator*(const Matrix& A, const Matrix& B);
+    friend void multiply(const Matrix &A, const Matrix &B, Matrix& C);
 };
 
 //- Solution functions. These will not modify the original matrices
@@ -118,10 +107,9 @@ Matrix solveLeastSquares(Matrix A, Matrix b);
 Matrix solve(Matrix A, Matrix b);
 Matrix eye(int m);
 Matrix random(int m, int n, double min, double max);
-Matrix transpose(Matrix matrix);
 Matrix inverse(Matrix matrix);
 
-Matrix operator*(Matrix A, Matrix& B);
-Matrix& multiply(Matrix &A, Matrix &B, Matrix& C);
+Matrix operator*(const Matrix& A, const Matrix& B);
+void multiply(const Matrix &A, const Matrix &B, Matrix& C);
 
 #endif

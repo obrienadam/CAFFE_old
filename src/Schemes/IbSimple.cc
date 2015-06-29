@@ -40,7 +40,7 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
     HexaFvmMesh& mesh = *meshPtr_;
     int i, j, k;
 
-    //- Determine the solid cells, set the rest as fluid
+    //- This procedure is done as per Mittal et al. (2008)
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
@@ -49,22 +49,19 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
             {
                 if(ibSphere_.isInside(mesh.cellXc(i, j, k)))
                 {
-                    cellStatus_(i, j, k) = INACTIVE;
                     ibField_(i, j, k) = SOLID;
-                    uField(i, j, k) = Vector3D(0., 0., 0.);
+                    cellStatus_(i, j, k) = INACTIVE;
                 }
                 else
                 {
-                    cellStatus_(i, j, k) = ACTIVE;
                     ibField_(i, j, k) = FLUID;
+                    cellStatus_(i, j, k) = ACTIVE;
                 }
-
-                mesh.findScalarField("ibField")(i, j, k) = ibField_(i, j, k);
             }
         }
     }
 
-    //- Determine the immersed boundary cells
+    //- Determine the IB or "ghost" cells
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
@@ -72,17 +69,14 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
             for(i = 0; i < nCellsI_; ++i)
             {
                 if(ibField_(i, j, k) == SOLID)
-                    continue;
-
-                if(ibField_(i + 1, j, k) == SOLID ||
-                        ibField_(i - 1, j, k) == SOLID ||
-                        ibField_(i, j + 1, k) == SOLID ||
-                        ibField_(i, j - 1, k) == SOLID ||
-                        ibField_(i, j, k + 1) == SOLID ||
-                        ibField_(i, j, k - 1) == SOLID)
                 {
-                    ibField_(i, j, k) = IB;
-                    cellStatus_(i, j, k) = INTERPOLATION;
+                    if(ibField_(i + 1, j, k) == FLUID || ibField_(i - 1, j, k) == FLUID
+                            || ibField_(i, j + 1, k) == FLUID || ibField_(i, j - 1, k) == FLUID
+                            || ibField_(i, j, k + 1) == FLUID || ibField_(i, j, k - 1) == FLUID)
+                    {
+                        ibField_(i, j, k) = IB;
+                        cellStatus_(i, j, k) = INTERPOLATION;
+                    }
                 }
 
                 mesh.findScalarField("ibField")(i, j, k) = ibField_(i, j, k);
@@ -96,9 +90,8 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
     using namespace std;
 
     HexaFvmMesh& mesh = *meshPtr_;
-    int i, j, k, l, n;
-    Point3D tmpPoints[6];
-    double tmpValues[6];
+    Point3D boundaryPoint, imagePoint, tmpPoints[8];
+    int i, j, k, ii, jj, kk;
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -108,72 +101,14 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
             {
                 if(ibField_(i, j, k) == IB)
                 {
-                    tmpPoints[0] = mesh.cellXc(i + 1, j, k);
-                    tmpPoints[1] = mesh.cellXc(i - 1, j, k);
-                    tmpPoints[2] = mesh.cellXc(i, j + 1, k);
-                    tmpPoints[3] = mesh.cellXc(i, j - 1, k);
-                    tmpPoints[4] = mesh.cellXc(i, j, k + 1);
-                    tmpPoints[5] = mesh.cellXc(i, j, k - 1);
-                    for(l = 0; l < 3; ++l)
-                    {
-                        tmpValues[0] = uField(i + 1, j, k)(l);
-                        tmpValues[1] = uField(i - 1, j, k)(l);
-                        tmpValues[2] = uField(i, j + 1, k)(l);
-                        tmpValues[3] = uField(i, j - 1, k)(l);
-                        tmpValues[4] = uField(i, j, k + 1)(l);
-                        tmpValues[5] = uField(i, j, k - 1)(l);
+                    // Find the boundary and image points
+                    boundaryPoint = ibSphere_.nearestIntersect(mesh.cellXc(i, j, k));
+                    imagePoint = 2.*boundaryPoint - mesh.cellXc(i, j , k);
 
-                        uField(i, j, k)(l) = Interpolation::linear(tmpPoints, tmpValues, 6, mesh.cellXc(i, j, k));
-                    }
+                    mesh.locateCell(imagePoint, ii, jj, kk);
 
-                    n = 0;
-                    pField(i, j, k) = 0.;
-                    pCorr_(i, j, k) = 0.;
-
-                    if(ibField_(i + 1, j, k) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i + 1, j, k);// + dot(gradPField_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
-                        pCorr_(i, j, k) += pCorr_(i + 1, j, k);// + dot(gradPCorr_(i + 1, j, k), mesh.rCellW(i + 1, j, k));
-                        ++n;
-                    }
-
-                    if(ibField_(i - 1, j, k) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i - 1, j, k);// + dot(gradPField_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
-                        pCorr_(i, j, k) += pCorr_(i - 1, j, k);// + dot(gradPCorr_(i - 1, j, k), mesh.rCellE(i - 1, j, k));
-                        ++n;
-                    }
-
-                    if(ibField_(i, j + 1, k) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i, j + 1, k);// + dot(gradPField_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
-                        pCorr_(i, j, k) += pCorr_(i, j + 1, k);// + dot(gradPCorr_(i, j + 1, k), mesh.rCellS(i, j + 1, k));
-                        ++n;
-                    }
-
-                    if(ibField_(i, j - 1, k) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i, j - 1, k);/// + dot(gradPField_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
-                        pCorr_(i, j, k) += pCorr_(i, j - 1, k);// + dot(gradPCorr_(i, j - 1, k), mesh.rCellN(i, j - 1, k));
-                        ++n;
-                    }
-
-                    if(ibField_(i, j, k + 1) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i, j, k + 1);// + dot(gradPField_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
-                        pCorr_(i, j, k) += pCorr_(i, j, k + 1);// + dot(gradPCorr_(i, j, k + 1), mesh.rCellB(i, j, k + 1));
-                        ++n;
-                    }
-
-                    if(ibField_(i, j, k - 1) == FLUID)
-                    {
-                        pField(i, j, k) += pField(i, j, k - 1);// + dot(gradPField_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
-                        pCorr_(i, j, k) += pCorr_(i, j, k - 1);// + dot(gradPCorr_(i, j, k - 1), mesh.rCellT(i, j, k - 1));
-                        ++n;
-                    }
-
-                    pField(i, j, k) /= double(n);
-                    pCorr_(i, j, k) /= double(n);
+                    // Figure out which "octant" formed by cell centers should be used for trilinear interpolation
+                    std::cout << ii << " " << jj << " " << kk << std::endl; //std::cin >> ii;
                 }
             }
         }

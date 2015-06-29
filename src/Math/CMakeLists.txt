@@ -24,4 +24,4 @@ set(SOURCES Vector3D.cc
             Interpolation.cc)
 
 add_library(Math ${HEADERS} ${SOURCES})
-target_link_libraries(Math lapacke lapack blas petsc)
+target_link_libraries(Math blas lapack cblas atlas petsc)

@@ -1,6 +1,8 @@
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
+#include <utility>
+
 #include "Point3D.h"
 
 class Geometry
@@ -19,13 +21,12 @@ public:
     //- 3-Dimensional
 
     //- Hexahedron methods
-
     static double computeHexahedronVolume(Point3D* points);
     static Point3D computeHexahedronCentroid(Point3D* points);
     static bool checkHexahedronSurfacesIsPlanar(Point3D* points);
+    static bool isInsideHexahedron(const Point3D& point, const Point3D* points);
 
     //- Tetrahedron methods
-
     static double computeTetrahedronVolume(Point3D* points);
     static Point3D computeTetrahedronCentroid(Point3D* points);
 
@@ -34,7 +35,8 @@ public:
     virtual double volume() = 0;
 
     //- Intersections
-    virtual Point3D nearestIntersect(const Point3D& origin, const Point3D& point) = 0;
+    virtual Point3D nearestIntersect(const Point3D& point) = 0;
+    virtual std::pair<Point3D, Point3D> lineIntersect(const Point3D& pt1, const Point3D& pt2) = 0;
 
     //- Tests
     virtual bool isInside(const Point3D& point) = 0;

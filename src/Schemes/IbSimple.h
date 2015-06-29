@@ -30,7 +30,7 @@
 #include "Simple.h"
 #include "Sphere.h"
 
-enum CellType{FLUID, SOLID, IB};
+enum CellType{FLUID, IB, SOLID};
 
 class IbSimple : public Simple
 {

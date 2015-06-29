@@ -19,10 +19,19 @@ public:
                          int nPoints,
                          const Point3D& interpolationPoint);
 
+    static double trilinear(const Point3D* points,
+                            const double* values,
+                            int nPoints,
+                            const Point3D& interpolationPoint);
+
     static double quadratic(const Point3D* points,
                             const double* values,
                             int nPoints,
                             const Point3D& interpolationPoint);
+
+    static Matrix computeTrilinearCoeffs(const Point3D* points,
+                                         int nPoints,
+                                         const Point3D& interpolationPoint);
 };
 
 #endif
