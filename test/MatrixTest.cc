@@ -78,10 +78,6 @@ int main()
         C = solveLeastSquares(A, B);
 
         C.print();
-/*
-        cout << "Solution:" << endl;
-
-        C.print();
 
         cout << "Test the interpolation methods:" << endl;
 
@@ -132,11 +128,10 @@ int main()
             pt.z = rand()/double(RAND_MAX) + 1.;
 
             pt *= a;
-            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 12, pt) << endl;
-            //cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
-            //cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
+            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 8, pt) << endl;
+            cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
+            cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
         }
-        */
     }
     catch (const char* errorMessage)
     {

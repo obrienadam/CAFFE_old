@@ -122,7 +122,9 @@ double& Matrix::operator()(int i, int j)
 
 void Matrix::solveLeastSquares(Matrix &b)
 {
-    throw "\"Matrix::solveLeastSquares\" not currently working because of an apparent bug in clapack_dgels.";
+    // This is a bit of workaround, there seems to be some kind of bug with CblasRowMajor for clapack_dgels
+    clapack_dgels(CblasColMajor, CblasTrans, n_, m_, b.n_, elements_.data(), n_, b.elements_.data(), b.m_);
+    b.m_ = n_;
 }
 
 void Matrix::solve(Matrix &b)
