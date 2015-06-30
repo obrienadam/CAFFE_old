@@ -41,9 +41,12 @@ int main()
 
         A.print();
 
-        cout << "Inverting A:" << endl;
+        cout << "Inverting A..." << endl;
 
-        C = inverse(A);
+        A.inverse();
+
+        cout << "A^-1*B = " << endl;
+        C = A*B;
         C.print();
 
         cout << "Allocating a large matrix:" << endl;
@@ -59,8 +62,8 @@ int main()
 
         cout << "Setting up a least squares problem:" << endl;
 
-        A = random(10, 3, -9, 9);
-        B = random(10, 1, -9, 9);
+        A = random(4, 3, -9, 9);
+        B = random(4, 1, -9, 9);
 
         cout << "Matrix A:" << endl;
 
@@ -70,8 +73,12 @@ int main()
 
         B.print();
 
-        A.solve(B);
+        cout << "Matrix C:" << endl;
 
+        C = solveLeastSquares(A, B);
+
+        C.print();
+/*
         cout << "Solution:" << endl;
 
         C.print();
@@ -125,10 +132,11 @@ int main()
             pt.z = rand()/double(RAND_MAX) + 1.;
 
             pt *= a;
-            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 6, pt) << endl;
+            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 12, pt) << endl;
             //cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
             //cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
         }
+        */
     }
     catch (const char* errorMessage)
     {

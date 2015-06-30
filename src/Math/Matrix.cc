@@ -36,10 +36,6 @@ extern "C"
 #include "Output.h"
 
 Matrix::Matrix(int m, int n)
-    :
-      elements_(NULL),
-      ipiv_(NULL),
-      bufferSize_(0)
 {
     allocate(m, n);
 }
@@ -75,70 +71,38 @@ Matrix::Matrix(const Matrix &other)
     :
       Matrix(other.m_, other.n_)
 {
-    for(int i = 0; i < nElements_; ++i)
-        elements_[i] = other.elements_[i];
+    elements_ = other.elements_;
 }
 
 Matrix::~Matrix()
 {
-    deallocate();
+
 }
 
 Matrix& Matrix::operator=(const Matrix& rhs)
 {
-    int i;
-
     if(this == &rhs)
         return *this;
 
     reallocate(rhs.m_, rhs.n_);
-
-    for(i = 0; i < nElements_; ++i)
-        elements_[i] = rhs.elements_[i];
+    elements_ = rhs.elements_;
 
     return *this;
 }
 
 void Matrix::allocate(int m, int n)
 {
-    deallocate();
-
     m_ = m;
     n_ = n;
     nElements_ = m_*n_;
 
-    if(nElements_ == 0)
-        return;
-
-    elements_ = new double[nElements_];
-    ipiv_ = new int[m_];
-    bufferSize_ = nElements_;
+    elements_.resize(nElements_);
+    ipiv_.resize(nElements_);
 }
 
 void Matrix::reallocate(int m, int n)
 {
-    if(bufferSize_ < m*n)
-    {
-        allocate(m, n);
-    }
-    else
-    {
-        m_ = m;
-        n_ = n;
-        nElements_ = m_*n_;
-    }
-}
-
-void Matrix::deallocate()
-{
-    if(elements_ == NULL)
-        return;
-
-    delete[] elements_;
-    elements_ = NULL;
-    delete[] ipiv_;
-    ipiv_ = NULL;
-    bufferSize_ = nElements_ = m_ = n_ = 0;
+    allocate(m, n);
 }
 
 void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
@@ -158,23 +122,18 @@ double& Matrix::operator()(int i, int j)
 
 void Matrix::solveLeastSquares(Matrix &b)
 {
-    clapack_dgels(CblasRowMajor, CblasNoTrans, m_, n_, b.n_, elements_, m_, b.elements_, b.m_);
-
-    // Modify the dimensions of vector b to reflect the number of unknowns. Note that this doesn't release memory,
-    // but it shouldn't matter. Also, this function will change the values of both A and b.
-
-    b.m_ = n_;
+    throw "\"Matrix::solveLeastSquares\" not currently working because of an apparent bug in clapack_dgels.";
 }
 
 void Matrix::solve(Matrix &b)
 {
-    clapack_dgesv(CblasRowMajor, m_, b.n_, elements_, m_, ipiv_, b.elements_, b.m_);
+    clapack_dgesv(CblasRowMajor, m_, b.n_, elements_.data(), m_, ipiv_.data(), b.elements_.data(), b.m_);
 }
 
 Matrix& Matrix::inverse()
 {
-    clapack_dgetrf(CblasRowMajor, m_, n_, elements_, n_, ipiv_);
-    clapack_dgetri(CblasRowMajor, m_, elements_, n_, ipiv_);
+    clapack_dgetrf(CblasRowMajor, m_, n_, elements_.data(), n_, ipiv_.data());
+    clapack_dgetri(CblasRowMajor, m_, elements_.data(), n_, ipiv_.data());
     return *this;
 }
 
@@ -196,7 +155,6 @@ void Matrix::print()
 Matrix solveLeastSquares(Matrix A, Matrix b)
 {
     A.solveLeastSquares(b);
-    int k; std::cin >> k;
     return b;
 }
 
@@ -250,6 +208,6 @@ Matrix operator*(const Matrix& A, const Matrix& B)
 
 void multiply(const Matrix &A, const Matrix &B, Matrix &C)
 {
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_, B.n_, A.n_, 1., A.elements_, A.n_, B.elements_, B.n_, 1., C.elements_, C.n_);
+    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_, B.n_, A.n_, 1., A.elements_.data(), A.n_, B.elements_.data(), B.n_, 1., C.elements_.data(), C.n_);
 }
 

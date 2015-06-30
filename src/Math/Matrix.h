@@ -25,15 +25,17 @@
 #ifndef MATRIX_H
 #define MATRIX_H
 
+#include <vector>
+
 #include "Vector3D.h"
 
 class Matrix
 {
 protected:
 
-    int m_, n_, nElements_, bufferSize_;
-    double* elements_;
-    int* ipiv_;
+    int m_, n_, nElements_;
+    std::vector<double> elements_;
+    std::vector<int> ipiv_;
 
 public:
 
@@ -63,12 +65,11 @@ public:
 
     void allocate(int m, int n);
     void reallocate(int m, int n);
-    void deallocate();
 
     double& operator()(int i, int j);
     int nRows() const {return m_;}
     int nCols() const {return n_;}
-    int nElements(){return nElements_;}
+    int nElements(){return elements_.size();}
 
     /** Add a 3D vector to a row, with the first element at i, j.
      */

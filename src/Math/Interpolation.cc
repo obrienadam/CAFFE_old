@@ -16,8 +16,6 @@ double Interpolation::linear(const Point3D* points,
     M_.reallocate(nPoints, 4);
     b_.reallocate(nPoints, 1);
 
-    std::cout << M_.nRows() << std::endl;
-
     for(i = 0; i < nPoints; ++i)
     {
         M_(i, 0) = 1.;
