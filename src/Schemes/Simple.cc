@@ -164,15 +164,13 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
     double a[7];
     int rowNo, cols[7];
     Vector3D bP;
-    SparseMatrix A;
-    SparseVector x, b, h;
 
     storeUField(uField, uFieldStar_);
 
     indexMap.generateMap(cellStatus_);
-    A.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
-    x.allocate(3*indexMap.nActive());
-    b.allocate(3*indexMap.nActive());
+    AMomentum.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
+    xMomentum.allocate(3*indexMap.nActive());
+    bMomentum.allocate(3*indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -274,8 +272,8 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                     cols[4] = indexMap(i, j - 1, k, l);
                     cols[5] = indexMap(i, j, k + 1, l);
                     cols[6] = indexMap(i, j, k - 1, l);
-                    A.setRow(rowNo, 7, cols, a);
-                    b.setValue(rowNo, bP(l));
+                    AMomentum.setRow(rowNo, 7, cols, a);
+                    bMomentum.setValue(rowNo, bP(l));
                 }
 
                 // Update D-field
@@ -284,7 +282,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
         }
     }
 
-    momentumBiCGStabIters_ += A.solve(b, x);
+    momentumBiCGStabIters_ += AMomentum.solve(bMomentum, xMomentum);
 
     // Map solution back to the domain
     for(k = 0; k < nCellsK_; ++k)
@@ -298,19 +296,13 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
                 for(l = 0; l < 3; ++l)
                 {
-                    uField(i, j, k)(l) = x(indexMap(i, j, k, l));
-                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), 0.);
+                    uField(i, j, k)(l) = xMomentum(indexMap(i, j, k, l));
                 }
             }
         }
     }
 
     // Compute the pseudo-velocity vector
-
-    A.assemble();
-    scale(-1., A);
-    h.allocate(x);
-    multiplyAdd(A, x, b, h);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -321,10 +313,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                for(l = 0; l < 3; ++l)
-                {
-                    hField_(i, j, k)(l) = (h(indexMap(i, j, k, l)) + mesh.cellVol(i, j, k)*gradPField_(i, j, k)(l))*dField_(i, j, k)/mesh.cellVol(i, j, k);
-                }
+                hField_(i, j, k) = uField(i, j, k) + dField_(i, j, k)*gradPField_(i, j, k);
             }
         }
     }
@@ -425,15 +414,13 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
     Vector3D sf, ds, gradPCorrBar;
     double aP, aE, aW, aN, aS, aT, aB, bP, a[7];
     int rowNo, cols[7];
-    SparseMatrix A;
-    SparseVector x, b;
 
     computeMassFlowFaces(rhoField, uField, massFlowField);
 
     indexMap.generateMap(cellStatus_);
-    A.allocate(indexMap.nActive(), indexMap.nActive(), 7);
-    x.allocate(indexMap.nActive());
-    b.allocate(indexMap.nActive());
+    APCorr.allocate(indexMap.nActive(), indexMap.nActive(), 7);
+    xPCorr.allocate(indexMap.nActive());
+    bPCorr.allocate(indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -475,13 +462,13 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
                 cols[4] = indexMap(i, j - 1, k, 0);
                 cols[5] = indexMap(i, j, k + 1, 0);
                 cols[6] = indexMap(i, j, k - 1, 0);
-                A.setRow(rowNo, 7, cols, a);
-                b.setValue(rowNo, bP);
+                APCorr.setRow(rowNo, 7, cols, a);
+                bPCorr.setValue(rowNo, bP);
             }
         }
     }
 
-    pCorrBiCGStabIters_ += A.solve(b, x);
+    pCorrBiCGStabIters_ += APCorr.solve(bPCorr, xPCorr);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -492,7 +479,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                pCorr_(i, j, k) = x(indexMap(i, j, k, 0));
+                pCorr_(i, j, k) = xPCorr(indexMap(i, j, k, 0));
             }
         }
     }
@@ -562,12 +549,11 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
     computeCellCenteredGradients(uField, gradUField_, DIVERGENCE_THEOREM);
 }
 
-Vector3D Simple::computeResidual(Field<Vector3D> &uField)
+double Simple::computeResidual(Field<Vector3D> &uField)
 {
-    HexaFvmMesh& mesh = *meshPtr_;
-    int i, j, k;
-    Vector3D sumMomentumResidualSqr = Vector3D(0., 0., 0.);
-    double sumVol = 0.;
+    int i, j, k, l;
+
+    // Momentum residuals
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -578,15 +564,20 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                Output::print("Fix the residual functions!");
+                for(l = 0; l < 3; ++l)
+                {
+                    xMomentum.setValue(indexMap(i, j, k, l), uField(i, j, k)(l));
+                }
             }
         }
     }
 
-    if(isnan(sumMomentumResidualSqr.x) || isnan(sumMomentumResidualSqr.y) || isnan(sumMomentumResidualSqr.z))
-        Output::raiseException("Simple", "computeResidual", "a NaN value was detected.");
+    rMomentum.allocate(3*indexMap.nActive());
+    scale(-1., bMomentum);
+    multiplyAdd(AMomentum, xMomentum, bMomentum, rMomentum);
+    momentumResidual_ = l2Norm(rMomentum);
 
-    return sqrt(sumMomentumResidualSqr/sumVol);
+    return momentumResidual_;
 }
 
 // ************* Public Methods *************
@@ -778,6 +769,8 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
         correctContinuity(rhoField, massFlowField, uField, pField);
         std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
+
+    momentumResidual_ = computeResidual(uField);
 }
 
 void Simple::copySolution(std::vector<double> &original)
@@ -811,9 +804,7 @@ void Simple::displayUpdateMessage()
 
     Output::print("Simple", "Momentum prediction total BiCGStab iterations : " + std::to_string(momentumBiCGStabIters_));
     Output::print("Simple", "Pressure correction total BiCGStab iterations : " + std::to_string(pCorrBiCGStabIters_) + "\n");
-    Output::print("Simple", "U-Momentum residual           : " + std::to_string(momentumResidual_.x));
-    Output::print("Simple", "V-Momentum residual           : " + std::to_string(momentumResidual_.y));
-    Output::print("Simple", "W-Momentum residual           : " + std::to_string(momentumResidual_.z));
+    Output::print("Simple", "Momentum L2 residual norm     : " + std::to_string(momentumResidual_));
     Output::print("Simple", "Maximum cell continuity error : " + std::to_string(maxContinuityError) + "\n");
 
     momentumBiCGStabIters_= 0;

@@ -52,3 +52,17 @@ void SparseVector::print()
 {
     VecView(vec_, PETSC_VIEWER_STDOUT_SELF);
 }
+
+void scale(double alpha, SparseVector &vec)
+{
+    VecScale(vec.vec_, alpha);
+}
+
+double l2Norm(const SparseVector &vec)
+{
+    double norm;
+
+    VecNorm(vec.vec_, NORM_2, &norm);
+
+    return norm;
+}

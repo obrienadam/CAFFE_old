@@ -33,6 +33,11 @@ public:
     friend void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C);
     friend void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b);
     friend void multiplyAdd(const SparseMatrix& A, const SparseVector& x1, const SparseVector& x2, SparseVector& b);
+    friend void scale(double alpha, SparseVector& vec);
+    friend double l2Norm(const SparseVector& vec);
 };
+
+void scale(double alpha, SparseVector& vec);
+double l2Norm(const SparseVector& vec);
 
 #endif

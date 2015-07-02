@@ -45,6 +45,10 @@ protected:
     Field<double>* muFieldPtr_;
     Field<double>* massFlowFieldPtr_;
 
+    IndexMap indexMap;
+    SparseMatrix AMomentum, APCorr;
+    SparseVector xMomentum, xPCorr, bMomentum, bPCorr, rMomentum, rPCorr;
+
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
     Field<double> dE_, dW_, dN_, dS_, dT_, dB_;
@@ -61,8 +65,6 @@ protected:
     Field<Tensor3D> gradVecField_;
     Field<Vector3D> gradScalarField_;
 
-    IndexMap indexMap;
-
     bool timeAccurate_;
 
     double relaxationFactorMomentum_, relaxationFactorPCorr_;
@@ -70,7 +72,7 @@ protected:
 
     int maxInnerIters_, momentumBiCGStabIters_, pCorrBiCGStabIters_;
 
-    Vector3D momentumResidual_;
+    double momentumResidual_;
 
     void setConstantFields(Input &input);
 
@@ -112,7 +114,7 @@ protected:
      */
     void correctContinuity(Field<double> &rhoField, Field<double> &massFlowField, Field<Vector3D>& uField, Field<double>& pField);
 
-    Vector3D computeResidual(Field<Vector3D>& uField);
+    double computeResidual(Field<Vector3D>& uField);
 
 public:
 

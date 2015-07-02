@@ -21,7 +21,7 @@ fileWriteInterval
 ### Time ###################################################
 
 timeStep
-2.5e-3
+2.5e-2
 maxSimTime
 48
 maxRealTimeHours
@@ -32,9 +32,9 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.2
+0.5
 relaxationFactorPCorr
-0.2
+0.5
 rho
 1.
 mu
