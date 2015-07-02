@@ -68,10 +68,15 @@ void SparseMatrix::allocate(int m, int n, int nnz)
     // Get MPI ranges
     MatGetOwnershipRange(A_, &iLower_, &iUpper_);
 }
-#include <iostream>
+
 void SparseMatrix::setValue(int i, int j, double value)
 {
     MatSetValues(A_, 1, &i, 1, &j, &value, INSERT_VALUES);
+}
+
+void SparseMatrix::setRow(int rowNo, int nCols, int colNos[], double values[])
+{
+    MatSetValues(A_, 1, &rowNo, nCols, colNos, values, INSERT_VALUES);
 }
 
 int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
@@ -85,7 +90,7 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
     PCSetType(pc_, PCILU);
-    //PCFactorSetFill(pc_, 2);
+    PCFactorSetFill(pc_, 2);
     KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
     KSPSetType(ksp_, KSPBCGS);
 
@@ -95,7 +100,33 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
     return nIters;
 }
 
+void SparseMatrix::assemble()
+{
+    MatAssemblyBegin(A_, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(A_, MAT_FINAL_ASSEMBLY);
+}
+
 void SparseMatrix::print()
 {
     MatView(A_, PETSC_VIEWER_STDOUT_SELF);
+}
+
+void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C)
+{
+    MatMatMult(A.A_, B.A_, MAT_INITIAL_MATRIX, PETSC_DEFAULT, &C.A_);
+}
+
+void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b)
+{
+    MatMult(A.A_, x.vec_, b.vec_);
+}
+
+void multiplyAdd(const SparseMatrix &A, const SparseVector &x1, const SparseVector &x2, SparseVector &b)
+{
+    MatMultAdd(A.A_, x1.vec_, x2.vec_, b.vec_);
+}
+
+void scale(double alpha, SparseMatrix &A)
+{
+    MatScale(A.A_, alpha);
 }

@@ -132,6 +132,22 @@ int main()
             cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
             cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
         }
+
+        cout << "Testing trilinear coefficients computation..." << endl;
+
+        Matrix beta = Interpolation::computeTrilinearCoeffs(points, 8, pt);
+        Matrix phi(values, 8, 1);
+
+        cout << "The computed beta matrix is:" << endl;
+
+        beta.print();
+
+        cout << "Using the computed beta matrix for interpolation yields:" << endl;
+
+        (beta*phi).print();
+
+        cout << "The result of this operation should be zero if the beta matrix is correct:" << endl
+             << Interpolation::trilinear(points, values, 8, pt) - (beta*phi)(0, 0) << endl;
     }
     catch (const char* errorMessage)
     {

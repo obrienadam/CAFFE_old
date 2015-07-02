@@ -608,24 +608,25 @@ double HexaFvmMesh::rCellMagB(int i, int j, int k)
 void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk)
 {
     int i, j, k;
+    int nI = cellCenters_.sizeI(), nJ = cellCenters_.sizeJ(), nK = cellCenters_.sizeK();
     Point3D tmpPoints[8];
 
-    for(k = 0; k < nCellsK(); ++k)
+    for(k = 0; k < nK; ++k)
     {
-        for(j = 0; j < nCellsJ(); ++j)
+        for(j = 0; j < nJ; ++j)
         {
-            for(i = 0; i < nCellsI(); ++i)
+            for(i = 0; i < nI; ++i)
             {
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i + 1, j, k);
                 tmpPoints[2] = nodes_(i + 1, j + 1, k);
                 tmpPoints[3] = nodes_(i, j + 1, k);
-                tmpPoints[4] = nodes_(i, j, k);
+                tmpPoints[4] = nodes_(i, j, k + 1);
                 tmpPoints[5] = nodes_(i + 1, j, k + 1);
                 tmpPoints[6] = nodes_(i + 1, j + 1, k + 1);
                 tmpPoints[7] = nodes_(i, j + 1, k + 1);
 
-                if(Geometry::isInsideHexahedron(cellCenters_(i, j, k), tmpPoints))
+                if(Geometry::isInsideHexahedron(point, tmpPoints))
                 {
                     ii = i;
                     jj = j;
@@ -636,7 +637,49 @@ void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk)
         }
     }
 
-    Output::raiseException("HexaFvmMesh", "locateCell", "the specified point is not in the domain.");
+    Output::raiseException("HexaFvmMesh", "locateCell", "the specified point \"" + std::to_string(point) + "\" is not inside the domain.");
+}
+
+void HexaFvmMesh::locateEnclosingCells(const Point3D &point, int ii[], int jj[], int kk[])
+{
+    int i, j, k, i0, j0, k0;
+    Point3D tmpPoints[8];
+
+    locateCell(point, i0, j0, k0);
+
+    for(k = k0 - 1; k <= k0; ++k)
+    {
+        for(j = j0 - 1; j <= j0; ++j)
+        {
+            for(i = i0 - 1; i <= i0; ++i)
+            {
+                tmpPoints[0] = cellCenters_(i, j, k);
+                tmpPoints[1] = cellCenters_(i + 1, j, k);
+                tmpPoints[2] = cellCenters_(i + 1, j + 1, k);
+                tmpPoints[3] = cellCenters_(i, j + 1, k);
+                tmpPoints[4] = cellCenters_(i, j, k + 1);
+                tmpPoints[5] = cellCenters_(i + 1, j, k + 1);
+                tmpPoints[6] = cellCenters_(i + 1, j + 1, k + 1);
+                tmpPoints[7] = cellCenters_(i, j + 1, k + 1);
+
+                if(Geometry::isInsideHexahedron(point, tmpPoints))
+                {
+                    ii[0] = i; jj[0] = j; kk[0] = k;
+                    ii[1] = i + 1; jj[1] = j; kk[1] = k;
+                    ii[2] = i + 1; jj[2] = j + 1; kk[2] = k;
+                    ii[3] = i; jj[3] = j + 1; kk[3] = k;
+                    ii[4] = i; jj[4] = j; kk[4] = k + 1;
+                    ii[5] = i + 1; jj[5] = j; kk[5] = k + 1;
+                    ii[6] = i + 1; jj[6] = j + 1; kk[6] = k + 1;
+                    ii[7] = i; jj[7] = j + 1; kk[7] = k + 1;
+                    return;
+                }
+            }
+        }
+    }
+
+    std::cout << i0 << " " << j0 << " " << k0 << std::endl;
+    Output::raiseException("HexaFvmMesh", "locateEnclosingCells", "a problem occurred when trying to locate the enclosing cells for point \"" + std::to_string(point) + "\".");
 }
 
 void HexaFvmMesh::writeDebug()

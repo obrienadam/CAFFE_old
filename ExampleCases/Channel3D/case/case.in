@@ -36,7 +36,7 @@ relaxationFactorMomentum
 relaxationFactorPCorr
 0.5
 rho
-998
+1
 mu
 0.01
 maxInnerIters

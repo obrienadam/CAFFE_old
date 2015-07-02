@@ -33,7 +33,7 @@
 #include "Vector3D.h"
 #include "Tensor3D.h"
 
-enum BoundaryPatch{FIXED, ZERO_GRADIENT, EXTRAPOLATE};
+enum BoundaryPatch{FIXED, ZERO_GRADIENT, EMPTY};
 enum{CONSERVED, AUXILLARY, PRIMITIVE};
 
 template <class T>

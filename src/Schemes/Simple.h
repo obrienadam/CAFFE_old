@@ -47,10 +47,8 @@ protected:
 
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
-    Field<double> a0P_, aP_, aE_, aW_, aN_, aS_, aT_, aB_;
     Field<double> dE_, dW_, dN_, dS_, dT_, dB_;
     Field<Vector3D> cE_, cW_, cN_, cS_, cT_, cB_;
-    Field<Vector3D> bP_;
     Field<Vector3D> hField_;
     Field<double> dField_;
 
@@ -70,12 +68,9 @@ protected:
     double relaxationFactorMomentum_, relaxationFactorPCorr_;
     int gradReconstructionMethod_;
 
-    int maxInnerIters_, momentumGmresIters_, pCorrGmresIters_;
+    int maxInnerIters_, momentumBiCGStabIters_, pCorrBiCGStabIters_;
 
     Vector3D momentumResidual_;
-
-    int uxStartI_, uyStartI_, uzStartI_, pStartI_;
-    int uxEndI_, uyEndI_, uzEndI_, pEndI_;
 
     void setConstantFields(Input &input);
 

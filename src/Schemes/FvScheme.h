@@ -37,9 +37,9 @@
 #include "HexaFvmMesh.h"
 
 enum {ADD, REPLACE};
-enum {LEAST_SQUARES, DIVERGENCE_THEOREM};
-enum {VOLUME_WEIGHTED, DISTANCE_WEIGHTED, NON_WEIGHTED};
-enum {ACTIVE, INACTIVE, INTERPOLATION};
+enum GradientEvaluationMethod{LEAST_SQUARES, DIVERGENCE_THEOREM};
+enum InterpolationMethod{VOLUME_WEIGHTED, DISTANCE_WEIGHTED, NON_WEIGHTED};
+enum Status{INACTIVE, ACTIVE, GHOST};
 
 class FvScheme
 {
@@ -77,6 +77,9 @@ public:
 
     template <class T, class GRAD_T>
     void extrapolateAllFaces(Field<T>& field, Field<GRAD_T>& gradField);
+
+    template <class T>
+    void setFieldBcCoeffs(Field<T>& field, int i, int j, int k, double& aP, double& aE, double& aW, double& aN, double& aS, double& aT, double& aB, T& source);
 
     /**
      * @brief Compute the gradient of a scalar field at the cell center.

@@ -61,6 +61,7 @@ namespace std
 Vector3D max(Vector3D u, const Vector3D& v);
 Vector3D min(Vector3D u, const Vector3D& v);
 Vector3D stov(string vecStr);
+string to_string(const Vector3D& u);
 }
 
 #endif

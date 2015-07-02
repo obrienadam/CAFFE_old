@@ -3,6 +3,8 @@
 
 #include <petsc.h>
 
+class SparseMatrix;
+
 class SparseVector
 {
 private:
@@ -28,6 +30,9 @@ public:
     void print();
 
     friend class SparseMatrix;
+    friend void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C);
+    friend void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b);
+    friend void multiplyAdd(const SparseMatrix& A, const SparseVector& x1, const SparseVector& x2, SparseVector& b);
 };
 
 #endif

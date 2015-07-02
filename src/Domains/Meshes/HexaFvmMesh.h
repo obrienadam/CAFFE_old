@@ -259,6 +259,15 @@ public:
     void locateCell(const Point3D& point, int& ii, int& jj, int& kk);
 
     /**
+     * @brief Locate the 8 cells that form a hexahedron with their centers and enclose the point.
+     * @param point The point of interest.
+     * @param ii Array of the i indices enclosing the point.
+     * @param jj Array of the j indices enclosing the point.
+     * @param kk Array of the k indices enclosing the point.
+     */
+    void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]);
+
+    /**
      * @brief Output all mesh data to a file for debugging purposes.
      */
     void writeDebug();

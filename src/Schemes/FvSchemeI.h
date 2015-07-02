@@ -286,3 +286,115 @@ void FvScheme::extrapolateAllFaces(Field<T>& field, Field<GRAD_T>& gradField)
     extrapolateInteriorFaces(field, gradField);
     extrapolateBoundaryFaces(field, gradField);
 }
+
+template <class T>
+void FvScheme::setFieldBcCoeffs(Field<T>& field, int i, int j, int k, double& aP, double& aE, double& aW, double& aN, double& aS, double& aT, double& aB, T& source)
+{
+    //- East bcs
+    if(i == uCellI_)
+    {
+        switch(field.getEastBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aE;
+            aE = 0.;
+            break;
+        case FIXED:
+            source -= aE*field(i + 1, j, k);
+            break;
+        case EMPTY:
+            aE = 0.;
+            break;
+        };
+    }
+
+    //- West bcs
+    if(i == 0)
+    {
+        switch(field.getWestBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aW;
+            aW = 0.;
+            break;
+        case FIXED:
+            source -= aW*field(i - 1, j, k);
+            break;
+        case EMPTY:
+            aW = 0.;
+            break;
+        };
+    }
+
+    //- North bcs
+    if(j == uCellJ_)
+    {
+        switch(field.getNorthBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aN;
+            aN = 0.;
+            break;
+        case FIXED:
+            source -= aN*field(i, j + 1, k);
+            break;
+        case EMPTY:
+            aN = 0.;
+            break;
+        };
+    }
+
+    //- South bcs
+    if(j == 0)
+    {
+        switch(field.getSouthBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aS;
+            aS = 0.;
+            break;
+        case FIXED:
+            source -= aS*field(i, j - 1, k);
+            break;
+        case EMPTY:
+            aS = 0.;
+            break;
+        };
+    }
+
+    //- Top bcs
+    if(k == uCellK_)
+    {
+        switch(field.getTopBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aT;
+            aT = 0.;
+            break;
+        case FIXED:
+            source -= aT*field(i, j, k + 1);
+            break;
+        case EMPTY:
+            aT = 0.;
+            break;
+        };
+    }
+
+    //- Bottom bcs
+    if(k == 0)
+    {
+        switch(field.getBottomBoundaryPatch())
+        {
+        case ZERO_GRADIENT:
+            aP += aB;
+            aB = 0.;
+            break;
+        case FIXED:
+            source -= aB*field(i, j, k - 1);
+            break;
+        case EMPTY:
+            aB = 0.;
+            break;
+        };
+    }
+}

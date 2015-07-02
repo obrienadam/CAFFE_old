@@ -34,14 +34,6 @@ Simple::Simple()
     :
       uField0_("u0", PRIMITIVE),
       uFieldStar_("uStar", PRIMITIVE),
-      a0P_("a0P", AUXILLARY),
-      aP_("aP", AUXILLARY),
-      aE_("aE", AUXILLARY),
-      aW_("aW", AUXILLARY),
-      aN_("aN", AUXILLARY),
-      aS_("aS", AUXILLARY),
-      aT_("aT", AUXILLARY),
-      aB_("aB", AUXILLARY),
       dE_("dE", AUXILLARY),
       dW_("dW", AUXILLARY),
       dN_("dN", AUXILLARY),
@@ -54,7 +46,6 @@ Simple::Simple()
       cS_("dS", AUXILLARY),
       cT_("dT", AUXILLARY),
       cB_("dB", AUXILLARY),
-      bP_("bP", AUXILLARY),
       pCorr_("pCorr", PRIMITIVE),
       gradPCorr_("gradPCorr", PRIMITIVE),
       hField_("hField", PRIMITIVE),
@@ -68,8 +59,8 @@ Simple::Simple()
       relaxationFactorPCorr_(0.1),
       gradReconstructionMethod_(DIVERGENCE_THEOREM),
       maxInnerIters_(20),
-      momentumGmresIters_(0),
-      pCorrGmresIters_(0)
+      momentumBiCGStabIters_(0),
+      pCorrBiCGStabIters_(0)
 {
 
 }
@@ -169,18 +160,19 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     int i, j, k, l;
     HexaFvmMesh& mesh = *meshPtr_;
+    double a0P, aP, aE, aW, aN, aS, aT, aB;
+    double a[7];
+    int rowNo, cols[7];
+    Vector3D bP;
     SparseMatrix A;
-    SparseVector x, b;
+    SparseVector x, b, h;
 
     storeUField(uField, uFieldStar_);
 
-    extrapolateInteriorFaces(uField, gradUField_);
-    extrapolateInteriorFaces(pField, gradPField_);
-
-    computeCellCenteredGradients(uField, gradUField_, DIVERGENCE_THEOREM);
-    computeCellCenteredGradients(pField, gradPField_, DIVERGENCE_THEOREM);
-
-    interpolateInteriorFaces(gradUField_, VOLUME_WEIGHTED);
+    indexMap.generateMap(cellStatus_);
+    A.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
+    x.allocate(3*indexMap.nActive());
+    b.allocate(3*indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -188,63 +180,63 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) == INACTIVE)
+                if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
                 // Time coefficient
                 if(timeAccurate_)
-                    a0P_(i, j, k) = rhoField(i, j, k)*mesh.cellVol(i, j, k)/timeStep;
+                    a0P = rhoField(i, j, k)*mesh.cellVol(i, j, k)/timeStep;
                 else
-                    a0P_(i, j, k) = 0.;
+                    a0P = 0.;
 
                 // Face coefficients
-                aE_(i, j, k) =  min(massFlowField.faceE(i, j, k), 0.) - muField.faceE(i, j, k)*dE_(i, j, k);
-                aW_(i, j, k) =  -max(massFlowField.faceW(i, j, k), 0.) - muField.faceW(i, j, k)*dW_(i, j, k);
-                aN_(i, j, k) =  min(massFlowField.faceN(i, j, k), 0.) - muField.faceN(i, j, k)*dN_(i, j, k);
-                aS_(i, j, k) =  -max(massFlowField.faceS(i, j, k), 0.) - muField.faceS(i, j, k)*dS_(i, j, k);
-                aT_(i, j, k) =  min(massFlowField.faceT(i, j, k), 0.) - muField.faceT(i, j, k)*dT_(i, j, k);
-                aB_(i, j, k) =  -max(massFlowField.faceB(i, j, k), 0.) - muField.faceB(i, j, k)*dB_(i, j, k);
+                aE =  min(massFlowField.faceE(i, j, k), 0.) - muField.faceE(i, j, k)*dE_(i, j, k);
+                aW = -max(massFlowField.faceW(i, j, k), 0.) - muField.faceW(i, j, k)*dW_(i, j, k);
+                aN =  min(massFlowField.faceN(i, j, k), 0.) - muField.faceN(i, j, k)*dN_(i, j, k);
+                aS = -max(massFlowField.faceS(i, j, k), 0.) - muField.faceS(i, j, k)*dS_(i, j, k);
+                aT =  min(massFlowField.faceT(i, j, k), 0.) - muField.faceT(i, j, k)*dT_(i, j, k);
+                aB = -max(massFlowField.faceB(i, j, k), 0.) - muField.faceB(i, j, k)*dB_(i, j, k);
 
                 // Central coefficient
-                aP_(i, j, k) = (max(massFlowField.faceE(i, j, k), 0.) + muField.faceE(i, j, k)*dE_(i, j, k)
+                aP = (max(massFlowField.faceE(i, j, k), 0.) + muField.faceE(i, j, k)*dE_(i, j, k)
                                 - min(massFlowField.faceW(i, j, k), 0.) + muField.faceW(i, j, k)*dW_(i, j, k)
                                 + max(massFlowField.faceN(i, j, k), 0.) + muField.faceN(i, j, k)*dN_(i, j, k)
                                 - min(massFlowField.faceS(i, j, k), 0.) + muField.faceS(i, j, k)*dS_(i, j, k)
                                 + max(massFlowField.faceT(i, j, k), 0.) + muField.faceT(i, j, k)*dT_(i, j, k)
                                 - min(massFlowField.faceB(i, j, k), 0.) + muField.faceB(i, j, k)*dB_(i, j, k)
-                                + a0P_(i, j, k))/relaxationFactorMomentum_;
+                                + a0P)/relaxationFactorMomentum_;
 
-                bP_(i, j, k) = a0P_(i, j, k)*uField0_(i, j, k);
+                bP = a0P*uField0_(i, j, k);
 
                 // Compute the cross-diffusion terms (due to mesh non-orthogonality)
-                bP_(i, j, k) += muField.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), cE_(i, j, k));
-                bP_(i, j, k) += muField.faceW(i, j, k)*dot(gradUField_.faceW(i, j, k), cW_(i, j, k));
-                bP_(i, j, k) += muField.faceN(i, j, k)*dot(gradUField_.faceN(i, j, k), cN_(i, j, k));
-                bP_(i, j, k) += muField.faceS(i, j, k)*dot(gradUField_.faceS(i, j, k), cS_(i, j, k));
-                bP_(i, j, k) += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
-                bP_(i, j, k) += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
+                bP += muField.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), cE_(i, j, k));
+                bP += muField.faceW(i, j, k)*dot(gradUField_.faceW(i, j, k), cW_(i, j, k));
+                bP += muField.faceN(i, j, k)*dot(gradUField_.faceN(i, j, k), cN_(i, j, k));
+                bP += muField.faceS(i, j, k)*dot(gradUField_.faceS(i, j, k), cS_(i, j, k));
+                bP += muField.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
+                bP += muField.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
 
                 /*
                 // Higher-order convection order terms go here (these need to be limited!)
                 if(i < uCellI_)
-                    bP_(i, j, k) += -min(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
+                    bP += -min(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i + 1, j, k), mesh.rFaceW(i + 1, j, k));
 
                 if(i > 0)
-                    bP_(i, j, k) += max(massFlowField.faceW(i, j, k), 0.)*dot(gradUField_(i - 1, j, k), mesh.rFaceE(i - 1, j, k));
+                    bP += max(massFlowField.faceW(i, j, k), 0.)*dot(gradUField_(i - 1, j, k), mesh.rFaceE(i - 1, j, k));
 
                 if(j < uCellJ_)
-                    bP_(i, j, k) += -min(massFlowField.faceN(i, j, k), 0.)*dot(gradUField_(i, j + 1, k), mesh.rFaceS(i, j + 1, k));
+                    bP += -min(massFlowField.faceN(i, j, k), 0.)*dot(gradUField_(i, j + 1, k), mesh.rFaceS(i, j + 1, k));
 
                 if(j > 0)
-                    bP_(i, j, k) += max(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j - 1, k), mesh.rFaceN(i, j - 1, k));
+                    bP += max(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j - 1, k), mesh.rFaceN(i, j - 1, k));
 
                 if(k < uCellK_)
-                    bP_(i, j, k) += -min(massFlowField.faceT(i, j, k), 0.)*dot(gradUField_(i, j, k + 1), mesh.rFaceB(i, j, k + 1));
+                    bP += -min(massFlowField.faceT(i, j, k), 0.)*dot(gradUField_(i, j, k + 1), mesh.rFaceB(i, j, k + 1));
 
                 if(k > 0)
-                    bP_(i, j, k) += max(massFlowField.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k - 1), mesh.rFaceT(i, j, k - 1));
+                    bP += max(massFlowField.faceB(i, j, k), 0.)*dot(gradUField_(i, j, k - 1), mesh.rFaceT(i, j, k - 1));
 
-                bP_(i, j, k) += (-max(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceE(i, j, k))
+                bP += (-max(massFlowField.faceE(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceE(i, j, k))
                                  + min(massFlowField.faceW(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceW(i, j, k))
                                  - max(massFlowField.faceN(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceN(i, j, k))
                                  + min(massFlowField.faceS(i, j, k), 0.)*dot(gradUField_(i, j, k), mesh.rFaceS(i, j, k))
@@ -253,200 +245,104 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 */
 
                 // Pressure term
-                bP_(i, j, k) += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
+                bP += -mesh.cellVol(i, j, k)*gradPField_(i, j, k);
 
                 // Relaxation source term
-                bP_(i, j, k) += (1. - relaxationFactorMomentum_)*aP_(i, j, k)*uFieldStar_(i, j, k);
+                bP += (1. - relaxationFactorMomentum_)*aP*uFieldStar_(i, j, k);
 
                 // Additional source terms
                 if(sFieldPtr != NULL)
-                    bP_(i, j, k) += (*sFieldPtr)(i, j, k);
+                    bP += (*sFieldPtr)(i, j, k);
 
-                //- Boundary conditions
-                // I-direction bcs
-                if(i == uCellI_ && uField.getEastBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aE_(i, j, k);
-                    bP_(i, j, k) += -aE_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceE(i, j, k));
-                    aE_(i, j, k) = 0.;
-                }
-                else if(i == uCellI_ || cellStatus_(i + 1, j, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aE_(i, j, k)*uField(i + 1, j, k);
-                    aE_(i, j, k) = 0.;
-                }
+                setFieldBcCoeffs(uField, i, j, k, aP, aE, aW, aN, aS, aT, aB, bP);
 
-                if(i == 0 && uField.getWestBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aW_(i, j, k);
-                    bP_(i, j, k) += -aW_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceW(i, j, k));
-                    aW_(i, j, k) = 0.;
-                }
-                else if(i == 0 || cellStatus_(i - 1, j, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aW_(i, j, k)*uField(i - 1, j, k);
-                    aW_(i, j, k) = 0.;
-                }
+                a[0] = aP;
+                a[1] = aE;
+                a[2] = aW;
+                a[3] = aN;
+                a[4] = aS;
+                a[5] = aT;
+                a[6] = aB;
 
-                // J-direction bcs
-                if(j == uCellJ_ && uField.getNorthBoundaryPatch() == ZERO_GRADIENT)
+                for(l = 0; l < 3; ++l)
                 {
-                    aP_(i, j, k) += aN_(i, j, k);
-                    bP_(i, j, k) += -aN_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceN(i, j, k));
-                    aN_(i, j, k) = 0.;
-                }
-                else if(j == uCellJ_ || cellStatus_(i, j + 1, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aN_(i, j, k)*uField(i, j + 1, k);
-                    aN_(i, j, k) = 0.;
-                }
-
-                if(j == 0 && uField.getSouthBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aS_(i, j, k);
-                    bP_(i, j, k) += -aS_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceS(i, j, k));
-                    aS_(i, j, k) = 0.;
-                }
-                else if(j == 0 || cellStatus_(i, j - 1, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aS_(i, j, k)*uField(i, j - 1, k);
-                    aS_(i, j, k) = 0.;
-                }
-
-                // K-direction bcs
-                if(k == uCellK_ && uField.getTopBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aT_(i, j, k);
-                    bP_(i, j, k) += -aT_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceT(i, j, k));
-                    aT_(i, j, k) = 0.;
-                }
-                else if(k == uCellK_ || cellStatus_(i, j, k + 1) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aT_(i, j, k)*uField(i, j, k + 1);
-                    aT_(i, j, k) = 0.;
-                }
-
-                if(k == 0 && uField.getBottomBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aB_(i, j, k);
-                    bP_(i, j, k) += -aB_(i, j, k)*dot(gradUField_(i, j, k), mesh.rFaceB(i, j, k));
-                    aB_(i, j, k) = 0.;
-                }
-                else if(k == 0 || cellStatus_(i, j, k - 1) == INTERPOLATION)
-                {
-                    bP_(i, j, k) += -aB_(i, j, k)*uField(i, j, k - 1);
-                    aB_(i, j, k) = 0.;
+                    rowNo = indexMap(i, j, k, l);
+                    cols[0] = indexMap(i, j, k, l);
+                    cols[1] = indexMap(i + 1, j, k, l);
+                    cols[2] = indexMap(i - 1, j, k, l);
+                    cols[3] = indexMap(i, j + 1, k, l);
+                    cols[4] = indexMap(i, j - 1, k, l);
+                    cols[5] = indexMap(i, j, k + 1, l);
+                    cols[6] = indexMap(i, j, k - 1, l);
+                    A.setRow(rowNo, 7, cols, a);
+                    b.setValue(rowNo, bP(l));
                 }
 
                 // Update D-field
-                dField_(i, j, k) = mesh.cellVol(i, j, k)/aP_(i, j, k);
+                dField_(i, j, k) = mesh.cellVol(i, j, k)/aP;
             }
         }
     }
 
-    dField_.setBoundaryFields();
-
-    momentumResidual_ = computeResidual(uFieldStar_);
-
-    // Set-up the solution matrix
-    indexMap.generateMap(cellStatus_);
-    A.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
-    x.allocate(3*indexMap.nActive());
-    b.allocate(3*indexMap.nActive());
-
-    // Add coefficients to the solution matrix (this process is a little memory intensive, may need to redo this later)
-    for(l = 0; l < 3; ++l)
-    {
-        for(k = 0; k < nCellsK_; ++k)
-        {
-            for(j = 0; j < nCellsJ_; ++j)
-            {
-                for(i = 0; i < nCellsI_; ++i)
-                {
-                    if(cellStatus_(i, j, k) != ACTIVE)
-                        continue;
-
-                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), aP_(i, j, k));
-
-                    // I-direction coefficients
-                    if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i + 1, j, k, l), aE_(i, j, k));
-
-                    if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i - 1, j, k, l), aW_(i, j, k));
-
-                    // J-direction coefficients
-                    if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j + 1, k, l), aN_(i, j, k));
-
-                    if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j - 1, k, l), aS_(i, j, k));
-
-                    // K-direction coefficents
-                    if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k + 1, l), aT_(i, j, k));
-
-                    if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                        A.setValue(indexMap(i, j, k, l), indexMap(i, j, k - 1, l), aB_(i, j, k));
-
-                    b.setValue(indexMap(i, j, k, l), bP_(i, j, k)(l));
-                }
-            }
-        }
-    }
-
-    momentumGmresIters_ += A.solve(b, x);
+    momentumBiCGStabIters_ += A.solve(b, x);
 
     // Map solution back to the domain
-    for(l = 0; l < 3; ++l)
-    {
-        for(k = 0; k < nCellsK_; ++k)
-        {
-            for(j = 0; j < nCellsJ_; ++j)
-            {
-                for(i = 0; i < nCellsI_; ++i)
-                {
-                    if(cellStatus_(i, j, k) != ACTIVE)
-                        continue;
-
-                    uField(i, j, k)(l) = x(indexMap(i, j, k, l));
-                }
-            }
-        }
-    }
-
-    // Assemble the pseudo-velocity vector, to be used for the Rhie-Chow interpolation
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) == INACTIVE)
+                if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                hField_(i, j, k) = (- aE_(i, j, k)*uField(i + 1, j, k)
-                                    - aW_(i, j, k)*uField(i - 1, j, k)
-                                    - aN_(i, j, k)*uField(i, j + 1, k)
-                                    - aS_(i, j, k)*uField(i, j - 1, k)
-                                    - aT_(i, j, k)*uField(i, j, k + 1)
-                                    - aB_(i, j, k)*uField(i, j, k - 1)
-                                    + bP_(i, j, k)
-                                    + mesh.cellVol(i, j, k)*gradPField_(i, j, k))/aP_(i, j, k);
+                for(l = 0; l < 3; ++l)
+                {
+                    uField(i, j, k)(l) = x(indexMap(i, j, k, l));
+                    A.setValue(indexMap(i, j, k, l), indexMap(i, j, k, l), 0.);
+                }
             }
         }
     }
 
+    // Compute the pseudo-velocity vector
+
+    A.assemble();
+    scale(-1., A);
+    h.allocate(x);
+    multiplyAdd(A, x, b, h);
+
+    for(k = 0; k < nCellsK_; ++k)
+    {
+        for(j = 0; j < nCellsJ_; ++j)
+        {
+            for(i = 0; i < nCellsI_; ++i)
+            {
+                if(cellStatus_(i, j, k) != ACTIVE)
+                    continue;
+
+                for(l = 0; l < 3; ++l)
+                {
+                    hField_(i, j, k)(l) = (h(indexMap(i, j, k, l)) + mesh.cellVol(i, j, k)*gradPField_(i, j, k)(l))*dField_(i, j, k)/mesh.cellVol(i, j, k);
+                }
+            }
+        }
+    }
+
+    dField_.setBoundaryFields();
+    extrapolateInteriorFaces(dField_, gradScalarField_);
+
     hField_.setBoundaryFields();
+    extrapolateInteriorFaces(hField_, gradVecField_);
+
+    uField.setBoundaryFields();
+    rhieChowInterpolateInteriorFaces(uField, pField);
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
 {
     int i, j, k;
     Vector3D sf, ds;
-
-    extrapolateInteriorFaces(hField_, gradVecField_);
-    extrapolateInteriorFaces(dField_, gradScalarField_);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -527,110 +423,13 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
 {
     int i, j, k;
     Vector3D sf, ds, gradPCorrBar;
+    double aP, aE, aW, aN, aS, aT, aB, bP, a[7];
+    int rowNo, cols[7];
     SparseMatrix A;
     SparseVector x, b;
 
-    rhieChowInterpolateInteriorFaces(uField, pField);
     computeMassFlowFaces(rhoField, uField, massFlowField);
 
-    for(k = 0; k < nCellsK_; ++k)
-    {
-        for(j = 0; j < nCellsJ_; ++j)
-        {
-            for(i = 0; i < nCellsI_; ++i)
-            {
-                if(cellStatus_(i, j, k) == INACTIVE)
-                    continue;
-
-                aE_(i, j, k) = rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k);
-                aW_(i, j, k) = rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k);
-                aN_(i, j, k) = rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k);
-                aS_(i, j, k) = rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k);
-                aT_(i, j, k) = rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k);
-                aB_(i, j, k) = rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k);
-
-                aP_(i, j, k) = -(aE_(i, j, k) + aW_(i, j, k) + aN_(i, j, k) + aS_(i, j, k) + aT_(i, j, k) + aB_(i, j, k));
-
-                massFlowField(i, j, k) = massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
-                        + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
-                        + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k);
-
-                bP_(i, j, k).x = massFlowField(i, j, k);
-
-                //- Boundary conditions
-                // I-direction bcs
-                if(i == uCellI_ && pCorr_.getEastBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aE_(i, j, k);
-                    aE_(i, j, k) = 0.;
-                }
-                else if(i == uCellI_ || cellStatus_(i + 1, j, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aE_(i, j, k)*pCorr_(i + 1, j, k);
-                    aE_(i, j, k) = 0.;
-                }
-
-                if(i == 0 && pCorr_.getWestBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aW_(i, j, k);
-                    aW_(i, j, k) = 0.;
-                }
-                else if(i == 0 || cellStatus_(i - 1, j, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aW_(i, j, k)*pCorr_(i - 1, j, k);
-                    aW_(i, j, k) = 0.;
-                }
-
-                // J-direction bcs
-                if(j == uCellJ_ && pCorr_.getNorthBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aN_(i, j, k);
-                    aN_(i, j, k) = 0.;
-                }
-                else if(j == uCellJ_ || cellStatus_(i, j + 1, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aN_(i, j, k)*pCorr_(i, j + 1, k);
-                    aN_(i, j, k) = 0.;
-                }
-
-                if(j == 0 && pCorr_.getSouthBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aS_(i, j, k);
-                    aS_(i, j, k) = 0.;
-                }
-                else if(j == 0 || cellStatus_(i, j - 1, k) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aS_(i, j, k)*pCorr_(i, j - 1, k);
-                    aS_(i, j, k) = 0.;
-                }
-
-                // K-direction bcs
-                if(k == uCellK_ && pCorr_.getTopBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aT_(i, j, k);
-                    aT_(i, j, k) = 0.;
-                }
-                else if(k == uCellK_ || cellStatus_(i, j, k + 1) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aT_(i, j, k)*pCorr_(i, j, k + 1);
-                    aT_(i, j, k) = 0.;
-                }
-
-                if(k == 0 && pCorr_.getBottomBoundaryPatch() == ZERO_GRADIENT)
-                {
-                    aP_(i, j, k) += aB_(i, j, k);
-                    aB_(i, j, k) = 0.;
-                }
-                else if(k == 0 || cellStatus_(i, j, k - 1) == INTERPOLATION)
-                {
-                    bP_(i, j, k).x += -aB_(i, j, k)*pCorr_(i, j, k - 1);
-                    aB_(i, j, k) = 0.;
-                }
-            }
-        }
-    }
-
-    // Set-up the solution matrix
     indexMap.generateMap(cellStatus_);
     A.allocate(indexMap.nActive(), indexMap.nActive(), 7);
     x.allocate(indexMap.nActive());
@@ -645,35 +444,44 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k, 0), aP_(i, j, k));
+                aE = rhoField.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k);
+                aW = rhoField.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k);
+                aN = rhoField.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k);
+                aS = rhoField.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k);
+                aT = rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k);
+                aB = rhoField.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k);
 
-                // I-direction coefficients
-                if(i < uCellI_ && cellStatus_(i + 1, j, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i + 1, j, k, 0), aE_(i, j, k));
+                aP = -(aE + aW + aN + aS + aT + aB);
 
-                if(i > 0 && cellStatus_(i - 1, j, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i - 1, j, k, 0), aW_(i, j, k));
+                bP = massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
+                        + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
+                        + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k);
 
-                // J-direction coefficients
-                if(j < uCellJ_ && cellStatus_(i, j + 1, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j + 1, k, 0), aN_(i, j, k));
+                setFieldBcCoeffs(pCorr_, i, j, k, aP, aE, aW, aN, aS, aT, aB, bP);
 
-                if(j > 0 && cellStatus_(i, j - 1, k) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j - 1, k, 0), aS_(i, j, k));
+                a[0] = aP;
+                a[1] = aE;
+                a[2] = aW;
+                a[3] = aN;
+                a[4] = aS;
+                a[5] = aT;
+                a[6] = aB;
 
-                // K-direction coefficients
-                if(k < uCellK_ && cellStatus_(i, j, k + 1) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k + 1, 0), aT_(i, j, k));
-
-                if(k > 0 && cellStatus_(i, j, k - 1) == ACTIVE)
-                    A.setValue(indexMap(i, j, k, 0), indexMap(i, j, k - 1, 0), aB_(i, j, k));
-
-                b.setValue(indexMap(i, j, k, 0), bP_(i, j, k).x);
+                rowNo = indexMap(i, j, k, 0);
+                cols[0] = indexMap(i, j, k, 0);
+                cols[1] = indexMap(i + 1, j, k, 0);
+                cols[2] = indexMap(i - 1, j, k, 0);
+                cols[3] = indexMap(i, j + 1, k, 0);
+                cols[4] = indexMap(i, j - 1, k, 0);
+                cols[5] = indexMap(i, j, k + 1, 0);
+                cols[6] = indexMap(i, j, k - 1, 0);
+                A.setRow(rowNo, 7, cols, a);
+                b.setValue(rowNo, bP);
             }
         }
     }
 
-    pCorrGmresIters_ += A.solve(b, x);
+    pCorrBiCGStabIters_ += A.solve(b, x);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -688,6 +496,10 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
             }
         }
     }
+
+    pCorr_.setBoundaryFields();
+    extrapolateInteriorFaces(pCorr_, gradPCorr_);
+    computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 }
 
 void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowField, Field<Vector3D> &uField, Field<double> &pField)
@@ -695,9 +507,6 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
     Field<double>& massFlow = mesh.findScalarField("massFlow");
-
-    extrapolateInteriorFaces(pCorr_, gradPCorr_);
-    computeCellCenteredGradients(pCorr_, gradPCorr_, DIVERGENCE_THEOREM);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -745,7 +554,12 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
     }
 
     pField.setBoundaryFields();
+    extrapolateInteriorFaces(pField, gradPField_);
+    computeCellCenteredGradients(pField, gradPField_, DIVERGENCE_THEOREM);
+
     uField.setBoundaryFields();
+    extrapolateInteriorFaces(uField, gradUField_);
+    computeCellCenteredGradients(uField, gradUField_, DIVERGENCE_THEOREM);
 }
 
 Vector3D Simple::computeResidual(Field<Vector3D> &uField)
@@ -764,15 +578,7 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                sumVol += mesh.cellVol(i, j, k);
-                sumMomentumResidualSqr += mesh.cellVol(i, j, k)*sqr(aP_(i, j, k)*uField(i, j, k)
-                                                                    + aE_(i, j, k)*uField(i + 1, j, k)
-                                                                    + aW_(i, j, k)*uField(i - 1, j, k)
-                                                                    + aN_(i, j, k)*uField(i, j + 1, k)
-                                                                    + aS_(i, j, k)*uField(i, j - 1, k)
-                                                                    + aT_(i, j, k)*uField(i, j, k + 1)
-                                                                    + aB_(i, j, k)*uField(i, j, k - 1)
-                                                                    - bP_(i, j, k));
+                Output::print("Fix the residual functions!");
             }
         }
     }
@@ -788,19 +594,6 @@ Vector3D Simple::computeResidual(Field<Vector3D> &uField)
 void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     FvScheme::initialize(input, mesh, "NA");
-
-    //- Set respective index parameters
-    uxStartI_ = 0;
-    uxEndI_ = nCells_ - 1;
-
-    uyStartI_ = uxEndI_ + 1;
-    uyEndI_ = uyStartI_ + nCells_ - 1;
-
-    uzStartI_ = uyEndI_ + 1;
-    uzEndI_ = uzStartI_ + nCells_ - 1;
-
-    pStartI_ = uzEndI_ + 1;
-    pEndI_ = pStartI_ + nCells_ - 1;
 
     //- Find the relevant fields
     uFieldPtr_ = &mesh.findVectorField("u");
@@ -824,15 +617,6 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     uField0_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     uFieldStar_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    a0P_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aP_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aE_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aW_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aN_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aS_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aT_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    aB_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-
     dE_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     dW_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     dN_.allocate(nCellsI_, nCellsJ_, nCellsK_);
@@ -847,7 +631,6 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     cT_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     cB_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    bP_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     hField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     dField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
@@ -1026,13 +809,13 @@ void Simple::displayUpdateMessage()
         }
     }
 
-    Output::print("Simple", "Momentum prediction total BiCGStab iterations : " + std::to_string(momentumGmresIters_));
-    Output::print("Simple", "Pressure correction total BiCGStab iterations : " + std::to_string(pCorrGmresIters_) + "\n");
+    Output::print("Simple", "Momentum prediction total BiCGStab iterations : " + std::to_string(momentumBiCGStabIters_));
+    Output::print("Simple", "Pressure correction total BiCGStab iterations : " + std::to_string(pCorrBiCGStabIters_) + "\n");
     Output::print("Simple", "U-Momentum residual           : " + std::to_string(momentumResidual_.x));
     Output::print("Simple", "V-Momentum residual           : " + std::to_string(momentumResidual_.y));
     Output::print("Simple", "W-Momentum residual           : " + std::to_string(momentumResidual_.z));
     Output::print("Simple", "Maximum cell continuity error : " + std::to_string(maxContinuityError) + "\n");
 
-    momentumGmresIters_ = 0;
-    pCorrGmresIters_ = 0;
+    momentumBiCGStabIters_= 0;
+    pCorrBiCGStabIters_ = 0;
 }

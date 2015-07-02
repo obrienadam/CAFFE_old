@@ -75,7 +75,7 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
                             || ibField_(i, j, k + 1) == FLUID || ibField_(i, j, k - 1) == FLUID)
                     {
                         ibField_(i, j, k) = IB;
-                        cellStatus_(i, j, k) = INTERPOLATION;
+                        cellStatus_(i, j, k) = GHOST;
                     }
                 }
 
@@ -91,7 +91,8 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
 
     HexaFvmMesh& mesh = *meshPtr_;
     Point3D boundaryPoint, imagePoint, tmpPoints[8];
-    int i, j, k, ii, jj, kk;
+    int i, j, k, ii[8], jj[8], kk[8], pointNo;
+    Matrix beta(1, 8);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -105,10 +106,12 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                     boundaryPoint = ibSphere_.nearestIntersect(mesh.cellXc(i, j, k));
                     imagePoint = 2.*boundaryPoint - mesh.cellXc(i, j , k);
 
-                    mesh.locateCell(imagePoint, ii, jj, kk);
+                    mesh.locateEnclosingCells(imagePoint, ii, jj, kk);
 
-                    // Figure out which "octant" formed by cell centers should be used for trilinear interpolation
-                    std::cout << ii << " " << jj << " " << kk << std::endl; //std::cin >> ii;
+                    for(pointNo = 0; pointNo < 8; ++pointNo)
+                        tmpPoints[pointNo] = mesh.cellXc(ii[pointNo], jj[pointNo], kk[pointNo]);
+
+                    beta = Interpolation::computeTrilinearCoeffs(tmpPoints, 8, imagePoint);
                 }
             }
         }

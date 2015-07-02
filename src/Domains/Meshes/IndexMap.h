@@ -35,7 +35,6 @@ private:
     int nI_, nJ_, nK_, nActive_;
 
     Field<int> indexField_;
-    Field<bool> isActive_;
 
 public:
 

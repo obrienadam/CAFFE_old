@@ -207,4 +207,9 @@ Vector3D stov(string vecStr)
 
     return vec;
 }
+
+string to_string(const Vector3D& u)
+{
+    return "(" + to_string(u.x) + ", " + to_string(u.y) + ", " + to_string(u.z) + ")";
+}
 }

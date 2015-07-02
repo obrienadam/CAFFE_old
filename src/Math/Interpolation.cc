@@ -142,7 +142,7 @@ Matrix Interpolation::computeTrilinearCoeffs(const Point3D *points,
     double x, y, z;
     Matrix beta(1, 8);
 
-    M_.reallocate(8, 0);
+    M_.reallocate(8, 8);
     b_.reallocate(1, 8);
 
     if(nPoints != 8)

@@ -32,9 +32,9 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.5
+0.2
 relaxationFactorPCorr
-0.5
+0.2
 rho
 1.
 mu

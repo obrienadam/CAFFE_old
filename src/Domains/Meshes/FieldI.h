@@ -388,7 +388,7 @@ void Field<T>::setEastBoundaryField()
     switch(eastBoundaryPatch_)
     {
 
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 
@@ -418,7 +418,7 @@ void Field<T>::setWestBoundaryField()
     switch(westBoundaryPatch_)
     {
 
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 
@@ -447,7 +447,7 @@ void Field<T>::setNorthBoundaryField()
     switch(northBoundaryPatch_)
     {
 
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 
@@ -476,7 +476,7 @@ void Field<T>::setSouthBoundaryField()
 
     switch(southBoundaryPatch_)
     {
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 
@@ -504,7 +504,7 @@ void Field<T>::setTopBoundaryField()
 
     switch(topBoundaryPatch_)
     {
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 
@@ -533,7 +533,7 @@ void Field<T>::setBottomBoundaryField()
 
     switch(bottomBoundaryPatch_)
     {
-    case FIXED: case EXTRAPOLATE:
+    case FIXED:
 
         break;
 

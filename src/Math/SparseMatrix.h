@@ -59,10 +59,22 @@ public:
 
     void allocate(int m, int n, int nnz);
     void setValue(int i, int j, double value);
+    void setRow(int rowNo, int nCols, int colNos[], double values[]);
 
     int solve(const SparseVector &b, SparseVector& x);
+    void assemble();
 
     void print();
+
+    friend void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C);
+    friend void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b);
+    friend void multiplyAdd(const SparseMatrix& A, const SparseVector& x1, const SparseVector& x2, SparseVector& b);
+    friend void scale(double alpha, SparseMatrix& A);
 };
+
+void multiply(const SparseMatrix& A, const SparseMatrix& B, SparseMatrix& C);
+void multiply(const SparseMatrix& A, const SparseVector& x, SparseVector& b);
+void multiplyAdd(const SparseMatrix& A, const SparseVector& x1, const SparseVector& x2, SparseVector& b);
+void scale(double alpha, SparseMatrix& A);
 
 #endif
