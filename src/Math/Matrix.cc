@@ -105,6 +105,12 @@ void Matrix::reallocate(int m, int n)
     allocate(m, n);
 }
 
+void Matrix::zero()
+{
+    for(int i = 0; i < nElements_; ++i)
+        elements_[i] = 0.;
+}
+
 void Matrix::addVector3DToRow(const Vector3D &vec, int i, int j)
 {
     elements_[n_*i + j] = vec.x;

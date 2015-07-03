@@ -327,10 +327,9 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
                 if(cellStatus_(i, j, k) != ACTIVE)
                     continue;
 
-                for(l = 0; l < 3; ++l)
-                {
-                    uField(i, j, k)(l) = xMomentum(indexMap(i, j, k, l));
-                }
+                uField(i, j, k).x = xMomentum(indexMap(i, j, k, 0));
+                uField(i, j, k).y = xMomentum(indexMap(i, j, k, 1));
+                uField(i, j, k).z = xMomentum(indexMap(i, j, k, 2));
             }
         }
     }
@@ -359,6 +358,7 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     uField.setBoundaryFields();
     rhieChowInterpolateInteriorFaces(uField, pField);
+    computeMassFlowFaces(rhoField, uField, massFlowField);
 }
 
 void Simple::rhieChowInterpolateInteriorFaces(Field<Vector3D> &uField, Field<double>& pField)
@@ -447,8 +447,6 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
     Vector3D sf, ds, gradPCorrBar;
     double aP, aE, aW, aN, aS, aT, aB, bP = 0., a[7];
     int rowNo, cols[7];
-
-    computeMassFlowFaces(rhoField, uField, massFlowField);
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -731,6 +729,11 @@ void Simple::setBoundaryConditions(Input &input)
         {
             uBoundaryTypes[i] = FIXED;
             pBoundaryTypes[i] = ZERO_GRADIENT;
+        }
+        else if(flowBoundaryType == "empty")
+        {
+            uBoundaryTypes[i] = EMPTY;
+            pBoundaryTypes[i] = EMPTY;
         }
         else
         {

@@ -51,6 +51,8 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
                 {
                     ibField_(i, j, k) = SOLID;
                     cellStatus_(i, j, k) = INACTIVE;
+                    uField(i, j, k) = Vector3D(0., 0., 0.);
+                    pField(i, j, k) = 0.;
                 }
                 else
                 {

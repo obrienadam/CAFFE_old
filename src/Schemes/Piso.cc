@@ -14,7 +14,7 @@ void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
     storeUField(uField, uField0_);
 
     for(i = 0; i < maxInnerIters_; ++i)
-    {
+    {   
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
 
         for(j = 0; j < 2; ++j)
@@ -25,5 +25,7 @@ void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
 
         std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
+
+    computeResidual(uField);
 }
 

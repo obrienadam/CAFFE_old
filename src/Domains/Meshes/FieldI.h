@@ -392,7 +392,7 @@ void Field<T>::setEastBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nJ = Array3D<T>::nJ_;
         nK = Array3D<T>::nK_;
@@ -422,7 +422,7 @@ void Field<T>::setWestBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nJ = Array3D<T>::nJ_;
         nK = Array3D<T>::nK_;
@@ -451,7 +451,7 @@ void Field<T>::setNorthBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nI = Array3D<T>::nI_;
         nK = Array3D<T>::nK_;
@@ -480,7 +480,7 @@ void Field<T>::setSouthBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nI = Array3D<T>::nI_;
         nK = Array3D<T>::nK_;
@@ -508,7 +508,7 @@ void Field<T>::setTopBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nI = Array3D<T>::nI_;
         nJ = Array3D<T>::nJ_;
@@ -537,7 +537,7 @@ void Field<T>::setBottomBoundaryField()
 
         break;
 
-    case ZERO_GRADIENT:
+    case ZERO_GRADIENT: case EMPTY:
 
         nI = Array3D<T>::nI_;
         nJ = Array3D<T>::nJ_;

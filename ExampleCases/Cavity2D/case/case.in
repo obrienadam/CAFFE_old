@@ -34,7 +34,7 @@ OFF
 relaxationFactorMomentum
 0.7
 relaxationFactorPCorr
-0.3
+0.5
 maxInnerIters
 1
 rho
@@ -65,11 +65,11 @@ boundaryRefValueSouth
 (0,0,0)
 
 boundaryTypeTop
-wall
+empty
 boundaryRefValueTop
 (0,0,0)
 
 boundaryTypeBottom
-wall
+empty
 boundaryRefValueBottom
 (0,0,0)

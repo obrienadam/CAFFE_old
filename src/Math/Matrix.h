@@ -65,6 +65,7 @@ public:
 
     void allocate(int m, int n);
     void reallocate(int m, int n);
+    void zero();
 
     double& operator()(int i, int j);
     int nRows() const {return m_;}
