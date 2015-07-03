@@ -16,7 +16,7 @@ SparseVector::SparseVector(int m)
 
 SparseVector::~SparseVector()
 {
-    VecDestroy(&vec_);
+    deallocate();
 }
 
 void SparseVector::allocate(int m)
@@ -34,9 +34,19 @@ void SparseVector::allocate(const SparseVector& other)
     VecDuplicate(other.vec_, &vec_);
 }
 
+void SparseVector::deallocate()
+{
+    VecDestroy(&vec_);
+}
+
 void SparseVector::setValue(int i, double value)
 {
     VecSetValues(vec_, 1, &i, &value, INSERT_VALUES);
+}
+
+void SparseVector::zeroEntries()
+{
+    VecZeroEntries(vec_);
 }
 
 double SparseVector::operator ()(int i)
@@ -48,6 +58,33 @@ double SparseVector::operator ()(int i)
     return value;
 }
 
+double SparseVector::l1Norm()
+{
+    double norm;
+
+    VecNorm(vec_, NORM_1, &norm);
+
+    return norm;
+}
+
+double SparseVector::l2Norm()
+{
+    double norm;
+
+    VecNorm(vec_, NORM_2, &norm);
+
+    return norm;
+}
+
+double SparseVector::infNorm()
+{
+    double norm;
+
+    VecNorm(vec_, NORM_INFINITY, &norm);
+
+    return norm;
+}
+
 void SparseVector::print()
 {
     VecView(vec_, PETSC_VIEWER_STDOUT_SELF);
@@ -56,13 +93,4 @@ void SparseVector::print()
 void scale(double alpha, SparseVector &vec)
 {
     VecScale(vec.vec_, alpha);
-}
-
-double l2Norm(const SparseVector &vec)
-{
-    double norm;
-
-    VecNorm(vec.vec_, NORM_2, &norm);
-
-    return norm;
 }

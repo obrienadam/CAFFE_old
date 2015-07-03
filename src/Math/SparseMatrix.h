@@ -43,11 +43,6 @@ private:
     double rToler_, absToler_;
     PetscErrorCode errorCode_;
 
-    // Testing making the assembly more efficient
-    double* values_;
-    int* cols_, *rows_;
-    int nRows_, nCols_, entryNo_;
-
     // MPI related
     int iLower_, iUpper_;
 
@@ -58,8 +53,10 @@ public:
     ~SparseMatrix();
 
     void allocate(int m, int n, int nnz);
+    void deallocate();
     void setValue(int i, int j, double value);
     void setRow(int rowNo, int nCols, int colNos[], double values[]);
+    void zeroEntries();
 
     int solve(const SparseVector &b, SparseVector& x);
     void assemble();

@@ -120,6 +120,44 @@ void Simple::setConstantFields(Input& input)
     interpolateInteriorFaces(muField, NON_WEIGHTED);
 }
 
+void Simple::createMatrices()
+{
+    indexMap.generateMap(cellStatus_);
+
+    AMomentum.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
+    xMomentum.allocate(3*indexMap.nActive());
+    bMomentum.allocate(3*indexMap.nActive());
+    rMomentum.allocate(3*indexMap.nActive());
+
+    APCorr.allocate(indexMap.nActive(), indexMap.nActive(), 7);
+    xPCorr.allocate(indexMap.nActive());
+    bPCorr.allocate(indexMap.nActive());
+}
+
+void Simple::destroyMatrices()
+{
+    AMomentum.deallocate();
+    xMomentum.deallocate();
+    bMomentum.deallocate();
+    rMomentum.deallocate();
+
+    APCorr.deallocate();
+    xPCorr.deallocate();
+    bPCorr.deallocate();
+}
+
+void Simple::zeroMatrices()
+{
+    AMomentum.zeroEntries();
+    xMomentum.zeroEntries();
+    bMomentum.zeroEntries();
+    rMomentum.zeroEntries();
+
+    APCorr.zeroEntries();
+    xPCorr.zeroEntries();
+    bPCorr.zeroEntries();
+}
+
 void Simple::storeUField(Field<Vector3D> &uField, Field<Vector3D> &uFieldOld)
 {
     int i, j, k;
@@ -163,14 +201,9 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
     double a0P, aP, aE, aW, aN, aS, aT, aB;
     double a[7];
     int rowNo, cols[7];
-    Vector3D bP;
+    Vector3D bP(0., 0., 0.);
 
     storeUField(uField, uFieldStar_);
-
-    indexMap.generateMap(cellStatus_);
-    AMomentum.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
-    xMomentum.allocate(3*indexMap.nActive());
-    bMomentum.allocate(3*indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -412,15 +445,10 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
 {
     int i, j, k;
     Vector3D sf, ds, gradPCorrBar;
-    double aP, aE, aW, aN, aS, aT, aB, bP, a[7];
+    double aP, aE, aW, aN, aS, aT, aB, bP = 0., a[7];
     int rowNo, cols[7];
 
     computeMassFlowFaces(rhoField, uField, massFlowField);
-
-    indexMap.generateMap(cellStatus_);
-    APCorr.allocate(indexMap.nActive(), indexMap.nActive(), 7);
-    xPCorr.allocate(indexMap.nActive());
-    bPCorr.allocate(indexMap.nActive());
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -493,7 +521,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
 {
     int i, j, k;
     HexaFvmMesh& mesh = *meshPtr_;
-    Field<double>& massFlow = mesh.findScalarField("massFlow");
+    Field<double>& massFlowError = mesh.findScalarField("massFlowError");
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -525,11 +553,9 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
                 if(k < uCellK_ || uField.getTopBoundaryPatch() == ZERO_GRADIENT)
                     massFlowField.faceT(i, j, k) += -rhoField.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k)*(pCorr_(i, j, k + 1) - pCorr_(i, j, k));
 
-                massFlow(i, j, k) = massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
-                        + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
-                        + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k);
-
-                massFlow(i, j, k) = fabs(massFlow(i, j, k));
+                massFlowError(i, j, k) = fabs(massFlowField.faceE(i, j, k) - massFlowField.faceW(i, j, k)
+                                              + massFlowField.faceN(i, j, k) - massFlowField.faceS(i, j, k)
+                                              + massFlowField.faceT(i, j, k) - massFlowField.faceB(i, j, k));
 
                 // Correct the pressure field
                 pField(i, j, k) += relaxationFactorPCorr_*pCorr_(i, j, k);
@@ -549,7 +575,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
     computeCellCenteredGradients(uField, gradUField_, DIVERGENCE_THEOREM);
 }
 
-double Simple::computeResidual(Field<Vector3D> &uField)
+void Simple::computeResidual(Field<Vector3D> &uField)
 {
     int i, j, k, l;
 
@@ -572,12 +598,11 @@ double Simple::computeResidual(Field<Vector3D> &uField)
         }
     }
 
-    rMomentum.allocate(3*indexMap.nActive());
     scale(-1., bMomentum);
     multiplyAdd(AMomentum, xMomentum, bMomentum, rMomentum);
-    momentumResidual_ = l2Norm(rMomentum);
-
-    return momentumResidual_;
+    momentumL1Norm_ = rMomentum.l1Norm();
+    momentumL2Norm_ = rMomentum.l2Norm();
+    momentumInfNorm_ = rMomentum.infNorm();
 }
 
 // ************* Public Methods *************
@@ -591,7 +616,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     pFieldPtr_ = &mesh.findScalarField("p");
     rhoFieldPtr_ = &mesh.findScalarField("rho");
     muFieldPtr_ = &mesh.findScalarField("mu");
-    massFlowFieldPtr_ = &mesh.findScalarField("massFlow");
+    massFlowFieldPtr_ = &mesh.findScalarField("massFlowError");
 
     //- Read all relevant input parameters
     if(input.inputStrings["timeAccurate"] == "ON")
@@ -639,6 +664,9 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
 
     //- Set constant fields
     setConstantFields(input);
+
+    //- Create matrices
+    createMatrices();
 
     Output::print("Simple", "Time accurate : " + input.inputStrings["timeAccurate"]);
     Output::print("Simple", "initialization complete.");
@@ -764,13 +792,14 @@ void Simple::discretize(double timeStep, std::vector<double> &timeDerivatives)
 
     for(i = 0; i < maxInnerIters_; ++i)
     {
+        zeroMatrices();
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
         computePCorr(rhoField, massFlowField, uField, pField);
         correctContinuity(rhoField, massFlowField, uField, pField);
         std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
 
-    momentumResidual_ = computeResidual(uField);
+    computeResidual(uField);
 }
 
 void Simple::copySolution(std::vector<double> &original)
@@ -804,7 +833,9 @@ void Simple::displayUpdateMessage()
 
     Output::print("Simple", "Momentum prediction total BiCGStab iterations : " + std::to_string(momentumBiCGStabIters_));
     Output::print("Simple", "Pressure correction total BiCGStab iterations : " + std::to_string(pCorrBiCGStabIters_) + "\n");
-    Output::print("Simple", "Momentum L2 residual norm     : " + std::to_string(momentumResidual_));
+    Output::print("Simple", "Momentum L1 residual norm     : " + std::to_string(momentumL1Norm_));
+    Output::print("Simple", "Momentum L2 residual norm     : " + std::to_string(momentumL2Norm_));
+    Output::print("Simple", "Momentum inf residual norm    : " + std::to_string(momentumInfNorm_));
     Output::print("Simple", "Maximum cell continuity error : " + std::to_string(maxContinuityError) + "\n");
 
     momentumBiCGStabIters_= 0;

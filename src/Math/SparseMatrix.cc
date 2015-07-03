@@ -27,13 +27,7 @@ SparseMatrix::SparseMatrix()
     :
       maxIters_(50000),
       rToler_(1e-5),
-      absToler_(1e-8),
-      values_(NULL),
-      cols_(NULL),
-      rows_(NULL),
-      nRows_(0),
-      nCols_(0),
-      entryNo_(0)
+      absToler_(1e-8)
 {
     PetscInitializeNoArguments();
 }
@@ -47,11 +41,7 @@ SparseMatrix::SparseMatrix(int m, int n, int nnz)
 
 SparseMatrix::~SparseMatrix()
 {
-    MatDestroy(&A_);
-    KSPDestroy(&ksp_);
-    delete[] values_;
-    delete[] cols_;
-    delete[] rows_;
+    deallocate();
 }
 
 void SparseMatrix::allocate(int m, int n, int nnz)
@@ -67,6 +57,15 @@ void SparseMatrix::allocate(int m, int n, int nnz)
 
     // Get MPI ranges
     MatGetOwnershipRange(A_, &iLower_, &iUpper_);
+
+    // Create solver context
+    KSPCreate(PETSC_COMM_WORLD, &ksp_);
+}
+
+void SparseMatrix::deallocate()
+{
+    MatDestroy(&A_);
+    KSPDestroy(&ksp_);
 }
 
 void SparseMatrix::setValue(int i, int j, double value)
@@ -79,6 +78,11 @@ void SparseMatrix::setRow(int rowNo, int nCols, int colNos[], double values[])
     MatSetValues(A_, 1, &rowNo, nCols, colNos, values, INSERT_VALUES);
 }
 
+void SparseMatrix::zeroEntries()
+{
+    MatZeroEntries(A_);
+}
+
 int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
 {
     int nIters;
@@ -86,7 +90,6 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
     MatAssemblyBegin(A_, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A_, MAT_FINAL_ASSEMBLY);
 
-    KSPCreate(PETSC_COMM_WORLD, &ksp_);
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
     PCSetType(pc_, PCILU);

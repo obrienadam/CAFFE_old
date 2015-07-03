@@ -47,7 +47,7 @@ protected:
 
     IndexMap indexMap;
     SparseMatrix AMomentum, APCorr;
-    SparseVector xMomentum, xPCorr, bMomentum, bPCorr, rMomentum, rPCorr;
+    SparseVector xMomentum, xPCorr, bMomentum, bPCorr, rMomentum;
 
     Field<Vector3D> uField0_;
     Field<Vector3D> uFieldStar_;
@@ -72,9 +72,13 @@ protected:
 
     int maxInnerIters_, momentumBiCGStabIters_, pCorrBiCGStabIters_;
 
-    double momentumResidual_;
+    double momentumL1Norm_, momentumL2Norm_, momentumInfNorm_;
 
     void setConstantFields(Input &input);
+
+    void createMatrices();
+    void destroyMatrices();
+    void zeroMatrices();
 
     /**
      * @brief Solve the momentum equation using the latest available velocity and pressure fields.
@@ -114,7 +118,7 @@ protected:
      */
     void correctContinuity(Field<double> &rhoField, Field<double> &massFlowField, Field<Vector3D>& uField, Field<double>& pField);
 
-    double computeResidual(Field<Vector3D>& uField);
+    void computeResidual(Field<Vector3D>& uField);
 
 public:
 

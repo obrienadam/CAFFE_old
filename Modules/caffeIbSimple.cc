@@ -30,7 +30,7 @@ int main(int argc, const char* argv[])
         mesh.addScalarField("p", CONSERVED);
         mesh.addScalarField("rho", PRIMITIVE);
         mesh.addScalarField("mu", PRIMITIVE);
-        mesh.addScalarField("massFlow", PRIMITIVE);
+        mesh.addScalarField("massFlowError", PRIMITIVE);
         mesh.addScalarField("ibField", AUXILLARY);
 
         // Initialize objects

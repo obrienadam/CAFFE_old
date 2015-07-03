@@ -24,8 +24,14 @@ public:
 
     void allocate(int m);
     void allocate(const SparseVector& other);
+    void deallocate();
     void setValue(int i, double value);
+    void zeroEntries();
     double operator()(int i);
+
+    double l1Norm();
+    double l2Norm();
+    double infNorm();
 
     void print();
 
@@ -34,10 +40,6 @@ public:
     friend void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b);
     friend void multiplyAdd(const SparseMatrix& A, const SparseVector& x1, const SparseVector& x2, SparseVector& b);
     friend void scale(double alpha, SparseVector& vec);
-    friend double l2Norm(const SparseVector& vec);
 };
-
-void scale(double alpha, SparseVector& vec);
-double l2Norm(const SparseVector& vec);
 
 #endif
