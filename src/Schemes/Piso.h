@@ -9,6 +9,7 @@ public:
 
     void discretize(double timeStep, std::vector<double>& timeDerivatives);
 
+    void displayUpdateMessage();
 };
 
 #endif

@@ -37,8 +37,6 @@ int main(int argc, const char* argv[])
         mesh.initialize(input);
         piso.initialize(input, mesh);
 
-        mesh.writeDebug();
-
         runControl.displayStartMessage();
 
         while(runControl.continueRun())

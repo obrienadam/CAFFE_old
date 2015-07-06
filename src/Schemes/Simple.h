@@ -135,7 +135,7 @@ public:
     void copySolution(std::vector<double>& original);
     void updateSolution(std::vector<double>& update, int method);
 
-    void displayUpdateMessage();
+    virtual void displayUpdateMessage();
 };
 
 #endif

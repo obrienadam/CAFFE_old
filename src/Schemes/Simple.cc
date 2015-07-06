@@ -335,7 +335,6 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
     }
 
     // Compute the pseudo-velocity vector
-
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
