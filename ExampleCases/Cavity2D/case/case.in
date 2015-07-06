@@ -41,6 +41,8 @@ rho
 1
 mu
 0.01
+numberOfPCorrections
+2
 
 ### Boundaries ##############################################
 
@@ -57,7 +59,7 @@ boundaryRefValueWest
 boundaryTypeNorth
 wall
 boundaryRefValueNorth
-(1,0,0)
+(10,0,0)
 
 boundaryTypeSouth
 wall

@@ -68,6 +68,7 @@ public:
     void zero();
 
     double& operator()(int i, int j);
+    double* data(){ return elements_.data(); }
     int nRows() const {return m_;}
     int nCols() const {return n_;}
     int nElements(){return elements_.size();}

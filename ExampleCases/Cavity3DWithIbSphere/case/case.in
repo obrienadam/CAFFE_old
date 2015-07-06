@@ -32,9 +32,9 @@ maxRealTimeHours
 timeAccurate
 OFF
 relaxationFactorMomentum
-0.9
+0.5
 relaxationFactorPCorr
-0.1
+0.5
 rho
 1
 mu
@@ -45,7 +45,7 @@ maxInnerIters
 ### Immersed Boundaries #####################################
 
 ibSphereRadius
-0.25
+0.15
 ibSphereCenter
 (0.5,0.5,0.5)
 

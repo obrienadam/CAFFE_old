@@ -116,20 +116,20 @@ void Simple::setConstantFields(Input& input)
 
     rhoField.setBoundaryFields();
     muField.setBoundaryFields();
-    interpolateInteriorFaces(rhoField, NON_WEIGHTED);
-    interpolateInteriorFaces(muField, NON_WEIGHTED);
+    extrapolateInteriorFaces(rhoField, gradScalarField_);
+    extrapolateInteriorFaces(muField, gradScalarField_);
 }
 
-void Simple::createMatrices()
+void Simple::createMatrices(int nnz)
 {
     indexMap.generateMap(cellStatus_);
 
-    AMomentum.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), 7);
+    AMomentum.allocate(3*indexMap.nActive(), 3*indexMap.nActive(), nnz);
     xMomentum.allocate(3*indexMap.nActive());
     bMomentum.allocate(3*indexMap.nActive());
     rMomentum.allocate(3*indexMap.nActive());
 
-    APCorr.allocate(indexMap.nActive(), indexMap.nActive(), 7);
+    APCorr.allocate(indexMap.nActive(), indexMap.nActive(), nnz);
     xPCorr.allocate(indexMap.nActive());
     bPCorr.allocate(indexMap.nActive());
 }
@@ -317,14 +317,14 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
 
     momentumBiCGStabIters_ += AMomentum.solve(bMomentum, xMomentum);
 
-    // Map solution back to the domain
+    // Map solution back to the domain, including ghost cell solutions
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) != ACTIVE)
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 uField(i, j, k).x = xMomentum(indexMap(i, j, k, 0));
@@ -341,10 +341,11 @@ void Simple::computeMomentum(Field<double>& rhoField, Field<double>& muField, Fi
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) != ACTIVE)
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 hField_(i, j, k) = uField(i, j, k) + dField_(i, j, k)*gradPField_(i, j, k);
+
             }
         }
     }
@@ -501,7 +502,7 @@ void Simple::computePCorr(Field<double>& rhoField, Field<double>& massFlowField,
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) != ACTIVE)
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 pCorr_(i, j, k) = xPCorr(indexMap(i, j, k, 0));
@@ -526,7 +527,7 @@ void Simple::correctContinuity(Field<double>& rhoField, Field<double>& massFlowF
         {
             for(i = 0; i < nCellsI_; ++i)
             {
-                if(cellStatus_(i, j, k) != ACTIVE)
+                if(cellStatus_(i, j, k) == INACTIVE)
                     continue;
 
                 //- Correct mass flow
@@ -663,7 +664,7 @@ void Simple::initialize(Input &input, HexaFvmMesh &mesh)
     setConstantFields(input);
 
     //- Create matrices
-    createMatrices();
+    createMatrices(7);
 
     Output::print("Simple", "Time accurate : " + input.inputStrings["timeAccurate"]);
     Output::print("Simple", "initialization complete.");

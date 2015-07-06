@@ -55,7 +55,7 @@ void IndexMap::generateMap(Field<int> &cellStatus)
         {
             for(i = 0; i < nI_; ++i)
             {
-                if(cellStatus(i, j, k) == ACTIVE)
+                if(cellStatus(i, j, k) == ACTIVE || cellStatus(i, j, k) == GHOST)
                 {
                     indexField_(i, j, k) = nActive_;
                     ++nActive_;

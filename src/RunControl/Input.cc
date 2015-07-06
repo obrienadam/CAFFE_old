@@ -74,6 +74,9 @@ Input::Input()
     inputDoubles["mu"] = 8.94e-4;
     inputInts["maxInnerIters"] = 10;
 
+    //- Piso parameters
+    inputInts["numberOfPCorrections"] = 2;
+
     //- multiphaseSimple parameters
     inputDoubles["sigma"] = 0.07;
     inputDoubles["rho2"] = 782.;

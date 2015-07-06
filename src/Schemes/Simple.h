@@ -76,7 +76,7 @@ protected:
 
     void setConstantFields(Input &input);
 
-    void createMatrices();
+    void createMatrices(int nnz);
     void destroyMatrices();
     void zeroMatrices();
 

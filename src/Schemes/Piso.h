@@ -5,10 +5,16 @@
 
 class Piso : public Simple
 {
+private:
+
+    int nPCorrections_;
+
 public:
 
-    void discretize(double timeStep, std::vector<double>& timeDerivatives);
+    Piso();
 
+    void initialize(Input &input, HexaFvmMesh &mesh);
+    void discretize(double timeStep, std::vector<double>& timeDerivatives);
     void displayUpdateMessage();
 };
 

@@ -2,6 +2,20 @@
 
 #include "Piso.h"
 
+Piso::Piso()
+    :
+      nPCorrections_(2)
+{
+
+}
+
+void Piso::initialize(Input &input, HexaFvmMesh &mesh)
+{
+    Simple::initialize(input, mesh);
+
+    nPCorrections_ = input.inputInts["numberOfPCorrections"];
+}
+
 void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
 {
     Field<Vector3D>& uField = *uFieldPtr_;
@@ -17,7 +31,7 @@ void Piso::discretize(double timeStep, std::vector<double> &timeDerivatives)
     {   
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
 
-        for(j = 0; j < 2; ++j)
+        for(j = 0; j < nPCorrections_; ++j)
         {
             computePCorr(rhoField, massFlowField, uField, pField);
             correctContinuity(rhoField, massFlowField, uField, pField);

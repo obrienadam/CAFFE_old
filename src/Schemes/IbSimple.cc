@@ -93,8 +93,9 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
 
     HexaFvmMesh& mesh = *meshPtr_;
     Point3D boundaryPoint, imagePoint, tmpPoints[8];
-    int i, j, k, ii[8], jj[8], kk[8], pointNo;
+    int i, j, k, l, m, ii[8], jj[8], kk[8], pointNo, colNos[9];
     Matrix beta(1, 8);
+    double values[9];
 
     for(k = 0; k < nCellsK_; ++k)
     {
@@ -113,7 +114,51 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                     for(pointNo = 0; pointNo < 8; ++pointNo)
                         tmpPoints[pointNo] = mesh.cellXc(ii[pointNo], jj[pointNo], kk[pointNo]);
 
+                    //- Determine the interpolation coefficients for the image point
                     beta = Interpolation::computeTrilinearCoeffs(tmpPoints, 8, imagePoint);
+
+                    for(l = 0; l < 3; ++l)
+                    {
+                        values[0] = 1.;
+                        colNos[0] = indexMap(i, j, k, l);
+
+                        for(m = 0; m < 8; ++m)
+                        {
+                            if(ii[m] == i && jj[m] == j && kk[m] == k)
+                            {
+                                values[0] += beta(0, m);
+                                colNos[m + 1] = -1;
+                            }
+                            else
+                            {
+                                values[m + 1] = beta(0, m);
+                                colNos[m + 1] = indexMap(ii[m], jj[m], kk[m], l);
+                            }
+                        }
+                        AMomentum.setRow(indexMap(i, j, k, l), 9, colNos, values);
+                    }
+
+                    //- Add the equation for the ghost cells to the coefficient matrix form pressure
+
+                    for(m = 0; m < 8; ++m)
+                    {
+                        values[0] = -1;
+                        colNos[0] = indexMap(i, j, k, 0);
+
+                        if(ii[m] == i && jj[m] == j && kk[m] == k)
+                        {
+                            values[0] += beta(0, m);
+                            colNos[m + 1] = -1;
+                        }
+                        else
+                        {
+                            values[m + 1] = beta(0, m);
+                            colNos[m + 1] = indexMap(ii[m], jj[m], kk[m], 0);
+                        }
+                    }
+
+                    APCorr.setRow(indexMap(i, j, k, 0), 9, colNos, values);
+                    bPCorr.setValue(indexMap(i, j, k, 0), 0);
                 }
             }
         }
@@ -124,11 +169,20 @@ void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     Simple::initialize(input, mesh);
 
+    Field<Vector3D>& uField = *uFieldPtr_;
+    Field<double>& pField = *pFieldPtr_;
+
     ibSphere_.radius = input.inputDoubles["ibSphereRadius"];
     ibSphere_.center = stov(input.inputStrings["ibSphereCenter"]);
 
     ibField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     ibSourceField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+
+    computeIbField(uField, pField);
+
+    //- Re-create matrices since some cells will have been deactivated
+    destroyMatrices();
+    createMatrices(9);
 }
 
 void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
@@ -141,14 +195,16 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     int i;
 
     storeUField(uField, uField0_);
-    computeIbField(uField, pField);
 
     for(i = 0; i < maxInnerIters_; ++i)
     {
+        zeroMatrices();
         setIbCells(uField, pField);
         computeMomentum(rhoField, muField, massFlowField, NULL, timeStep, uField, pField);
         computePCorr(rhoField, massFlowField, uField, pField);
         correctContinuity(rhoField, massFlowField, uField, pField);
         std::cout << "\rDTS iteration completion  |      " << (i + 1) << "/" << maxInnerIters_ << std::fixed << std::setprecision(2) << " (" << 100.*(i + 1)/maxInnerIters_ << "%)";
     }
+
+    computeResidual(uField);
 }
