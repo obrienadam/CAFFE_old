@@ -98,6 +98,7 @@ private:
 
     //- Private helper methods
 
+    void initializeCellsAndFaces();
     void initializeCells();
     void initializeCellToCellParameters();
     void initializeFaces();
@@ -107,6 +108,7 @@ private:
 public:
 
     HexaFvmMesh(){}
+    HexaFvmMesh(const HexaFvmMesh& other);
 
     /**
      * @brief scalarFields A vector containing all scalar fields defined on the domain.
@@ -119,10 +121,15 @@ public:
     std::vector< Field<Vector3D> > vectorFields;
 
     /**
-     * @brief initialize Initialize the domain.
+     * @brief Initialize the domain from an input file.
      * @param input Input object containg initialization data.
      */
     void initialize(Input &input);
+    /**
+     * @brief Initialize the domain from a node array.
+     * @param nodes 3D array of nodes representing cell vertices.
+     */
+    void initialize(Array3D<Point3D>& nodes);
 
     /**
      * @brief addScalarField Add a new scalar field to the domain.

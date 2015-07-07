@@ -11,7 +11,12 @@ target_link_libraries(geometryTest Math)
 add_executable(matrixTest MatrixTest.cc)
 target_link_libraries(matrixTest Math RunControl)
 
-# Build sparse matrix text unit
+# Build sparse matrix test unit
 
 add_executable(sparseMatrixTest SparseMatrixTest.cc)
 target_link_libraries(sparseMatrixTest Math RunControl)
+
+# Build parallel test unit
+
+add_executable(parallelTest ParallelTest.cc)
+target_link_libraries(parallelTest Parallel Math)

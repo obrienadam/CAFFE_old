@@ -85,6 +85,9 @@ void IbSimple::computeIbField(Field<Vector3D>& uField, Field<double>& pField)
             }
         }
     }
+
+    destroyMatrices();
+    createMatrices(9);
 }
 
 void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
@@ -158,7 +161,6 @@ void IbSimple::setIbCells(Field<Vector3D>& uField, Field<double>& pField)
                     }
 
                     APCorr.setRow(indexMap(i, j, k, 0), 9, colNos, values);
-                    bPCorr.setValue(indexMap(i, j, k, 0), 0);
                 }
             }
         }
@@ -169,20 +171,11 @@ void IbSimple::initialize(Input &input, HexaFvmMesh &mesh)
 {
     Simple::initialize(input, mesh);
 
-    Field<Vector3D>& uField = *uFieldPtr_;
-    Field<double>& pField = *pFieldPtr_;
-
     ibSphere_.radius = input.inputDoubles["ibSphereRadius"];
     ibSphere_.center = stov(input.inputStrings["ibSphereCenter"]);
 
     ibField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     ibSourceField_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-
-    computeIbField(uField, pField);
-
-    //- Re-create matrices since some cells will have been deactivated
-    destroyMatrices();
-    createMatrices(9);
 }
 
 void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
@@ -195,6 +188,7 @@ void IbSimple::discretize(double timeStep, std::vector<double> &timeDerivatives)
     int i;
 
     storeUField(uField, uField0_);
+    computeIbField(uField, pField);
 
     for(i = 0; i < maxInnerIters_; ++i)
     {

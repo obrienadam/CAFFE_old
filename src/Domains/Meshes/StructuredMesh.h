@@ -21,10 +21,6 @@ protected:
 
     std::ofstream foutRestart_, foutTec360_;
 
-    //- Private helper methods
-
-    void initializeBoundaryMeshes(int nGhostNodes);
-
 public:
 
     //- Constructors and destructor
@@ -39,6 +35,7 @@ public:
     //- Initialization
 
     virtual void initialize(Input& input);
+    virtual void initialize(Array3D<Point3D>& nodes);
     virtual int size();
     virtual std::string meshStats();
 

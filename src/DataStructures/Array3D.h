@@ -36,6 +36,7 @@ public:
 
     virtual inline T& operator()(int i, int j, int k);
    	inline T& operator()(int k);
+    T* data(){ return data_; }
 
     //- Iterators
 

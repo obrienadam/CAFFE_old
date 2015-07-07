@@ -5,6 +5,7 @@ set(HEADERS DomainIncludes.h
 	    ../DomainInterface.h
             StructuredMesh.h
 	    HexaFvmMesh.h
+            MultiBlockHexaFvmMesh.h
             HexaMeshGen.h
             Field.h
             InitialConditions.h
@@ -13,6 +14,7 @@ set(HEADERS DomainIncludes.h
 set(SOURCE HexaMeshGen.cc
 	   StructuredMesh.cc
            HexaFvmMesh.cc
+           MultiBlockHexaFvmMesh.cc
            FieldI.h
            InitialConditions.cc
            InitialConditionsI.h

@@ -36,6 +36,14 @@ void StructuredMesh::initialize(Input &input)
     Output::print(meshStats());
 }
 
+void StructuredMesh::initialize(Array3D<Point3D> &nodes)
+{
+    nodes_.allocate(nodes.sizeI(), nodes.sizeJ(), nodes.sizeK());
+
+    for(int i = 0; i < nodes_.size(); ++i)
+        nodes_(i) = nodes(i);
+}
+
 int StructuredMesh::size()
 {
     return nodes_.size();

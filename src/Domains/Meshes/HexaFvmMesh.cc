@@ -27,7 +27,37 @@
 
 // ************* Constructors and Destructors *************
 
+HexaFvmMesh::HexaFvmMesh(const HexaFvmMesh &other)
+{
+
+}
+
 // ************* Private Methods *************
+
+void HexaFvmMesh::initializeCellsAndFaces()
+{
+    int i, nI, nJ, nK;
+
+    // Initialize the finite volume mesh
+    initializeCells();
+    initializeCellToCellParameters();
+    initializeFaces();
+    initializeCellToFaceParameters();
+    initializeGlobalIndexMaps();
+
+    // All fields must now be reallocated
+    nI = cellCenters_.sizeI();
+    nJ = cellCenters_.sizeJ();
+    nK = cellCenters_.sizeK();
+
+    for(i = 0; i < scalarFields.size(); ++i)
+        scalarFields[i].allocate(nI, nJ, nK);
+
+    for(i = 0; i < vectorFields.size(); ++i)
+        vectorFields[i].allocate(nI, nJ, nK);
+
+    Output::print("HexaFvmMesh", "Initialization complete.");
+}
 
 void HexaFvmMesh::initializeCells()
 {
@@ -338,37 +368,16 @@ void HexaFvmMesh::initializeGlobalIndexMaps()
 
 void HexaFvmMesh::initialize(Input &input)
 {
-    uint nI, nJ, nK, i;
-
     // Initialize the mesh nodes
-
     StructuredMesh::initialize(input);
+    initializeCellsAndFaces();
+}
 
-    // Initialize the finite volume mesh
-
-    initializeCells();
-    initializeCellToCellParameters();
-    initializeFaces();
-    initializeCellToFaceParameters();
-    initializeGlobalIndexMaps();
-
-    // All fields must now be reallocated
-
-    nI = cellCenters_.sizeI();
-    nJ = cellCenters_.sizeJ();
-    nK = cellCenters_.sizeK();
-
-    for(i = 0; i < scalarFields.size(); ++i)
-    {
-        scalarFields[i].allocate(nI, nJ, nK);
-    }
-
-    for(i = 0; i < vectorFields.size(); ++i)
-    {
-        vectorFields[i].allocate(nI, nJ, nK);
-    }
-
-    Output::print("HexaFvmMesh", "Initialization complete.");
+void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
+{
+    // Initialize the mesh nodes
+    StructuredMesh::initialize(nodes);
+    initializeCellsAndFaces();
 }
 
 void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)

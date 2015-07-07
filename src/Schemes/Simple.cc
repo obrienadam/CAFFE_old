@@ -735,6 +735,11 @@ void Simple::setBoundaryConditions(Input &input)
             uBoundaryTypes[i] = EMPTY;
             pBoundaryTypes[i] = EMPTY;
         }
+        else if(flowBoundaryType == "none")
+        {
+            uBoundaryTypes[i] = ZERO_GRADIENT;
+            pBoundaryTypes[i] = ZERO_GRADIENT;
+        }
         else
         {
             Output::raiseException("Simple", "setBoundaryConditions", "boundary type \"" + flowBoundaryType + "\" is not a valid flow boundary.");
