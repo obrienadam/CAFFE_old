@@ -43,7 +43,6 @@ void HexaFvmMesh::initializeCellsAndFaces()
     initializeCellToCellParameters();
     initializeFaces();
     initializeCellToFaceParameters();
-    initializeGlobalIndexMaps();
 
     // All fields must now be reallocated
     nI = cellCenters_.sizeI();
@@ -65,7 +64,6 @@ void HexaFvmMesh::initializeCells()
     Point3D tmpPoints[8];
 
     // Allocate cell centers and their volumes
-
     cellCenters_.allocate(nI, nJ, nK);
     cellVolumes_.allocate(nI, nJ, nK);
 
@@ -101,7 +99,6 @@ void HexaFvmMesh::initializeCellToCellParameters()
     nK = cellCenters_.sizeK();
 
     // Allocate the cell to cell distance vectors and distaces
-
     cellToCellRelativeVectorsI_.allocate(nI - 1, nJ, nK);
     cellToCellUnitVectorsI_.allocate(nI - 1, nJ, nK);
     cellToCellDistancesI_.allocate(nI - 1, nJ, nK);
@@ -156,7 +153,6 @@ void HexaFvmMesh::initializeFaces()
     double tmpArea;
 
     // Initialize the I-direction faces (normals alligned with in the I-direction)
-
     nI = cellCenters_.sizeI() + 1;
     nJ = cellCenters_.sizeJ();
     nK = cellCenters_.sizeK();
@@ -189,7 +185,6 @@ void HexaFvmMesh::initializeFaces()
     } // end for k
 
     // Initialize the J-direction faces (normals aligned with in the J-direction)
-
     nI = cellCenters_.sizeI();
     nJ = cellCenters_.sizeJ() + 1;
     nK = cellCenters_.sizeK();
@@ -222,7 +217,6 @@ void HexaFvmMesh::initializeFaces()
     } // end for k
 
     // Initialize the K-direction faces (normals alligned with in the K-direction)
-
     nI = cellCenters_.sizeI();
     nJ = cellCenters_.sizeJ();
     nK = cellCenters_.sizeK() + 1;
@@ -295,71 +289,41 @@ void HexaFvmMesh::initializeCellToFaceParameters()
             for(i = 0; i < nI; ++i)
             {
                 // East cell to face parameters
-
                 tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsE_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsE_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesE_(i, j, k) = tmpVec.mag();
 
                 // West cell to face parameters
-
                 tmpVec = faceCentersI_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsW_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsW_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
 
                 // North cell to face parameters
-
                 tmpVec = faceCentersJ_(i, j + 1, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsN_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsN_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesN_(i, j, k) = tmpVec.mag();
 
                 // South cell to face parameters
-
                 tmpVec = faceCentersJ_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsS_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsS_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
 
                 // Top cell to face parameters
-
                 tmpVec = faceCentersK_(i, j, k + 1) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsT_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsT_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesT_(i, j, k) = tmpVec.mag();
 
                 // Bottom cell to face parameters
-
                 tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsB_(i, j, k) = tmpVec;
                 cellToFaceUnitVectorsB_(i, j, k) = tmpVec.unitVector();
                 cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
             } // end for i
-        } // end for j
-    } // end for k
-}
-
-void HexaFvmMesh::initializeGlobalIndexMaps()
-{
-    // Index maps are used for assembling linear systems. The ordering can be chosen such that the bandwidth is minimized.
-
-    int i, j, k, nI(nodes_.sizeI() - 1), nJ(nodes_.sizeJ() - 1), nK(nodes_.sizeK() - 1);
-
-    rowVectorOrdering_.allocate(nI, nJ, nK);
-    columnVectorOrdering_.allocate(nI, nJ, nK);
-    layerVectorOrdering_.allocate(nI, nJ, nK);
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                rowVectorOrdering_(i, j, k) = i + nI*j + nI*nJ*k;
-                columnVectorOrdering_(i, j, k) = j + nJ*k + nJ*nK*i;
-                layerVectorOrdering_(i, j, k) = k + nK*i + nI*nK*j;
-            }// end for i
         } // end for j
     } // end for k
 }
@@ -456,18 +420,6 @@ Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
     };
 
     return Point3D();
-}
-
-int HexaFvmMesh::globalIndex(int i, int j, int k, Ordering vectorOrdering)
-{
-    switch(vectorOrdering)
-    {
-    case ROW: return rowVectorOrdering_(i, j, k);
-    case COLUMN: return columnVectorOrdering_(i, j, k);
-    case LAYER: return layerVectorOrdering_(i, j, k);
-    };
-
-    return rowVectorOrdering_(i, j, k);
 }
 
 Vector3D HexaFvmMesh::rCellE(int i, int j, int k)

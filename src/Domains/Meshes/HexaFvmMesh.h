@@ -37,7 +37,6 @@
 
 enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
 enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
-enum Ordering{ROW, COLUMN, LAYER};
 
 class HexaFvmMesh : public StructuredMesh
 {
@@ -103,7 +102,6 @@ private:
     void initializeCellToCellParameters();
     void initializeFaces();
     void initializeCellToFaceParameters();
-    void initializeGlobalIndexMaps();
 
 public:
 
@@ -241,13 +239,6 @@ public:
     double rFaceMagS(int i, int j, int k){ return cellToFaceDistancesS_(i, j, k); }
     double rFaceMagT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
     double rFaceMagB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
-
-    /**
-     * @brief globalIndex Get the vector index for a cell, useful for assembling matrices.
-     * @param vectorOrdering The ordering of the vector, either by ROW, COLUMN or LAYER.
-     * @return The global index.
-     */
-    int globalIndex(int i, int j, int k, Ordering vectorOrdering);
 
     int nCellsI(){ return cellCenters_.sizeI(); }
     int nCellsJ(){ return cellCenters_.sizeJ(); }

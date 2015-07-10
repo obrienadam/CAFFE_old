@@ -28,6 +28,8 @@
 
 #include "Field.h"
 
+enum Ordering{I_INDEX, J_INDEX, K_INDEX};
+
 class IndexMap
 {
 private:
@@ -36,7 +38,11 @@ private:
 
     Field<int> indexField_;
 
+    Ordering index1_, index2_, index3_;
+
 public:
+
+    IndexMap(Ordering index1 = I_INDEX, Ordering index2 = J_INDEX, Ordering index3 = K_INDEX);
 
     int operator()(int i, int j, int k, int varSetNo);
     void generateMap(Field<int>& cellStatus);

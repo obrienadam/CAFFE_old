@@ -4,6 +4,7 @@
 #include "Parallel.h"
 #include "Array3D.h"
 #include "Vector3D.h"
+#include "MultiBlockHexaFvmMesh.h"
 
 int main()
 {
@@ -96,14 +97,14 @@ int main()
             cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << vector3DArray3D(i, j, k) << endl;
         }
 
-        int nEntities = 9312, iLower, iUpper;
+        int nEntities = 9312, iLower, iUpper, nEntitiesThisProc;
 
         Parallel::barrier();
 
         if(Parallel::isMainProcessor())
             cout << endl << "Testing the ownership range calculation with " << nEntities << " entities." << endl;
 
-        Parallel::ownerShipRange(nEntities, iLower, iUpper);
+        Parallel::ownershipRange(nEntities, iLower, iUpper, nEntitiesThisProc);
 
         for(i = 0; i < Parallel::nProcesses(); ++i)
         {
@@ -111,9 +112,19 @@ int main()
 
             if(Parallel::isThisProcessor(i))
             {
-                cout << "Ownership range for processor " << Parallel::processNo() << ": " << iLower << " -- " << iUpper << endl;
+                cout << "Ownership range for processor " << Parallel::processNo() << ": " << iLower << " -- " << iUpper << endl
+                     << "This proc has " << nEntitiesThisProc << " entities." << endl;
             }
         }
+
+        if(Parallel::isMainProcessor())
+            cout << "Testing the multi-block Hexa-mesh..." << endl;
+
+        MultiBlockHexaFvmMesh mesh;
+        Input input;
+
+        mesh.initialize(input);
+        mesh.writeTec360(0, "solution");
     }
     catch(const char* errorMessage)
     {

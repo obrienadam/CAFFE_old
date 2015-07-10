@@ -45,6 +45,8 @@ public:
 
     //- Output methods
     virtual void writeTec360(double time = 0.);
+
+    static void readTecplotMeshHeader(std::ifstream &fin, std::string &name, int& nI, int& nJ, int& nK);
 };
 
 #endif

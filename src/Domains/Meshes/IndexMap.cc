@@ -25,6 +25,15 @@
 #include "FvScheme.h"
 #include "Output.h"
 
+IndexMap::IndexMap(Ordering index1, Ordering index2, Ordering index3)
+    :
+      index1_(index1),
+      index2_(index2),
+      index3_(index3)
+{
+
+}
+
 int IndexMap::operator ()(int i, int j, int k, int varSetNo)
 {
     if(i >= 0 && i < nI_

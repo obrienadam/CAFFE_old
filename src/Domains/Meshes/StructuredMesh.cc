@@ -76,43 +76,7 @@ void StructuredMesh::initialize(std::string filename)
 
     fin.open(filename.c_str());
 
-    nI = nJ = nK = 0;
-
-    while(!fin.eof())
-    {
-        getline(fin, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer, false);
-
-        if(buffer.empty())
-            continue;
-
-        bufferVec = InputStringProcessing::partition(buffer, " ,=\"");
-
-        if(bufferVec[0] == "TITLE")
-            name = bufferVec[1];
-        else if(bufferVec[0] == "VARIABLES")
-            continue;
-        else if(bufferVec[0] == "ZONE")
-        {
-            for(i = 1; i < 7; i += 2)
-            {
-                if(bufferVec[i] == "I")
-                    nI = stoi(bufferVec[i + 1]);
-                else if(bufferVec[i] == "J")
-                    nJ = stoi(bufferVec[i + 1]);
-                else if(bufferVec[i] == "K")
-                    nK = stoi(bufferVec[i + 1]);
-                else
-                    Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + bufferVec[i] + "\".");
-            }
-        }
-        else if(bufferVec[0] == "FILETYPE")
-            continue;
-        else if(bufferVec[0] == "DATAPACKING")
-            break;
-        else
-            Output::raiseException("StructuredMesh", "initialize", "invalid mesh header \"" + bufferVec[0] + "\".");
-    }
+    readTecplotMeshHeader(fin, name, nI, nJ, nK);
 
     // Check to see if a dimension was not allocated
     if(nI == 0 || nJ == 0 || nK == 0)
@@ -171,4 +135,50 @@ void StructuredMesh::writeTec360(double time)
     ++nTec360Outputs_;
 
     foutTec360_.close();
+}
+
+void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name, int &nI, int &nJ, int &nK)
+{
+    using namespace std;
+
+    int i;
+    string buffer;
+    vector<string> bufferVec;
+
+
+    while(!fin.eof())
+    {
+        getline(fin, buffer);
+        buffer = InputStringProcessing::processBuffer(buffer, false);
+
+        if(buffer.empty())
+            continue;
+
+        bufferVec = InputStringProcessing::partition(buffer, " ,=\"");
+
+        if(bufferVec[0] == "TITLE")
+            name = bufferVec[1];
+        else if(bufferVec[0] == "VARIABLES")
+            continue;
+        else if(bufferVec[0] == "ZONE")
+        {
+            for(i = 1; i < 7; i += 2)
+            {
+                if(bufferVec[i] == "I")
+                    nI = stoi(bufferVec[i + 1]);
+                else if(bufferVec[i] == "J")
+                    nJ = stoi(bufferVec[i + 1]);
+                else if(bufferVec[i] == "K")
+                    nK = stoi(bufferVec[i + 1]);
+                else
+                    Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + bufferVec[i] + "\".");
+            }
+        }
+        else if(bufferVec[0] == "FILETYPE")
+            continue;
+        else if(bufferVec[0] == "DATAPACKING")
+            break;
+        else
+            Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "invalid mesh header \"" + bufferVec[0] + "\".");
+    }
 }

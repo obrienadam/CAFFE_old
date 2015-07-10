@@ -25,7 +25,7 @@ public:
     static int processNo();
     static bool isThisProcessor(int source);
     static bool isMainProcessor();
-    static void ownerShipRange(int nEntities, int &iLower, int &iUpper);
+    static void ownershipRange(int nEntities, int &iLower, int &iUpper, int &nEntitiesThisProc);
 
     static int sum(int number);
     static int min(int number);

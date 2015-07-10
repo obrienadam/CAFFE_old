@@ -44,9 +44,12 @@ bool Parallel::isMainProcessor()
         return false;
 }
 
-void Parallel::ownerShipRange(int nEntities, int &iLower, int &iUpper)
+void Parallel::ownershipRange(int nEntities, int &iLower, int &iUpper, int &nEntitiesThisProc)
 {
-    int nEntitiesThisProc = nEntities/nProcesses(), nRemainingEntities = nEntities%nProcesses();
+    int nRemainingEntities;
+
+    nEntitiesThisProc = nEntities/nProcesses();
+    nRemainingEntities = nEntities%nProcesses();
 
     if(processNo() < nRemainingEntities)
     {
