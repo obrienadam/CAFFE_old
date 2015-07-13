@@ -28,17 +28,33 @@ find_package(MPI REQUIRED)
 
 if(MPI_FOUND)
     include_directories(${MPI_INCLUDE_DIRS})
+    message("-- MPI_CXX includes: " ${MPI_CXX_INCLUDE_PATH})
+    message("-- MPI_CXX libraries: " ${MPI_CXX_LIBRARIES})
 endif()
 
 # Find boost package
-find_package(Boost REQUIRED COMPONENTS program_options system date_time filesystem)
+find_package(Boost 1.53.0 REQUIRED COMPONENTS program_options system date_time filesystem)
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
+    message("-- Boost version: " ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION})
+    message("-- Boost includes: " ${Boost_INCLUDE_DIRS})
+    message("-- Boost libraries: " ${Boost_LIBRARY_DIRS})
+endif()
+
+# Find blas package
+find_package(BLAS)
+
+if(BLAS_FOUND)
+	message("-- BLAS libraries: " ${BLAS_LIBRARIES})
 endif()
 
 # Find lapack package
 find_package(LAPACK)
+
+if(LAPACK_FOUND)
+	message("-- LAPACK libraries: " ${LAPACK_LIBRARIES})
+endif()
 
 # Includes
 set(INCLUDE_DIR src/DataStructures
