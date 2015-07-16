@@ -1,8 +1,11 @@
 #include <iostream>
 
+#include "Output.h"
 #include "Input.h"
 #include "RunControl.h"
-#include "Simple.h"
+
+#include "HexaFvmMesh.h"
+#include "Diffusion.h"
 
 int main(int argc, const char* argv[])
 {
@@ -19,13 +22,13 @@ int main(int argc, const char* argv[])
         mesh.initialize(input);
         Output::print(mesh.meshStats());
 
-        Simple simple(input, mesh);
+        Diffusion diffusion(input, mesh);
 
         runControl.displayStartMessage();
         while(runControl.continueRun())
         {
-            runControl.residualNorm = simple.solve(runControl.timeStep());
-            simple.displayUpdateMessage();
+            runControl.residualNorm = diffusion.solve(runControl.timeStep());
+            diffusion.displayUpdateMessage();
             runControl.displayUpdateMessage();
 
             if(runControl.writeToFile())

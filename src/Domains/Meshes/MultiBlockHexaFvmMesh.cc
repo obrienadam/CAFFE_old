@@ -49,11 +49,6 @@ void MultiBlockHexaFvmMesh::initialize(Input &input)
             }
         }
     }
-
-    blocks_[Parallel::processNo()].addVectorField("u", CONSERVED);
-    blocks_[Parallel::processNo()].addScalarField("phi", CONSERVED);
-    blocks_[Parallel::processNo()].initialize(nodes);
-    blocks_[Parallel::processNo()].name += "_block" + to_string(Parallel::processNo());
 }
 
 void MultiBlockHexaFvmMesh::allocate(int nBlocks)
@@ -64,5 +59,5 @@ void MultiBlockHexaFvmMesh::allocate(int nBlocks)
 
 void MultiBlockHexaFvmMesh::writeTec360(double time, std::string directoryName)
 {
-    blocks_[Parallel::processNo()].writeTec360(time, directoryName);
+    //blocks_[Parallel::processNo()].writeTec360(time, directoryName);
 }

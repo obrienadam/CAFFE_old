@@ -28,62 +28,33 @@
 #include <string>
 #include <iostream>
 
-#include "Array2D.h"
 #include "Array3D.h"
-#include "Vector3D.h"
-#include "Tensor3D.h"
-
-enum BoundaryPatch{FIXED, ZERO_GRADIENT, EMPTY};
-enum{CONSERVED, AUXILLARY, PRIMITIVE};
+#include "HexaFvmMesh.h"
 
 template <class T>
 class Field : public Array3D<T>
 {
-protected:
-
-    //- Face nodes for primitive and conserved fields
-
-    Array3D<T> facesI_;
-    Array3D<T> facesJ_;
-    Array3D<T> facesK_;
-
-    //- Face fluxes conserved fields (units/m^2)
-
-    Array3D<T> faceFluxesI_;
-    Array3D<T> faceFluxesJ_;
-    Array3D<T> faceFluxesK_;
-
-    //- Boundary patches
-
-    BoundaryPatch eastBoundaryPatch_;
-    BoundaryPatch westBoundaryPatch_;
-    BoundaryPatch northBoundaryPatch_;
-    BoundaryPatch southBoundaryPatch_;
-    BoundaryPatch topBoundaryPatch_;
-    BoundaryPatch bottomBoundaryPatch_;
-
 public:
 
-    Field(std::string name = "UnnamedField", int type = AUXILLARY);
-    Field(int nI, int nJ, int nK, std::string name = "UnnamedField", int type = AUXILLARY);
+    enum FieldType{CONSERVED, AUXILLARY};
+    enum BoundaryPatch{FIXED, ZERO_GRADIENT, EMPTY};
+
+    Field(const HexaFvmMesh &mesh, FieldType type, std::string name);
     Field(const Field& other);
 
-    /**
-     * @brief A CONSERVED type allocates memory for both face values and face flux values. A PRIMITIVE type allocates
-     * memory only for face values. An AUXILLARY type only allocates the centered values.
-     */
-    int type;
-    std::string name;
-
-    void allocate(int nI, int nJ, int nK);
-
-    //- The "type" determines whether or not tranport equations need to be solved for this field
+    Field<T>& operator=(const Field<T>& other);
 
     //- Access
-
     T& operator()(int i, int j, int k);
+    const T& operator()(int i, int j, int k) const;
+
     T& operator()(int i, int j, int k, int faceNo);
+    const T& operator()(int i, int j, int k, int faceNo) const;
+
     T& operator()(int k);
+    const T& operator()(int k) const;
+
+    const HexaFvmMesh& getMesh() const { return mesh_; }
 
     T& faceE(int i, int j, int k){ return facesI_(i + 1, j, k); }
     T& faceW(int i, int j, int k){ return facesI_(i, j, k); }
@@ -97,49 +68,27 @@ public:
     T& faceJ(int i, int j, int k){ return facesJ_(i, j, k); }
     T& faceK(int i, int j, int k){ return facesK_(i, j, k); }
 
-    T& fluxI(int i, int j, int k){ return faceFluxesI_(i, j, k); }
-    T& fluxJ(int i, int j, int k){ return faceFluxesJ_(i, j, k); }
-    T& fluxK(int i, int j, int k){ return faceFluxesK_(i, j, k); }
+    const T& faceE(int i, int j, int k) const { return facesI_(i + 1, j, k); }
+    const T& faceW(int i, int j, int k) const { return facesI_(i, j, k); }
+    const T& faceN(int i, int j, int k) const { return facesJ_(i, j + 1, k); }
+    const T& faceS(int i, int j, int k) const { return facesJ_(i, j, k); }
+    const T& faceT(int i, int j, int k) const { return facesK_(i, j, k + 1); }
+    const T& faceB(int i, int j, int k) const { return facesK_(i, j, k); }
+    const T& face(int i, int j, int k, int faceNo) const;
 
-    T fluxE(int i, int j, int k){ return faceFluxesI_(i + 1, j, k); }
-    T fluxW(int i, int j, int k){ return -faceFluxesI_(i, j, k); }
-    T fluxN(int i, int j, int k){ return faceFluxesJ_(i, j + 1, k); }
-    T fluxS(int i, int j, int k){ return -faceFluxesJ_(i, j, k); }
-    T fluxT(int i, int j, int k){ return faceFluxesK_(i, j, k + 1); }
-    T fluxB(int i, int j, int k){ return -faceFluxesK_(i, j, k); }
-    T sumFluxes(int i, int j, int k);
+    const T& faceI(int i, int j, int k) const { return facesI_(i, j, k); }
+    const T& faceJ(int i, int j, int k) const { return facesJ_(i, j, k); }
+    const T& faceK(int i, int j, int k) const { return facesK_(i, j, k); }
 
     T maxNeighbour(int i, int j, int k);
     T minNeighbour(int i, int j, int k);
 
-    /**
-     * @brief Get a stencil from the specified cell
-     * @return A 3D array containing the stencil.
-     */
-    Array3D<T> getStencil(int i, int j, int k);
-
-    /**
-     * @brief Place a stencil in the array provided from the specified cell
-     * @param stencil A 3D array to contain the stencil.
-     */
-    void getStencil(int i, int j, int k, Array3D<T>& stencil);
-
-    /**
-     * @brief Assign boundaries a patch that identifies the type, as well as a reference value.
-     */
-    void setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
-                          BoundaryPatch westBoundaryType, T westBoundaryValue,
-                          BoundaryPatch northBoundaryType, T northBoundaryValue,
-                          BoundaryPatch southBoundaryType, T southBoundaryValue,
-                          BoundaryPatch topBoundaryType, T topBoundaryValue,
-                          BoundaryPatch bottomBoundaryType, T bottomBoundaryValue);
-
-    void setEastBoundary(BoundaryPatch boundaryType, T boundaryValue);
-    void setWestBoundary(BoundaryPatch boundaryType, T boundaryValue);
-    void setNorthBoundary(BoundaryPatch BoundaryType, T boundaryValue);
-    void setSouthBoundary(BoundaryPatch BoundaryType, T boundaryValue);
-    void setTopBoundary(BoundaryPatch BoundaryType, T boundaryValue);
-    void setBottomBoundary(BoundaryPatch BoundaryType, T boundaryValue);
+    void setEastBoundary(const std::string &boundaryType, T boundaryValue);
+    void setWestBoundary(const std::string &boundaryType, T boundaryValue);
+    void setNorthBoundary(const std::string &BoundaryType, T boundaryValue);
+    void setSouthBoundary(const std::string &boundaryType, T boundaryValue);
+    void setTopBoundary(const std::string &boundaryType, T boundaryValue);
+    void setBottomBoundary(const std::string &boundaryType, T boundaryValue);
 
     void setBoundaryFields();
 
@@ -157,10 +106,37 @@ public:
     BoundaryPatch getTopBoundaryPatch(){ return topBoundaryPatch_; }
     BoundaryPatch getBottomBoundaryPatch(){ return bottomBoundaryPatch_; }
 
+    void setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b);
+
+    const Array3D<T>* cellData() const { return this; }
+
     /**
      * @brief Print the field to the console, for debugging purposes.
      */
     void print();
+
+    std::string name;
+
+protected:
+
+    void allocate(int nCellsI, int nCellsJ, int nCellsK);
+
+    //- Reference to the mesh, required for constructing a field
+    const HexaFvmMesh &mesh_;
+    FieldType type_;
+
+    //- Face nodes for primitive and conserved fields
+    Array3D<T> facesI_;
+    Array3D<T> facesJ_;
+    Array3D<T> facesK_;
+
+    //- Boundary patches
+    BoundaryPatch eastBoundaryPatch_;
+    BoundaryPatch westBoundaryPatch_;
+    BoundaryPatch northBoundaryPatch_;
+    BoundaryPatch southBoundaryPatch_;
+    BoundaryPatch topBoundaryPatch_;
+    BoundaryPatch bottomBoundaryPatch_;
 };
 
 #include "FieldI.h"

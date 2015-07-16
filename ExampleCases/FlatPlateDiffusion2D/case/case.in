@@ -1,6 +1,6 @@
 ############################################################
 #
-# This is just a sample file for testing the file reading.
+# Example Case: FlatPlateDiffusion2D
 #
 ############################################################
 
@@ -11,71 +11,53 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
+maxNumberOfIterations
 2
-screenWriteInterval
-1
 fileWriteInterval
 1
 
 ### Time ###################################################
 
 timeStep
-2e-3
+0
 maxSimTime
 48
 maxRealTimeHours
 48
 
-### Scheme #################################################
+### Solver #################################################
 
 timeAccurate
-ON
-relaxationFactorMomentum
-0.5
-relaxationFactorPCorr
-0.5
+OFF
 
-rho
-998
-mu
-8.94e-4
-rho2
-782
-mu
-8.94e-3
-
-maxInnerIters
-10
-
-### Boundaries #############################################
+### Boundaries ##############################################
 
 boundaryTypeEast
-outlet
+zeroGradient
 boundaryRefValueEast
-(0,0,0)
+0
 
 boundaryTypeWest
-outlet
+fixed
 boundaryRefValueWest
-(0,0,0)
+1
 
 boundaryTypeNorth
-outlet
+fixed
 boundaryRefValueNorth
-(0,0,0)
+0
 
 boundaryTypeSouth
-outlet
+fixed
 boundaryRefValueSouth
-(0,0,0)
+0.5
 
 boundaryTypeTop
-outlet
+empty
 boundaryRefValueTop
-(0,0,0)
+0
 
 boundaryTypeBottom
-outlet
+empty
 boundaryRefValueBottom
-(0,0,0)
+0

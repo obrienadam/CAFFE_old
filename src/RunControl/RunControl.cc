@@ -31,8 +31,6 @@ RunControl::RunControl()
     :
       itrs_(0),
       simTime_(0.),
-      startRealTime_(boost::posix_time::microsec_clock::local_time()),
-      maxElapsedRealTime_(boost::posix_time::hours(48)),
       terminationCondition_("iterations")
 {
 
@@ -40,29 +38,25 @@ RunControl::RunControl()
 
 void RunControl::initialize(Input &input)
 {
-    terminationCondition_ = input.inputStrings["terminationCondition"];
-    maxItrs_ = input.inputInts["maxItrs"];
-    timeStep_ = input.inputDoubles["timeStep"];
-    maxSimTime_ = input.inputDoubles["maxSimTime"];
-    screenWriteInterval_ = input.inputInts["screenWriteInterval"];
-    fileWriteInterval_ = input.inputInts["fileWriteInterval"];
+    terminationCondition_ = input.getString("terminationCondition");
+    maxIters_ = input.getInt("maxNumberOfIterations");
+    timeStep_ = input.getDouble("timeStep");
+    maxSimTime_ = input.getDouble("maxSimTime");
+    fileWriteInterval_ = input.getInt("fileWriteInterval");
 
     //- Create a directory for the solution output
-
     createDirectory("solution");
 }
 
 bool RunControl::continueRun()
 {
-    using namespace boost::posix_time;
 
     ++itrs_;
     simTime_ += timeStep_;
-    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     if(terminationCondition_ == "iterations")
     {
-        if(itrs_ >= maxItrs_)
+        if(itrs_ >= maxIters_)
             return false;
     }
     else if(terminationCondition_ == "simTime")
@@ -72,8 +66,7 @@ bool RunControl::continueRun()
     }
     else if (terminationCondition_ == "realTime")
     {
-        if(elapsedRealTime_ >= maxElapsedRealTime_)
-            return false;
+        Output::issueWarning("RunControl", "continueRun", "termination condition for real time not yet implemented.");
     }
     else
     {
@@ -81,14 +74,6 @@ bool RunControl::continueRun()
     }
 
     return true;
-}
-
-bool RunControl::writeToScreen()
-{
-    if(itrs_%screenWriteInterval_ == 0)
-        return true;
-
-    return false;
 }
 
 bool RunControl::writeToFile()
@@ -124,7 +109,7 @@ void RunControl::displayStartMessage()
     Output::printLine();
 
     message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << "." << endl
-            << "Iterations beginning on " << startRealTime_ << ".";
+            << "Iterations beginning on " << time_.currentTime() << ".";
 
     Output::print(message.str());
 }
@@ -137,11 +122,9 @@ void RunControl::displayUpdateMessage()
     ostringstream message;
     double completionPercentage;
 
-    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
-
     if(terminationCondition_ == "iterations")
     {
-        completionPercentage = double(itrs_)/double(maxItrs_)*100.;
+        completionPercentage = double(itrs_)/double(maxIters_)*100.;
     }
     else if(terminationCondition_ == "simTime")
     {
@@ -149,13 +132,13 @@ void RunControl::displayUpdateMessage()
     }
     else if (terminationCondition_ == "realTime")
     {
-        completionPercentage = elapsedRealTime_.total_microseconds()/maxElapsedRealTime_.total_microseconds()*100.;
+        //completionPercentage = elapsedRealTime_.total_microseconds()/maxElapsedRealTime_.total_microseconds()*100.;
     }
 
     message << "Simulation completion (%) |      " << completionPercentage << endl
             << "Iterations completed      |      " << itrs_ << endl
             << "Simulation time (sec)     |      " << simTime_ << endl
-            << "Elapsed time (hh:mm:ss)   |      " << elapsedRealTime_ << endl
+            << "Elapsed time (hh:mm:ss)   |      " << time_.elapsedTime() << endl
             << "Residual norm             |      " << residualNorm;
 
     Output::print(message.str());
@@ -165,18 +148,15 @@ void RunControl::displayUpdateMessage()
 void RunControl::displayEndMessage()
 {
     using namespace std;
-    using namespace boost::posix_time;
-
-    elapsedRealTime_ = microsec_clock::local_time() - startRealTime_;
 
     ostringstream message;
 
     Output::printLine();
 
-    message << "Iterations completed on " << startRealTime_ + elapsedRealTime_ << endl
+    message << "Iterations completed on " << time_.currentTime() << endl
             << "Iterations completed: " << itrs_ << endl
             << "Simulation time: " << simTime_ << endl
-            << "Elapsed time: " << elapsedRealTime_;
+            << "Elapsed time: " << time_.elapsedTime();
 
     Output::print(message.str());
     Output::printLine();

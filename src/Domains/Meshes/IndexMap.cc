@@ -25,55 +25,91 @@
 #include "FvScheme.h"
 #include "Output.h"
 
-IndexMap::IndexMap(Ordering index1, Ordering index2, Ordering index3)
-    :
-      index1_(index1),
-      index2_(index2),
-      index3_(index3)
+IndexMap::IndexMap()
 {
 
 }
 
+void IndexMap::initialize(int nCellsI, int nCellsJ, int nCellsK)
+{
+    nCellsI_ = nCellsI;
+    nCellsJ_ = nCellsJ;
+    nCellsK_ = nCellsK;
+    nActive_ = nCellsI_*nCellsJ_*nCellsK_;
+    globalIndices_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    cellStatuses_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+
+    for(int i = 0; i < nActive_; ++i)
+    {
+        globalIndices_(i) = i;
+        cellStatuses_(i) = ACTIVE;
+    }
+}
+
 int IndexMap::operator ()(int i, int j, int k, int varSetNo)
 {
-    if(i >= 0 && i < nI_
-            && j >= 0 && j < nJ_
-            && k >= 0 && k < nK_)
+    if(i >= 0 && i < nCellsI_
+            && j >= 0 && j < nCellsJ_
+            && k >= 0 && k < nCellsK_)
     {
-        return indexField_(i, j, k) + varSetNo*nActive_;
+        return globalIndices_(i, j, k) + varSetNo*nActive_;
     }
 
     return -1;
 }
 
-void IndexMap::generateMap(Field<int> &cellStatus)
+bool IndexMap::isActive(int i, int j, int k)
 {
-    int i, j, k;
+    if(cellStatuses_(i, j, k) == ACTIVE)
+        return true;
+    else
+        return false;
+}
 
+bool IndexMap::isGhost(int i, int j, int k)
+{
+    if(cellStatuses_(i, j, k) == GHOST)
+        return true;
+    else
+        return false;
+}
+
+bool IndexMap::isInactive(int i, int j, int k)
+{
+    if(cellStatuses_(i, j, k) == INACTIVE)
+        return true;
+    else
+        return false;
+}
+
+void IndexMap::setActive(int i, int j, int k)
+{
+    cellStatuses_(i, j, k) = ACTIVE;
+}
+
+void IndexMap::setGhost(int i, int j, int k)
+{
+    cellStatuses_(i, j, k) = GHOST;
+}
+
+void IndexMap::setInactive(int i, int j, int k)
+{
+    cellStatuses_(i, j, k) = INACTIVE;
+}
+
+void IndexMap::generateGlobalIndices()
+{
     nActive_ = 0;
-
-    nI_ = cellStatus.sizeI();
-    nJ_ = cellStatus.sizeJ();
-    nK_ = cellStatus.sizeK();
-
-    indexField_.allocate(nI_, nJ_, nK_);
-
-    for(k = 0; k < nK_; ++k)
+    for(int i = 0; i < cellStatuses_.size(); ++i)
     {
-        for(j = 0; j < nJ_; ++j)
+        if(cellStatuses_(i) == ACTIVE || cellStatuses_(i) == GHOST)
         {
-            for(i = 0; i < nI_; ++i)
-            {
-                if(cellStatus(i, j, k) == ACTIVE || cellStatus(i, j, k) == GHOST)
-                {
-                    indexField_(i, j, k) = nActive_;
-                    ++nActive_;
-                }
-                else
-                {
-                    indexField_(i, j, k) = -1;
-                }
-            }
+            globalIndices_(i) = nActive_;
+            ++nActive_;
+        }
+        else
+        {
+            globalIndices_(i) = -1;
         }
     }
 }

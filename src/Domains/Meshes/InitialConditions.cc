@@ -82,11 +82,11 @@ void InitialConditions::readInputFile(std::string filename)
         //- This is a bit shady. May want to look at improving this
         try
         {
-            setInitialConditions(mesh.findScalarField(buffer));
+            //setInitialConditions(mesh.findScalarField(buffer));
         }
         catch(const char* errorMessage)
         {
-            setInitialConditions(mesh.findVectorField(buffer));
+            //setInitialConditions(mesh.findVectorField(buffer));
         }
     }
 

@@ -58,7 +58,7 @@ template <class T>
 void InitialConditions::createUniform(T value, Field<T>& field)
 {
     int i, j, k;
-
+std::cout << "creating uniform field\n";
     for(k = 0; k < nCellsK_; ++k)
     {
         for(j = 0; j < nCellsJ_; ++j)

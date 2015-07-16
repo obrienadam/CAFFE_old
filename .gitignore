@@ -32,3 +32,6 @@ latex
 
 # Callgrind
 callgrind.*
+
+# Log files
+*.log

@@ -26,27 +26,34 @@
 #ifndef INDEX_MAP_H
 #define INDEX_MAP_H
 
-#include "Field.h"
-
-enum Ordering{I_INDEX, J_INDEX, K_INDEX};
+#include "Array3D.h"
 
 class IndexMap
 {
-private:
-
-    int nI_, nJ_, nK_, nActive_;
-
-    Field<int> indexField_;
-
-    Ordering index1_, index2_, index3_;
-
 public:
 
-    IndexMap(Ordering index1 = I_INDEX, Ordering index2 = J_INDEX, Ordering index3 = K_INDEX);
+    enum CellStatus{ACTIVE, GHOST, INACTIVE};
 
+    IndexMap();
+
+    void initialize(int nCellsI, int nCellsJ, int nCellsK);
     int operator()(int i, int j, int k, int varSetNo);
-    void generateMap(Field<int>& cellStatus);
+
     int nActive(){ return nActive_; }
+    bool isActive(int i, int j, int k);
+    bool isGhost(int i, int j, int k);
+    bool isInactive(int i, int j, int k);
+
+    void setActive(int i, int j, int k);
+    void setGhost(int i, int j, int k);
+    void setInactive(int i, int j, int k);
+    void generateGlobalIndices();
+
+private:
+
+    int nCellsI_, nCellsJ_, nCellsK_, nActive_;
+    Array3D<int> globalIndices_;
+    Array3D<CellStatus> cellStatuses_;
 };
 
 #endif

@@ -33,22 +33,11 @@
 
 class SparseMatrix
 {
-private:
-
-    Mat A_;
-    KSP ksp_;
-    PC pc_;
-
-    int maxIters_;
-    double rToler_, absToler_;
-    PetscErrorCode errorCode_;
-
-    // MPI related
-    int iLower_, iUpper_;
-
 public:
 
-    SparseMatrix();
+    enum ReuseMatrix{TRUE, FALSE};
+
+    SparseMatrix(double rToler = PETSC_DEFAULT, double absToler = PETSC_DEFAULT, int maxIters = PETSC_DEFAULT);
     SparseMatrix(int m, int n, int nnz);
     ~SparseMatrix();
 
@@ -62,6 +51,19 @@ public:
     void assemble();
 
     void print();
+
+private:
+
+    Mat A_;
+    KSP ksp_;
+    PC pc_;
+
+    int maxIters_;
+    double rToler_, absToler_;
+    PetscErrorCode errorCode_;
+
+    // MPI related
+    int iLower_, iUpper_;
 
     friend void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C);
     friend void multiply(const SparseMatrix &A, const SparseVector &x, SparseVector &b);

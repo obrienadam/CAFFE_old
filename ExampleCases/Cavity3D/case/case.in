@@ -11,10 +11,8 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
+maxNumberOfIterations
 1000
-screenWriteInterval
-1
 fileWriteInterval
 1
 
@@ -27,49 +25,51 @@ maxSimTime
 maxRealTimeHours
 48
 
-### Scheme #################################################
+### Solver #################################################
 
 timeAccurate
-ON
+OFF
 relaxationFactorMomentum
-0.5
+0.7
 relaxationFactorPCorr
-0.5
+0.3
 rho
 1.
 mu
 0.01
-maxInnerIters
-10
+numberOfPressureCorrections
+3
+numberOfInnerIterations
+5
 
 ### Boundaries ##############################################
 
 boundaryTypeEast
 wall
-boundaryRefValueEast
+boundaryRefVectorEast
 (0,0,0)
 
 boundaryTypeWest
 wall
-boundaryRefValueWest
+boundaryRefVectorWest
 (0,0,0)
 
 boundaryTypeNorth
 wall
-boundaryRefValueNorth
+boundaryRefVectorNorth
 (1,0,1)
 
 boundaryTypeSouth
 wall
-boundaryRefValueSouth
+boundaryRefVectorSouth
 (1,0,1)
 
 boundaryTypeTop
 wall
-boundaryRefValueTop
+boundaryRefVectorTop
 (0,0,0)
 
 boundaryTypeBottom
 wall
-boundaryRefValueBottom
+boundaryRefVectorBottom
 (0,0,0)

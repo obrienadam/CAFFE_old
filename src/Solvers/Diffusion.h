@@ -25,35 +25,22 @@
 #ifndef DIFFUSION_H
 #define DIFFUSION_H
 
-#include "FvScheme.h"
-#include "Array3D.h"
-#include "Point3D.h"
-#include "Vector3D.h"
+#include "Solver.h"
+#include "Field.h"
 
-class Diffusion : public FvScheme
+class Diffusion : public Solver
 {
-private:
-
-    Field<double>* phiFieldPtr_;
-    Field<Vector3D> gradPhiField_;
-    Array3D<double> stencil_;
-
-    /**
-     * @brief Helper function that computes all of the face fluxes after the reconstructions are complete.
-     */
-    void computeFaceFluxes();
-
 public:
 
-    Diffusion();
+    Diffusion(const Input &input, const HexaFvmMesh &mesh);
     ~Diffusion();
 
-    void initialize(Input& input, HexaFvmMesh &mesh, std::string conservedFieldName);
-    int nConservedVariables();
+    virtual double solve(double timeStep);
 
-    void discretize(double timeStep, std::vector<double>& timeDerivatives);
-    void copySolution(std::vector<double>& original);
-    void updateSolution(std::vector<double>& update, int method);
+protected:
+
+    Field<double> phiField_;
+    Field<Vector3D> gradPhiField_;
 };
 
 #endif

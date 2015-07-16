@@ -1,6 +1,6 @@
 ############################################################
 #
-# Example Case: Cavity 3D
+# Example Case: Skewed Cavity 3D
 #
 ############################################################
 
@@ -11,10 +11,8 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
+maxNumberOfIterations
 6000
-screenWriteInterval
-1
 fileWriteInterval
 1
 
@@ -39,37 +37,39 @@ rho
 1
 mu
 0.01
-maxInnerIters
-20
+numberOfPressureCorrections
+3
+numberOfInnerIterations
+5
 
 ### Boundaries ##############################################
 
 boundaryTypeEast
 wall
-boundaryRefValueEast
+boundaryRefVectorEast
 (0,0,0)
 
 boundaryTypeWest
 wall
-boundaryRefValueWest
+boundaryRefVectorWest
 (0,0,0)
 
 boundaryTypeNorth
 wall
-boundaryRefValueNorth
+boundaryRefVectorNorth
 (1,0,1)
 
 boundaryTypeSouth
 wall
-boundaryRefValueSouth
+boundaryRefVectorSouth
 (0,0,0)
 
 boundaryTypeTop
 wall
-boundaryRefValueTop
+boundaryRefVectorTop
 (0,0,0)
 
 boundaryTypeBottom
 wall
-boundaryRefValueBottom
+boundaryRefVectorBottom
 (0,0,0)

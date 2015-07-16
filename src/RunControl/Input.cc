@@ -33,58 +33,52 @@
 Input::Input()
 {
     //- Set-up default input values
-    inputDoubles["simStartTime"] = 0.;
-    inputDoubles["maxSimTime"] = 1.;
-    inputDoubles["timeStep"] = 1e-4;
-    inputDoubles["maxRealTimeHours"] = 48.;
-    inputDoubles["maxRealTimeMinutes"] = 0.;
-    inputDoubles["maxRealTimeSeconds"] = 0.;
+    inputDoubles_["simStartTime"] = 0.;
+    inputDoubles_["maxSimTime"] = 1.;
+    inputDoubles_["timeStep"] = 1e-4;
+    inputDoubles_["maxRealTimeHours"] = 48.;
+    inputDoubles_["maxRealTimeMinutes"] = 0.;
+    inputDoubles_["maxRealTimeSeconds"] = 0.;
+    inputInts_["maxNumberOfIterations"] = 1000;
+    inputInts_["fileWriteInterval"] = 50;
+    inputStrings_["terminationCondition"] = "simTime";
+    inputStrings_["timeAccurate"] = "OFF";
 
-    inputInts["maxItrs"] = 1000;
-    inputInts["fileWriteInterval"] = 50;
-    inputInts["screenWriteInterval"] = 50;
+    //- Boundary conditions
+    inputStrings_["boundaryTypeEast"] = "fixed";
+    inputStrings_["boundaryTypeWest"] = "fixed";
+    inputStrings_["boundaryTypeNorth"] = "fixed";
+    inputStrings_["boundaryTypeSouth"] = "fixed";
+    inputStrings_["boundaryTypeTop"] = "fixed";
+    inputStrings_["boundaryTypeBottom"] = "fixed";
 
-    inputStrings["solver"] = "Euler";
-    inputStrings["terminationCondition"] = "simTime";
+    inputStrings_["boundaryRefVectorEast"] = "(0., 0., 0.)";
+    inputStrings_["boundaryRefVectorWest"] = "(0., 0., 0.)";
+    inputStrings_["boundaryRefVectorNorth"] = "(0., 0., 0.)";
+    inputStrings_["boundaryRefVectorSouth"] = "(0., 0., 0.)";
+    inputStrings_["boundaryRefVectorTop"] = "(0., 0., 0.)";
+    inputStrings_["boundaryRefVectorBottom"] = "(0., 0., 0.)";
 
-    inputStrings["boundaryTypeEast"] = "fixed";
-    inputStrings["boundaryTypeWest"] = "fixed";
-    inputStrings["boundaryTypeNorth"] = "fixed";
-    inputStrings["boundaryTypeSouth"] = "fixed";
-    inputStrings["boundaryTypeTop"] = "fixed";
-    inputStrings["boundaryTypeBottom"] = "fixed";
-
-    inputStrings["boundaryRefValueEast"] = "(0., 0., 0.)";
-    inputStrings["boundaryRefValueWest"] = "(0., 0., 0.)";
-    inputStrings["boundaryRefValueNorth"] = "(0., 0., 0.)";
-    inputStrings["boundaryRefValueSouth"] = "(0., 0., 0.)";
-    inputStrings["boundaryRefValueTop"] = "(0., 0., 0.)";
-    inputStrings["boundaryRefValueBottom"] = "(0., 0., 0.)";
-
-    //- Linear solver parameters
-    inputInts["kspMaxItrs"] = 5000;
-    inputDoubles["kspRelativeTolerance"] = 1e-12;
-    inputDoubles["kspAbsoluteTolerance"] = 1e-6;
+    inputDoubles_["boundaryRefValueEast"] = 0.;
+    inputDoubles_["boundaryRefValueWest"] = 0.;
+    inputDoubles_["boundaryRefValueNorth"] = 0.;
+    inputDoubles_["boundaryRefValueSouth"] = 0.;
+    inputDoubles_["boundaryRefValueTop"] = 0.;
+    inputDoubles_["boundaryRefValueBottom"] = 0.;
 
     //- Simple parameters
-    inputStrings["timeAccurate"] = "OFF";
-    inputDoubles["relaxationFactorMomentum"] = 0.3;
-    inputDoubles["relaxationFactorPCorr"] = 0.1;
-    inputDoubles["rho"] = 998.;
-    inputDoubles["mu"] = 8.94e-4;
-    inputInts["maxInnerIters"] = 10;
+    inputDoubles_["relaxationFactorMomentum"] = 0.3;
+    inputDoubles_["relaxationFactorPCorr"] = 0.1;
+    inputDoubles_["rho"] = 998.;
+    inputDoubles_["mu"] = 8.94e-4;
+    inputInts_["numberOfInnerIterations"] = 1;
 
     //- Piso parameters
-    inputInts["numberOfPCorrections"] = 2;
+    inputInts_["numberOfPressureCorrections"] = 2;
 
-    //- multiphaseSimple parameters
-    inputDoubles["sigma"] = 0.07;
-    inputDoubles["rho2"] = 782.;
-    inputDoubles["mu2"] = 8.94e-3;
-
-    //- ibSimple parameters
-    inputDoubles["ibSphereRadius"] = 0.5;
-    inputStrings["ibSphereCenter"] = "(0.5, 0.5, 0.5)";
+    //- ibPiso parameters
+    inputDoubles_["ibSphereRadius"] = 0.5;
+    inputStrings_["ibSphereCenter"] = "(0.5, 0.5, 0.5)";
 }
 
 Input::Input(std::string filename)
@@ -128,14 +122,14 @@ void Input::openInputFile(std::string filename)
         if(buffer.empty())
             continue;
 
-        if(inputInts.find(buffer) != inputInts.end())
+        if(inputInts_.find(buffer) != inputInts_.end())
         {
             getline(fin_, buffer2);
             buffer2 = InputStringProcessing::processBuffer(buffer2);
 
             try
             {
-                inputInts[buffer] = stoi(buffer2);
+                inputInts_[buffer] = stoi(buffer2);
             }
             catch(...)
             {
@@ -143,14 +137,14 @@ void Input::openInputFile(std::string filename)
             }
         }
 
-        else if (inputDoubles.find(buffer) != inputDoubles.end())
+        else if (inputDoubles_.find(buffer) != inputDoubles_.end())
         {
             getline(fin_, buffer2);
             buffer2 = InputStringProcessing::processBuffer(buffer2);
 
             try
             {
-                inputDoubles[buffer] = stod(buffer2);
+                inputDoubles_[buffer] = stod(buffer2);
             }
             catch(...)
             {
@@ -158,12 +152,12 @@ void Input::openInputFile(std::string filename)
             }
         }
 
-        else if (inputStrings.find(buffer) != inputStrings.end())
+        else if (inputStrings_.find(buffer) != inputStrings_.end())
         {
             getline(fin_, buffer2);
             buffer2 = InputStringProcessing::processBuffer(buffer2, false);
 
-            inputStrings[buffer] = buffer2;
+            inputStrings_[buffer] = buffer2;
         }
         else
         {
@@ -182,21 +176,21 @@ void Input::print()
 
     cout << "Input Integers:\n";
 
-    for(intMapItr = inputInts.begin(); intMapItr != inputInts.end(); ++intMapItr)
+    for(intMapItr = inputInts_.begin(); intMapItr != inputInts_.end(); ++intMapItr)
     {
         cout << intMapItr->first << ": " << intMapItr->second << endl;
     }
 
     cout << "Input Doubles:\n";
 
-    for(doubleMapItr = inputDoubles.begin(); doubleMapItr != inputDoubles.end(); ++doubleMapItr)
+    for(doubleMapItr = inputDoubles_.begin(); doubleMapItr != inputDoubles_.end(); ++doubleMapItr)
     {
         cout << doubleMapItr->first << ": " << doubleMapItr->second << endl;
     }
 
     cout << "Input Strings:\n";
 
-    for(stringMapItr = inputStrings.begin(); stringMapItr != inputStrings.end(); ++stringMapItr)
+    for(stringMapItr = inputStrings_.begin(); stringMapItr != inputStrings_.end(); ++stringMapItr)
     {
         cout << stringMapItr->first << ": " << stringMapItr->second << endl;
     }

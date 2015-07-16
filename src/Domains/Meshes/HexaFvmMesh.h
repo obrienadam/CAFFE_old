@@ -33,17 +33,159 @@
 #include "Array3D.h"
 #include "Vector3D.h"
 #include "Point3D.h"
-#include "Field.h"
-
-enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
-enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
 
 class HexaFvmMesh : public StructuredMesh
 {
+
+public:
+
+    enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+    enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
+
+    HexaFvmMesh();
+    HexaFvmMesh(const HexaFvmMesh& other);
+
+    void initialize(Input &input);
+    void initialize(Array3D<Point3D>& nodes);
+
+    virtual std::string meshStats();
+
+    // Retrieve cell parameters
+    Point3D cellXc(int i, int j, int k) const;
+    double cellVol(int i, int j, int k) const { return cellVolumes_(i, j, k); }
+
+    Point3D node(int i, int j, int k, int nodeNo) const;
+
+    // Retrive face parameters
+    Point3D faceXcE(int i, int j, int k) const { return faceCentersI_(i + 1, j, k); }
+    Point3D faceXcW(int i, int j, int k) const { return faceCentersI_(i, j, k); }
+    Point3D faceXcN(int i, int j, int k) const { return faceCentersJ_(i, j + 1, k); }
+    Point3D faceXcS(int i, int j, int k) const { return faceCentersJ_(i, j, k); }
+    Point3D faceXcT(int i, int j, int k) const { return faceCentersK_(i, j, k + 1); }
+    Point3D faceXcB(int i, int j, int k) const { return faceCentersK_(i, j, k); }
+
+    Vector3D fAreaNormE(int i, int j, int k) const { return faceNormalsI_(i + 1, j, k); }
+    Vector3D fAreaNormW(int i, int j, int k) const { return -faceNormalsI_(i, j, k); }
+    Vector3D fAreaNormN(int i, int j, int k) const { return faceNormalsJ_(i, j + 1, k); }
+    Vector3D fAreaNormS(int i, int j, int k) const { return -faceNormalsJ_(i, j, k); }
+    Vector3D fAreaNormT(int i, int j, int k) const { return faceNormalsK_(i, j, k + 1); }
+    Vector3D fAreaNormB(int i, int j, int k) const { return -faceNormalsK_(i, j, k); }
+
+    double faceAreaE(int i, int j, int k) const { return faceAreasI_(i + 1, j, k); }
+    double faceAreaW(int i, int j, int k) const { return faceAreasI_(i, j, k); }
+    double faceAreaN(int i, int j, int k) const { return faceAreasJ_(i, j + 1, k); }
+    double faceAreaS(int i, int j, int k) const { return faceAreasJ_(i, j, k); }
+    double faceAreaT(int i, int j, int k) const { return faceAreasK_(i, j, k + 1); }
+    double faceAreaB(int i, int j, int k) const { return faceAreasK_(i, j, k); }
+
+    Point3D faceXcI(int i, int j, int k) const { return faceCentersI_(i, j, k); }
+    Point3D faceXcJ(int i, int j, int k) const { return faceCentersJ_(i, j, k); }
+    Point3D faceXcK(int i, int j, int k) const { return faceCentersK_(i, j, k); }
+
+    Vector3D fAreaNormI(int i, int j, int k) const { return faceNormalsI_(i, j, k); }
+    Vector3D fAreaNormJ(int i, int j, int k) const { return faceNormalsJ_(i, j, k); }
+    Vector3D fAreaNormK(int i, int j, int k) const { return faceNormalsK_(i, j, k); }
+
+    double fAreaI(int i, int j, int k) const { return faceAreasI_(i, j, k); }
+    double fAreaJ(int i, int j, int k) const { return faceAreasJ_(i, j, k); }
+    double fAreaK(int i, int j, int k) const { return faceAreasK_(i, j, k); }
+
+    // Retrieve cell to cell parameters
+    Vector3D rCellE(int i, int j, int k) const;
+    Vector3D rCellW(int i, int j, int k) const;
+    Vector3D rCellN(int i, int j, int k) const;
+    Vector3D rCellS(int i, int j, int k) const;
+    Vector3D rCellT(int i, int j, int k) const;
+    Vector3D rCellB(int i, int j, int k) const;
+
+    Vector3D rnCellE(int i, int j, int k);
+    Vector3D rnCellW(int i, int j, int k);
+    Vector3D rnCellN(int i, int j, int k);
+    Vector3D rnCellS(int i, int j, int k);
+    Vector3D rnCellT(int i, int j, int k);
+    Vector3D rnCellB(int i, int j, int k);
+
+    double rCellMagE(int i, int j, int k);
+    double rCellMagW(int i, int j, int k);
+    double rCellMagN(int i, int j, int k);
+    double rCellMagS(int i, int j, int k);
+    double rCellMagT(int i, int j, int k);
+    double rCellMagB(int i, int j, int k);
+
+    Vector3D rFaceE(int i, int j, int k) const { return cellToFaceRelativeVectorsE_(i, j, k); }
+    Vector3D rFaceW(int i, int j, int k) const { return cellToFaceRelativeVectorsW_(i, j, k); }
+    Vector3D rFaceN(int i, int j, int k) const { return cellToFaceRelativeVectorsN_(i, j, k); }
+    Vector3D rFaceS(int i, int j, int k) const { return cellToFaceRelativeVectorsS_(i, j, k); }
+    Vector3D rFaceT(int i, int j, int k) const { return cellToFaceRelativeVectorsT_(i, j, k); }
+    Vector3D rFaceB(int i, int j, int k) const { return cellToFaceRelativeVectorsB_(i, j, k); }
+
+    Vector3D rnFaceE(int i, int j, int k) const { return cellToFaceUnitVectorsE_(i, j, k); }
+    Vector3D rnFaceW(int i, int j, int k) const { return cellToFaceUnitVectorsW_(i, j, k); }
+    Vector3D rnFaceN(int i, int j, int k) const { return cellToFaceUnitVectorsN_(i, j, k); }
+    Vector3D rnFaceS(int i, int j, int k) const { return cellToFaceUnitVectorsS_(i, j, k); }
+    Vector3D rnFaceT(int i, int j, int k) const { return cellToFaceUnitVectorsT_(i, j, k); }
+    Vector3D rnFaceB(int i, int j, int k) const { return cellToFaceUnitVectorsB_(i, j, k); }
+
+    double rFaceMagE(int i, int j, int k) const { return cellToFaceDistancesE_(i, j, k); }
+    double rFaceMagW(int i, int j, int k) const { return cellToFaceDistancesW_(i, j, k); }
+    double rFaceMagN(int i, int j, int k) const { return cellToFaceDistancesN_(i, j, k); }
+    double rFaceMagS(int i, int j, int k) const { return cellToFaceDistancesS_(i, j, k); }
+    double rFaceMagT(int i, int j, int k) const { return cellToFaceDistancesT_(i, j, k); }
+    double rFaceMagB(int i, int j, int k) const { return cellToFaceDistancesB_(i, j, k); }
+
+    int nCellsI() const { return cellCenters_.sizeI(); }
+    int nCellsJ() const { return cellCenters_.sizeJ(); }
+    int nCellsK() const { return cellCenters_.sizeK(); }
+    int nFacesI() const { return faceCentersI_.sizeI(); }
+    int nFacesJ() const { return faceCentersJ_.sizeJ(); }
+    int nFacesK() const { return faceCentersK_.sizeK(); }
+
+    int uCellI() const { return cellCenters_.sizeI() - 1; }
+    int uCellJ() const { return cellCenters_.sizeJ() - 1; }
+    int uCellK() const { return cellCenters_.sizeK() - 1; }
+
+    /**
+     * @brief Locate the cell whose center is closest to a point, and store the indices.
+     * @param point The point to be considered.
+     * @param ii The i index of the cell closest to point.
+     * @param jj The j index of the cell closest to point.
+     * @param kk The k index of the cell closest to point.
+     */
+    void locateCell(const Point3D& point, int& ii, int& jj, int& kk) const;
+
+    /**
+     * @brief Locate the 8 cells that form a hexahedron with their centers and enclose the point.
+     * @param point The point of interest.
+     * @param ii Array of the i indices enclosing the point.
+     * @param jj Array of the j indices enclosing the point.
+     * @param kk Array of the k indices enclosing the point.
+     */
+    void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]) const;
+
+    /**
+     * @brief Output all mesh data to a file for debugging purposes.
+     */
+    void writeDebug();
+
+    void addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const;
+    void addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const;
+
+    /**
+     * @brief Write cell-centered data to the Tecplot360 ASCII format.
+     * @param time The solution time.
+     */
+    void writeTec360(double time = 0, std::string directoryName = "");
+
 private:
 
-    //- Geometric data pertaining only to the interior fvm mesh
+    //- Private helper methods
+    void initializeCellsAndFaces();
+    void initializeCells();
+    void initializeCellToCellParameters();
+    void initializeFaces();
+    void initializeCellToFaceParameters();
 
+    //- Geometric data pertaining only to the interior fvm mesh
     Array3D<Point3D> cellCenters_;
     Array3D<double> cellVolumes_;
 
@@ -89,192 +231,8 @@ private:
     Array3D<double> cellToFaceDistancesT_;
     Array3D<double> cellToFaceDistancesB_;
 
-    //- Global cell index map, for implicit methods
-
-    Array3D<int> rowVectorOrdering_;
-    Array3D<int> columnVectorOrdering_;
-    Array3D<int> layerVectorOrdering_;
-
-    //- Private helper methods
-
-    void initializeCellsAndFaces();
-    void initializeCells();
-    void initializeCellToCellParameters();
-    void initializeFaces();
-    void initializeCellToFaceParameters();
-
-public:
-
-    HexaFvmMesh(){}
-    HexaFvmMesh(const HexaFvmMesh& other);
-
-    /**
-     * @brief scalarFields A vector containing all scalar fields defined on the domain.
-     */
-    std::vector< Field<double> > scalarFields;
-
-    /**
-     * @brief vectorFields A vector containing all vector fields defined on the domain.
-     */
-    std::vector< Field<Vector3D> > vectorFields;
-
-    /**
-     * @brief Initialize the domain from an input file.
-     * @param input Input object containg initialization data.
-     */
-    void initialize(Input &input);
-    /**
-     * @brief Initialize the domain from a node array.
-     * @param nodes 3D array of nodes representing cell vertices.
-     */
-    void initialize(Array3D<Point3D>& nodes);
-
-    /**
-     * @brief addScalarField Add a new scalar field to the domain.
-     * @param scalarFieldName Name of the new scalar field.
-     * @param type The type of field, either CONSERVED or AUXILLARY.
-     */
-    void addScalarField(std::string scalarFieldName, int type = AUXILLARY);
-
-    /**
-     * @brief addVectorField Add a new vector field to the domain.
-     * @param vectorFieldName Name of the new vector field.
-     * @param type The type of field, either CONSERVED or AUXILLARY.
-     */
-    void addVectorField(std::string vectorFieldName, int type = AUXILLARY);
-
-    /**
-     * @brief findScalarField Locate a scalar field within the domain.
-     * @param fieldName The name of the field to be searched for.
-     * @return A reference to the field if found.
-     */
-    Field<double>& findScalarField(const std::string &fieldName);
-
-    /**
-     * @brief Locate a vector field within the domain. Raises an exception if it is not found.
-     * @param fieldName The name of the field to be searched for.
-     * @return  A reference to  the field if found.
-     */
-    Field<Vector3D>& findVectorField(const std::string &fieldName);
-
-    // Retrieve cell parameters
-    Point3D cellXc(int i, int j, int k);
-    double cellVol(int i, int j, int k){ return cellVolumes_(i, j, k); }
-
-    Point3D node(int i, int j, int k, int nodeNo);
-
-    // Retrive face parameters
-    Point3D faceXcE(int i, int j, int k){ return faceCentersI_(i + 1, j, k); }
-    Point3D faceXcW(int i, int j, int k){ return faceCentersI_(i, j, k); }
-    Point3D faceXcN(int i, int j, int k){ return faceCentersJ_(i, j + 1, k); }
-    Point3D faceXcS(int i, int j, int k){ return faceCentersJ_(i, j, k); }
-    Point3D faceXcT(int i, int j, int k){ return faceCentersK_(i, j, k + 1); }
-    Point3D faceXcB(int i, int j, int k){ return faceCentersK_(i, j, k); }
-
-    Vector3D fAreaNormE(int i, int j, int k){ return faceNormalsI_(i + 1, j, k); }
-    Vector3D fAreaNormW(int i, int j, int k){ return -faceNormalsI_(i, j, k); }
-    Vector3D fAreaNormN(int i, int j, int k){ return faceNormalsJ_(i, j + 1, k); }
-    Vector3D fAreaNormS(int i, int j, int k){ return -faceNormalsJ_(i, j, k); }
-    Vector3D fAreaNormT(int i, int j, int k){ return faceNormalsK_(i, j, k + 1); }
-    Vector3D fAreaNormB(int i, int j, int k){ return -faceNormalsK_(i, j, k); }
-
-    double faceAreaE(int i, int j, int k){ return faceAreasI_(i + 1, j, k); }
-    double faceAreaW(int i, int j, int k){ return faceAreasI_(i, j, k); }
-    double faceAreaN(int i, int j, int k){ return faceAreasJ_(i, j + 1, k); }
-    double faceAreaS(int i, int j, int k){ return faceAreasJ_(i, j, k); }
-    double faceAreaT(int i, int j, int k){ return faceAreasK_(i, j, k + 1); }
-    double faceAreaB(int i, int j, int k){ return faceAreasK_(i, j, k); }
-
-    Point3D faceXcI(int i, int j, int k){ return faceCentersI_(i, j, k); }
-    Point3D faceXcJ(int i, int j, int k){ return faceCentersJ_(i, j, k); }
-    Point3D faceXcK(int i, int j, int k){ return faceCentersK_(i, j, k); }
-
-    Vector3D fAreaNormI(int i, int j, int k){ return faceNormalsI_(i, j, k); }
-    Vector3D fAreaNormJ(int i, int j, int k){ return faceNormalsJ_(i, j, k); }
-    Vector3D fAreaNormK(int i, int j, int k){ return faceNormalsK_(i, j, k); }
-
-    double fAreaI(int i, int j, int k){ return faceAreasI_(i, j, k); }
-    double fAreaJ(int i, int j, int k){ return faceAreasJ_(i, j, k); }
-    double fAreaK(int i, int j, int k){ return faceAreasK_(i, j, k); }
-
-    // Retrieve cell to cell parameters
-    Vector3D rCellE(int i, int j, int k);
-    Vector3D rCellW(int i, int j, int k);
-    Vector3D rCellN(int i, int j, int k);
-    Vector3D rCellS(int i, int j, int k);
-    Vector3D rCellT(int i, int j, int k);
-    Vector3D rCellB(int i, int j, int k);
-
-    Vector3D rnCellE(int i, int j, int k);
-    Vector3D rnCellW(int i, int j, int k);
-    Vector3D rnCellN(int i, int j, int k);
-    Vector3D rnCellS(int i, int j, int k);
-    Vector3D rnCellT(int i, int j, int k);
-    Vector3D rnCellB(int i, int j, int k);
-
-    double rCellMagE(int i, int j, int k);
-    double rCellMagW(int i, int j, int k);
-    double rCellMagN(int i, int j, int k);
-    double rCellMagS(int i, int j, int k);
-    double rCellMagT(int i, int j, int k);
-    double rCellMagB(int i, int j, int k);
-
-    Vector3D rFaceE(int i, int j, int k){ return cellToFaceRelativeVectorsE_(i, j, k); }
-    Vector3D rFaceW(int i, int j, int k){ return cellToFaceRelativeVectorsW_(i, j, k); }
-    Vector3D rFaceN(int i, int j, int k){ return cellToFaceRelativeVectorsN_(i, j, k); }
-    Vector3D rFaceS(int i, int j, int k){ return cellToFaceRelativeVectorsS_(i, j, k); }
-    Vector3D rFaceT(int i, int j, int k){ return cellToFaceRelativeVectorsT_(i, j, k); }
-    Vector3D rFaceB(int i, int j, int k){ return cellToFaceRelativeVectorsB_(i, j, k); }
-
-    Vector3D rnFaceE(int i, int j, int k){ return cellToFaceUnitVectorsE_(i, j, k); }
-    Vector3D rnFaceW(int i, int j, int k){ return cellToFaceUnitVectorsW_(i, j, k); }
-    Vector3D rnFaceN(int i, int j, int k){ return cellToFaceUnitVectorsN_(i, j, k); }
-    Vector3D rnFaceS(int i, int j, int k){ return cellToFaceUnitVectorsS_(i, j, k); }
-    Vector3D rnFaceT(int i, int j, int k){ return cellToFaceUnitVectorsT_(i, j, k); }
-    Vector3D rnFaceB(int i, int j, int k){ return cellToFaceUnitVectorsB_(i, j, k); }
-
-    double rFaceMagE(int i, int j, int k){ return cellToFaceDistancesE_(i, j, k); }
-    double rFaceMagW(int i, int j, int k){ return cellToFaceDistancesW_(i, j, k); }
-    double rFaceMagN(int i, int j, int k){ return cellToFaceDistancesN_(i, j, k); }
-    double rFaceMagS(int i, int j, int k){ return cellToFaceDistancesS_(i, j, k); }
-    double rFaceMagT(int i, int j, int k){ return cellToFaceDistancesT_(i, j, k); }
-    double rFaceMagB(int i, int j, int k){ return cellToFaceDistancesB_(i, j, k); }
-
-    int nCellsI(){ return cellCenters_.sizeI(); }
-    int nCellsJ(){ return cellCenters_.sizeJ(); }
-    int nCellsK(){ return cellCenters_.sizeK(); }
-    int nFacesI(){ return faceCentersI_.sizeI(); }
-    int nFacesJ(){ return faceCentersJ_.sizeJ(); }
-    int nFacesK(){ return faceCentersK_.sizeK(); }
-
-    /**
-     * @brief Locate the cell whose center is closest to a point, and store the indices.
-     * @param point The point to be considered.
-     * @param ii The i index of the cell closest to point.
-     * @param jj The j index of the cell closest to point.
-     * @param kk The k index of the cell closest to point.
-     */
-    void locateCell(const Point3D& point, int& ii, int& jj, int& kk);
-
-    /**
-     * @brief Locate the 8 cells that form a hexahedron with their centers and enclose the point.
-     * @param point The point of interest.
-     * @param ii Array of the i indices enclosing the point.
-     * @param jj Array of the j indices enclosing the point.
-     * @param kk Array of the k indices enclosing the point.
-     */
-    void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]);
-
-    /**
-     * @brief Output all mesh data to a file for debugging purposes.
-     */
-    void writeDebug();
-
-    /**
-     * @brief Write cell-centered data to the Tecplot360 ASCII format.
-     * @param time The solution time.
-     */
-    void writeTec360(double time = 0, std::string directoryName = "");
+    mutable std::vector< std::pair< std::string, const Array3D<double> *> > scalarVariablePtrs_;
+    mutable std::vector< std::pair< std::string, const Array3D<Vector3D> *> > vectorVariablePtrs_;
 };
 
 #endif

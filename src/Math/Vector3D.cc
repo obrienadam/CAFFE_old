@@ -37,6 +37,21 @@ double& Vector3D::operator()(int i)
     throw "Attempted to access an element outside the range of Vector3D.";
 }
 
+const double& Vector3D::operator ()(int i) const
+{
+    switch(i)
+    {
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    };
+
+    throw "Attempted to access an element outside the range of Vector3D.";
+}
+
 double Vector3D::mag()
 {
   return sqrt(x*x + y*y + z*z);

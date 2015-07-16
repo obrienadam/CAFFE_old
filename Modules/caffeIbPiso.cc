@@ -2,7 +2,8 @@
 
 #include "Input.h"
 #include "RunControl.h"
-#include "Simple.h"
+#include "IbPiso.h"
+#include "InitialConditions.h"
 
 int main(int argc, const char* argv[])
 {
@@ -19,13 +20,13 @@ int main(int argc, const char* argv[])
         mesh.initialize(input);
         Output::print(mesh.meshStats());
 
-        Simple simple(input, mesh);
+        IbPiso piso(input, mesh);
 
         runControl.displayStartMessage();
         while(runControl.continueRun())
         {
-            runControl.residualNorm = simple.solve(runControl.timeStep());
-            simple.displayUpdateMessage();
+            runControl.residualNorm = piso.solve(runControl.timeStep());
+            piso.displayUpdateMessage();
             runControl.displayUpdateMessage();
 
             if(runControl.writeToFile())

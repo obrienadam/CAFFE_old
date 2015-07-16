@@ -5,18 +5,7 @@
 int Parallel::commBufferSize_;
 std::vector<double> Parallel::commBuffer_;
 
-void Parallel::initialize()
-{
-    MPI::Init();
-
-    commBufferSize_ = 1000000;
-    commBuffer_.resize(commBufferSize_);
-}
-
-void Parallel::finalize()
-{
-    MPI::Finalize();
-}
+/********************** Public methods ***********************/
 
 int Parallel::nProcesses()
 {
@@ -106,42 +95,6 @@ double Parallel::max(double number)
     return number;
 }
 
-void Parallel::broadcastInput(int source, Input &input)
-{
-    using namespace std;
-
-    map<string, double>::iterator dItr;
-    map<string, int>::iterator iItr;
-    map<string, string>::iterator sItr;
-    int *intPtr;
-    double *doublePtr;
-    //char* charPtr;
-
-    for(dItr = input.inputDoubles.begin(); dItr != input.inputDoubles.end(); ++dItr)
-    {
-        doublePtr = &(dItr->second);
-
-        MPI::COMM_WORLD.Bcast(doublePtr, 1, MPI::DOUBLE, source);
-    }
-
-    for(iItr = input.inputInts.begin(); iItr != input.inputInts.end(); ++iItr)
-    {
-        intPtr = &(iItr->second);
-
-        MPI::COMM_WORLD.Bcast(intPtr, 1, MPI::INT, source);
-    }
-
-    for(sItr = input.inputStrings.begin(); sItr != input.inputStrings.end(); ++sItr)
-    {
-        //- This probably won't work as written...
-        /*
-        charPtr = &(sItr->second).front();
-
-        MPI::COMM_WORLD.Bcast(charPtr, (*sItr).second.size(), MPI::CHAR, source);
-        */
-    }
-}
-
 void Parallel::send(int source, int dest, std::vector<double> &vector)
 {
     if(processNo() == source)
@@ -206,4 +159,19 @@ void Parallel::send(int source, int dest, Matrix &matrix)
 void Parallel::barrier()
 {
     MPI::COMM_WORLD.Barrier();
+}
+
+/********************** Private methods ***********************/
+
+void Parallel::initialize()
+{
+    MPI::Init();
+
+    commBufferSize_ = 1000000;
+    commBuffer_.resize(commBufferSize_);
+}
+
+void Parallel::finalize()
+{
+    MPI::Finalize();
 }

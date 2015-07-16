@@ -1,6 +1,6 @@
 ############################################################
 #
-# This is just a sample file for testing the file reading.
+# Example Case: Channel3D With Ib Sphere
 #
 ############################################################
 
@@ -11,17 +11,15 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
-4000
-screenWriteInterval
-1
+maxNumberOfIterations
+1000
 fileWriteInterval
 1
 
 ### Time ###################################################
 
 timeStep
-2.5e-3
+2e-3
 maxSimTime
 48
 maxRealTimeHours
@@ -32,51 +30,53 @@ maxRealTimeHours
 timeAccurate
 ON
 relaxationFactorMomentum
-0.3
+0.5
 relaxationFactorPCorr
-0.3
+0.5
 rho
 998
 mu
 8.94e-4
-maxInnerIters
-10
+numberOfPressureCorrections
+5
+numberOfInnerIterations
+5
 
 ### Immersed Boundaries ####################################
 
 ibSphereRadius
-0.15
+0.1
 ibSphereCenter
-(1.5,0.5,0.5)
+(0.5,0.5,0.5)
 
 ### Boundaries #############################################
 
 boundaryTypeEast
 outlet
-boundaryRefValueEast
+boundaryRefVectorEast
 (0,0,0)
 
 boundaryTypeWest
 inlet
-boundaryRefValueWest
+boundaryRefVectorWest
 (1,0,0)
 
 boundaryTypeNorth
 wall
-boundaryRefValueNorth
+boundaryRefVectorNorth
 (0,0,0)
 
 boundaryTypeSouth
 wall
-boundaryRefValueSouth
+boundaryRefVectorSouth
 (0,0,0)
 
 boundaryTypeTop
 wall
-boundaryRefValueTop
+boundaryRefVectorTop
 (0,0,0)
 
 boundaryTypeBottom
 wall
-boundaryRefValueBottom
+boundaryRefVectorBottom
 (0,0,0)

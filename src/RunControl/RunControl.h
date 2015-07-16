@@ -27,36 +27,14 @@
 
 #include <string>
 
-#include <boost/date_time.hpp>
-
 #include "Input.h"
 #include "DomainInterface.h"
 #include "Solver.h"
+#include "Time.h"
 
 class RunControl
 {
-    typedef boost::posix_time::ptime RealTime;
-    typedef boost::posix_time::time_duration RealTimeDuration;
-
-private:
-
-    //- Simulation control
-
-    std::string terminationCondition_;
-    int itrs_, maxItrs_;
-    double simTime_, timeStep_, maxSimTime_;
-
-    int screenWriteInterval_, fileWriteInterval_;
-
-    //- Time related objects
-
-    RealTime startRealTime_;
-    RealTimeDuration elapsedRealTime_, maxElapsedRealTime_;
-
 public:
-
-    double residualNorm;
-
     RunControl();
 
     void initialize(Input& input);
@@ -66,7 +44,6 @@ public:
      * @retval terminate if false, continue if true.
      */
     bool continueRun();
-    bool writeToScreen();
     bool writeToFile();
     void reset();
     double timeStep(){ return timeStep_; }
@@ -82,6 +59,18 @@ public:
     void displayStartMessage();
     void displayUpdateMessage();
     void displayEndMessage();
+
+    double residualNorm;
+
+private:
+
+    std::string terminationCondition_;
+    int itrs_, maxIters_;
+    double simTime_, timeStep_, maxSimTime_;
+
+    int fileWriteInterval_;
+
+    Time time_;
 };
 
 #endif

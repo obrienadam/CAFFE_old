@@ -24,33 +24,30 @@
  * handling more complex geometries.
  */
 
-#ifndef IB_SIMPLE_H
-#define IB_SIMPLE_H
+#ifndef IB_PISO_H
+#define IB_PISO_H
 
-#include "Simple.h"
+#include "Piso.h"
 #include "Sphere.h"
 
-enum CellType{FLUID, IB, SOLID};
-
-class IbSimple : public Simple
+class IbPiso : public Piso
 {
-private:
-
-    Field<CellType> ibField_;
-    Field<Vector3D> ibSourceField_;
-
-    Sphere ibSphere_;
-
-    void computeIbField(Field<Vector3D>& uField, Field<double>& pField);
-    void setIbCells(Field<Vector3D> &uField, Field<double>& pField);
 
 public:
 
-    IbSimple();
+    IbPiso(const Input &input, const HexaFvmMesh &mesh);
 
-    void initialize(Input& input, HexaFvmMesh& mesh);
+    virtual double solve(double timeStep);
 
-    void discretize(double timeStep, std::vector<double>& timeDerivatives);
+private:
+
+    enum CellType{FLUID, IB, SOLID};
+
+    void computeIbField();
+    void computeIbCoeffs();
+
+    Field<CellType> ibField_;
+    Sphere ibSphere_;
 };
 
 #endif

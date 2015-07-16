@@ -28,14 +28,15 @@ public:
 
     //- Return the container sizes
 
-    int sizeI(){return nI_;}
-    int sizeJ(){return nJ_;}
-    int sizeK(){return nK_;}
-    int size(){return n_;}
-    int vecIndex(int i, int j, int k){ return k*nInJ_ + j*nI_ + i; }
+    int sizeI() const {return nI_;}
+    int sizeJ() const {return nJ_;}
+    int sizeK() const {return nK_;}
+    int size() const {return n_;}
 
     virtual inline T& operator()(int i, int j, int k);
+    virtual inline const T& operator()(int i, int j, int k) const;
    	inline T& operator()(int k);
+    inline const T& operator()(int k) const;
     T* data(){ return data_; }
 
     //- Iterators

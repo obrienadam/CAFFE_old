@@ -31,35 +31,28 @@
 
 class Input
 {
+public:
+
+    Input();
+    Input(std::string filename);
+    ~Input();
+
+    int getInt(const std::string &parameter) const { return inputInts_[parameter]; }
+    double getDouble(const std::string &parameter) const { return inputDoubles_[parameter]; }
+    std::string getString(const std::string &parameter) const { return inputStrings_[parameter]; }
+
+    void openInputFile(std::string filename);
+    void print();
+
 private:
 
     std::string filename_;
     std::ifstream fin_;
 
-public:
+    mutable std::map<std::string, int> inputInts_;
+    mutable std::map<std::string, double> inputDoubles_;
+    mutable std::map<std::string, std::string> inputStrings_;
 
-    std::map<std::string, int> inputInts;
-    std::map<std::string, double> inputDoubles;
-    std::map<std::string, std::string> inputStrings;
-
-    /** Default constructor. Sets all default input values.
-     */
-    Input();
-
-    /** Constructor that opens an input file.
-     * @param filename the name of the input file.
-     */
-    Input(std::string filename);
-    ~Input();
-
-    /** Open an input file.
-     * @param filename the name of the input file.
-     */
-    void openInputFile(std::string filename);
-
-    /** Print all of the input data to the console.
-     */
-    void print();
 };
 
 #endif

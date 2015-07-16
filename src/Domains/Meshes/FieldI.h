@@ -27,91 +27,65 @@
 
 // ************* Constructors and Destructors *************
 
-template <class T>
-Field<T>::Field(std::string name, int type)
-    :
-      name(name),
-      type(type)
-{
-
-}
-
 template<class T>
-Field<T>::Field(int nI, int nJ, int nK, std::string name, int type)
+Field<T>::Field(const HexaFvmMesh &mesh, FieldType type, std::string name)
     :
-      name(name),
-      type(type)
+      mesh_(mesh),
+      type_(type),
+      name(name)
 {
-    allocate(nI, nJ, nK);
+    allocate(mesh_.nCellsI(), mesh_.nCellsJ(), mesh_.nCellsK());
 }
 
 template<class T>
 Field<T>::Field(const Field &other)
     :
-      Field(other.nI_, other.nJ_, other.nK_, other.name, other.type)
+      mesh_(other.mesh_),
+      type_(other.type_),
+      name(other.name)
 {
-    int k;
-
-    for(k = 0; k < Array3D<T>::n_; ++k)
-    {
-        Array3D<T>::data_[k] = other.Array3D<T>::data_[k];
-    }
+    allocate(mesh_.nCellsI(), mesh_.nCellsJ(), mesh_.nCellsK());
 }
 
 // ************* Public Methods *************
 
 template<class T>
-void Field<T>::allocate(int nI, int nJ, int nK)
+Field<T>& Field<T>::operator =(const Field<T>& other)
 {
-    Array3D<T>::allocate(nI, nJ, nK);
+    int i;
 
-    if (type == CONSERVED || type == PRIMITIVE)
+    //- Check to make sure this assignment is legal. Fields cannont be equated to other fields that reference a different mesh
+    if(&mesh_ != &other.mesh_)
+        Output::raiseException("Field", "operator=", "cannot assign a field to another field if the mesh references are different.");
+
+    for(i = 0; i < Array3D<T>::n_; ++i)
+        Array3D<T>::data_[i] = other.data_[i];
+
+    if(type_ == CONSERVED && other.type_ == CONSERVED)
     {
-        facesI_.allocate(nI + 1, nJ, nK);
-        facesJ_.allocate(nI, nJ + 1, nK);
-        facesK_.allocate(nI, nJ, nK + 1);
+        for(i = 0; i < facesI_.size(); ++i)
+            facesI_(i) = other.facesI_(i);
+
+        for(i = 0; i < facesJ_.size(); ++i)
+            facesJ_(i) = other.facesJ_(i);
+
+        for(i = 0; i < facesK_.size(); ++i)
+            facesK_(i) = other.facesK_(i);
     }
 
-    if (type == CONSERVED)
-    {
-        faceFluxesI_.allocate(nI + 1, nJ, nK);
-        faceFluxesJ_.allocate(nI, nJ + 1, nK);
-        faceFluxesK_.allocate(nI, nJ, nK + 1);
-    }
+    return *this;
 }
 
 template<class T>
-Array3D<T> Field<T>::getStencil(int i, int j, int k)
+void Field<T>::allocate(int nCellsI, int nCellsJ, int nCellsK)
 {
-    Array3D<T> stencil(3, 3, 3);
-    int l, m, n;
+    Array3D<T>::allocate(nCellsI, nCellsJ, nCellsK);
 
-    for(n = -1; n < 2; ++n)
+    if (type_ == CONSERVED)
     {
-        for(m = -1; m < 2; ++m)
-        {
-            for(l = -1; l < 2; ++l)
-            {
-                stencil(l, m, n) = operator ()(i + l, j + m, k + n);
-            }
-        }
-    }
-}
-
-template<class T>
-void Field<T>::getStencil(int i, int j, int k, Array3D<T> &stencil)
-{
-    int l, m, n;
-
-    for(n = -1; n < 2; ++n)
-    {
-        for(m = -1; m < 2; ++m)
-        {
-            for(l = -1; l < 2; ++l)
-            {
-                stencil(l, m, n) = operator ()(i + l, j + m, k + n);
-            }
-        }
+        facesI_.allocate(nCellsI + 1, nCellsJ, nCellsK);
+        facesJ_.allocate(nCellsI, nCellsJ + 1, nCellsK);
+        facesK_.allocate(nCellsI, nCellsJ, nCellsK + 1);
     }
 }
 
@@ -125,7 +99,48 @@ T& Field<T>::operator()(int i, int j, int k)
     }
 
     // Access to the boundaries
+    if(i < 0)
+    {
+        return facesI_(0, j, k);
+    }
+    else if (i >= Array3D<T>::nI_)
+    {
+        return facesI_(Array3D<T>::nI_, j, k);
+    }
 
+    if(j < 0)
+    {
+        return facesJ_(i, 0, k);
+    }
+    else if (j >= Array3D<T>::nJ_)
+    {
+        return facesJ_(i, Array3D<T>::nJ_, k);
+    }
+
+    if(k < 0)
+    {
+        return facesK_(i, j, 0);
+    }
+    else if (k >= Array3D<T>::nK_)
+    {
+        return facesK_(i, j, Array3D<T>::nK_);
+    }
+
+    // Just to get rid of the compiler warning
+
+    return Array3D<T>::data_[0];
+}
+
+template<class T>
+const T& Field<T>::operator()(int i, int j, int k) const
+{
+    if(i >= 0 && j >= 0 && k >= 0 &&
+            i < Array3D<T>::nI_ && j < Array3D<T>::nJ_ && k < Array3D<T>::nK_)
+    {
+        return Array3D<T>::operator ()(i, j, k);
+    }
+
+    // Access to the boundaries
     if(i < 0)
     {
         return facesI_(0, j, k);
@@ -183,6 +198,30 @@ T& Field<T>::operator ()(int i, int j, int k, int faceNo)
 }
 
 template<class T>
+const T& Field<T>::operator ()(int i, int j, int k, int faceNo) const
+{
+    switch(faceNo)
+    {
+    case 0:
+        return operator ()(i + 1, j, k);
+    case 1:
+        return operator ()(i - 1, j, k);
+    case 2:
+        return operator ()(i, j + 1, k);
+    case 3:
+        return operator ()(i, j - 1, k);
+    case 4:
+        return operator ()(i, j, k + 1);
+    case 5:
+        return operator ()(i, j, k - 1);
+    default:
+        Output::raiseException("Field", "operator()", "invalid face number specified.");
+    };
+
+    return operator ()(i, j, k);
+}
+
+template<class T>
 T& Field<T>::operator ()(int k)
 {
     if(k < 0 || k >= Array3D<T>::n_)
@@ -192,11 +231,12 @@ T& Field<T>::operator ()(int k)
 }
 
 template<class T>
-T Field<T>::sumFluxes(int i, int j, int k)
+const T& Field<T>::operator ()(int k) const
 {
-    return faceFluxesI_(i + 1, j, k) - faceFluxesI_(i, j, k)
-            + faceFluxesJ_(i, j + 1, k) - faceFluxesJ_(i, j, k)
-            + faceFluxesK_(i, j, k + 1) - faceFluxesK_(i, j, k);
+    if(k < 0 || k >= Array3D<T>::n_)
+        Output::raiseException("Field", "operator()", "Attempted to access an element outside the bounds of the field.");
+
+    return Array3D<T>::data_[k];
 }
 
 template<class T>
@@ -256,29 +296,18 @@ T& Field<T>::face(int i, int j, int k, int faceNo)
 }
 
 template<class T>
-void Field<T>::setAllBoundaries(BoundaryPatch eastBoundaryType, T eastBoundaryValue,
-                                BoundaryPatch westBoundaryType, T westBoundaryValue,
-                                BoundaryPatch northBoundaryType, T northBoundaryValue,
-                                BoundaryPatch southBoundaryType, T southBoundaryValue,
-                                BoundaryPatch topBoundaryType, T topBoundaryValue,
-                                BoundaryPatch bottomBoundaryType, T bottomBoundaryValue)
-{
-    setEastBoundary(eastBoundaryType, eastBoundaryValue);
-    setWestBoundary(westBoundaryType, westBoundaryValue);
-    setNorthBoundary(northBoundaryType, northBoundaryValue);
-    setSouthBoundary(southBoundaryType, southBoundaryValue);
-    setTopBoundary(topBoundaryType, topBoundaryValue);
-    setBottomBoundary(bottomBoundaryType, bottomBoundaryValue);
-
-    Output::print("Field", "boundaries for field \"" + name + "\" have been set.");
-}
-
-template<class T>
-void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setEastBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int j, k;
 
-    eastBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        eastBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        eastBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        eastBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setEastBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -290,11 +319,18 @@ void Field<T>::setEastBoundary(BoundaryPatch boundaryType, T boundaryValue)
 }
 
 template<class T>
-void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setWestBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int j, k;
 
-    westBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        westBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        westBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        westBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setWestBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -306,11 +342,18 @@ void Field<T>::setWestBoundary(BoundaryPatch boundaryType, T boundaryValue)
 }
 
 template<class T>
-void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setNorthBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int i, k;
 
-    northBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        northBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        northBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        northBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setNorthBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -322,11 +365,18 @@ void Field<T>::setNorthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 }
 
 template<class T>
-void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setSouthBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int i, k;
 
-    southBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        southBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        southBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        southBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setSouthBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(k = 0; k < Array3D<T>::nK_; ++k)
     {
@@ -338,11 +388,18 @@ void Field<T>::setSouthBoundary(BoundaryPatch boundaryType, T boundaryValue)
 }
 
 template<class T>
-void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setTopBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int i, j;
 
-    topBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        topBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        topBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        topBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setTopBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
@@ -354,11 +411,18 @@ void Field<T>::setTopBoundary(BoundaryPatch boundaryType, T boundaryValue)
 }
 
 template<class T>
-void Field<T>::setBottomBoundary(BoundaryPatch boundaryType, T boundaryValue)
+void Field<T>::setBottomBoundary(const std::string &boundaryType, T boundaryValue)
 {
     int i, j;
 
-    bottomBoundaryPatch_ = boundaryType;
+    if(boundaryType == "fixed")
+        bottomBoundaryPatch_ = FIXED;
+    else if(boundaryType == "zeroGradient")
+        bottomBoundaryPatch_ = ZERO_GRADIENT;
+    else if(boundaryType == "empty")
+        bottomBoundaryPatch_ = EMPTY;
+    else
+        Output::raiseException("Field", "setBottomBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
     for(j = 0; j < Array3D<T>::nJ_; ++j)
     {
@@ -552,6 +616,106 @@ void Field<T>::setBottomBoundaryField()
 
         break;
     };
+}
+
+template<class T>
+void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
+{
+    if(i == mesh_.uCellI())
+    {
+        switch(eastBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[1]*operator ()(i + 1, j, k);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[1];
+            break;
+        case EMPTY:
+            a[1] = 0.;
+            break;
+        }
+    }
+
+    if(i == 0)
+    {
+        switch(westBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[2]*operator ()(i - 1, j, k);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[2];
+            break;
+        case EMPTY:
+            a[2] = 0.;
+            break;
+        }
+    }
+
+    if(j == mesh_.uCellJ())
+    {
+        switch(northBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[3]*operator ()(i, j + 1, k);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[3];
+            break;
+        case EMPTY:
+            a[3] = 0.;
+            break;
+        }
+    }
+
+    if(j == 0)
+    {
+        switch(southBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[4]*operator ()(i, j - 1, k);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[4];
+            break;
+        case EMPTY:
+            a[4] = 0.;
+            break;
+        }
+    }
+
+    if(k == mesh_.uCellK())
+    {
+        switch(topBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[5]*operator ()(i, j, k + 1);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[5];
+            break;
+        case EMPTY:
+            a[5] = 0.;
+            break;
+        }
+    }
+
+    if(k == 0)
+    {
+        switch(bottomBoundaryPatch_)
+        {
+        case FIXED:
+            b += -a[6]*operator ()(i, j, k - 1);
+            break;
+        case ZERO_GRADIENT:
+            a[0] += a[6];
+            break;
+        case EMPTY:
+            a[6] = 0.;
+            break;
+        }
+    }
 }
 
 template<class T>

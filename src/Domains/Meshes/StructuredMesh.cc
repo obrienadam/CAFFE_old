@@ -29,11 +29,8 @@ StructuredMesh::~StructuredMesh()
 void StructuredMesh::initialize(Input &input)
 {
     Output::print("StructuredMesh", "Initializing structured mesh...");
-
     initialize("mesh/structuredMesh.dat");
-
     Output::print("StructuredMesh", "Initialization of structured mesh complete.");
-    Output::print(meshStats());
 }
 
 void StructuredMesh::initialize(Array3D<Point3D> &nodes)
@@ -55,10 +52,10 @@ std::string StructuredMesh::meshStats()
 
     stats << "Mesh statistics:" << "\n"
           << "----------------" << "\n"
-          << "Nodes in I direction-> " << nodes_.sizeI() << "\n"
-          << "Nodes in J direction-> " << nodes_.sizeJ() << "\n"
-          << "Nodes in K direction-> " << nodes_.sizeK() << "\n"
-          << "Nodes total-> " << nodes_.size() << "\n";
+          << "Nodes in I direction -> " << nodes_.sizeI() << "\n"
+          << "Nodes in J direction -> " << nodes_.sizeJ() << "\n"
+          << "Nodes in K direction -> " << nodes_.sizeK() << "\n"
+          << "Nodes total -> " << nodes_.size() << "\n";
 
     return stats.str();
 }

@@ -1,7 +1,7 @@
 ## hexaMesh input file
 
-MeshName = Cavity3DWithIbSphere
-MetricConversion = 1
+MeshName = FlatPlate2D
+MetricConversion = 0.1
 
 Vertices
 {
@@ -17,5 +17,5 @@ Vertices
 
 Resolution
 {
-	(51 51 51)
+	(201 201 2)
 }

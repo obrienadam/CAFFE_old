@@ -1,6 +1,6 @@
 ############################################################
 #
-# Example Case: Cavity 3D With Ib Sphere
+# Example Case: Cavity 3D With IB Sphere
 #
 ############################################################
 
@@ -11,36 +11,36 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
-200
-screenWriteInterval
-1
+maxNumberOfIterations
+1000
 fileWriteInterval
 1
 
 ### Time ###################################################
 
 timeStep
-1e-2
+2.5e-2
 maxSimTime
 48
 maxRealTimeHours
 48
 
-### Scheme #################################################
+### Solver #################################################
 
 timeAccurate
 OFF
 relaxationFactorMomentum
-0.5
+0.7
 relaxationFactorPCorr
-0.5
+0.3
 rho
-1
+1.
 mu
 0.01
-maxInnerIters
+numberOfPressureCorrections
 1
+numberOfInnerIterations
+5
 
 ### Immersed Boundaries #####################################
 
@@ -53,30 +53,30 @@ ibSphereCenter
 
 boundaryTypeEast
 wall
-boundaryRefValueEast
+boundaryRefVectorEast
 (0,0,0)
 
 boundaryTypeWest
 wall
-boundaryRefValueWest
+boundaryRefVectorWest
 (0,0,0)
 
 boundaryTypeNorth
 wall
-boundaryRefValueNorth
+boundaryRefVectorNorth
 (1,0,1)
 
 boundaryTypeSouth
 wall
-boundaryRefValueSouth
-(0,0,0)
+boundaryRefVectorSouth
+(1,0,1)
 
 boundaryTypeTop
 wall
-boundaryRefValueTop
+boundaryRefVectorTop
 (0,0,0)
 
 boundaryTypeBottom
 wall
-boundaryRefValueBottom
+boundaryRefVectorBottom
 (0,0,0)

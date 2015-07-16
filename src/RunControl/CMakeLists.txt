@@ -6,14 +6,16 @@ set(HEADERS ArgsList.h
             InputStringProcessing.h
 	    Input.h
 	    Output.h
-            RunControl.h)
+            RunControl.h
+            Time.h)
 
 set(SOURCE ArgsList.cc
    	   Version.cc
            InputStringProcessing.cc
  	   Input.cc
            Output.cc
-           RunControl.cc)
+           RunControl.cc
+           Time.cc)
 
 add_library(RunControl ${HEADERS} ${SOURCE})
 target_link_libraries(RunControl ${Boost_LIBRARIES})

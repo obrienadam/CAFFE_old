@@ -27,7 +27,14 @@
 
 // ************* Constructors and Destructors *************
 
+HexaFvmMesh::HexaFvmMesh()
+{
+
+}
+
 HexaFvmMesh::HexaFvmMesh(const HexaFvmMesh &other)
+    :
+      HexaFvmMesh()
 {
 
 }
@@ -36,26 +43,11 @@ HexaFvmMesh::HexaFvmMesh(const HexaFvmMesh &other)
 
 void HexaFvmMesh::initializeCellsAndFaces()
 {
-    int i, nI, nJ, nK;
-
     // Initialize the finite volume mesh
     initializeCells();
     initializeCellToCellParameters();
     initializeFaces();
     initializeCellToFaceParameters();
-
-    // All fields must now be reallocated
-    nI = cellCenters_.sizeI();
-    nJ = cellCenters_.sizeJ();
-    nK = cellCenters_.sizeK();
-
-    for(i = 0; i < scalarFields.size(); ++i)
-        scalarFields[i].allocate(nI, nJ, nK);
-
-    for(i = 0; i < vectorFields.size(); ++i)
-        vectorFields[i].allocate(nI, nJ, nK);
-
-    Output::print("HexaFvmMesh", "Initialization complete.");
 }
 
 void HexaFvmMesh::initializeCells()
@@ -334,7 +326,9 @@ void HexaFvmMesh::initialize(Input &input)
 {
     // Initialize the mesh nodes
     StructuredMesh::initialize(input);
+    Output::print("HexaFvmMesh", "initializing hexahedral finite-volume mesh...");
     initializeCellsAndFaces();
+    Output::print("HexaFvmMesh", "initialization of hexahedral finite-volume mesh complete.");
 }
 
 void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
@@ -344,58 +338,26 @@ void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
     initializeCellsAndFaces();
 }
 
-void HexaFvmMesh::addScalarField(std::string scalarFieldName, int type)
+std::string HexaFvmMesh::meshStats()
 {
-    Field<double> newScalarField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), scalarFieldName, type);
-    scalarFields.push_back(newScalarField);
+    std::string structuredMeshStats = StructuredMesh::meshStats();
+    std::ostringstream stats;
+
+    stats << structuredMeshStats
+          << "Cells in I direction -> " << cellCenters_.sizeI() << "\n"
+          << "Cells in J direction -> " << cellCenters_.sizeJ() << "\n"
+          << "Cells in K direction -> " << cellCenters_.sizeK() << "\n"
+          << "Cells total -> " << cellCenters_.size() << "\n";
+
+    return stats.str();
 }
 
-void HexaFvmMesh::addVectorField(std::string vectorFieldName, int type)
-{
-    Field<Vector3D> newVectorField(cellCenters_.sizeI(), cellCenters_.sizeJ(), cellCenters_.sizeK(), vectorFieldName, type);
-    vectorFields.push_back(newVectorField);
-}
-
-Field<double>& HexaFvmMesh::findScalarField(const std::string& fieldName)
-{
-    int i, end(scalarFields.size());
-
-    for(i = 0; i < end; ++i)
-    {
-        if(fieldName == scalarFields[i].name)
-            return scalarFields[i];
-    }
-
-    Output::raiseException("HexaFvmMesh", "findScalarField", "cannot find field \"" + fieldName + "\".");
-
-    // return just to suppress compiler warning
-
-    return scalarFields[end];
-}
-
-Field<Vector3D> &HexaFvmMesh::findVectorField(const std::string& fieldName)
-{
-    int i, end(vectorFields.size());
-
-    for(i = 0; i < end; ++i)
-    {
-        if(fieldName == vectorFields[i].name)
-            return vectorFields[i];
-    }
-
-    Output::raiseException("HexaFvmMesh", "findVectorField", "cannot find field \"" + fieldName + "\".");
-
-    // return just to suppress compiler warning
-
-    return vectorFields[end];
-}
-
-Point3D HexaFvmMesh::cellXc(int i, int j, int k)
+Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
 {
     return cellCenters_(i, j, k);
 }
 
-Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
+Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo) const
 {
     switch(nodeNo)
     {
@@ -422,7 +384,7 @@ Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo)
     return Point3D();
 }
 
-Vector3D HexaFvmMesh::rCellE(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellE(int i, int j, int k) const
 {
     if(i == cellToCellRelativeVectorsI_.sizeI())
         return cellToFaceRelativeVectorsE_(i, j, k);
@@ -430,7 +392,7 @@ Vector3D HexaFvmMesh::rCellE(int i, int j, int k)
     return cellToCellRelativeVectorsI_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::rCellW(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellW(int i, int j, int k) const
 {
     if(i == 0)
         return cellToFaceRelativeVectorsW_(i, j, k);
@@ -438,7 +400,7 @@ Vector3D HexaFvmMesh::rCellW(int i, int j, int k)
     return -cellToCellRelativeVectorsI_(i - 1, j, k);
 }
 
-Vector3D HexaFvmMesh::rCellN(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellN(int i, int j, int k) const
 {
     if(j == cellToCellRelativeVectorsJ_.sizeJ())
         return cellToFaceRelativeVectorsN_(i, j, k);
@@ -446,7 +408,7 @@ Vector3D HexaFvmMesh::rCellN(int i, int j, int k)
     return cellToCellRelativeVectorsJ_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::rCellS(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellS(int i, int j, int k) const
 {
     if(j == 0)
         return cellToFaceRelativeVectorsS_(i, j, k);
@@ -454,7 +416,7 @@ Vector3D HexaFvmMesh::rCellS(int i, int j, int k)
     return -cellToCellRelativeVectorsJ_(i, j - 1, k);
 }
 
-Vector3D HexaFvmMesh::rCellT(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellT(int i, int j, int k) const
 {
     if(k == cellToCellRelativeVectorsK_.sizeK())
         return cellToFaceRelativeVectorsT_(i, j, k);
@@ -462,7 +424,7 @@ Vector3D HexaFvmMesh::rCellT(int i, int j, int k)
     return cellToCellRelativeVectorsK_(i, j, k);
 }
 
-Vector3D HexaFvmMesh::rCellB(int i, int j, int k)
+Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
 {
     if(k == 0)
         return cellToFaceRelativeVectorsB_(i, j, k);
@@ -566,7 +528,7 @@ double HexaFvmMesh::rCellMagB(int i, int j, int k)
     return cellToCellDistancesK_(i, j, k - 1);
 }
 
-void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk)
+void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk) const
 {
     int i, j, k;
     int nI = cellCenters_.sizeI(), nJ = cellCenters_.sizeJ(), nK = cellCenters_.sizeK();
@@ -601,7 +563,7 @@ void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk)
     Output::raiseException("HexaFvmMesh", "locateCell", "the specified point \"" + std::to_string(point) + "\" is not inside the domain.");
 }
 
-void HexaFvmMesh::locateEnclosingCells(const Point3D &point, int ii[], int jj[], int kk[])
+void HexaFvmMesh::locateEnclosingCells(const Point3D &point, int ii[], int jj[], int kk[]) const
 {
     int i, j, k, i0, j0, k0;
     Point3D tmpPoints[8];
@@ -688,6 +650,20 @@ void HexaFvmMesh::writeDebug()
     Output::print("HexaFvmMesh", "finished writing debugging file.");
 }
 
+void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const
+{
+    using namespace std;
+
+    scalarVariablePtrs_.push_back(pair<string, const Array3D<double>*>(name, array3DPtr));
+}
+
+void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const
+{
+    using namespace std;
+
+    vectorVariablePtrs_.push_back(pair<string, const Array3D<Vector3D>*>(name, array3DPtr));
+}
+
 void HexaFvmMesh::writeTec360(double time, std::string directoryName)
 {
     using namespace std;
@@ -704,12 +680,12 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
         foutTec360_ << "TITLE = \"" << name << "\"" << endl
                     << "VARIABLES = \"x\", \"y\", \"z\", ";
 
-        for(varNo = 0; varNo < scalarFields.size(); ++varNo)
+        for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
         {
-            foutTec360_ << "\"" << scalarFields[varNo].name << "\", ";
+            foutTec360_ << "\"" << scalarVariablePtrs_[varNo].first << "\", ";
         }
 
-        for(varNo = 0; varNo < vectorFields.size(); ++varNo)
+        for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
         {
             for(componentNo = 0; componentNo < 3; ++componentNo)
             {
@@ -726,7 +702,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
                     break;
                 }
 
-                foutTec360_ << "\"" << vectorFields[varNo].name + "_" + component << "\", ";
+                foutTec360_ << "\"" << vectorVariablePtrs_[varNo].first + "_" + component << "\", ";
             }
         }
 
@@ -735,7 +711,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
                     << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
                     << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
                     << "DATAPACKING = BLOCK" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
+                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
 
         // Output the mesh data
         for(componentNo = 0; componentNo < 3; ++componentNo)
@@ -761,12 +737,11 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
                     << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
                     << "DATAPACKING = BLOCK" << endl
                     << "VARSHARELIST = ([1-3] = 1)" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarFields.size() + 3*vectorFields.size() << "] = CELLCENTERED)" << endl;
+                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
     }
 
     // Output the solution data for scalars
-
-    for(varNo = 0; varNo < scalarFields.size(); ++varNo)
+    for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
     {
         for(k = 0; k < cellCenters_.sizeK(); ++k)
         {
@@ -774,7 +749,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
             {
                 for(i = 0; i < cellCenters_.sizeI(); ++i)
                 {
-                    foutTec360_ << scalarFields[varNo](i, j, k) << " ";
+                    foutTec360_ << scalarVariablePtrs_[varNo].second->operator()(i, j, k) << " ";
                 }
 
                 foutTec360_ << endl;
@@ -784,7 +759,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
 
     // Output the solution data for vectors
 
-    for(varNo = 0; varNo < vectorFields.size(); ++varNo)
+    for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
     {
         for(componentNo = 0; componentNo < 3; ++componentNo)
         {
@@ -794,7 +769,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
                 {
                     for(i = 0; i < cellCenters_.sizeI(); ++i)
                     {
-                        foutTec360_ << vectorFields[varNo](i, j, k)(componentNo) << " ";
+                        foutTec360_ << vectorVariablePtrs_[varNo].second->operator()(i, j, k)(componentNo) << " ";
                     }
 
                     foutTec360_ << endl;

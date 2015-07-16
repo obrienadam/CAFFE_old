@@ -1,13 +1,17 @@
 # CMakeLists.txt for CAFFE/src/Solvers
 # Author: Adam O'Brien
 
-set(HEADERS SolverIncludes.h
-            Solver.h
-            Euler.h
-            PredictorCorrector.h)
+set(HEADERS Solver.h
+            Diffusion.h
+            Simple.h
+            Piso.h
+            IbPiso.h)
 
 set(SOURCE Solver.cc
-           Euler.cc
-           PredictorCorrector.cc)
+           Diffusion.cc
+           Simple.cc
+           Piso.cc
+           IbPiso.cc)
 
 add_library(Solvers ${HEADERS} ${SOURCE})
+target_link_libraries(Solvers ${Boost_LIBRARIES})

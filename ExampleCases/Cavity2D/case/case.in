@@ -11,10 +11,8 @@ iterations
 
 ### Iterations #############################################
 
-maxItrs
-6000
-screenWriteInterval
-1
+maxNumberOfIterations
+1000
 fileWriteInterval
 10
 
@@ -34,44 +32,44 @@ OFF
 relaxationFactorMomentum
 0.7
 relaxationFactorPCorr
-0.5
-maxInnerIters
-1
+0.3
 rho
 1
 mu
 0.01
-numberOfPCorrections
+numberOfInnerIterations
+1
+numberOfPressureCorrections
 2
 
 ### Boundaries ##############################################
 
 boundaryTypeEast
 wall
-boundaryRefValueEast
+boundaryRefVectorEast
 (0,0,0)
 
 boundaryTypeWest
 wall
-boundaryRefValueWest
+boundaryRefVectorWest
 (0,0,0)
 
 boundaryTypeNorth
 wall
-boundaryRefValueNorth
+boundaryRefVectorNorth
 (10,0,0)
 
 boundaryTypeSouth
 wall
-boundaryRefValueSouth
+boundaryRefVectorSouth
 (0,0,0)
 
 boundaryTypeTop
 empty
-boundaryRefValueTop
+boundaryRefVectorTop
 (0,0,0)
 
 boundaryTypeBottom
 empty
-boundaryRefValueBottom
+boundaryRefVectorBottom
 (0,0,0)

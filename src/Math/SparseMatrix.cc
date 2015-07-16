@@ -23,11 +23,11 @@
 
 #include "SparseMatrix.h"
 
-SparseMatrix::SparseMatrix()
+SparseMatrix::SparseMatrix(double rToler, double absToler, int maxIters)
     :
-      maxIters_(50000),
-      rToler_(1e-5),
-      absToler_(1e-8)
+      rToler_(rToler),
+      absToler_(absToler),
+      maxIters_(maxIters)
 {
     PetscInitializeNoArguments();
 }
@@ -89,7 +89,6 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
 
     MatAssemblyBegin(A_, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(A_, MAT_FINAL_ASSEMBLY);
-
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
     PCSetType(pc_, PCILU);

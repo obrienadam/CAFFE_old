@@ -10,12 +10,6 @@
 
 class Parallel
 {
-
-private:
-
-    static int commBufferSize_;
-    static std::vector<double> commBuffer_;
-
 public:
 
     static void initialize();
@@ -35,8 +29,6 @@ public:
     static double min(double number);
     static double max(double number);
 
-    static void broadcastInput(int source, Input& input);
-
     //- Note: All of these methods assume that the data structures have been properly sized!
     static void send(int source, int dest, std::vector<double>& vector);
     static void send(int source, int dest, Array3D<double>& doubleArray3D);
@@ -44,6 +36,11 @@ public:
     static void send(int source, int dest, Matrix& matrix);
 
     static void barrier();
+
+private:
+
+    static int commBufferSize_;
+    static std::vector<double> commBuffer_;
 };
 
 #endif

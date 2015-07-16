@@ -21,6 +21,7 @@ class Vector3D
   double x, y, z;
 
   double& operator()(int i);
+  const double& operator()(int i) const;
 
   double mag();
   Vector3D unitVector();
