@@ -52,18 +52,18 @@ const double& Vector3D::operator ()(int i) const
     throw "Attempted to access an element outside the range of Vector3D.";
 }
 
-double Vector3D::mag()
+double Vector3D::mag() const
 {
   return sqrt(x*x + y*y + z*z);
 }
 
-Vector3D Vector3D::unitVector()
+Vector3D Vector3D::unitVector() const
 {
   double invMag(1./mag());
   return Vector3D(invMag*x, invMag*y, invMag*z);
 }
 
-void Vector3D::print()
+void Vector3D::print() const
 {
     std::cout << "(" << x << ", " << y << ", " << z << ")\n";
 }

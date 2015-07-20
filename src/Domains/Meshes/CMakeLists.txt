@@ -20,8 +20,8 @@ set(SOURCE HexaMeshGen.cc
            MultiBlockHexaFvmMesh.cc
            FieldI.h
            BoundaryConditionI.h
-           FixedBoundaryConditionI.h
-           ZeroGradientBoundaryConditionI.h
+           FixedBoundaryCondition.cc
+           ZeroGradientBoundaryCondition.cc
            InitialConditions.cc
            InitialConditionsI.h
            IndexMap.cc)

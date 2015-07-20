@@ -1,6 +1,8 @@
 #ifndef BOUNDARY_CONDITION_H
 #define BOUNDARY_CONDITION_H
 
+#include <string>
+
 #include "Input.h"
 #include "Field.h"
 
@@ -9,16 +11,14 @@ class BoundaryCondition
 {
 public:
 
-    enum Location{EAST, WEST, NORTH, SOUTH, TOP, BOTTOM};
-
     BoundaryCondition();
-    BoundaryCondition(const Input &input, Location patchLocation, Field<T> &internalField);
+    BoundaryCondition(const Input &input, const std::string &patchLocation, Field<T> &internalField);
 
     virtual void setBoundaryPatch() = 0;
 
 protected:
 
-    Location patchLocation_;
+    std::string patchLocation_;
     Field<T> &internalField_;
 };
 

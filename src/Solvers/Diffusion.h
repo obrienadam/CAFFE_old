@@ -27,6 +27,7 @@
 
 #include "Solver.h"
 #include "Field.h"
+#include "BoundaryCondition.h"
 
 class Diffusion : public Solver
 {

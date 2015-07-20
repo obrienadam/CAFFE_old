@@ -18,16 +18,14 @@ class Vector3D
   Vector3D(double x = 0., double y = 0., double z = 0.);
   Vector3D(const Vector3D& other);
 
-  double x, y, z;
-
   double& operator()(int i);
   const double& operator()(int i) const;
 
-  double mag();
-  Vector3D unitVector();
+  double mag() const;
+  Vector3D unitVector() const;
 
   //- Print to screen
-  void print();
+  void print() const;
 
   //- Member operators
   Vector3D& operator+=(const Vector3D& rhs);
@@ -35,6 +33,7 @@ class Vector3D
   Vector3D& operator*=(double rhs);
   Vector3D& operator/=(double rhs);
 
+  double x, y, z;
 };
 
 //- Vector3D related operators

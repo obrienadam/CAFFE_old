@@ -39,7 +39,7 @@ class HexaFvmMesh : public StructuredMesh
 
 public:
 
-    enum {EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+    enum RelativeLocation{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
     enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
 
     HexaFvmMesh();
@@ -48,11 +48,13 @@ public:
     void initialize(Input &input);
     void initialize(Array3D<Point3D>& nodes);
 
+    void addBoundaryMesh(const HexaFvmMesh &mesh, RelativeLocation relativeLocation);
+
     virtual std::string meshStats();
 
     // Retrieve cell parameters
     Point3D cellXc(int i, int j, int k) const;
-    double cellVol(int i, int j, int k) const { return cellVolumes_(i, j, k); }
+    double cellVol(int i, int j, int k) const;
 
     Point3D node(int i, int j, int k, int nodeNo) const;
 
@@ -98,20 +100,21 @@ public:
     Vector3D rCellT(int i, int j, int k) const;
     Vector3D rCellB(int i, int j, int k) const;
 
-    Vector3D rnCellE(int i, int j, int k);
-    Vector3D rnCellW(int i, int j, int k);
-    Vector3D rnCellN(int i, int j, int k);
-    Vector3D rnCellS(int i, int j, int k);
-    Vector3D rnCellT(int i, int j, int k);
-    Vector3D rnCellB(int i, int j, int k);
+    Vector3D rnCellE(int i, int j, int k) const;
+    Vector3D rnCellW(int i, int j, int k) const;
+    Vector3D rnCellN(int i, int j, int k) const;
+    Vector3D rnCellS(int i, int j, int k) const;
+    Vector3D rnCellT(int i, int j, int k) const;
+    Vector3D rnCellB(int i, int j, int k) const;
 
-    double rCellMagE(int i, int j, int k);
-    double rCellMagW(int i, int j, int k);
-    double rCellMagN(int i, int j, int k);
-    double rCellMagS(int i, int j, int k);
-    double rCellMagT(int i, int j, int k);
-    double rCellMagB(int i, int j, int k);
+    double rCellMagE(int i, int j, int k) const;
+    double rCellMagW(int i, int j, int k) const;
+    double rCellMagN(int i, int j, int k) const;
+    double rCellMagS(int i, int j, int k) const;
+    double rCellMagT(int i, int j, int k) const;
+    double rCellMagB(int i, int j, int k) const;
 
+    // Retrieve cell to face parameters
     Vector3D rFaceE(int i, int j, int k) const { return cellToFaceRelativeVectorsE_(i, j, k); }
     Vector3D rFaceW(int i, int j, int k) const { return cellToFaceRelativeVectorsW_(i, j, k); }
     Vector3D rFaceN(int i, int j, int k) const { return cellToFaceRelativeVectorsN_(i, j, k); }
@@ -165,7 +168,7 @@ public:
     /**
      * @brief Output all mesh data to a file for debugging purposes.
      */
-    void writeDebug();
+    void writeDebug() const;
 
     void addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const;
     void addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const;
@@ -230,6 +233,13 @@ private:
     Array3D<double> cellToFaceDistancesS_;
     Array3D<double> cellToFaceDistancesT_;
     Array3D<double> cellToFaceDistancesB_;
+
+    const HexaFvmMesh *eastBoundaryMeshPtr_;
+    const HexaFvmMesh *westBoundaryMeshPtr_;
+    const HexaFvmMesh *northBoundaryMeshPtr_;
+    const HexaFvmMesh *southBoundaryMeshPtr_;
+    const HexaFvmMesh *topBoundaryMeshPtr_;
+    const HexaFvmMesh *bottomBoundaryMeshPtr_;
 
     mutable std::vector< std::pair< std::string, const Array3D<double> *> > scalarVariablePtrs_;
     mutable std::vector< std::pair< std::string, const Array3D<Vector3D> *> > vectorVariablePtrs_;

@@ -6,7 +6,6 @@
 #include "Output.h"
 #include "InputStringProcessing.h"
 
-// ************* Private Methods *************
 
 // ************* Public Methods *************
 
@@ -133,6 +132,8 @@ void StructuredMesh::writeTec360(double time)
 
     foutTec360_.close();
 }
+
+// ************* Protected Methods *************
 
 void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name, int &nI, int &nJ, int &nK)
 {

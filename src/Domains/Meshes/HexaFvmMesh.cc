@@ -28,6 +28,13 @@
 // ************* Constructors and Destructors *************
 
 HexaFvmMesh::HexaFvmMesh()
+    :
+      eastBoundaryMeshPtr_(NULL),
+      westBoundaryMeshPtr_(NULL),
+      northBoundaryMeshPtr_(NULL),
+      southBoundaryMeshPtr_(NULL),
+      topBoundaryMeshPtr_(NULL),
+      bottomBoundaryMeshPtr_(NULL)
 {
 
 }
@@ -37,6 +44,557 @@ HexaFvmMesh::HexaFvmMesh(const HexaFvmMesh &other)
       HexaFvmMesh()
 {
 
+}
+
+// ************* Public Methods *************
+
+void HexaFvmMesh::initialize(Input &input)
+{
+    // Initialize the mesh nodes
+    StructuredMesh::initialize(input);
+    Output::print("HexaFvmMesh", "initializing hexahedral finite-volume mesh...");
+    initializeCellsAndFaces();
+    Output::print("HexaFvmMesh", "initialization of hexahedral finite-volume mesh complete.");
+}
+
+void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
+{
+    // Initialize the mesh nodes
+    StructuredMesh::initialize(nodes);
+    initializeCellsAndFaces();
+}
+
+void HexaFvmMesh::addBoundaryMesh(const HexaFvmMesh &mesh, RelativeLocation relativeLocation)
+{
+    switch(relativeLocation)
+    {
+    case EAST:
+        eastBoundaryMeshPtr_ = &mesh;
+        break;
+    case WEST:
+        westBoundaryMeshPtr_ = &mesh;
+        break;
+    case NORTH:
+        northBoundaryMeshPtr_ = &mesh;
+        break;
+    case SOUTH:
+        southBoundaryMeshPtr_ = &mesh;
+        break;
+    case TOP:
+        topBoundaryMeshPtr_ = &mesh;
+        break;
+    case BOTTOM:
+        bottomBoundaryMeshPtr_ = &mesh;
+        break;
+    };
+}
+
+std::string HexaFvmMesh::meshStats()
+{
+    std::string structuredMeshStats = StructuredMesh::meshStats();
+    std::ostringstream stats;
+
+    stats << structuredMeshStats
+          << "Cells in I direction -> " << cellCenters_.sizeI() << "\n"
+          << "Cells in J direction -> " << cellCenters_.sizeJ() << "\n"
+          << "Cells in K direction -> " << cellCenters_.sizeK() << "\n"
+          << "Cells total -> " << cellCenters_.size() << "\n";
+
+    return stats.str();
+}
+
+Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
+{
+    if(i < 0 && westBoundaryMeshPtr_ != NULL)
+        return westBoundaryMeshPtr_->cellXc(westBoundaryMeshPtr_->uCellI(), j, k);
+    else if(i > uCellI() && eastBoundaryMeshPtr_ != NULL)
+        return eastBoundaryMeshPtr_->cellXc(0, j, k);
+
+    if(j < 0 && southBoundaryMeshPtr_ != NULL)
+        return southBoundaryMeshPtr_->cellXc(i, southBoundaryMeshPtr_->uCellJ(), k);
+    else if(j > uCellJ() && northBoundaryMeshPtr_ != NULL)
+        return northBoundaryMeshPtr_->cellXc(i, 0, k);
+
+    if(k < 0 && bottomBoundaryMeshPtr_ != NULL)
+        return bottomBoundaryMeshPtr_->cellXc(i, j, bottomBoundaryMeshPtr_->uCellK());
+    else if(k > uCellK() && topBoundaryMeshPtr_ != NULL)
+        return topBoundaryMeshPtr_->cellXc(i, j, 0);
+
+    return cellCenters_(i, j, k);
+}
+
+double HexaFvmMesh::cellVol(int i, int j, int k) const
+{
+    if(i < 0 && westBoundaryMeshPtr_ != NULL)
+        return westBoundaryMeshPtr_->cellVol(westBoundaryMeshPtr_->uCellI(), j, k);
+    else if(i > uCellI() && eastBoundaryMeshPtr_ != NULL)
+        return eastBoundaryMeshPtr_->cellVol(0, j, k);
+
+    if(j < 0 && southBoundaryMeshPtr_ != NULL)
+        return southBoundaryMeshPtr_->cellVol(i, southBoundaryMeshPtr_->uCellJ(), k);
+    else if(j > uCellJ() && northBoundaryMeshPtr_ != NULL)
+        return northBoundaryMeshPtr_->cellVol(i, 0, k);
+
+    if(k < 0 && bottomBoundaryMeshPtr_ != NULL)
+        return bottomBoundaryMeshPtr_->cellVol(i, j, bottomBoundaryMeshPtr_->uCellK());
+    else if(k > uCellK() && topBoundaryMeshPtr_ != NULL)
+        return topBoundaryMeshPtr_->cellVol(i, j, 0);
+
+    return cellVolumes_(i, j, k);
+}
+
+Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo) const
+{
+    switch(nodeNo)
+    {
+    case BSW:
+        return nodes_(i, j, k);
+    case BSE:
+        return nodes_(i + 1, j, k);
+    case BNE:
+        return nodes_(i + 1, j + 1, k);
+    case BNW:
+        return nodes_(i, j + 1, k);
+    case TSW:
+        return nodes_(i, j, k + 1);
+    case TSE:
+        return nodes_(i + 1, j, k + 1);
+    case TNE:
+        return nodes_(i + 1, j + 1, k + 1);
+    case TNW:
+        return nodes_(i, j + 1, k + 1);
+    default:
+        Output::raiseException("HexaFvmMesh", "node", "invalid node specified.");
+    };
+
+    return Point3D();
+}
+
+Vector3D HexaFvmMesh::rCellE(int i, int j, int k) const
+{
+    if(i == uCellI())
+    {
+        if(eastBoundaryMeshPtr_ != NULL)
+            return eastBoundaryMeshPtr_->cellXc(0, j, k) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsE_(i, j, k);
+    }
+
+    return cellToCellRelativeVectorsI_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rCellW(int i, int j, int k) const
+{
+    if(i == 0)
+    {
+        if(westBoundaryMeshPtr_ != NULL)
+            return westBoundaryMeshPtr_->cellXc(westBoundaryMeshPtr_->uCellI(), j, k) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsW_(i, j, k);
+    }
+
+    return -cellToCellRelativeVectorsI_(i - 1, j, k);
+}
+
+Vector3D HexaFvmMesh::rCellN(int i, int j, int k) const
+{
+    if(j == uCellJ())
+    {
+        if(northBoundaryMeshPtr_ != NULL)
+            return northBoundaryMeshPtr_->cellXc(i, 0, k) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsN_(i, j, k);
+    }
+
+    return cellToCellRelativeVectorsJ_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rCellS(int i, int j, int k) const
+{
+    if(j == 0)
+    {
+        if(southBoundaryMeshPtr_ != NULL)
+            return southBoundaryMeshPtr_->cellXc(i, southBoundaryMeshPtr_->uCellJ(), k) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsS_(i, j, k);
+    }
+
+    return -cellToCellRelativeVectorsJ_(i, j - 1, k);
+}
+
+Vector3D HexaFvmMesh::rCellT(int i, int j, int k) const
+{
+    if(k == uCellK())
+    {
+        if(topBoundaryMeshPtr_ != NULL)
+            return topBoundaryMeshPtr_->cellXc(i, j, 0) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsT_(i, j, k);
+    }
+
+    return cellToCellRelativeVectorsK_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
+{
+    if(k == 0)
+    {
+        if(bottomBoundaryMeshPtr_ != NULL)
+            return bottomBoundaryMeshPtr_->cellXc(i, j, bottomBoundaryMeshPtr_->uCellK()) - cellXc(i, j, k);
+        else
+            return cellToFaceRelativeVectorsB_(i, j, k);
+    }
+
+    return -cellToCellRelativeVectorsK_(i, j, k - 1);
+}
+
+Vector3D HexaFvmMesh::rnCellE(int i, int j, int k) const
+{
+    if(i == cellToCellUnitVectorsI_.sizeI())
+        return cellToFaceUnitVectorsE_(i, j, k);
+
+    return cellToCellUnitVectorsI_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellW(int i, int j, int k) const
+{
+    if(i == 0)
+        return cellToFaceUnitVectorsW_(i, j, k);
+
+    return -cellToCellUnitVectorsI_(i - 1, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellN(int i, int j, int k) const
+{
+    if(j == cellToCellUnitVectorsJ_.sizeJ())
+        return cellToFaceUnitVectorsN_(i, j, k);
+
+    return cellToCellUnitVectorsJ_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellS(int i, int j, int k) const
+{
+    if(j == 0)
+        return cellToFaceUnitVectorsS_(i, j, k);
+
+    return -cellToCellUnitVectorsJ_(i, j - 1, k);
+}
+
+Vector3D HexaFvmMesh::rnCellT(int i, int j, int k) const
+{
+    if(k == cellToCellUnitVectorsK_.sizeK())
+        return cellToFaceUnitVectorsT_(i, j, k);
+
+    return cellToCellUnitVectorsK_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rnCellB(int i, int j, int k) const
+{
+    if(k == 0)
+        return cellToFaceUnitVectorsB_(i, j, k);
+
+    return -cellToCellUnitVectorsK_(i, j, k - 1);
+}
+
+double HexaFvmMesh::rCellMagE(int i, int j, int k) const
+{
+    if(i == cellToCellDistancesI_.sizeI())
+        return cellToFaceDistancesE_(i, j, k);
+
+    return cellToCellDistancesI_(i, j, k);
+}
+
+double HexaFvmMesh::rCellMagW(int i, int j, int k) const
+{
+    if(i == 0)
+        return cellToFaceDistancesW_(i, j, k);
+
+    return cellToCellDistancesI_(i - 1, j, k);
+}
+
+double HexaFvmMesh::rCellMagN(int i, int j, int k) const
+{
+    if(j == cellToCellDistancesJ_.sizeJ())
+        return cellToFaceDistancesN_(i, j, k);
+
+    return cellToCellDistancesJ_(i, j, k);
+}
+
+double HexaFvmMesh::rCellMagS(int i, int j, int k) const
+{
+    if(j == 0)
+        return cellToFaceDistancesS_(i, j, k);
+
+    return cellToCellDistancesJ_(i, j - 1, k);
+}
+
+double HexaFvmMesh::rCellMagT(int i, int j, int k) const
+{
+    if(k == cellToCellDistancesK_.sizeK())
+        return cellToFaceDistancesT_(i, j, k);
+
+    return cellToCellDistancesK_(i, j, k);
+}
+
+double HexaFvmMesh::rCellMagB(int i, int j, int k) const
+{
+    if(k == 0)
+        return cellToFaceDistancesB_(i, j, k);
+
+    return cellToCellDistancesK_(i, j, k - 1);
+}
+
+void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk) const
+{
+    int i, j, k;
+    int nI = cellCenters_.sizeI(), nJ = cellCenters_.sizeJ(), nK = cellCenters_.sizeK();
+    Point3D tmpPoints[8];
+
+    for(k = 0; k < nK; ++k)
+    {
+        for(j = 0; j < nJ; ++j)
+        {
+            for(i = 0; i < nI; ++i)
+            {
+                tmpPoints[0] = nodes_(i, j, k);
+                tmpPoints[1] = nodes_(i + 1, j, k);
+                tmpPoints[2] = nodes_(i + 1, j + 1, k);
+                tmpPoints[3] = nodes_(i, j + 1, k);
+                tmpPoints[4] = nodes_(i, j, k + 1);
+                tmpPoints[5] = nodes_(i + 1, j, k + 1);
+                tmpPoints[6] = nodes_(i + 1, j + 1, k + 1);
+                tmpPoints[7] = nodes_(i, j + 1, k + 1);
+
+                if(Geometry::isInsideHexahedron(point, tmpPoints))
+                {
+                    ii = i;
+                    jj = j;
+                    kk = k;
+                    return;
+                }
+            }
+        }
+    }
+
+    Output::raiseException("HexaFvmMesh", "locateCell", "the specified point \"" + std::to_string(point) + "\" is not inside the domain.");
+}
+
+void HexaFvmMesh::locateEnclosingCells(const Point3D &point, int ii[], int jj[], int kk[]) const
+{
+    int i, j, k, i0, j0, k0;
+    Point3D tmpPoints[8];
+
+    locateCell(point, i0, j0, k0);
+
+    for(k = k0 - 1; k <= k0; ++k)
+    {
+        for(j = j0 - 1; j <= j0; ++j)
+        {
+            for(i = i0 - 1; i <= i0; ++i)
+            {
+                tmpPoints[0] = cellCenters_(i, j, k);
+                tmpPoints[1] = cellCenters_(i + 1, j, k);
+                tmpPoints[2] = cellCenters_(i + 1, j + 1, k);
+                tmpPoints[3] = cellCenters_(i, j + 1, k);
+                tmpPoints[4] = cellCenters_(i, j, k + 1);
+                tmpPoints[5] = cellCenters_(i + 1, j, k + 1);
+                tmpPoints[6] = cellCenters_(i + 1, j + 1, k + 1);
+                tmpPoints[7] = cellCenters_(i, j + 1, k + 1);
+
+                if(Geometry::isInsideHexahedron(point, tmpPoints))
+                {
+                    ii[0] = i; jj[0] = j; kk[0] = k;
+                    ii[1] = i + 1; jj[1] = j; kk[1] = k;
+                    ii[2] = i + 1; jj[2] = j + 1; kk[2] = k;
+                    ii[3] = i; jj[3] = j + 1; kk[3] = k;
+                    ii[4] = i; jj[4] = j; kk[4] = k + 1;
+                    ii[5] = i + 1; jj[5] = j; kk[5] = k + 1;
+                    ii[6] = i + 1; jj[6] = j + 1; kk[6] = k + 1;
+                    ii[7] = i; jj[7] = j + 1; kk[7] = k + 1;
+                    return;
+                }
+            }
+        }
+    }
+
+    std::cout << i0 << " " << j0 << " " << k0 << std::endl;
+    Output::raiseException("HexaFvmMesh", "locateEnclosingCells", "a problem occurred when trying to locate the enclosing cells for point \"" + std::to_string(point) + "\".");
+}
+
+void HexaFvmMesh::writeDebug() const
+{
+    using namespace std;
+
+    uint i, j, k;
+    ofstream debugFout;
+
+    Output::print("HexaFvmMesh", "writing a debugging file...");
+
+    i = 0;
+    j = 0;
+    k = 0;
+
+    debugFout.open((name + "_debug" + ".msh").c_str());
+    debugFout << "Cell " << i << ", " << j << ", " << k << endl
+              << endl
+              << "Center: " << cellXc(i, j, k) << endl
+              << "Volume: " << cellVol(i, j, k) << endl
+              << endl
+              << "rCellE: " << rCellE(i, j, k) << endl
+              << "rCellW: " << rCellW(i, j, k) << endl
+              << "rCellN: " << rCellN(i, j, k) << endl
+              << "rCellS: " << rCellS(i, j, k) << endl
+              << "rCellT: " << rCellT(i, j, k) << endl
+              << "rCellB: " << rCellB(i, j, k) << endl
+              << endl
+              << "rFaceE: " << rFaceE(i, j, k) << endl
+              << "rFaceW: " << rFaceW(i, j, k) << endl
+              << "rFaceN: " << rFaceN(i, j, k) << endl
+              << "rFaceS: " << rFaceS(i, j, k) << endl
+              << "rFaceT: " << rFaceT(i, j, k) << endl
+              << "rFaceB: " << rFaceB(i, j, k) << endl
+              << endl
+              << "fAreaNormE: " << fAreaNormE(i, j, k) << endl
+              << "fAreaNormW: " << fAreaNormW(i, j, k) << endl
+              << "fAreaNormN: " << fAreaNormN(i, j, k) << endl
+              << "fAreaNormS: " << fAreaNormS(i, j, k) << endl
+              << "fAreaNormT: " << fAreaNormT(i, j, k) << endl
+              << "fAreaNormB: " << fAreaNormB(i, j, k) << endl;
+
+    debugFout.close();
+
+    Output::print("HexaFvmMesh", "finished writing debugging file.");
+}
+
+void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const
+{
+    using namespace std;
+
+    scalarVariablePtrs_.push_back(pair<string, const Array3D<double>*>(name, array3DPtr));
+}
+
+void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const
+{
+    using namespace std;
+
+    vectorVariablePtrs_.push_back(pair<string, const Array3D<Vector3D>*>(name, array3DPtr));
+}
+
+void HexaFvmMesh::writeTec360(double time, std::string directoryName)
+{
+    using namespace std;
+
+    int i, j, k, varNo, componentNo;
+    string component;
+
+    Output::print("HexaFvmMesh", "Writing data to Tec360 ASCII...");
+
+    if(!foutTec360_.is_open())
+    {
+        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
+
+        foutTec360_ << "TITLE = \"" << name << "\"" << endl
+                    << "VARIABLES = \"x\", \"y\", \"z\", ";
+
+        for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
+        {
+            foutTec360_ << "\"" << scalarVariablePtrs_[varNo].first << "\", ";
+        }
+
+        for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
+        {
+            for(componentNo = 0; componentNo < 3; ++componentNo)
+            {
+                switch(componentNo)
+                {
+                case 0:
+                    component = "x";
+                    break;
+                case 1:
+                    component = "y";
+                    break;
+                case 2:
+                    component = "z";
+                    break;
+                }
+
+                foutTec360_ << "\"" << vectorVariablePtrs_[varNo].first + "_" + component << "\", ";
+            }
+        }
+
+        // Special header only for the first zone. This enables the nodes to be shared by subsequent zones
+        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
+                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
+                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+                    << "DATAPACKING = BLOCK" << endl
+                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
+
+        // Output the mesh data
+        for(componentNo = 0; componentNo < 3; ++componentNo)
+        {
+            for(k = 0; k < nodes_.sizeK(); ++k)
+            {
+                for(j = 0; j < nodes_.sizeJ(); ++j)
+                {
+                    for(i = 0; i < nodes_.sizeI(); ++i)
+                    {
+                        foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
+                    }
+
+                    foutTec360_ << endl;
+                }
+            }
+        }
+    }
+    else
+    {
+        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
+                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
+                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+                    << "DATAPACKING = BLOCK" << endl
+                    << "VARSHARELIST = ([1-3] = 1)" << endl
+                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
+    }
+
+    // Output the solution data for scalars
+    for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
+    {
+        for(k = 0; k < cellCenters_.sizeK(); ++k)
+        {
+            for(j = 0; j < cellCenters_.sizeJ(); ++j)
+            {
+                for(i = 0; i < cellCenters_.sizeI(); ++i)
+                {
+                    foutTec360_ << scalarVariablePtrs_[varNo].second->operator()(i, j, k) << " ";
+                }
+
+                foutTec360_ << endl;
+            }
+        }
+    }
+
+    // Output the solution data for vectors
+
+    for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
+    {
+        for(componentNo = 0; componentNo < 3; ++componentNo)
+        {
+            for(k = 0; k < cellCenters_.sizeK(); ++k)
+            {
+                for(j = 0; j < cellCenters_.sizeJ(); ++j)
+                {
+                    for(i = 0; i < cellCenters_.sizeI(); ++i)
+                    {
+                        foutTec360_ << vectorVariablePtrs_[varNo].second->operator()(i, j, k)(componentNo) << " ";
+                    }
+
+                    foutTec360_ << endl;
+                }
+            }
+        }
+    }
+
+    Output::print("HexaFvmMesh", "Finished writing data to Tec360 ASCII.");
 }
 
 // ************* Private Methods *************
@@ -318,465 +876,4 @@ void HexaFvmMesh::initializeCellToFaceParameters()
             } // end for i
         } // end for j
     } // end for k
-}
-
-// ************* Public Methods *************
-
-void HexaFvmMesh::initialize(Input &input)
-{
-    // Initialize the mesh nodes
-    StructuredMesh::initialize(input);
-    Output::print("HexaFvmMesh", "initializing hexahedral finite-volume mesh...");
-    initializeCellsAndFaces();
-    Output::print("HexaFvmMesh", "initialization of hexahedral finite-volume mesh complete.");
-}
-
-void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
-{
-    // Initialize the mesh nodes
-    StructuredMesh::initialize(nodes);
-    initializeCellsAndFaces();
-}
-
-std::string HexaFvmMesh::meshStats()
-{
-    std::string structuredMeshStats = StructuredMesh::meshStats();
-    std::ostringstream stats;
-
-    stats << structuredMeshStats
-          << "Cells in I direction -> " << cellCenters_.sizeI() << "\n"
-          << "Cells in J direction -> " << cellCenters_.sizeJ() << "\n"
-          << "Cells in K direction -> " << cellCenters_.sizeK() << "\n"
-          << "Cells total -> " << cellCenters_.size() << "\n";
-
-    return stats.str();
-}
-
-Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
-{
-    return cellCenters_(i, j, k);
-}
-
-Point3D HexaFvmMesh::node(int i, int j, int k, int nodeNo) const
-{
-    switch(nodeNo)
-    {
-    case BSW:
-        return nodes_(i, j, k);
-    case BSE:
-        return nodes_(i + 1, j, k);
-    case BNE:
-        return nodes_(i + 1, j + 1, k);
-    case BNW:
-        return nodes_(i, j + 1, k);
-    case TSW:
-        return nodes_(i, j, k + 1);
-    case TSE:
-        return nodes_(i + 1, j, k + 1);
-    case TNE:
-        return nodes_(i + 1, j + 1, k + 1);
-    case TNW:
-        return nodes_(i, j + 1, k + 1);
-    default:
-        Output::raiseException("HexaFvmMesh", "node", "invalid node specified.");
-    };
-
-    return Point3D();
-}
-
-Vector3D HexaFvmMesh::rCellE(int i, int j, int k) const
-{
-    if(i == cellToCellRelativeVectorsI_.sizeI())
-        return cellToFaceRelativeVectorsE_(i, j, k);
-
-    return cellToCellRelativeVectorsI_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rCellW(int i, int j, int k) const
-{
-    if(i == 0)
-        return cellToFaceRelativeVectorsW_(i, j, k);
-
-    return -cellToCellRelativeVectorsI_(i - 1, j, k);
-}
-
-Vector3D HexaFvmMesh::rCellN(int i, int j, int k) const
-{
-    if(j == cellToCellRelativeVectorsJ_.sizeJ())
-        return cellToFaceRelativeVectorsN_(i, j, k);
-
-    return cellToCellRelativeVectorsJ_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rCellS(int i, int j, int k) const
-{
-    if(j == 0)
-        return cellToFaceRelativeVectorsS_(i, j, k);
-
-    return -cellToCellRelativeVectorsJ_(i, j - 1, k);
-}
-
-Vector3D HexaFvmMesh::rCellT(int i, int j, int k) const
-{
-    if(k == cellToCellRelativeVectorsK_.sizeK())
-        return cellToFaceRelativeVectorsT_(i, j, k);
-
-    return cellToCellRelativeVectorsK_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
-{
-    if(k == 0)
-        return cellToFaceRelativeVectorsB_(i, j, k);
-
-    return -cellToCellRelativeVectorsK_(i, j, k - 1);
-}
-
-Vector3D HexaFvmMesh::rnCellE(int i, int j, int k)
-{
-    if(i == cellToCellUnitVectorsI_.sizeI())
-        return cellToFaceUnitVectorsE_(i, j, k);
-
-    return cellToCellUnitVectorsI_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellW(int i, int j, int k)
-{
-    if(i == 0)
-        return cellToFaceUnitVectorsW_(i, j, k);
-
-    return -cellToCellUnitVectorsI_(i - 1, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellN(int i, int j, int k)
-{
-    if(j == cellToCellUnitVectorsJ_.sizeJ())
-        return cellToFaceUnitVectorsN_(i, j, k);
-
-    return cellToCellUnitVectorsJ_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellS(int i, int j, int k)
-{
-    if(j == 0)
-        return cellToFaceUnitVectorsS_(i, j, k);
-
-    return -cellToCellUnitVectorsJ_(i, j - 1, k);
-}
-
-Vector3D HexaFvmMesh::rnCellT(int i, int j, int k)
-{
-    if(k == cellToCellUnitVectorsK_.sizeK())
-        return cellToFaceUnitVectorsT_(i, j, k);
-
-    return cellToCellUnitVectorsK_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellB(int i, int j, int k)
-{
-    if(k == 0)
-        return cellToFaceUnitVectorsB_(i, j, k);
-
-    return -cellToCellUnitVectorsK_(i, j, k - 1);
-}
-
-double HexaFvmMesh::rCellMagE(int i, int j, int k)
-{
-    if(i == cellToCellDistancesI_.sizeI())
-        return cellToFaceDistancesE_(i, j, k);
-
-    return cellToCellDistancesI_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagW(int i, int j, int k)
-{
-    if(i == 0)
-        return cellToFaceDistancesW_(i, j, k);
-
-    return cellToCellDistancesI_(i - 1, j, k);
-}
-
-double HexaFvmMesh::rCellMagN(int i, int j, int k)
-{
-    if(j == cellToCellDistancesJ_.sizeJ())
-        return cellToFaceDistancesN_(i, j, k);
-
-    return cellToCellDistancesJ_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagS(int i, int j, int k)
-{
-    if(j == 0)
-        return cellToFaceDistancesS_(i, j, k);
-
-    return cellToCellDistancesJ_(i, j - 1, k);
-}
-
-double HexaFvmMesh::rCellMagT(int i, int j, int k)
-{
-    if(k == cellToCellDistancesK_.sizeK())
-        return cellToFaceDistancesT_(i, j, k);
-
-    return cellToCellDistancesK_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagB(int i, int j, int k)
-{
-    if(k == 0)
-        return cellToFaceDistancesB_(i, j, k);
-
-    return cellToCellDistancesK_(i, j, k - 1);
-}
-
-void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk) const
-{
-    int i, j, k;
-    int nI = cellCenters_.sizeI(), nJ = cellCenters_.sizeJ(), nK = cellCenters_.sizeK();
-    Point3D tmpPoints[8];
-
-    for(k = 0; k < nK; ++k)
-    {
-        for(j = 0; j < nJ; ++j)
-        {
-            for(i = 0; i < nI; ++i)
-            {
-                tmpPoints[0] = nodes_(i, j, k);
-                tmpPoints[1] = nodes_(i + 1, j, k);
-                tmpPoints[2] = nodes_(i + 1, j + 1, k);
-                tmpPoints[3] = nodes_(i, j + 1, k);
-                tmpPoints[4] = nodes_(i, j, k + 1);
-                tmpPoints[5] = nodes_(i + 1, j, k + 1);
-                tmpPoints[6] = nodes_(i + 1, j + 1, k + 1);
-                tmpPoints[7] = nodes_(i, j + 1, k + 1);
-
-                if(Geometry::isInsideHexahedron(point, tmpPoints))
-                {
-                    ii = i;
-                    jj = j;
-                    kk = k;
-                    return;
-                }
-            }
-        }
-    }
-
-    Output::raiseException("HexaFvmMesh", "locateCell", "the specified point \"" + std::to_string(point) + "\" is not inside the domain.");
-}
-
-void HexaFvmMesh::locateEnclosingCells(const Point3D &point, int ii[], int jj[], int kk[]) const
-{
-    int i, j, k, i0, j0, k0;
-    Point3D tmpPoints[8];
-
-    locateCell(point, i0, j0, k0);
-
-    for(k = k0 - 1; k <= k0; ++k)
-    {
-        for(j = j0 - 1; j <= j0; ++j)
-        {
-            for(i = i0 - 1; i <= i0; ++i)
-            {
-                tmpPoints[0] = cellCenters_(i, j, k);
-                tmpPoints[1] = cellCenters_(i + 1, j, k);
-                tmpPoints[2] = cellCenters_(i + 1, j + 1, k);
-                tmpPoints[3] = cellCenters_(i, j + 1, k);
-                tmpPoints[4] = cellCenters_(i, j, k + 1);
-                tmpPoints[5] = cellCenters_(i + 1, j, k + 1);
-                tmpPoints[6] = cellCenters_(i + 1, j + 1, k + 1);
-                tmpPoints[7] = cellCenters_(i, j + 1, k + 1);
-
-                if(Geometry::isInsideHexahedron(point, tmpPoints))
-                {
-                    ii[0] = i; jj[0] = j; kk[0] = k;
-                    ii[1] = i + 1; jj[1] = j; kk[1] = k;
-                    ii[2] = i + 1; jj[2] = j + 1; kk[2] = k;
-                    ii[3] = i; jj[3] = j + 1; kk[3] = k;
-                    ii[4] = i; jj[4] = j; kk[4] = k + 1;
-                    ii[5] = i + 1; jj[5] = j; kk[5] = k + 1;
-                    ii[6] = i + 1; jj[6] = j + 1; kk[6] = k + 1;
-                    ii[7] = i; jj[7] = j + 1; kk[7] = k + 1;
-                    return;
-                }
-            }
-        }
-    }
-
-    std::cout << i0 << " " << j0 << " " << k0 << std::endl;
-    Output::raiseException("HexaFvmMesh", "locateEnclosingCells", "a problem occurred when trying to locate the enclosing cells for point \"" + std::to_string(point) + "\".");
-}
-
-void HexaFvmMesh::writeDebug()
-{
-    using namespace std;
-
-    uint i, j, k;
-    ofstream debugFout;
-
-    Output::print("HexaFvmMesh", "writing a debugging file...");
-
-    i = 0;
-    j = 0;
-    k = 0;
-
-    debugFout.open((name + "_debug" + ".msh").c_str());
-    debugFout << "Cell " << i << ", " << j << ", " << k << endl
-              << endl
-              << "Center: " << cellXc(i, j, k) << endl
-              << "Volume: " << cellVol(i, j, k) << endl
-              << endl
-              << "rCellE: " << rCellE(i, j, k) << endl
-              << "rCellW: " << rCellW(i, j, k) << endl
-              << "rCellN: " << rCellN(i, j, k) << endl
-              << "rCellS: " << rCellS(i, j, k) << endl
-              << "rCellT: " << rCellT(i, j, k) << endl
-              << "rCellB: " << rCellB(i, j, k) << endl
-              << endl
-              << "rFaceE: " << rFaceE(i, j, k) << endl
-              << "rFaceW: " << rFaceW(i, j, k) << endl
-              << "rFaceN: " << rFaceN(i, j, k) << endl
-              << "rFaceS: " << rFaceS(i, j, k) << endl
-              << "rFaceT: " << rFaceT(i, j, k) << endl
-              << "rFaceB: " << rFaceB(i, j, k) << endl
-              << endl
-              << "fAreaNormE: " << fAreaNormE(i, j, k) << endl
-              << "fAreaNormW: " << fAreaNormW(i, j, k) << endl
-              << "fAreaNormN: " << fAreaNormN(i, j, k) << endl
-              << "fAreaNormS: " << fAreaNormS(i, j, k) << endl
-              << "fAreaNormT: " << fAreaNormT(i, j, k) << endl
-              << "fAreaNormB: " << fAreaNormB(i, j, k) << endl;
-
-    debugFout.close();
-
-    Output::print("HexaFvmMesh", "finished writing debugging file.");
-}
-
-void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const
-{
-    using namespace std;
-
-    scalarVariablePtrs_.push_back(pair<string, const Array3D<double>*>(name, array3DPtr));
-}
-
-void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const
-{
-    using namespace std;
-
-    vectorVariablePtrs_.push_back(pair<string, const Array3D<Vector3D>*>(name, array3DPtr));
-}
-
-void HexaFvmMesh::writeTec360(double time, std::string directoryName)
-{
-    using namespace std;
-
-    int i, j, k, varNo, componentNo;
-    string component;
-
-    Output::print("HexaFvmMesh", "Writing data to Tec360 ASCII...");
-
-    if(!foutTec360_.is_open())
-    {
-        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
-
-        foutTec360_ << "TITLE = \"" << name << "\"" << endl
-                    << "VARIABLES = \"x\", \"y\", \"z\", ";
-
-        for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
-        {
-            foutTec360_ << "\"" << scalarVariablePtrs_[varNo].first << "\", ";
-        }
-
-        for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
-        {
-            for(componentNo = 0; componentNo < 3; ++componentNo)
-            {
-                switch(componentNo)
-                {
-                case 0:
-                    component = "x";
-                    break;
-                case 1:
-                    component = "y";
-                    break;
-                case 2:
-                    component = "z";
-                    break;
-                }
-
-                foutTec360_ << "\"" << vectorVariablePtrs_[varNo].first + "_" + component << "\", ";
-            }
-        }
-
-        // Special header only for the first zone. This enables the nodes to be shared by subsequent zones
-        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
-                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
-                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
-                    << "DATAPACKING = BLOCK" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
-
-        // Output the mesh data
-        for(componentNo = 0; componentNo < 3; ++componentNo)
-        {
-            for(k = 0; k < nodes_.sizeK(); ++k)
-            {
-                for(j = 0; j < nodes_.sizeJ(); ++j)
-                {
-                    for(i = 0; i < nodes_.sizeI(); ++i)
-                    {
-                        foutTec360_ << nodes_(i, j, k)(componentNo) << " ";
-                    }
-
-                    foutTec360_ << endl;
-                }
-            }
-        }
-    }
-    else
-    {
-        foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
-                    << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
-                    << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
-                    << "DATAPACKING = BLOCK" << endl
-                    << "VARSHARELIST = ([1-3] = 1)" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
-    }
-
-    // Output the solution data for scalars
-    for(varNo = 0; varNo < scalarVariablePtrs_.size(); ++varNo)
-    {
-        for(k = 0; k < cellCenters_.sizeK(); ++k)
-        {
-            for(j = 0; j < cellCenters_.sizeJ(); ++j)
-            {
-                for(i = 0; i < cellCenters_.sizeI(); ++i)
-                {
-                    foutTec360_ << scalarVariablePtrs_[varNo].second->operator()(i, j, k) << " ";
-                }
-
-                foutTec360_ << endl;
-            }
-        }
-    }
-
-    // Output the solution data for vectors
-
-    for(varNo = 0; varNo < vectorVariablePtrs_.size(); ++varNo)
-    {
-        for(componentNo = 0; componentNo < 3; ++componentNo)
-        {
-            for(k = 0; k < cellCenters_.sizeK(); ++k)
-            {
-                for(j = 0; j < cellCenters_.sizeJ(); ++j)
-                {
-                    for(i = 0; i < cellCenters_.sizeI(); ++i)
-                    {
-                        foutTec360_ << vectorVariablePtrs_[varNo].second->operator()(i, j, k)(componentNo) << " ";
-                    }
-
-                    foutTec360_ << endl;
-                }
-            }
-        }
-    }
-
-    Output::print("HexaFvmMesh", "Finished writing data to Tec360 ASCII.");
 }
