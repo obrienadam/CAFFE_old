@@ -1,0 +1,8 @@
+; Initial conditions: Channel3D
+
+
+u
+{
+	type uniform
+	refVector (0,0,0)
+}

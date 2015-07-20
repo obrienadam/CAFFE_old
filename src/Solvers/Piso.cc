@@ -6,7 +6,7 @@ Piso::Piso(const Input &input, const HexaFvmMesh &mesh)
     :
       Simple::Simple(input, mesh)
 {
-    nPCorrections_ = input.getInt("numberOfPressureCorrections");
+    nPCorrections_ = input.caseParameters.get<int>("Solver.numberOfPressureCorrections");
 }
 
 double Piso::solve(double timeStep)

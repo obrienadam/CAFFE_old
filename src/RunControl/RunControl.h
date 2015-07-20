@@ -37,7 +37,7 @@ class RunControl
 public:
     RunControl();
 
-    void initialize(Input& input);
+    void initialize(const Input &input);
 
     /** Decide whether or not to continue running.
      * @param timeStep the fixed timeStep.

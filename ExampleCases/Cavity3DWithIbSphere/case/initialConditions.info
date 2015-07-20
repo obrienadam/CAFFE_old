@@ -1,0 +1,11 @@
+; Initial conditions: Cavity3DWithIbSphere
+
+MetricConversion 0.1
+
+u
+{
+	Uniform
+	{
+		value (0, 0, 0)
+	}
+}

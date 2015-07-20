@@ -34,8 +34,8 @@ IbPiso::IbPiso(const Input &input, const HexaFvmMesh &mesh)
       Piso(input, mesh),
       ibField_(mesh, Field<CellType>::AUXILLARY, "ibField")
 {
-    ibSphere_.radius = input.getDouble("ibSphereRadius");
-    ibSphere_.center = std::stov(input.getString("ibSphereCenter"));
+    ibSphere_.radius = input.caseParameters.get<double>("ImmersedBoundaries.Sphere.radius");
+    ibSphere_.center = std::stov(input.caseParameters.get<std::string>("ImmersedBoundaries.Sphere.center"));
 }
 
 /***************** Public methods *****************************/

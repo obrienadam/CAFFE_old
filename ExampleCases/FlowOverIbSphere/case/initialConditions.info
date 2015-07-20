@@ -1,0 +1,14 @@
+; Initial conditions: FlowOverIbSphere
+
+
+u
+{
+	type uniform
+	refVector (1,0,0)
+}
+
+p
+{
+	type uniform
+	refValue 0
+}

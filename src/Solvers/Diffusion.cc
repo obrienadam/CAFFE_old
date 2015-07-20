@@ -37,17 +37,19 @@ Diffusion::Diffusion(const Input &input, const HexaFvmMesh &mesh)
       phiField_(mesh, Field<double>::CONSERVED, "phi"),
       gradPhiField_(mesh, Field<Vector3D>::AUXILLARY, "gradPhi")
 {
+    using namespace std;
+
     Solver::createMatrices(1, 1, 7);
     mesh_.addArray3DToTecplotOutput(phiField_.name, phiField_.cellData());
     mesh_.addArray3DToTecplotOutput(gradPhiField_.name, gradPhiField_.cellData());
 
     //- Set field boundaries
-    phiField_.setEastBoundary(input.getString("boundaryTypeEast"), input.getDouble("boundaryRefValueEast"));
-    phiField_.setWestBoundary(input.getString("boundaryTypeWest"), input.getDouble("boundaryRefValueWest"));
-    phiField_.setNorthBoundary(input.getString("boundaryTypeNorth"), input.getDouble("boundaryRefValueNorth"));
-    phiField_.setSouthBoundary(input.getString("boundaryTypeSouth"), input.getDouble("boundaryRefValueSouth"));
-    phiField_.setTopBoundary(input.getString("boundaryTypeTop"), input.getDouble("boundaryRefValueTop"));
-    phiField_.setBottomBoundary(input.getString("boundaryTypeBottom"), input.getDouble("boundaryRefValueBottom"));
+    phiField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
+    phiField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
+    phiField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
+    phiField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
+    phiField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
+    phiField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.bottom.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
 }
 
 Diffusion::~Diffusion()
@@ -77,9 +79,9 @@ double Diffusion::solve(double time_Step)
                 a[1] = dE_(i, j, k);
                 a[2] = dW_(i, j, k);
                 a[3] = dN_(i, j, k);
-                a[4] = dT_(i, j, k);
-                a[5] = dB_(i, j, k);
-                a[6] = dT_(i, j, k);
+                a[4] = dS_(i, j, k);
+                a[5] = dT_(i, j, k);
+                a[6] = dB_(i, j, k);
 
                 a[0] = -(a[1] + a[2] + a[3] + a[4] + a[5] + a[6]) + a0P;
                 b = a0P*phiField_(i, j, k);
@@ -102,7 +104,6 @@ double Diffusion::solve(double time_Step)
 
     time_.toc();
     Output::print("\nDiffusion", "matrix assembly completed in " + time_.elapsedTime());
-
 
     biCGStabIters_ = A_[0].solve(b_[0], x_[0]);
 

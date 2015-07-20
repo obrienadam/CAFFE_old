@@ -36,13 +36,15 @@ RunControl::RunControl()
 
 }
 
-void RunControl::initialize(Input &input)
+void RunControl::initialize(const Input &input)
 {
-    terminationCondition_ = input.getString("terminationCondition");
-    maxIters_ = input.getInt("maxNumberOfIterations");
-    timeStep_ = input.getDouble("timeStep");
-    maxSimTime_ = input.getDouble("maxSimTime");
-    fileWriteInterval_ = input.getInt("fileWriteInterval");
+    using namespace std;
+
+    terminationCondition_ = input.caseParameters.get<string>("RunControl.terminationCondition");
+    maxIters_ = input.caseParameters.get<int>("RunControl.maxNumberOfIterations");
+    timeStep_ = input.caseParameters.get<double>("RunControl.timeStep");
+    maxSimTime_ = input.caseParameters.get<double>("RunControl.maxSimTime");
+    fileWriteInterval_ = input.caseParameters.get<int>("RunControl.fileWriteInterval");
 
     //- Create a directory for the solution output
     createDirectory("solution");

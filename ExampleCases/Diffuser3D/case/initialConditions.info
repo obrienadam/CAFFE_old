@@ -1,0 +1,13 @@
+; Initial conditions: Diffuser3D
+
+u
+{
+	type uniform
+	refVector (3,0,0)
+}
+
+p
+{
+	type uniform
+	refVector (0,0,0)
+}

@@ -40,11 +40,9 @@ Field<T>::Field(const HexaFvmMesh &mesh, FieldType type, std::string name)
 template<class T>
 Field<T>::Field(const Field &other)
     :
-      mesh_(other.mesh_),
-      type_(other.type_),
-      name(other.name)
+      Field<T>::Field(other.mesh_, other.type_, other.name + "_copy")
 {
-    allocate(mesh_.nCellsI(), mesh_.nCellsJ(), mesh_.nCellsK());
+    operator =(other);
 }
 
 // ************* Public Methods *************
@@ -87,6 +85,13 @@ void Field<T>::allocate(int nCellsI, int nCellsJ, int nCellsK)
         facesJ_.allocate(nCellsI, nCellsJ + 1, nCellsK);
         facesK_.allocate(nCellsI, nCellsJ, nCellsK + 1);
     }
+
+    eastBoundaryPatch_.allocate(1, mesh_.nCellsJ(), mesh_.nCellsK());
+    westBoundaryPatch_.allocate(1, mesh_.nCellsJ(), mesh_.nCellsK());
+    northBoundaryPatch_.allocate(mesh_.nCellsI(), 1, mesh_.nCellsK());
+    southBoundaryPatch_.allocate(mesh_.nCellsI(), 1, mesh_.nCellsK());
+    topBoundaryPatch_.allocate(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
+    bottomBoundaryPatch_.allocate(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
 }
 
 template<class T>
@@ -101,33 +106,32 @@ T& Field<T>::operator()(int i, int j, int k)
     // Access to the boundaries
     if(i < 0)
     {
-        return facesI_(0, j, k);
+        return westBoundaryPatch_(abs(i) - 1, j, k);
     }
     else if (i >= Array3D<T>::nI_)
     {
-        return facesI_(Array3D<T>::nI_, j, k);
+        return eastBoundaryPatch_(i - Array3D<T>::nI_, j, k);
     }
 
     if(j < 0)
     {
-        return facesJ_(i, 0, k);
+        return southBoundaryPatch_(i, abs(j) - 1, k);
     }
     else if (j >= Array3D<T>::nJ_)
     {
-        return facesJ_(i, Array3D<T>::nJ_, k);
+        return northBoundaryPatch_(i, j - Array3D<T>::nJ_, k);
     }
 
     if(k < 0)
     {
-        return facesK_(i, j, 0);
+        return bottomBoundaryPatch_(i, j, abs(k) - 1);
     }
     else if (k >= Array3D<T>::nK_)
     {
-        return facesK_(i, j, Array3D<T>::nK_);
+        return topBoundaryPatch_(i, j, k - Array3D<T>::nK_);
     }
 
     // Just to get rid of the compiler warning
-
     return Array3D<T>::data_[0];
 }
 
@@ -143,33 +147,32 @@ const T& Field<T>::operator()(int i, int j, int k) const
     // Access to the boundaries
     if(i < 0)
     {
-        return facesI_(0, j, k);
+        return westBoundaryPatch_(abs(i) - 1, j, k);
     }
     else if (i >= Array3D<T>::nI_)
     {
-        return facesI_(Array3D<T>::nI_, j, k);
+        return eastBoundaryPatch_(i - Array3D<T>::nI_, j, k);
     }
 
     if(j < 0)
     {
-        return facesJ_(i, 0, k);
+        return southBoundaryPatch_(i, abs(j) - 1, k);
     }
     else if (j >= Array3D<T>::nJ_)
     {
-        return facesJ_(i, Array3D<T>::nJ_, k);
+        return northBoundaryPatch_(i, j - Array3D<T>::nJ_, k);
     }
 
     if(k < 0)
     {
-        return facesK_(i, j, 0);
+        return bottomBoundaryPatch_(i, j, abs(k) - 1);
     }
     else if (k >= Array3D<T>::nK_)
     {
-        return facesK_(i, j, Array3D<T>::nK_);
+        return topBoundaryPatch_(i, j, k - Array3D<T>::nK_);
     }
 
     // Just to get rid of the compiler warning
-
     return Array3D<T>::data_[0];
 }
 
@@ -301,19 +304,20 @@ void Field<T>::setEastBoundary(const std::string &boundaryType, T boundaryValue)
     int j, k;
 
     if(boundaryType == "fixed")
-        eastBoundaryPatch_ = FIXED;
+        eastBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        eastBoundaryPatch_ = ZERO_GRADIENT;
+        eastBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        eastBoundaryPatch_ = EMPTY;
+        eastBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setEastBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0; k < eastBoundaryPatch_.sizeK(); ++k)
     {
-        for(j = 0; j < Array3D<T>::nJ_; ++j)
+        for(j = 0; j < eastBoundaryPatch_.sizeJ(); ++j)
         {
-            facesI_(Array3D<T>::nI_, j, k) = boundaryValue;
+            eastBoundaryPatch_(0, j, k) = boundaryValue;
+            facesI_(mesh_.nCellsI(), j, k) = eastBoundaryPatch_(0, j, k);
         } // end for j
     } //  end for k
 }
@@ -324,19 +328,20 @@ void Field<T>::setWestBoundary(const std::string &boundaryType, T boundaryValue)
     int j, k;
 
     if(boundaryType == "fixed")
-        westBoundaryPatch_ = FIXED;
+        westBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        westBoundaryPatch_ = ZERO_GRADIENT;
+        westBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        westBoundaryPatch_ = EMPTY;
+        westBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setWestBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0; k < westBoundaryPatch_.sizeK(); ++k)
     {
-        for(j = 0; j < Array3D<T>::nJ_; ++j)
+        for(j = 0; j < westBoundaryPatch_.sizeJ(); ++j)
         {
-            facesI_(0, j, k) = boundaryValue;
+            westBoundaryPatch_(0, j, k) = boundaryValue;
+            facesI_(0, j, k) = westBoundaryPatch_(0, j, k);
         } // end for j
     } //  end for k
 }
@@ -347,19 +352,20 @@ void Field<T>::setNorthBoundary(const std::string &boundaryType, T boundaryValue
     int i, k;
 
     if(boundaryType == "fixed")
-        northBoundaryPatch_ = FIXED;
+        northBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        northBoundaryPatch_ = ZERO_GRADIENT;
+        northBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        northBoundaryPatch_ = EMPTY;
+        northBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setNorthBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0; k < northBoundaryPatch_.sizeK(); ++k)
     {
-        for(i = 0; i < Array3D<T>::nI_; ++i)
+        for(i = 0; i < northBoundaryPatch_.sizeI(); ++i)
         {
-            facesJ_(i, Array3D<T>::nJ_, k) = boundaryValue;
+            northBoundaryPatch_(i, 0, k) = boundaryValue;
+            facesJ_(i, mesh_.nCellsJ(), k) = northBoundaryPatch_(i, 0, k);
         } // end for i
     } //  end for k
 }
@@ -370,19 +376,20 @@ void Field<T>::setSouthBoundary(const std::string &boundaryType, T boundaryValue
     int i, k;
 
     if(boundaryType == "fixed")
-        southBoundaryPatch_ = FIXED;
+        southBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        southBoundaryPatch_ = ZERO_GRADIENT;
+        southBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        southBoundaryPatch_ = EMPTY;
+        southBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setSouthBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(k = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0; k < southBoundaryPatch_.sizeK(); ++k)
     {
-        for(i = 0; i < Array3D<T>::nI_; ++i)
+        for(i = 0; i < southBoundaryPatch_.sizeI(); ++i)
         {
-            facesJ_(i, 0, k) = boundaryValue;
+            southBoundaryPatch_(i, 0, k) = boundaryValue;
+            facesJ_(i, 0, k) = southBoundaryPatch_(i, 0, k);
         } // end for i
     } //  end for k
 }
@@ -393,19 +400,20 @@ void Field<T>::setTopBoundary(const std::string &boundaryType, T boundaryValue)
     int i, j;
 
     if(boundaryType == "fixed")
-        topBoundaryPatch_ = FIXED;
+        topBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        topBoundaryPatch_ = ZERO_GRADIENT;
+        topBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        topBoundaryPatch_ = EMPTY;
+        topBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setTopBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(j = 0; j < Array3D<T>::nJ_; ++j)
+    for(j = 0; j < topBoundaryPatch_.sizeJ(); ++j)
     {
-        for(i = 0; i < Array3D<T>::nI_; ++i)
+        for(i = 0; i < topBoundaryPatch_.sizeI(); ++i)
         {
-            facesK_(i, j, Array3D<T>::nK_) = boundaryValue;
+            topBoundaryPatch_(i, j, 0) = boundaryValue;
+            facesK_(i, j, mesh_.nCellsK()) = topBoundaryPatch_(i, j, 0);
         } // end for i
     } //  end for j
 }
@@ -416,19 +424,20 @@ void Field<T>::setBottomBoundary(const std::string &boundaryType, T boundaryValu
     int i, j;
 
     if(boundaryType == "fixed")
-        bottomBoundaryPatch_ = FIXED;
+        bottomBoundaryPatchId_ = FIXED;
     else if(boundaryType == "zeroGradient")
-        bottomBoundaryPatch_ = ZERO_GRADIENT;
+        bottomBoundaryPatchId_ = ZERO_GRADIENT;
     else if(boundaryType == "empty")
-        bottomBoundaryPatch_ = EMPTY;
+        bottomBoundaryPatchId_ = EMPTY;
     else
         Output::raiseException("Field", "setBottomBoundary", "unrecognized boundary condition type \"" + boundaryType + "\".");
 
-    for(j = 0; j < Array3D<T>::nJ_; ++j)
+    for(j = 0; j < bottomBoundaryPatch_.sizeJ(); ++j)
     {
-        for(i = 0; i < Array3D<T>::nI_; ++i)
+        for(i = 0; i < bottomBoundaryPatch_.sizeI(); ++i)
         {
-            facesK_(i, j, 0) = boundaryValue;
+            bottomBoundaryPatch_(i, j, 0) = boundaryValue;
+            facesK_(i, j, 0) = bottomBoundaryPatch_(i, j, 0);
         } // end for i
     } //  end for j
 }
@@ -447,9 +456,9 @@ void Field<T>::setBoundaryFields()
 template<class T>
 void Field<T>::setEastBoundaryField()
 {
-    int j, k, nJ, nK, maxI;
+    int maxI, j, k;
 
-    switch(eastBoundaryPatch_)
+    switch(eastBoundaryPatchId_)
     {
 
     case FIXED:
@@ -458,15 +467,14 @@ void Field<T>::setEastBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nJ = Array3D<T>::nJ_;
-        nK = Array3D<T>::nK_;
         maxI = Array3D<T>::nI_ - 1;
 
-        for(k = 0; k < nK; ++k)
+        for(k = 0; k < eastBoundaryPatch_.sizeK(); ++k)
         {
-            for(j = 0; j < nJ; ++j)
+            for(j = 0; j < westBoundaryPatch_.sizeJ(); ++j)
             {
-                facesI_(Array3D<T>::nI_, j, k) = Array3D<T>::operator ()(maxI, j, k);
+                eastBoundaryPatch_(0, j, k) = Array3D<T>::operator ()(maxI, j, k);
+                facesI_(mesh_.nCellsI(), j, k) = eastBoundaryPatch_(0, j, k);
             }
         }
 
@@ -477,9 +485,9 @@ void Field<T>::setEastBoundaryField()
 template<class T>
 void Field<T>::setWestBoundaryField()
 {
-    int j, k, nJ, nK;
+    int j, k;
 
-    switch(westBoundaryPatch_)
+    switch(westBoundaryPatchId_)
     {
 
     case FIXED:
@@ -488,14 +496,12 @@ void Field<T>::setWestBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nJ = Array3D<T>::nJ_;
-        nK = Array3D<T>::nK_;
-
-        for(k = 0; k < nK; ++k)
+        for(k = 0; k < westBoundaryPatch_.sizeK(); ++k)
         {
-            for(j = 0; j < nJ; ++j)
+            for(j = 0; j < westBoundaryPatch_.sizeJ(); ++j)
             {
-                facesI_(0, j, k) = Array3D<T>::operator ()(0, j, k);
+                westBoundaryPatch_(0, j, k) = Array3D<T>::operator ()(0, j, k);
+                facesI_(0, j, k) = westBoundaryPatch_(0, j, k);
             }
         }
 
@@ -506,9 +512,9 @@ void Field<T>::setWestBoundaryField()
 template<class T>
 void Field<T>::setNorthBoundaryField()
 {
-    int i, k, nI, nK, maxJ;
+    int i, maxJ, k;
 
-    switch(northBoundaryPatch_)
+    switch(northBoundaryPatchId_)
     {
 
     case FIXED:
@@ -517,15 +523,14 @@ void Field<T>::setNorthBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nI = Array3D<T>::nI_;
-        nK = Array3D<T>::nK_;
         maxJ = Array3D<T>::nJ_ - 1;
 
-        for(k = 0; k < nK; ++k)
+        for(k = 0; k < northBoundaryPatch_.sizeK(); ++k)
         {
-            for(i = 0; i < nI; ++i)
+            for(i = 0; i < northBoundaryPatch_.sizeI(); ++i)
             {
-                facesJ_(i, Array3D<T>::nJ_, k) = Array3D<T>::operator ()(i, maxJ, k);
+                northBoundaryPatch_(i, 0, k) = Array3D<T>::operator ()(i, maxJ, k);
+                facesJ_(i, mesh_.nCellsJ(), k) = northBoundaryPatch_(i, 0, k);
             }
         }
 
@@ -536,9 +541,9 @@ void Field<T>::setNorthBoundaryField()
 template<class T>
 void Field<T>::setSouthBoundaryField()
 {
-    int i, k, nI, nK;
+    int i, k;
 
-    switch(southBoundaryPatch_)
+    switch(southBoundaryPatchId_)
     {
     case FIXED:
 
@@ -546,14 +551,12 @@ void Field<T>::setSouthBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nI = Array3D<T>::nI_;
-        nK = Array3D<T>::nK_;
-
-        for(k = 0; k < nK; ++k)
+        for(k = 0; k < southBoundaryPatch_.sizeK(); ++k)
         {
-            for(i = 0; i < nI; ++i)
+            for(i = 0; i < southBoundaryPatch_.sizeI(); ++i)
             {
-                facesJ_(i, 0, k) = Array3D<T>::operator ()(i, 0, k);
+                southBoundaryPatch_(i, 0, k) = Array3D<T>::operator ()(i, 0, k);
+                facesJ_(i, 0, k) = southBoundaryPatch_(i, 0, k);
             }
         }
 
@@ -564,9 +567,9 @@ void Field<T>::setSouthBoundaryField()
 template<class T>
 void Field<T>::setTopBoundaryField()
 {
-    int i, j, nI, nJ, maxK;
+    int i, j, maxK;
 
-    switch(topBoundaryPatch_)
+    switch(topBoundaryPatchId_)
     {
     case FIXED:
 
@@ -574,15 +577,14 @@ void Field<T>::setTopBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nI = Array3D<T>::nI_;
-        nJ = Array3D<T>::nJ_;
         maxK = Array3D<T>::nK_ - 1;
 
-        for(j = 0; j < nJ; ++j)
+        for(j = 0; j < topBoundaryPatch_.sizeJ(); ++j)
         {
-            for(i = 0; i < nI; ++i)
+            for(i = 0; i < topBoundaryPatch_.sizeI(); ++i)
             {
-                facesK_(i, j, Array3D<T>::nK_) = Array3D<T>::operator ()(i, j, maxK);
+                topBoundaryPatch_(i, j, 0) = Array3D<T>::operator ()(i, j, maxK);
+                facesK_(i, j, mesh_.nCellsK()) = topBoundaryPatch_(i, j, 0);
             }
         }
 
@@ -593,9 +595,9 @@ void Field<T>::setTopBoundaryField()
 template<class T>
 void Field<T>::setBottomBoundaryField()
 {
-    int i, j, nI, nJ;
+    int i, j;
 
-    switch(bottomBoundaryPatch_)
+    switch(bottomBoundaryPatchId_)
     {
     case FIXED:
 
@@ -603,14 +605,12 @@ void Field<T>::setBottomBoundaryField()
 
     case ZERO_GRADIENT: case EMPTY:
 
-        nI = Array3D<T>::nI_;
-        nJ = Array3D<T>::nJ_;
-
-        for(j = 0; j < nJ; ++j)
+        for(j = 0; j < bottomBoundaryPatch_.sizeJ(); ++j)
         {
-            for(i = 0; i < nI; ++i)
+            for(i = 0; i < bottomBoundaryPatch_.sizeI(); ++i)
             {
-                facesK_(i, j, 0) = Array3D<T>::operator ()(i, j, 0);
+                bottomBoundaryPatch_(i, j, 0) = Array3D<T>::operator ()(i, j, 0);
+                facesK_(i, j, 0) = bottomBoundaryPatch_(i, j, 0);
             }
         }
 
@@ -623,7 +623,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 {
     if(i == mesh_.uCellI())
     {
-        switch(eastBoundaryPatch_)
+        switch(eastBoundaryPatchId_)
         {
         case FIXED:
             b += -a[1]*operator ()(i + 1, j, k);
@@ -639,7 +639,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 
     if(i == 0)
     {
-        switch(westBoundaryPatch_)
+        switch(westBoundaryPatchId_)
         {
         case FIXED:
             b += -a[2]*operator ()(i - 1, j, k);
@@ -655,7 +655,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 
     if(j == mesh_.uCellJ())
     {
-        switch(northBoundaryPatch_)
+        switch(northBoundaryPatchId_)
         {
         case FIXED:
             b += -a[3]*operator ()(i, j + 1, k);
@@ -671,7 +671,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 
     if(j == 0)
     {
-        switch(southBoundaryPatch_)
+        switch(southBoundaryPatchId_)
         {
         case FIXED:
             b += -a[4]*operator ()(i, j - 1, k);
@@ -687,7 +687,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 
     if(k == mesh_.uCellK())
     {
-        switch(topBoundaryPatch_)
+        switch(topBoundaryPatchId_)
         {
         case FIXED:
             b += -a[5]*operator ()(i, j, k + 1);
@@ -703,7 +703,7 @@ void Field<T>::setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b)
 
     if(k == 0)
     {
-        switch(bottomBoundaryPatch_)
+        switch(bottomBoundaryPatchId_)
         {
         case FIXED:
             b += -a[6]*operator ()(i, j, k - 1);

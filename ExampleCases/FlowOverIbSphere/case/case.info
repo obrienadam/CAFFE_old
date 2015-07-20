@@ -1,0 +1,71 @@
+; Example case: FlowOverIbSphere
+
+RunControl
+{
+	terminationCondition iterations
+	maxNumberOfIterations 16000
+	fileWriteInterval 10
+	timeStep 2.5e-3
+	maxSimTime 48
+	maxRealTimeHours 48
+}
+
+Solver
+{
+	timeAccurate ON
+	relaxationFactorMomentum 0.5
+	relaxationFactorPCorr 0.5
+	rho 998
+	mu 8.94e-4
+	numberOfPressureCorrections 3
+	numberOfInnerIterations 4
+}
+
+ImmersedBoundaries
+{
+	Sphere
+	{
+		radius 0.15
+		center (0.7,1,1)
+	}
+}
+
+Boundaries
+{
+	east
+	{
+		type outlet
+		refVector (0,0,0)
+		refValue 0
+	}
+	west
+	{
+		type inlet
+		refVector (1,0,0)
+		refValue 0
+	}
+	north
+	{
+		type zeroGradient
+		refVector (0,0,0)
+		refValue 0
+	}
+	south
+	{
+		type zeroGradient
+		refVector (0,0,0)
+		refValue 0
+	}
+	top
+	{
+		type zeroGradient
+		refVector (0,0,0)
+		refValue 0
+	}
+	bottom
+	{
+		type zeroGradient
+		refVector (0,0,0)
+		refValue 0
+	}
+}

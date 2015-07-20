@@ -1,0 +1,15 @@
+; Initial conditions for Cavity2D
+
+MetricConversion 1
+
+u
+{
+	type uniform
+	value (1,0,0)
+}
+
+p
+{
+	type uniform
+	value 0
+}

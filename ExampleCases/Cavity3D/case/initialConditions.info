@@ -1,0 +1,15 @@
+; Initial conditions: Cavity3D
+
+MetricConversion = 0.1
+
+u
+{
+	type uniform
+	value (0,0,0)
+}
+
+p
+{
+	type uniform
+	value 0
+}

@@ -10,9 +10,7 @@ set(HEADERS MathConstants.h
             Matrix.h
             SparseMatrix.h
             SparseVector.h
-            Interpolation.h
-            FiniteDifference.h
-            FiniteDifferenceI.h)
+            Interpolation.h)
 
 set(SOURCES Vector3D.cc
             Tensor3D.cc

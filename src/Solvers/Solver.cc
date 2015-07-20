@@ -20,10 +20,12 @@ Solver::Solver(const Input &input, const HexaFvmMesh &mesh)
     indexMap_.initialize(mesh_.nCellsI(), mesh_.nCellsJ(), mesh_.nCellsK());
     computeMeshMetrics();
 
-    if(input.getString("timeAccurate") == "ON")
+    if(input.caseParameters.get<std::string>("Solver.timeAccurate") == "ON")
         solutionType_ = UNSTEADY;
     else
         solutionType_ = STEADY;
+
+    Output::print("Solver", "Time accurate: " + input.caseParameters.get<std::string>("Solver.timeAccurate"));
 }
 
 void Solver::displayUpdateMessage()

@@ -1,0 +1,55 @@
+; Example case: FlatPlateDiffusion2D
+
+RunControl
+{
+	terminationCondition iterations
+	maxNumberOfIterations 5
+	fileWriteInterval 1
+	timeStep 1
+	maxSimTime 48
+	maxRealTimeHours 48
+}
+
+Solver
+{
+	timeAccurate OFF
+}
+
+Boundaries
+{
+	east
+	{
+		type fixed
+		refValue 0
+	}
+
+	west
+	{
+		type fixed
+		refValue 0
+	}
+
+	north
+	{
+		type fixed
+		refValue 0.5
+	}
+
+	south
+	{
+		type fixed
+		refValue 0.5
+	}
+
+	top
+	{
+		type empty
+		refValue 0
+	}
+
+	bottom
+	{
+		type empty
+		refValue 0
+	}
+}

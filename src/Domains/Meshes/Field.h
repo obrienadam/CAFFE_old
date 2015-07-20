@@ -99,12 +99,19 @@ public:
     void setTopBoundaryField();
     void setBottomBoundaryField();
 
-    BoundaryPatch getEastBoundaryPatch(){ return eastBoundaryPatch_; }
-    BoundaryPatch getWestBoundaryPatch(){ return westBoundaryPatch_; }
-    BoundaryPatch getNorthBoundaryPatch(){ return northBoundaryPatch_; }
-    BoundaryPatch getSouthBoundaryPatch(){ return southBoundaryPatch_; }
-    BoundaryPatch getTopBoundaryPatch(){ return topBoundaryPatch_; }
-    BoundaryPatch getBottomBoundaryPatch(){ return bottomBoundaryPatch_; }
+    BoundaryPatch getEastBoundaryPatch(){ return eastBoundaryPatchId_; }
+    BoundaryPatch getWestBoundaryPatch(){ return westBoundaryPatchId_; }
+    BoundaryPatch getNorthBoundaryPatch(){ return northBoundaryPatchId_; }
+    BoundaryPatch getSouthBoundaryPatch(){ return southBoundaryPatchId_; }
+    BoundaryPatch getTopBoundaryPatch(){ return topBoundaryPatchId_; }
+    BoundaryPatch getBottomBoundaryPatch(){ return bottomBoundaryPatchId_; }
+
+    Array3D<T> eastBoundaryPatch_;
+    Array3D<T> westBoundaryPatch_;
+    Array3D<T> northBoundaryPatch_;
+    Array3D<T> southBoundaryPatch_;
+    Array3D<T> topBoundaryPatch_;
+    Array3D<T> bottomBoundaryPatch_;
 
     void setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b);
 
@@ -131,12 +138,12 @@ protected:
     Array3D<T> facesK_;
 
     //- Boundary patches
-    BoundaryPatch eastBoundaryPatch_;
-    BoundaryPatch westBoundaryPatch_;
-    BoundaryPatch northBoundaryPatch_;
-    BoundaryPatch southBoundaryPatch_;
-    BoundaryPatch topBoundaryPatch_;
-    BoundaryPatch bottomBoundaryPatch_;
+    BoundaryPatch eastBoundaryPatchId_;
+    BoundaryPatch westBoundaryPatchId_;
+    BoundaryPatch northBoundaryPatchId_;
+    BoundaryPatch southBoundaryPatchId_;
+    BoundaryPatch topBoundaryPatchId_;
+    BoundaryPatch bottomBoundaryPatchId_;
 };
 
 #include "FieldI.h"

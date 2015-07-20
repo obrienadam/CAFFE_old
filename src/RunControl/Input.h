@@ -26,33 +26,18 @@
 #define INPUT_H
 
 #include <string>
-#include <fstream>
-#include <map>
+
+#include <boost/property_tree/ptree.hpp>
 
 class Input
 {
 public:
 
     Input();
-    Input(std::string filename);
-    ~Input();
+    Input(const std::string &caseFilename, const std::string &initialConditionsFilename);
 
-    int getInt(const std::string &parameter) const { return inputInts_[parameter]; }
-    double getDouble(const std::string &parameter) const { return inputDoubles_[parameter]; }
-    std::string getString(const std::string &parameter) const { return inputStrings_[parameter]; }
-
-    void openInputFile(std::string filename);
-    void print();
-
-private:
-
-    std::string filename_;
-    std::ifstream fin_;
-
-    mutable std::map<std::string, int> inputInts_;
-    mutable std::map<std::string, double> inputDoubles_;
-    mutable std::map<std::string, std::string> inputStrings_;
-
+    boost::property_tree::ptree caseParameters;
+    boost::property_tree::ptree initialConditions;
 };
 
 #endif

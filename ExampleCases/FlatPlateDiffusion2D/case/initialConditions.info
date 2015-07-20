@@ -1,0 +1,11 @@
+; Initial conditions: FlatPlate2D
+
+MetricConversion = 1.
+
+u
+{
+	Uniform
+	{
+		value = (1.,0.,0.)
+	}
+}

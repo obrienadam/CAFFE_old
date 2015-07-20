@@ -1,0 +1,15 @@
+; Initial conditions: SkewedCavity3D
+
+MetricConversion = 1.
+
+u
+{
+	type uniform
+	refVector (0,0,0)
+}
+
+p
+{
+	type uniform
+	refValue 0
+}

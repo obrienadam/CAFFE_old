@@ -14,7 +14,6 @@ int main(int argc, const char* argv[])
 
     try
     {
-        input.openInputFile("case/case.in");
         runControl.initialize(input);
         mesh.initialize(input);
         Output::print(mesh.meshStats());

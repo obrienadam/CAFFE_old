@@ -1,0 +1,62 @@
+; Example case: SkewedCavity3D
+
+RunControl
+{
+	terminationCondition iterations
+	maxNumberOfIterations 6000
+	fileWriteInterval 1
+	timeStep 5e-4
+	maxSimTime 48
+	maxRealTimeHours 48
+}
+
+Solver
+{
+	timeAccurate ON
+	relaxationFactorMomentum 0.6
+	relaxationFactorPCorr 0.4
+	rho 1
+	mu 0.01
+	numberOfPressureCorrections 3
+	numberOfInnerIterations 5
+}
+
+Boundaries
+{
+	east
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	west
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	north
+	{
+		type wall
+		refVector (1,0,0)
+		refValue 0
+	}
+	south
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	top
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	bottom
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+}

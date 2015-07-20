@@ -1,0 +1,62 @@
+; Example case: Diffuser3D
+
+RunControl
+{
+	terminationCondition iterations
+	maxNumberOfIterations 1000
+	fileWriteInterval 1
+	timeStep 2e-3
+	maxSimTime 48
+	maxRealTimeHours 48
+}
+
+Solver
+{
+	timeAccurate ON
+	numberOfInnerIterations 5
+	numberOfPressureCorrections 2
+	relaxationFactorMomentum 0.3
+	relaxationFactorPCorr 0.1
+	rho 998
+	mu 8.94e-4
+}
+
+Boundaries
+{
+	east
+	{
+		type outlet
+		refVector (0,0,0)
+		refValue 0
+	}
+	west
+	{
+		type inlet
+		refVector (3,0,0)
+		refValue 0
+	}
+	north
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	south
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	top
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+	bottom
+	{
+		type wall
+		refVector (0,0,0)
+		refValue 0
+	}
+}

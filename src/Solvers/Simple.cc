@@ -57,10 +57,10 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
     if(Solver::solutionType_ == Solver::STEADY)
         nInnerIters_ = 1;
     else
-        nInnerIters_ = input.getInt("numberOfInnerIterations");
+        nInnerIters_ = input.caseParameters.get<int>("Solver.numberOfInnerIterations");
 
-    omegaMomentum_ = input.getDouble("relaxationFactorMomentum");
-    omegaPCorr_ = input.getDouble("relaxationFactorPCorr");
+    omegaMomentum_ = input.caseParameters.get<double>("Solver.relaxationFactorMomentum");
+    omegaPCorr_ = input.caseParameters.get<double>("Solver.relaxationFactorPCorr");
 
     setBoundaries(input);
     setConstantFields(input);
@@ -94,15 +94,17 @@ void Simple::displayUpdateMessage()
 
 void Simple::setBoundaries(const Input &input)
 {
+    using namespace std;
+
     //- East bcs
-    if(input.getString("boundaryTypeEast") == "inlet" || input.getString("boundaryTypeEast") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.east.type") == "inlet" || input.caseParameters.get<string>("Boundaries.east.type") == "wall")
     {
-        uField_.setEastBoundary("fixed", std::stov(input.getString("boundaryRefVectorEast")));
+        uField_.setEastBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
         pField_.setEastBoundary("zeroGradient", 0.);
         pCorrField_.setEastBoundary("zeroGradient", 0.);
-        hField_.setEastBoundary("fixed", std::stov(input.getString("boundaryRefVectorEast")));
+        hField_.setEastBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
     }
-    else if(input.getString("boundaryTypeEast") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.east.type") == "outlet")
     {
         uField_.setEastBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setEastBoundary("fixed", 0.);
@@ -111,21 +113,21 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setEastBoundary(input.getString("boundaryTypeEast"), std::stov(input.getString("boundaryRefVectorEast")));
-        pField_.setEastBoundary(input.getString("boundaryTypeEast"), input.getDouble("boundaryRefValueEast"));
-        pCorrField_.setEastBoundary(input.getString("boundaryTypeEast"), input.getDouble("boundaryRefValueEast"));
-        hField_.setEastBoundary(input.getString("boundaryTypeEast"), std::stov(input.getString("boundaryRefVectorEast")));
+        uField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
+        pField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
+        pCorrField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
+        hField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
     }
 
     //- West bcs
-    if(input.getString("boundaryTypeWest") == "inlet" || input.getString("boundaryTypeWest") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.west.type") == "inlet" || input.caseParameters.get<string>("Boundaries.west.type") == "wall")
     {
-        uField_.setWestBoundary("fixed", std::stov(input.getString("boundaryRefVectorWest")));
+        uField_.setWestBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
         pField_.setWestBoundary("zeroGradient", 0.);
         pCorrField_.setWestBoundary("zeroGradient", 0.);
-        hField_.setWestBoundary("fixed", std::stov(input.getString("boundaryRefVectorWest")));
+        hField_.setWestBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
     }
-    else if(input.getString("boundaryTypeWest") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.west.type") == "outlet")
     {
         uField_.setWestBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setWestBoundary("fixed", 0.);
@@ -134,21 +136,21 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setWestBoundary(input.getString("boundaryTypeWest"), std::stov(input.getString("boundaryRefVectorWest")));
-        pField_.setWestBoundary(input.getString("boundaryTypeWest"), input.getDouble("boundaryRefValueWest"));
-        pCorrField_.setWestBoundary(input.getString("boundaryTypeWest"), input.getDouble("boundaryRefValueWest"));
-        hField_.setWestBoundary(input.getString("boundaryTypeWest"), std::stov(input.getString("boundaryRefVectorWest")));
+        uField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
+        pField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
+        pCorrField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
+        hField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
     }
 
     //- North bcs
-    if(input.getString("boundaryTypeNorth") == "inlet" || input.getString("boundaryTypeNorth") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.north.type") == "inlet" || input.caseParameters.get<string>("Boundaries.north.type") == "wall")
     {
-        uField_.setNorthBoundary("fixed", std::stov(input.getString("boundaryRefVectorNorth")));
+        uField_.setNorthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
         pField_.setNorthBoundary("zeroGradient", 0.);
         pCorrField_.setNorthBoundary("zeroGradient", 0.);
-        hField_.setNorthBoundary("fixed", std::stov(input.getString("boundaryRefVectorNorth")));
+        hField_.setNorthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
     }
-    else if(input.getString("boundaryTypeNorth") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.north.type") == "outlet")
     {
         uField_.setNorthBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setNorthBoundary("fixed", 0.);
@@ -157,21 +159,21 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setNorthBoundary(input.getString("boundaryTypeNorth"), std::stov(input.getString("boundaryRefVectorNorth")));
-        pField_.setNorthBoundary(input.getString("boundaryTypeNorth"), input.getDouble("boundaryRefValueNorth"));
-        pCorrField_.setNorthBoundary(input.getString("boundaryTypeNorth"), input.getDouble("boundaryRefValueNorth"));
-        hField_.setNorthBoundary(input.getString("boundaryTypeNorth"), std::stov(input.getString("boundaryRefVectorNorth")));
+        uField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
+        pField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
+        pCorrField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
+        hField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
     }
 
     //- South bcs
-    if(input.getString("boundaryTypeSouth") == "inlet" || input.getString("boundaryTypeSouth") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.south.type") == "inlet" || input.caseParameters.get<string>("Boundaries.south.type") == "wall")
     {
-        uField_.setSouthBoundary("fixed", std::stov(input.getString("boundaryRefVectorSouth")));
+        uField_.setSouthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
         pField_.setSouthBoundary("zeroGradient", 0.);
         pCorrField_.setSouthBoundary("zeroGradient", 0.);
-        hField_.setSouthBoundary("fixed", std::stov(input.getString("boundaryRefVectorSouth")));
+        hField_.setSouthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
     }
-    else if(input.getString("boundaryTypeSouth") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.south.type") == "outlet")
     {
         uField_.setSouthBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setSouthBoundary("fixed", 0.);
@@ -180,21 +182,21 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setSouthBoundary(input.getString("boundaryTypeSouth"), std::stov(input.getString("boundaryRefVectorSouth")));
-        pField_.setSouthBoundary(input.getString("boundaryTypeSouth"), input.getDouble("boundaryRefValueSouth"));
-        pCorrField_.setSouthBoundary(input.getString("boundaryTypeSouth"), input.getDouble("boundaryRefValueSouth"));
-        hField_.setSouthBoundary(input.getString("boundaryTypeSouth"), std::stov(input.getString("boundaryRefVectorSouth")));
+        uField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
+        pField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
+        pCorrField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
+        hField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
     }
 
     //- Top bcs
-    if(input.getString("boundaryTypeTop") == "inlet" || input.getString("boundaryTypeTop") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.top.type") == "inlet" || input.caseParameters.get<string>("Boundaries.top.type") == "wall")
     {
-        uField_.setTopBoundary("fixed", std::stov(input.getString("boundaryRefVectorTop")));
+        uField_.setTopBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
         pField_.setTopBoundary("zeroGradient", 0.);
         pCorrField_.setTopBoundary("zeroGradient", 0.);
-        hField_.setTopBoundary("fixed", std::stov(input.getString("boundaryRefVectorTop")));
+        hField_.setTopBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
     }
-    else if(input.getString("boundaryTypeTop") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.top.type") == "outlet")
     {
         uField_.setTopBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setTopBoundary("fixed", 0.);
@@ -203,21 +205,21 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setTopBoundary(input.getString("boundaryTypeTop"), std::stov(input.getString("boundaryRefVectorTop")));
-        pField_.setTopBoundary(input.getString("boundaryTypeTop"), input.getDouble("boundaryRefValueTop"));
-        pCorrField_.setTopBoundary(input.getString("boundaryTypeTop"), input.getDouble("boundaryRefValueTop"));
-        hField_.setTopBoundary(input.getString("boundaryTypeTop"), std::stov(input.getString("boundaryRefVectorTop")));
+        uField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
+        pField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
+        pCorrField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
+        hField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
     }
 
     //- Bottom bcs
-    if(input.getString("boundaryTypeBottom") == "inlet" || input.getString("boundaryTypeBottom") == "wall")
+    if(input.caseParameters.get<string>("Boundaries.top.type") == "inlet" || input.caseParameters.get<string>("Boundaries.top.type") == "wall")
     {
-        uField_.setBottomBoundary("fixed", std::stov(input.getString("boundaryRefVectorBottom")));
+        uField_.setBottomBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
         pField_.setBottomBoundary("zeroGradient", 0.);
         pCorrField_.setBottomBoundary("zeroGradient", 0.);
-        hField_.setBottomBoundary("fixed", std::stov(input.getString("boundaryRefVectorBottom")));
+        hField_.setBottomBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
     }
-    else if(input.getString("boundaryTypeBottom") == "outlet")
+    else if(input.caseParameters.get<string>("Boundaries.top.type") == "outlet")
     {
         uField_.setBottomBoundary("zeroGradient", Vector3D(0., 0., 0.));
         pField_.setBottomBoundary("fixed", 0.);
@@ -226,10 +228,10 @@ void Simple::setBoundaries(const Input &input)
     }
     else
     {
-        uField_.setBottomBoundary(input.getString("boundaryTypeBottom"), std::stov(input.getString("boundaryRefVectorBottom")));
-        pField_.setBottomBoundary(input.getString("boundaryTypeBottom"), input.getDouble("boundaryRefValueBottom"));
-        pCorrField_.setBottomBoundary(input.getString("boundaryTypeBottom"), input.getDouble("boundaryRefValueBottom"));
-        hField_.setBottomBoundary(input.getString("boundaryTypeBottom"), std::stov(input.getString("boundaryRefVectorTop")));
+        uField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
+        pField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
+        pCorrField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
+        hField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
     }
 }
 
@@ -243,8 +245,8 @@ void Simple::setConstantFields(const Input &input)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                rhoField_(i, j, k) = input.getDouble("rho");
-                muField_(i, j, k) = input.getDouble("mu");
+                rhoField_(i, j, k) = input.caseParameters.get<double>("Solver.rho");
+                muField_(i, j, k) = input.caseParameters.get<double>("Solver.mu");
             }
         }
     }
