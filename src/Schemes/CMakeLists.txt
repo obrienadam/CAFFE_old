@@ -10,4 +10,4 @@ set(SOURCE FvSchemeI.h
            FvVectorScheme.cc)
 
 add_library(Schemes ${HEADERS} ${SOURCE})
-target_link_libraries(Schemes HexaMesh)
+target_link_libraries(Schemes HexaFvmMesh)

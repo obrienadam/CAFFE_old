@@ -27,7 +27,7 @@
 
 #include "Solver.h"
 #include "Field.h"
-#include "BoundaryCondition.h"
+#include "PrimitiveBoundaryCondition.h"
 
 class Diffusion : public Solver
 {
@@ -42,6 +42,8 @@ protected:
 
     Field<double> phiField_;
     Field<Vector3D> gradPhiField_;
+
+    PrimitiveBoundaryCondition<double> bcs_;
 };
 
 #endif

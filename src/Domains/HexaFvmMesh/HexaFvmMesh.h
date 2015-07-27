@@ -39,7 +39,7 @@ class HexaFvmMesh : public StructuredMesh
 
 public:
 
-    enum RelativeLocation{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
+    enum Direction{EAST = 0, WEST = 1, NORTH = 2, SOUTH = 3, TOP = 4, BOTTOM = 5};
     enum {BSW = 0, BSE = 1, BNE = 2, BNW = 3, TSW = 4, TSE = 5, TNE = 6, TNW = 7};
 
     HexaFvmMesh();
@@ -48,7 +48,13 @@ public:
     void initialize(Input &input);
     void initialize(Array3D<Point3D>& nodes);
 
-    void addBoundaryMesh(const HexaFvmMesh &mesh, RelativeLocation relativeLocation);
+    void addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation);
+    bool eastMeshExists() const;
+    bool westMeshExists() const;
+    bool northMeshExists() const;
+    bool southMeshExists() const;
+    bool topMeshExists() const;
+    bool bottomMeshExists() const;
 
     virtual std::string meshStats();
 
@@ -139,6 +145,7 @@ public:
     int nCellsI() const { return cellCenters_.sizeI(); }
     int nCellsJ() const { return cellCenters_.sizeJ(); }
     int nCellsK() const { return cellCenters_.sizeK(); }
+    int nCells() const { return cellCenters_.size(); }
     int nFacesI() const { return faceCentersI_.sizeI(); }
     int nFacesJ() const { return faceCentersJ_.sizeJ(); }
     int nFacesK() const { return faceCentersK_.sizeK(); }
@@ -146,6 +153,27 @@ public:
     int uCellI() const { return cellCenters_.sizeI() - 1; }
     int uCellJ() const { return cellCenters_.sizeJ() - 1; }
     int uCellK() const { return cellCenters_.sizeK() - 1; }
+
+    double dE(int i, int j, int k) const { return dE_(i, j, k); }
+    double dW(int i, int j, int k) const { return dW_(i, j, k); }
+    double dN(int i, int j, int k) const { return dN_(i, j, k); }
+    double dS(int i, int j, int k) const { return dS_(i, j, k); }
+    double dT(int i, int j, int k) const { return dT_(i, j, k); }
+    double dB(int i, int j, int k) const { return dB_(i, j, k); }
+
+    Vector3D cE(int i, int j, int k) const { return cE_(i, j, k); }
+    Vector3D cW(int i, int j, int k) const { return cW_(i, j, k); }
+    Vector3D cN(int i, int j, int k) const { return cN_(i, j, k); }
+    Vector3D cS(int i, int j, int k) const { return cS_(i, j, k); }
+    Vector3D cT(int i, int j, int k) const { return cT_(i, j, k); }
+    Vector3D cB(int i, int j, int k) const { return cB_(i, j, k); }
+
+    double gE(int i, int j, int k) const { return gE_(i, j, k); }
+    double gW(int i, int j, int k) const { return gW_(i, j, k); }
+    double gN(int i, int j, int k) const { return gN_(i, j, k); }
+    double gS(int i, int j, int k) const { return gS_(i, j, k); }
+    double gT(int i, int j, int k) const { return gT_(i, j, k); }
+    double gB(int i, int j, int k) const { return gB_(i, j, k); }
 
     /**
      * @brief Locate the cell whose center is closest to a point, and store the indices.
@@ -187,6 +215,7 @@ private:
     void initializeCellToCellParameters();
     void initializeFaces();
     void initializeCellToFaceParameters();
+    void computeMeshMetrics();
 
     //- Geometric data pertaining only to the interior fvm mesh
     Array3D<Point3D> cellCenters_;
@@ -233,6 +262,13 @@ private:
     Array3D<double> cellToFaceDistancesS_;
     Array3D<double> cellToFaceDistancesT_;
     Array3D<double> cellToFaceDistancesB_;
+
+    //- Misc mesh metrics commonly used in fvm
+    Array3D<double> dE_, dW_, dN_, dS_, dT_, dB_;
+    Array3D<Vector3D> cE_, cW_, cN_, cS_, cT_, cB_;
+
+    //- Volume based interpolation factors
+    Array3D<double> gE_, gW_, gN_, gS_, gT_, gB_;
 
     const HexaFvmMesh *eastBoundaryMeshPtr_;
     const HexaFvmMesh *westBoundaryMeshPtr_;

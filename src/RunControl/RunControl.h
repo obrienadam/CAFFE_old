@@ -28,7 +28,6 @@
 #include <string>
 
 #include "Input.h"
-#include "DomainInterface.h"
 #include "Solver.h"
 #include "Time.h"
 

@@ -11,7 +11,8 @@
 
 StructuredMesh::StructuredMesh()
     :
-      name("UnnamedMesh")
+      name("UnnamedMesh"),
+      nTec360Outputs_(0)
 {
 
 }

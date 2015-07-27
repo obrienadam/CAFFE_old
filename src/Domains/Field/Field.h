@@ -56,6 +56,35 @@ public:
 
     const HexaFvmMesh& getMesh() const { return mesh_; }
 
+    void getSubfield(int iLower, int iUpper,
+                     int jLower, int jUpper,
+                     int kLower, int kUpper,
+                     Array3D<T> &subField) const;
+
+    void setValues(int iLower, int iUpper,
+                   int jLower, int jUpper,
+                   int kLower, int kUpper,
+                   T value);
+
+    void setValue(T value);
+
+    void setFixedBoundaryPatches(const T *refValues);
+    void setFixedBoundaryPatches(T refValue);
+
+    void setEastFacesFromPatch();
+    void setWestFacesFromPatch();
+    void setNorthFacesFromPatch();
+    void setSouthFacesFromPatch();
+    void setTopFacesFromPatch();
+    void setBottomFacesFromPatch();
+
+    void setZeroGradientBoundaryEast();
+    void setZeroGradientBoundaryWest();
+    void setZeroGradientBoundaryNorth();
+    void setZeroGradientBoundarySouth();
+    void setZeroGradientBoundaryTop();
+    void setZeroGradientBoundaryBottom();
+
     T& faceE(int i, int j, int k){ return facesI_(i + 1, j, k); }
     T& faceW(int i, int j, int k){ return facesI_(i, j, k); }
     T& faceN(int i, int j, int k){ return facesJ_(i, j + 1, k); }
@@ -83,44 +112,15 @@ public:
     T maxNeighbour(int i, int j, int k);
     T minNeighbour(int i, int j, int k);
 
-    void setEastBoundary(const std::string &boundaryType, T boundaryValue);
-    void setWestBoundary(const std::string &boundaryType, T boundaryValue);
-    void setNorthBoundary(const std::string &BoundaryType, T boundaryValue);
-    void setSouthBoundary(const std::string &boundaryType, T boundaryValue);
-    void setTopBoundary(const std::string &boundaryType, T boundaryValue);
-    void setBottomBoundary(const std::string &boundaryType, T boundaryValue);
-
-    void setBoundaryFields();
-
-    void setEastBoundaryField();
-    void setWestBoundaryField();
-    void setNorthBoundaryField();
-    void setSouthBoundaryField();
-    void setTopBoundaryField();
-    void setBottomBoundaryField();
-
-    BoundaryPatch getEastBoundaryPatch(){ return eastBoundaryPatchId_; }
-    BoundaryPatch getWestBoundaryPatch(){ return westBoundaryPatchId_; }
-    BoundaryPatch getNorthBoundaryPatch(){ return northBoundaryPatchId_; }
-    BoundaryPatch getSouthBoundaryPatch(){ return southBoundaryPatchId_; }
-    BoundaryPatch getTopBoundaryPatch(){ return topBoundaryPatchId_; }
-    BoundaryPatch getBottomBoundaryPatch(){ return bottomBoundaryPatchId_; }
-
-    Array3D<T> eastBoundaryPatch_;
-    Array3D<T> westBoundaryPatch_;
-    Array3D<T> northBoundaryPatch_;
-    Array3D<T> southBoundaryPatch_;
-    Array3D<T> topBoundaryPatch_;
-    Array3D<T> bottomBoundaryPatch_;
-
-    void setImplicitBoundaryCoeffs(int i, int j, int k, double *a, T &b);
-
     const Array3D<T>* cellData() const { return this; }
-
-    /**
-     * @brief Print the field to the console, for debugging purposes.
-     */
     void print();
+
+    Array3D<T> eastBoundaryPatch;
+    Array3D<T> westBoundaryPatch;
+    Array3D<T> northBoundaryPatch;
+    Array3D<T> southBoundaryPatch;
+    Array3D<T> topBoundaryPatch;
+    Array3D<T> bottomBoundaryPatch;
 
     std::string name;
 
@@ -136,14 +136,6 @@ protected:
     Array3D<T> facesI_;
     Array3D<T> facesJ_;
     Array3D<T> facesK_;
-
-    //- Boundary patches
-    BoundaryPatch eastBoundaryPatchId_;
-    BoundaryPatch westBoundaryPatchId_;
-    BoundaryPatch northBoundaryPatchId_;
-    BoundaryPatch southBoundaryPatchId_;
-    BoundaryPatch topBoundaryPatchId_;
-    BoundaryPatch bottomBoundaryPatchId_;
 };
 
 #include "FieldI.h"

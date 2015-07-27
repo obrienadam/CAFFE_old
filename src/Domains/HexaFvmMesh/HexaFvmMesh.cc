@@ -64,7 +64,7 @@ void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
     initializeCellsAndFaces();
 }
 
-void HexaFvmMesh::addBoundaryMesh(const HexaFvmMesh &mesh, RelativeLocation relativeLocation)
+void HexaFvmMesh::addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation)
 {
     switch(relativeLocation)
     {
@@ -87,6 +87,54 @@ void HexaFvmMesh::addBoundaryMesh(const HexaFvmMesh &mesh, RelativeLocation rela
         bottomBoundaryMeshPtr_ = &mesh;
         break;
     };
+}
+
+bool HexaFvmMesh::eastMeshExists() const
+{
+    if(eastBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
+}
+
+bool HexaFvmMesh::westMeshExists() const
+{
+    if(westBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
+}
+
+bool HexaFvmMesh::northMeshExists() const
+{
+    if(northBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
+}
+
+bool HexaFvmMesh::southMeshExists() const
+{
+    if(southBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
+}
+
+bool HexaFvmMesh::topMeshExists() const
+{
+    if(topBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
+}
+
+bool HexaFvmMesh::bottomMeshExists() const
+{
+    if(bottomBoundaryMeshPtr_ == NULL)
+        return false;
+    else
+        return true;
 }
 
 std::string HexaFvmMesh::meshStats()
@@ -606,6 +654,7 @@ void HexaFvmMesh::initializeCellsAndFaces()
     initializeCellToCellParameters();
     initializeFaces();
     initializeCellToFaceParameters();
+    computeMeshMetrics();
 }
 
 void HexaFvmMesh::initializeCells()
@@ -876,4 +925,83 @@ void HexaFvmMesh::initializeCellToFaceParameters()
             } // end for i
         } // end for j
     } // end for k
+}
+
+void HexaFvmMesh::computeMeshMetrics()
+{
+    int i, j, k;
+
+    dE_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dW_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dN_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dS_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dT_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+
+    cE_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cW_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cN_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cS_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cT_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+
+    gE_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gW_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gN_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gS_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gT_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+
+    for(k = 0; k < nCellsK(); ++k)
+    {
+        for(j = 0; j < nCellsJ(); ++j)
+        {
+            for(i = 0; i < nCellsI(); ++i)
+            {
+                dE_(i, j, k) = dot(fAreaNormE(i, j, k), fAreaNormE(i, j, k))/dot(fAreaNormE(i, j, k), rCellE(i, j, k));
+                dW_(i, j, k) = dot(fAreaNormW(i, j, k), fAreaNormW(i, j, k))/dot(fAreaNormW(i, j, k), rCellW(i, j, k));
+                dN_(i, j, k) = dot(fAreaNormN(i, j, k), fAreaNormN(i, j, k))/dot(fAreaNormN(i, j, k), rCellN(i, j, k));
+                dS_(i, j, k) = dot(fAreaNormS(i, j, k), fAreaNormS(i, j, k))/dot(fAreaNormS(i, j, k), rCellS(i, j, k));
+                dT_(i, j, k) = dot(fAreaNormT(i, j, k), fAreaNormT(i, j, k))/dot(fAreaNormT(i, j, k), rCellT(i, j, k));
+                dB_(i, j, k) = dot(fAreaNormB(i, j, k), fAreaNormB(i, j, k))/dot(fAreaNormB(i, j, k), rCellB(i, j, k));
+
+                cE_(i, j, k) = fAreaNormE(i, j, k) - rCellE(i, j, k)*dot(fAreaNormE(i, j, k), fAreaNormE(i, j, k))/dot(fAreaNormE(i, j, k), rCellE(i, j, k));
+                cW_(i, j, k) = fAreaNormW(i, j, k) - rCellW(i, j, k)*dot(fAreaNormW(i, j, k), fAreaNormW(i, j, k))/dot(fAreaNormW(i, j, k), rCellW(i, j, k));
+                cN_(i, j, k) = fAreaNormN(i, j, k) - rCellN(i, j, k)*dot(fAreaNormN(i, j, k), fAreaNormN(i, j, k))/dot(fAreaNormN(i, j, k), rCellN(i, j, k));
+                cS_(i, j, k) = fAreaNormS(i, j, k) - rCellS(i, j, k)*dot(fAreaNormS(i, j, k), fAreaNormS(i, j, k))/dot(fAreaNormS(i, j, k), rCellS(i, j, k));
+                cT_(i, j, k) = fAreaNormT(i, j, k) - rCellT(i, j, k)*dot(fAreaNormT(i, j, k), fAreaNormT(i, j, k))/dot(fAreaNormT(i, j, k), rCellT(i, j, k));
+                cB_(i, j, k) = fAreaNormB(i, j, k) - rCellB(i, j, k)*dot(fAreaNormB(i, j, k), fAreaNormB(i, j, k))/dot(fAreaNormB(i, j, k), rCellB(i, j, k));
+
+                if(i < uCellI() || eastBoundaryMeshPtr_ != NULL)
+                    gE_(i, j, k) = cellVol(i + 1, j, k)/(cellVol(i + 1, j, k) + cellVol(i, j, k));
+                else
+                    gE_(i, j, k) = 1.;
+
+                if(i > 0 || westBoundaryMeshPtr_ != NULL)
+                    gW_(i, j, k) = cellVol(i - 1, j, k)/(cellVol(i - 1, j, k) + cellVol(i, j, k));
+                else
+                    gW_(i, j, k) = 1.;
+
+                if(j < uCellJ() || northBoundaryMeshPtr_ != NULL)
+                    gN_(i, j, k) = cellVol(i, j + 1, k)/(cellVol(i, j + 1, k) + cellVol(i, j, k));
+                else
+                    gN_(i, j, k) = 1.;
+
+                if(j > 0 || southBoundaryMeshPtr_ != NULL)
+                    gS_(i, j, k) = cellVol(i, j - 1, k)/(cellVol(i, j - 1, k) + cellVol(i, j, k));
+                else
+                    gS_(i, j, k) = 1.;
+
+                if(k < uCellK() || topBoundaryMeshPtr_ != NULL)
+                    gT_(i, j, k) = cellVol(i, j, k + 1)/(cellVol(i, j, k + 1) + cellVol(i, j, k));
+                else
+                    gT_(i, j, k) = 1.;
+
+                if(k > 0 || bottomBoundaryMeshPtr_ != NULL)
+                    gB_(i, j, k) = cellVol(i, j, k - 1)/(cellVol(i, j, k - 1) + cellVol(i, j, k));
+                else
+                    gB_(i, j, k) = 1.;
+            }
+        }
+    }
 }

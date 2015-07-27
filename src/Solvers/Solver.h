@@ -26,7 +26,6 @@ protected:
     void createMatrices(int nMatrices, int nVectors, int nnz);
     void destroyMatrices();
     void zeroMatrices();
-    void computeMeshMetrics();
 
     const HexaFvmMesh &mesh_;
 
@@ -35,8 +34,6 @@ protected:
     std::vector<SparseVector> x_, b_, res_;
     IndexMap indexMap_;
 
-    Array3D<double> dE_, dW_, dN_, dS_, dT_, dB_;
-    Array3D<Vector3D> cE_, cW_, cN_, cS_, cT_, cB_;
     Time time_;
 
     int biCGStabIters_;

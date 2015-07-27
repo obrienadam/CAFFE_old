@@ -5,11 +5,11 @@
 #include <fstream>
 #include <vector>
 
-#include "DomainInterface.h"
-#include "Point3D.h"
+#include "Input.h"
 #include "Array3D.h"
+#include "Point3D.h"
 
-class StructuredMesh : public DomainInterface
+class StructuredMesh
 {
 public:
 
@@ -38,7 +38,8 @@ protected:
     //- Structured data. In this class, only the geometric mesh is stored
     Array3D<Point3D> nodes_;
 
-    //- File output object
+    //- File output
+    int nTec360Outputs_;
     std::ofstream foutRestart_, foutTec360_;
 };
 

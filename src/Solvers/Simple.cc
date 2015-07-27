@@ -47,7 +47,8 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
       dField_(mesh, Field<double>::CONSERVED, "dField"),
       hField_(mesh, Field<Vector3D>::CONSERVED, "hField"),
       gradScalarField_(mesh, Field<Vector3D>::AUXILLARY, "gradScalarField"),
-      gradVectorField_(mesh, Field<Tensor3D>::AUXILLARY, "gradVectorField")
+      gradVectorField_(mesh, Field<Tensor3D>::AUXILLARY, "gradVectorField"),
+      flowBcs_(input, uField_, pField_, pCorrField_, rhoField_, muField_, hField_, dField_)
 {
     Solver::createMatrices(2, 3, 7);
     mesh_.addArray3DToTecplotOutput(uField_.name, uField_.cellData());
@@ -62,7 +63,6 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
     omegaMomentum_ = input.caseParameters.get<double>("Solver.relaxationFactorMomentum");
     omegaPCorr_ = input.caseParameters.get<double>("Solver.relaxationFactorPCorr");
 
-    setBoundaries(input);
     setConstantFields(input);
 }
 
@@ -92,190 +92,26 @@ void Simple::displayUpdateMessage()
 
 // ************* Protected Methods *************
 
-void Simple::setBoundaries(const Input &input)
-{
-    using namespace std;
-
-    //- East bcs
-    if(input.caseParameters.get<string>("Boundaries.east.type") == "inlet" || input.caseParameters.get<string>("Boundaries.east.type") == "wall")
-    {
-        uField_.setEastBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
-        pField_.setEastBoundary("zeroGradient", 0.);
-        pCorrField_.setEastBoundary("zeroGradient", 0.);
-        hField_.setEastBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.east.type") == "outlet")
-    {
-        uField_.setEastBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setEastBoundary("fixed", 0.);
-        pCorrField_.setEastBoundary("fixed", 0.);
-        hField_.setEastBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
-        pField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
-        pCorrField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
-        hField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), std::stov(input.caseParameters.get<string>("Boundaries.east.refVector")));
-    }
-
-    //- West bcs
-    if(input.caseParameters.get<string>("Boundaries.west.type") == "inlet" || input.caseParameters.get<string>("Boundaries.west.type") == "wall")
-    {
-        uField_.setWestBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
-        pField_.setWestBoundary("zeroGradient", 0.);
-        pCorrField_.setWestBoundary("zeroGradient", 0.);
-        hField_.setWestBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.west.type") == "outlet")
-    {
-        uField_.setWestBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setWestBoundary("fixed", 0.);
-        pCorrField_.setWestBoundary("fixed", 0.);
-        hField_.setWestBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
-        pField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
-        pCorrField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
-        hField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), std::stov(input.caseParameters.get<string>("Boundaries.west.refVector")));
-    }
-
-    //- North bcs
-    if(input.caseParameters.get<string>("Boundaries.north.type") == "inlet" || input.caseParameters.get<string>("Boundaries.north.type") == "wall")
-    {
-        uField_.setNorthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
-        pField_.setNorthBoundary("zeroGradient", 0.);
-        pCorrField_.setNorthBoundary("zeroGradient", 0.);
-        hField_.setNorthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.north.type") == "outlet")
-    {
-        uField_.setNorthBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setNorthBoundary("fixed", 0.);
-        pCorrField_.setNorthBoundary("fixed", 0.);
-        hField_.setNorthBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
-        pField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
-        pCorrField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
-        hField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), std::stov(input.caseParameters.get<string>("Boundaries.north.refVector")));
-    }
-
-    //- South bcs
-    if(input.caseParameters.get<string>("Boundaries.south.type") == "inlet" || input.caseParameters.get<string>("Boundaries.south.type") == "wall")
-    {
-        uField_.setSouthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
-        pField_.setSouthBoundary("zeroGradient", 0.);
-        pCorrField_.setSouthBoundary("zeroGradient", 0.);
-        hField_.setSouthBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.south.type") == "outlet")
-    {
-        uField_.setSouthBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setSouthBoundary("fixed", 0.);
-        pCorrField_.setSouthBoundary("fixed", 0.);
-        hField_.setSouthBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
-        pField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
-        pCorrField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
-        hField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), std::stov(input.caseParameters.get<string>("Boundaries.south.refVector")));
-    }
-
-    //- Top bcs
-    if(input.caseParameters.get<string>("Boundaries.top.type") == "inlet" || input.caseParameters.get<string>("Boundaries.top.type") == "wall")
-    {
-        uField_.setTopBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
-        pField_.setTopBoundary("zeroGradient", 0.);
-        pCorrField_.setTopBoundary("zeroGradient", 0.);
-        hField_.setTopBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.top.type") == "outlet")
-    {
-        uField_.setTopBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setTopBoundary("fixed", 0.);
-        pCorrField_.setTopBoundary("fixed", 0.);
-        hField_.setTopBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
-        pField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
-        pCorrField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
-        hField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
-    }
-
-    //- Bottom bcs
-    if(input.caseParameters.get<string>("Boundaries.top.type") == "inlet" || input.caseParameters.get<string>("Boundaries.top.type") == "wall")
-    {
-        uField_.setBottomBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
-        pField_.setBottomBoundary("zeroGradient", 0.);
-        pCorrField_.setBottomBoundary("zeroGradient", 0.);
-        hField_.setBottomBoundary("fixed", std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
-    }
-    else if(input.caseParameters.get<string>("Boundaries.top.type") == "outlet")
-    {
-        uField_.setBottomBoundary("zeroGradient", Vector3D(0., 0., 0.));
-        pField_.setBottomBoundary("fixed", 0.);
-        pCorrField_.setBottomBoundary("fixed", 0.);
-        hField_.setBottomBoundary("zeroGradient", Vector3D(0., 0., 0.));
-    }
-    else
-    {
-        uField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.bottom.refVector")));
-        pField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
-        pCorrField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
-        hField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.top.type"), std::stov(input.caseParameters.get<string>("Boundaries.top.refVector")));
-    }
-}
-
 void Simple::setConstantFields(const Input &input)
 {
-    int i, j, k;
+    double rho, mu;
 
-    for(k = 0; k < mesh_.nCellsK(); ++k)
-    {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
-        {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
-            {
-                rhoField_(i, j, k) = input.caseParameters.get<double>("Solver.rho");
-                muField_(i, j, k) = input.caseParameters.get<double>("Solver.mu");
-            }
-        }
-    }
+    rho = input.caseParameters.get<double>("Solver.rho");
+    mu = input.caseParameters.get<double>("Solver.mu");
 
-    rhoField_.setEastBoundary("zeroGradient", 0.);
-    rhoField_.setWestBoundary("zeroGradient", 0.);
-    rhoField_.setNorthBoundary("zeroGradient", 0.);
-    rhoField_.setSouthBoundary("zeroGradient", 0.);
-    rhoField_.setTopBoundary("zeroGradient", 0.);
-    rhoField_.setBottomBoundary("zeroGradient", 0.);
-    muField_.setEastBoundary("zeroGradient", 0.);
-    muField_.setWestBoundary("zeroGradient", 0.);
-    muField_.setNorthBoundary("zeroGradient", 0.);
-    muField_.setSouthBoundary("zeroGradient", 0.);
-    muField_.setTopBoundary("zeroGradient", 0.);
-    muField_.setBottomBoundary("zeroGradient", 0.);
-    dField_.setEastBoundary("zeroGradient", 0.);
-    dField_.setWestBoundary("zeroGradient", 0.);
-    dField_.setNorthBoundary("zeroGradient", 0.);
-    dField_.setSouthBoundary("zeroGradient", 0.);
-    dField_.setTopBoundary("zeroGradient", 0.);
-    dField_.setBottomBoundary("zeroGradient", 0.);
+    rhoField_.setValue(rho);
+    muField_.setValue(mu);
+
+    rhoField_.setFixedBoundaryPatches(rho);
+    muField_.setFixedBoundaryPatches(mu);
+
     Output::printLine();
 
-    rhoField_.setBoundaryFields();
-    muField_.setBoundaryFields();
+    flowBcs_.rhoFieldBcs.setBoundaries();
+    flowBcs_.muFieldBcs.setBoundaries();
 
-    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, rhoField_);
-    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, muField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::NON_WEIGHTED, rhoField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::NON_WEIGHTED, muField_);
 }
 
 void Simple::computeMomentum(double timeStep)
@@ -303,32 +139,33 @@ void Simple::computeMomentum(double timeStep)
                 else
                     a0P = 0.;
 
-                a[1] =  min(massFlowField_.faceE(i, j, k), 0.) - muField_.faceE(i, j, k)*dE_(i, j, k);
-                a[2] = -max(massFlowField_.faceW(i, j, k), 0.) - muField_.faceW(i, j, k)*dW_(i, j, k);
-                a[3] =  min(massFlowField_.faceN(i, j, k), 0.) - muField_.faceN(i, j, k)*dN_(i, j, k);
-                a[4] = -max(massFlowField_.faceS(i, j, k), 0.) - muField_.faceS(i, j, k)*dS_(i, j, k);
-                a[5] =  min(massFlowField_.faceT(i, j, k), 0.) - muField_.faceT(i, j, k)*dT_(i, j, k);
-                a[6] = -max(massFlowField_.faceB(i, j, k), 0.) - muField_.faceB(i, j, k)*dB_(i, j, k);
+                a[1] =  min(massFlowField_.faceE(i, j, k), 0.) - muField_.faceE(i, j, k)*mesh_.dE(i, j, k);
+                a[2] = -max(massFlowField_.faceW(i, j, k), 0.) - muField_.faceW(i, j, k)*mesh_.dW(i, j, k);
+                a[3] =  min(massFlowField_.faceN(i, j, k), 0.) - muField_.faceN(i, j, k)*mesh_.dN(i, j, k);
+                a[4] = -max(massFlowField_.faceS(i, j, k), 0.) - muField_.faceS(i, j, k)*mesh_.dS(i, j, k);
+                a[5] =  min(massFlowField_.faceT(i, j, k), 0.) - muField_.faceT(i, j, k)*mesh_.dT(i, j, k);
+                a[6] = -max(massFlowField_.faceB(i, j, k), 0.) - muField_.faceB(i, j, k)*mesh_.dB(i, j, k);
 
-                a[0] = (max(massFlowField_.faceE(i, j, k), 0.) + muField_.faceE(i, j, k)*dE_(i, j, k)
-                        - min(massFlowField_.faceW(i, j, k), 0.) + muField_.faceW(i, j, k)*dW_(i, j, k)
-                        + max(massFlowField_.faceN(i, j, k), 0.) + muField_.faceN(i, j, k)*dN_(i, j, k)
-                        - min(massFlowField_.faceS(i, j, k), 0.) + muField_.faceS(i, j, k)*dS_(i, j, k)
-                        + max(massFlowField_.faceT(i, j, k), 0.) + muField_.faceT(i, j, k)*dT_(i, j, k)
-                        - min(massFlowField_.faceB(i, j, k), 0.) + muField_.faceB(i, j, k)*dB_(i, j, k)
+                a[0] = (max(massFlowField_.faceE(i, j, k), 0.) + muField_.faceE(i, j, k)*mesh_.dE(i, j, k)
+                        - min(massFlowField_.faceW(i, j, k), 0.) + muField_.faceW(i, j, k)*mesh_.dW(i, j, k)
+                        + max(massFlowField_.faceN(i, j, k), 0.) + muField_.faceN(i, j, k)*mesh_.dN(i, j, k)
+                        - min(massFlowField_.faceS(i, j, k), 0.) + muField_.faceS(i, j, k)*mesh_.dS(i, j, k)
+                        + max(massFlowField_.faceT(i, j, k), 0.) + muField_.faceT(i, j, k)*mesh_.dT(i, j, k)
+                        - min(massFlowField_.faceB(i, j, k), 0.) + muField_.faceB(i, j, k)*mesh_.dB(i, j, k)
                         + a0P)/omegaMomentum_;
 
                 b = a0P*uField0_(i, j, k);
-                uField_.setImplicitBoundaryCoeffs(i, j, k, a, b);
                 b += -mesh_.cellVol(i, j, k)*gradPField_(i, j, k);
                 b += (1. - omegaMomentum_)*a[0]*uFieldStar_(i, j, k);
 
-                b += muField_.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), cE_(i, j, k));
-                b += muField_.faceW(i, j, k)*dot(gradUField_.faceW(i, j, k), cW_(i, j, k));
-                b += muField_.faceN(i, j, k)*dot(gradUField_.faceN(i, j, k), cN_(i, j, k));
-                b += muField_.faceS(i, j, k)*dot(gradUField_.faceS(i, j, k), cS_(i, j, k));
-                b += muField_.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), cT_(i, j, k));
-                b += muField_.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), cB_(i, j, k));
+                b += muField_.faceE(i, j, k)*dot(gradUField_.faceE(i, j, k), mesh_.cE(i, j, k));
+                b += muField_.faceW(i, j, k)*dot(gradUField_.faceW(i, j, k), mesh_.cW(i, j, k));
+                b += muField_.faceN(i, j, k)*dot(gradUField_.faceN(i, j, k), mesh_.cN(i, j, k));
+                b += muField_.faceS(i, j, k)*dot(gradUField_.faceS(i, j, k), mesh_.cS(i, j, k));
+                b += muField_.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), mesh_.cT(i, j, k));
+                b += muField_.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), mesh_.cB(i, j, k));
+
+                flowBcs_.setImplicitMomentumBoundaryCoefficients(i, j, k, a, b);
 
                 rowNo = indexMap_(i, j, k, 0);
                 cols[0] = rowNo;
@@ -382,13 +219,13 @@ void Simple::computeMomentum(double timeStep)
     Output::print("Simple", "momentum matrix solution completed in " + time_.elapsedTime());
     Output::print("Simple", "biCGStab iterations: " + to_string(biCGStabIters_));
 
-    dField_.setBoundaryFields();
-    hField_.setBoundaryFields();
+    flowBcs_.uFieldBcs.setBoundaries();
+    flowBcs_.dFieldBcs.setBoundaries();
+    flowBcs_.hFieldBcs.setBoundaries();
 
     FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, dField_, gradScalarField_);
     FvVectorScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, hField_, gradVectorField_);
 
-    uField_.setBoundaryFields();
     rhieChowInterpolateFaces();
 }
 
@@ -411,12 +248,12 @@ void Simple::computePCorr()
                 if(!indexMap_.isActive(i, j, k))
                     continue;
 
-                a[1] = rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*dE_(i, j, k);
-                a[2] = rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*dW_(i, j, k);
-                a[3] = rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*dN_(i, j, k);
-                a[4] = rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*dS_(i, j, k);
-                a[5] = rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*dT_(i, j, k);
-                a[6] = rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*dB_(i, j, k);
+                a[1] = rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*mesh_.dE(i, j, k);
+                a[2] = rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*mesh_.dW(i, j, k);
+                a[3] = rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*mesh_.dN(i, j, k);
+                a[4] = rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*mesh_.dS(i, j, k);
+                a[5] = rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*mesh_.dT(i, j, k);
+                a[6] = rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*mesh_.dB(i, j, k);
 
                 a[0] = -(a[1] + a[2] + a[3] + a[4] + a[5] + a[6]);
 
@@ -424,7 +261,7 @@ void Simple::computePCorr()
                         + massFlowField_.faceN(i, j, k) - massFlowField_.faceS(i, j, k)
                         + massFlowField_.faceT(i, j, k) - massFlowField_.faceB(i, j, k);
 
-                pCorrField_.setImplicitBoundaryCoeffs(i, j, k, a, b);
+                flowBcs_.setImplicitPCorrBoundaryCoefficients(i, j, k, a, b);
 
                 rowNo = indexMap_(i, j, k, 0);
                 cols[0] = indexMap_(i, j, k, 0);
@@ -465,7 +302,8 @@ void Simple::computePCorr()
     Output::print("Simple", "pressure correction matrix solution completed in " + time_.elapsedTime());
     Output::print("Simple", "biCGStab iterations: " + to_string(biCGStabIters_));
 
-    pCorrField_.setBoundaryFields();
+    flowBcs_.pCorrFieldBcs.setBoundaries();
+
     FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, pCorrField_, gradPCorrField_);
     FvScalarScheme::computeCellCenteredGradients(FvScheme::DIVERGENCE_THEOREM, pCorrField_, gradPCorrField_);
 }
@@ -483,30 +321,30 @@ void Simple::correct()
                 if(indexMap_.isInactive(i, j, k))
                     continue;
 
-                if(i == 0 && uField_.getWestBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(i == 0 && flowBcs_.getTypeWest() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceW(i, j, k) += -rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*dW_(i, j, k);
+                    massFlowField_.faceW(i, j, k) += -rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*mesh_.dW(i, j, k);
                 }
-                if(j == 0 && uField_.getSouthBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(j == 0 && flowBcs_.getTypeSouth() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceS(i, j, k) += -rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*dS_(i, j, k);
+                    massFlowField_.faceS(i, j, k) += -rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*mesh_.dS(i, j, k);
                 }
-                if(k == 0 && uField_.getBottomBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(k == 0 && flowBcs_.getTypeBottom() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceB(i, j, k) += -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*dB_(i, j, k);
+                    massFlowField_.faceB(i, j, k) += -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
-                if(i < mesh_.uCellI() || uField_.getEastBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(i < mesh_.uCellI() || flowBcs_.getTypeEast() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceE(i, j, k) += -rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*(pCorrField_(i + 1, j, k) - pCorrField_(i, j, k))*dE_(i, j, k);
+                    massFlowField_.faceE(i, j, k) += -rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*(pCorrField_(i + 1, j, k) - pCorrField_(i, j, k))*mesh_.dE(i, j, k);
                 }
-                if(j < mesh_.uCellJ() || uField_.getNorthBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(j < mesh_.uCellJ() || flowBcs_.getTypeNorth() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceN(i, j, k) += -rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*(pCorrField_(i, j + 1, k) - pCorrField_(i, j, k))*dN_(i, j, k);
+                    massFlowField_.faceN(i, j, k) += -rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*(pCorrField_(i, j + 1, k) - pCorrField_(i, j, k))*mesh_.dN(i, j, k);
                 }
-                if(k < mesh_.uCellK() || uField_.getTopBoundaryPatch() == Field<Vector3D>::ZERO_GRADIENT)
+                if(k < mesh_.uCellK() || flowBcs_.getTypeTop() == SimpleBoundaryCondition::OUTLET)
                 {
-                    massFlowField_.faceT(i, j, k) += -rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*(pCorrField_(i, j, k + 1) - pCorrField_(i, j, k))*dT_(i, j, k);
+                    massFlowField_.faceT(i, j, k) += -rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*(pCorrField_(i, j, k + 1) - pCorrField_(i, j, k))*mesh_.dT(i, j, k);
                 }
 
                 massFlowField_(i, j, k) = massFlowField_.faceE(i, j, k) - massFlowField_.faceW(i, j, k)
@@ -519,8 +357,8 @@ void Simple::correct()
         }
     }
 
-    pField_.setBoundaryFields();
-    uField_.setBoundaryFields();
+    flowBcs_.pFieldBcs.setBoundaries();
+    flowBcs_.uFieldBcs.setBoundaries();
 
     FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, pField_, gradPField_);
     FvVectorScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, uField_, gradUField_);
@@ -567,20 +405,20 @@ void Simple::rhieChowInterpolateFaces()
 
                 if(i == 0)
                 {
-                    massFlowField_.faceW(i, j, k) = -dot(hField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k)) - dField_.faceW(i, j, k)*(pField_(i - 1, j, k) - pField_(i, j, k))*dW_(i, j, k);
+                    massFlowField_.faceW(i, j, k) = -dot(hField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k)) - dField_.faceW(i, j, k)*(pField_(i - 1, j, k) - pField_(i, j, k))*mesh_.dW(i, j, k);
                 }
                 if(j == 0)
                 {
-                    massFlowField_.faceS(i, j, k) = -dot(hField_.faceS(i, j, k), mesh_.fAreaNormS(i, j, k)) - dField_.faceS(i, j, k)*(pField_(i, j - 1, k) - pField_(i, j, k))*dS_(i, j, k);
+                    massFlowField_.faceS(i, j, k) = -dot(hField_.faceS(i, j, k), mesh_.fAreaNormS(i, j, k)) - dField_.faceS(i, j, k)*(pField_(i, j - 1, k) - pField_(i, j, k))*mesh_.dS(i, j, k);
                 }
                 if(k == 0)
                 {
-                    massFlowField_.faceB(i, j, k) = -dot(hField_.faceB(i, j, k), mesh_.fAreaNormB(i, j, k)) - dField_.faceB(i, j, k)*(pField_(i, j, k - 1) - pField_(i, j, k))*dB_(i, j, k);
+                    massFlowField_.faceB(i, j, k) = -dot(hField_.faceB(i, j, k), mesh_.fAreaNormB(i, j, k)) - dField_.faceB(i, j, k)*(pField_(i, j, k - 1) - pField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
-                massFlowField_.faceE(i, j, k) = dot(hField_.faceE(i, j, k), mesh_.fAreaNormE(i, j, k)) - dField_.faceE(i, j, k)*(pField_(i + 1, j, k) - pField_(i, j, k))*dE_(i, j, k);
-                massFlowField_.faceN(i, j, k) = dot(hField_.faceN(i, j, k), mesh_.fAreaNormN(i, j, k)) - dField_.faceN(i, j, k)*(pField_(i, j + 1, k) - pField_(i, j, k))*dN_(i, j, k);
-                massFlowField_.faceT(i, j, k) = dot(hField_.faceT(i, j, k), mesh_.fAreaNormT(i, j, k)) - dField_.faceT(i, j, k)*(pField_(i, j, k + 1) - pField_(i, j, k))*dT_(i, j, k);
+                massFlowField_.faceE(i, j, k) = dot(hField_.faceE(i, j, k), mesh_.fAreaNormE(i, j, k)) - dField_.faceE(i, j, k)*(pField_(i + 1, j, k) - pField_(i, j, k))*mesh_.dE(i, j, k);
+                massFlowField_.faceN(i, j, k) = dot(hField_.faceN(i, j, k), mesh_.fAreaNormN(i, j, k)) - dField_.faceN(i, j, k)*(pField_(i, j + 1, k) - pField_(i, j, k))*mesh_.dN(i, j, k);
+                massFlowField_.faceT(i, j, k) = dot(hField_.faceT(i, j, k), mesh_.fAreaNormT(i, j, k)) - dField_.faceT(i, j, k)*(pField_(i, j, k + 1) - pField_(i, j, k))*mesh_.dT(i, j, k);
             }
         }
     }

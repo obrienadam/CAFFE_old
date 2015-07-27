@@ -28,6 +28,7 @@
 
 #include "Solver.h"
 #include "Field.h"
+#include "SimpleBoundaryCondition.h"
 
 class Simple : public Solver
 {
@@ -40,7 +41,6 @@ public:
 
 public:
 
-    void setBoundaries(const Input &input);
     void setConstantFields(const Input &input);
 
     void computeMomentum(double timeStep);
@@ -71,6 +71,8 @@ public:
     //- Misc gradient fields to be used for reconstructions of misc fields
     Field<Vector3D> gradScalarField_;
     Field<Tensor3D> gradVectorField_;
+
+    SimpleBoundaryCondition flowBcs_;
 
     int nInnerIters_;
     double omegaMomentum_, omegaPCorr_;

@@ -19,4 +19,4 @@ target_link_libraries(sparseMatrixTest Math RunControl)
 # Build parallel test unit
 
 add_executable(parallelTest ParallelTest.cc)
-target_link_libraries(parallelTest Parallel Math HexaMesh)
+target_link_libraries(parallelTest Parallel Math HexaFvmMesh)

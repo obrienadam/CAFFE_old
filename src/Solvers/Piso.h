@@ -10,6 +10,7 @@ public:
     Piso(const Input &input, const HexaFvmMesh &mesh);
 
     virtual double solve(double timeStep);
+    virtual void displayUpdateMessage();
 
 protected:
 

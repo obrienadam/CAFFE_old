@@ -60,8 +60,8 @@ endif()
 set(INCLUDE_DIR src/DataStructures
 		src/Math
 		src/RunControl
-		src/Domains
-		src/Domains/Meshes
+                src/Domains/HexaFvmMesh
+                src/Domains/Field
 		src/Solvers
 		src/Schemes
                 src/Parallel)

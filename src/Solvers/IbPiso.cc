@@ -165,7 +165,6 @@ void IbPiso::computeIbCoeffs()
                     A_[0].setRow(indexMap_(i, j, k, 0), 9, colNos, values);
 
                     //- Add the equation for the ghost cells to the coefficient matrix form pressure
-
                     for(m = 0; m < 8; ++m)
                     {
                         values[0] = -1;

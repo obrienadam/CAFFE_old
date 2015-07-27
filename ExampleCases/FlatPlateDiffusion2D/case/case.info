@@ -3,7 +3,7 @@
 RunControl
 {
 	terminationCondition iterations
-	maxNumberOfIterations 5
+	maxNumberOfIterations 2
 	fileWriteInterval 1
 	timeStep 1
 	maxSimTime 48
@@ -20,7 +20,7 @@ Boundaries
 	east
 	{
 		type fixed
-		refValue 0
+		refValue 1
 	}
 
 	west
@@ -31,14 +31,14 @@ Boundaries
 
 	north
 	{
-		type fixed
+		type zeroGradient
 		refValue 0.5
 	}
 
 	south
 	{
 		type fixed
-		refValue 0.5
+		refValue 0.1
 	}
 
 	top

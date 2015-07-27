@@ -14,4 +14,4 @@ set(SOURCE Solver.cc
            IbPiso.cc)
 
 add_library(Solvers ${HEADERS} ${SOURCE})
-target_link_libraries(Solvers ${Boost_LIBRARIES})
+target_link_libraries(Solvers Field)

@@ -35,21 +35,14 @@ Diffusion::Diffusion(const Input &input, const HexaFvmMesh &mesh)
     :
       Solver(input, mesh),
       phiField_(mesh, Field<double>::CONSERVED, "phi"),
-      gradPhiField_(mesh, Field<Vector3D>::AUXILLARY, "gradPhi")
+      gradPhiField_(mesh, Field<Vector3D>::AUXILLARY, "gradPhi"),
+      bcs_(input, phiField_)
 {
     using namespace std;
 
     Solver::createMatrices(1, 1, 7);
     mesh_.addArray3DToTecplotOutput(phiField_.name, phiField_.cellData());
     mesh_.addArray3DToTecplotOutput(gradPhiField_.name, gradPhiField_.cellData());
-
-    //- Set field boundaries
-    phiField_.setEastBoundary(input.caseParameters.get<string>("Boundaries.east.type"), input.caseParameters.get<double>("Boundaries.east.refValue"));
-    phiField_.setWestBoundary(input.caseParameters.get<string>("Boundaries.west.type"), input.caseParameters.get<double>("Boundaries.west.refValue"));
-    phiField_.setNorthBoundary(input.caseParameters.get<string>("Boundaries.north.type"), input.caseParameters.get<double>("Boundaries.north.refValue"));
-    phiField_.setSouthBoundary(input.caseParameters.get<string>("Boundaries.south.type"), input.caseParameters.get<double>("Boundaries.south.refValue"));
-    phiField_.setTopBoundary(input.caseParameters.get<string>("Boundaries.top.type"), input.caseParameters.get<double>("Boundaries.top.refValue"));
-    phiField_.setBottomBoundary(input.caseParameters.get<string>("Boundaries.bottom.type"), input.caseParameters.get<double>("Boundaries.bottom.refValue"));
 }
 
 Diffusion::~Diffusion()
@@ -76,17 +69,17 @@ double Diffusion::solve(double time_Step)
                 else
                     a0P = 0.;
 
-                a[1] = dE_(i, j, k);
-                a[2] = dW_(i, j, k);
-                a[3] = dN_(i, j, k);
-                a[4] = dS_(i, j, k);
-                a[5] = dT_(i, j, k);
-                a[6] = dB_(i, j, k);
+                a[1] = mesh_.dE(i, j, k);
+                a[2] = mesh_.dW(i, j, k);
+                a[3] = mesh_.dN(i, j, k);
+                a[4] = mesh_.dS(i, j, k);
+                a[5] = mesh_.dT(i, j, k);
+                a[6] = mesh_.dB(i, j, k);
 
                 a[0] = -(a[1] + a[2] + a[3] + a[4] + a[5] + a[6]) + a0P;
                 b = a0P*phiField_(i, j, k);
 
-                phiField_.setImplicitBoundaryCoeffs(i, j, k, a, b);
+                bcs_.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
                 cols[0] = indexMap_(i, j, k, 0);
                 cols[1] = indexMap_(i + 1, j, k, 0);
@@ -122,6 +115,7 @@ double Diffusion::solve(double time_Step)
     time_.toc();
     Output::print("Diffusion", "solution of linear system completed in " + time_.elapsedTime());
 
+    bcs_.setBoundaries();
     FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, phiField_, gradPhiField_);
     FvScalarScheme::computeCellCenteredGradients(FvScheme::DIVERGENCE_THEOREM, phiField_, gradPhiField_);
 

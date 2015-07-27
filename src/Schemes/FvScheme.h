@@ -33,7 +33,7 @@ class FvScheme
 public:
 
     enum GradientEvaluationMethod{LEAST_SQUARES, DIVERGENCE_THEOREM};
-    enum InterpolationMethod{VOLUME_WEIGHTED, DISTANCE_WEIGHTED, NON_WEIGHTED};
+    enum InterpolationMethod{VOLUME_WEIGHTED, NON_WEIGHTED};
 
     FvScheme();
     ~FvScheme();

@@ -29,3 +29,10 @@ double Piso::solve(double timeStep)
     return computeContinuityError();
 }
 
+void Piso::displayUpdateMessage()
+{
+    Output::print("Piso", "completed iteration.");
+    Output::print("Piso", "BiCGStab iterations: " + std::to_string(biCGStabIters_));
+    Output::print("Piso", "Max continuity error: " + std::to_string(continuityError_));
+    Output::printLine();
+}
