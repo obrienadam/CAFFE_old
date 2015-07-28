@@ -235,4 +235,10 @@ template<class T>
 void PrimitiveBoundaryCondition<T>::setFixedBoundaries()
 {
     internalField_.setFixedBoundaryPatches(refValues_);
+    internalField_.setEastFacesFromPatch();
+    internalField_.setWestFacesFromPatch();
+    internalField_.setNorthFacesFromPatch();
+    internalField_.setSouthFacesFromPatch();
+    internalField_.setTopFacesFromPatch();
+    internalField_.setBottomFacesFromPatch();
 }

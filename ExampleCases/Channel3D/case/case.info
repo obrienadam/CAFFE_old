@@ -13,11 +13,11 @@ RunControl
 
 Solver
 {
-	timeAccurate ON
+	timeAccurate OFF
 	relaxationFactorMomentum 0.5
 	relaxationFactorPCorr 0.5
-	rho 998
-	mu 8.94e-4
+	rho 1
+	mu 0.001
 	numberOfPressureCorrections 3
 	numberOfInnerIterations 4
 }
@@ -28,30 +28,36 @@ Boundaries
 	{
 		type outlet
 		refVector (0,0,0)
+		refValue 0
 	}
 	west
 	{
 		type inlet
 		refVector (1,0,0)
+		refValue 0
 	}
 	north
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 	south
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 	top
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 	bottom
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 }

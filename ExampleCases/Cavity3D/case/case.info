@@ -27,35 +27,41 @@ Boundaries
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 
 	west
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 
 	north
 	{
 		type wall
 		refVector (10,0,10)
+		refValue 0
 	}
 
 	south
 	{
 		type wall
 		refVector (-10,0,-10)
+		refValue 0
 	}
 
 	top
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 
 	bottom
 	{
 		type wall
 		refVector (0,0,0)
+		refValue 0
 	}
 }
