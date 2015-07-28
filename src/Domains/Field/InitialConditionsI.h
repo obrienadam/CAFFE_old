@@ -26,32 +26,11 @@
 
 #include "InitialConditions.h"
 #include "Output.h"
-#include "InputStringProcessing.h"
 
 template <class T>
 void InitialConditions::setInitialConditions(Field<T> &field)
 {
-    std::string buffer;
 
-    findOpeningBrace();
-
-    while(!inputFile_.eof())
-    {
-        getline(inputFile_, buffer);
-
-        InputStringProcessing::processBuffer(buffer, true);
-
-        if(buffer.empty())
-            continue;
-        else if(buffer == "Sphere")
-            setSphere(field);
-        else if(buffer == "Uniform")
-            setUniform(field);
-        else if(buffer == "}")
-            break;
-        else
-            Output::raiseException("InitialConditions", "setInitialConditions", "unrecognized initial condition \"" + buffer + "\"");
-    }
 }
 
 template <class T>

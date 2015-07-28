@@ -2,100 +2,27 @@
 
 #include "HexaMeshGen.h"
 #include "Output.h"
-#include "InputStringProcessing.h"
 #include "Geometry.h"
 
 HexaMeshGen::HexaMeshGen()
-    :
-      metricConversion_(1.),
-      meshName_("UnnamedMesh")
 {
-    
+    using namespace boost::property_tree;
+
+    read_info("mesh/structuredMesh.info", meshParameters_);
+    meshName_ = meshParameters_.get<std::string>("MeshName");
+    metricConversion_ = meshParameters_.get<double>("MetricConversion");
+
+    for(int i = 1; i <= 8; ++i)
+        vertices_[i - 1] = metricConversion_*std::stov(meshParameters_.get<std::string>("Vertices.v" + std::to_string(i)));
+
+    resolution_ = std::stov(meshParameters_.get<std::string>("Resolution"));
+
+    nodes_.allocate((int)resolution_.x, (int)resolution_.y, (int)resolution_.z);
+
+    Output::print("HexaMeshGen", "Successfully read file \"mesh/structuredMesh.info\".");
 }
 
 //******************** Public methods **************************
-
-void HexaMeshGen::readMeshInputFile(std::string filename)
-{
-    using namespace std;
-    
-    string buffer;
-    ifstream inputFile(filename.c_str());
-    
-    if(!inputFile.is_open())
-    {      
-        Output::raiseException("HexaMeshGen", "readMeshInputFile", "mesh input file not found.");
-    }
-    
-    while(!inputFile.eof())
-    {
-        // Get a line from the buffer and process it
-        
-        getline(inputFile, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer);
-        
-        // Check to see if the buffer is empty
-        
-        if(buffer.empty())
-            continue;
-        
-        // Check the contents of the buffer, which must be a header. Pass the inputfile to the apropriate method
-        
-        if(buffer.substr(0, buffer.find("=")) == "MetricConversion")
-        {
-            buffer = buffer.substr(buffer.find("=") + 1, buffer.length());
-            metricConversion_ = stod(buffer);
-        }
-        else if(buffer.substr(0, buffer.find("=")) == "MeshName")
-        {
-            buffer = buffer.substr(buffer.find("=") + 1, buffer.length());
-            meshName_ = buffer;
-        }
-        else if(buffer == "Vertices")
-            readVertices(inputFile);
-        else if(buffer == "Resolution")
-            readResolution(inputFile);
-        else
-            Output::raiseException("HexaMeshGen", "readMeshInputFile", "Unrecognized input field header " + buffer + ".");
-    }
-}
-
-void HexaMeshGen::writeMeshFile()
-{
-    using namespace std;
-
-    int i, j, k, l;
-
-    ofstream fout("mesh/structuredMesh.dat");
-
-    Output::print("HexaMeshGen", "Writing mesh file...");
-
-    fout << "TITLE = " << "\"" + meshName_ + "\"" << endl
-         << "VARIABLES = \"x\", \"y\", \"z\"" << endl
-         << "FILETYPE = GRID" << endl
-         << "ZONE I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
-         << "DATAPACKING = BLOCK" << endl;
-
-    for(l = 0; l < 3; ++l)
-    {
-        for(k = 0; k < nodes_.sizeK(); ++k)
-        {
-            for(j = 0; j < nodes_.sizeJ(); ++j)
-            {
-                for(i = 0; i < nodes_.sizeI(); ++i)
-                {
-                    fout << nodes_(i, j, k)(l) << " ";
-                }
-
-                fout << endl;
-            }
-        }
-    }
-
-    fout.close();
-
-    Output::print("HexaMeshGen", "Finished writing mesh file.");
-}
 
 void HexaMeshGen::generateMesh()
 {
@@ -146,129 +73,47 @@ void HexaMeshGen::generateMesh()
     Output::print("HexaMeshGen", "Mesh generation complete.");
 }
 
-void HexaMeshGen::generateBoxMesh(double dx, double dy, double dz)
+void HexaMeshGen::writeMeshFile()
 {
-    int i, j, k;
+    using namespace std;
 
-    for(k = 0; k < nodes_.sizeK(); ++k)
+    int i, j, k, l;
+
+    ofstream fout("mesh/structuredMesh.dat");
+
+    Output::print("HexaMeshGen", "Writing mesh file...");
+
+    fout << "TITLE = " << "\"" + meshName_ + "\"" << endl
+         << "VARIABLES = \"x\", \"y\", \"z\"" << endl
+         << "FILETYPE = GRID" << endl
+         << "ZONE I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
+         << "DATAPACKING = BLOCK" << endl;
+
+    for(l = 0; l < 3; ++l)
     {
-        for(j = 0; j < nodes_.sizeJ(); ++j)
+        for(k = 0; k < nodes_.sizeK(); ++k)
         {
-            for(i = 0; i < nodes_.sizeI(); ++i)
+            for(j = 0; j < nodes_.sizeJ(); ++j)
             {
+                for(i = 0; i < nodes_.sizeI(); ++i)
+                {
+                    fout << nodes_(i, j, k)(l) << " ";
+                }
 
-                nodes_(i, j, k) = Point3D( dx*double(i)/double(nodes_.sizeI() - 1),
-                                           dy*double(j)/double(nodes_.sizeJ() - 1),
-                                           dz*double(k)/double(nodes_.sizeK() - 1) );
-            } // end for i
-        } // end for j
-    } // end for k
+                fout << endl;
+            }
+        }
+    }
+
+    fout.close();
+
+    Output::print("HexaMeshGen", "Finished writing mesh file.");
 }
 
 void HexaMeshGen::checkMesh()
 {
     // Checks for non-planar surfaces
 
-    if(!Geometry::checkHexahedronSurfacesIsPlanar(vertices_.data()))
+    if(!Geometry::checkHexahedronSurfacesIsPlanar(vertices_))
         Output::raiseException("HexaMeshGen", "checkMesh", "one or more surfaces of the mesh geometry is not planar, which is not currently supported.");
-}
-
-//****************** Private methods ******************************
-
-void HexaMeshGen::readVertices(std::ifstream& inputFile)
-{
-    using namespace std;
-
-    string buffer;
-
-    // Make sure the vertex list is empty since push_back is used
-    vertices_.clear();
-
-    while(!inputFile.eof())
-    {
-        // Get a line from the file and process it
-
-        getline(inputFile, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer);
-
-        if(buffer.empty())
-            continue;
-        else if(buffer != "{")
-            Output::raiseException("HexaMeshGen", "readVertices", "Expected a \"{\", but received a \"" + buffer + "\".");
-
-        // Input is good, break
-
-        break;
-    }
-
-    // Begin reading the vertices
-    while(true)
-    {
-        getline(inputFile, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer, false);
-
-        if(buffer.empty())
-            continue;
-        else if(buffer == "}")
-        {
-            if(vertices_.size() != 8)
-                Output::raiseException("HexaMeshGen", "readVertices", "invalid number of vertices specified.");
-            else
-                break;
-        }
-
-        // buffer should contain a bracketed vector
-        vertices_.push_back(stov(buffer));
-    }
-
-    Output::print("HexaMeshGen: Successfully initialized domain vertices.");
-
-    checkMesh();
-}
-
-void HexaMeshGen::readResolution(std::ifstream& inputFile)
-{
-    using namespace std;
-
-    int nI, nJ, nK;
-    Vector3D tmpVec;
-    string buffer;
-
-    while(!inputFile.eof())
-    {
-        // Get a line from the file and process it
-
-        getline(inputFile, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer);
-
-        if(buffer.empty())
-            continue;
-        else if(buffer != "{")
-            Output::raiseException("HexaMeshGen", "readResolution", "Expected a \"{\", but received a \"" + buffer + "\".");
-
-        // Input is good, break
-        break;
-    }
-
-    // Begin reading the vertices
-
-    while(true)
-    {
-        getline(inputFile, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer, false);
-
-        if(buffer.empty())
-            continue;
-        else if(buffer == "}")
-            break;
-
-        tmpVec = stov(buffer);
-
-        nI = int(tmpVec.x);
-        nJ = int(tmpVec.y);
-        nK = int(tmpVec.z);
-        nodes_.allocate(nI, nJ, nK);
-    }
-
-    Output::print("HexaMeshGen", "Successfully allocated mesh nodes.");
 }

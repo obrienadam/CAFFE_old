@@ -5,6 +5,9 @@
 #include <fstream>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/info_parser.hpp>
+
 #include "Array3D.h"
 #include "Point3D.h"
 
@@ -16,28 +19,23 @@ public:
     //- Constructors and destructors
     HexaMeshGen();
 
-    //- HexaMesh file input and output
-    void readMeshInputFile(std::string filename);
-    void writeMeshFile();
-
     //- Mesh generation
     void generateMesh();
-    void generateBoxMesh(double dx, double dy, double dz);
+    void writeMeshFile();
 
     //- Mesh check
     void checkMesh();
 
 private:
 
-    //- Helper functions for reading mesh files
-    void readVertices(std::ifstream& inputFile);
-    void readResolution(std::ifstream& inputFile);
-
+    std::string meshName_;
     double metricConversion_;
 
-    std::vector<Point3D> vertices_;
+    Point3D vertices_[8];
+    Vector3D resolution_;
     Array3D<Point3D> nodes_;
-    std::string meshName_;
+
+    boost::property_tree::ptree meshParameters_;
 };
 
 #endif

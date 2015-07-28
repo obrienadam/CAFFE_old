@@ -10,8 +10,8 @@ int main(int argc, const char* argv[])
     try
     {
         HexaMeshGen hexaMeshGen;
-        hexaMeshGen.readMeshInputFile("mesh/structuredMesh.in");
         hexaMeshGen.generateMesh();
+        hexaMeshGen.checkMesh();
         hexaMeshGen.writeMeshFile();
     }
     catch (const char* errorMessage)

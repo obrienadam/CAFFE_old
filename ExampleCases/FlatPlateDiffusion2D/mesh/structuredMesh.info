@@ -1,0 +1,18 @@
+; hexaMesh input file
+
+MeshName FlatPlate2D
+MetricConversion 0.1
+
+Vertices
+{
+	v1 (0,0,0)
+	v2 (1,0,0)
+	v3 (1,1,0)
+	v4 (0,1,0)
+	v5 (0,0,1)
+	v6 (1,0,1)
+	v7 (1,1,1)
+	v8 (0,1,1)
+}
+
+Resolution (201,201,2)

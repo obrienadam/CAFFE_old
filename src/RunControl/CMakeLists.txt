@@ -2,16 +2,14 @@
 # Author: Adam O'Brien
 
 set(HEADERS ArgsList.h
-	    Version.h
-            InputStringProcessing.h
+            Version.h
 	    Input.h
 	    Output.h
             RunControl.h
             Time.h)
 
 set(SOURCE ArgsList.cc
-   	   Version.cc
-           InputStringProcessing.cc
+           Version.cc
  	   Input.cc
            Output.cc
            RunControl.cc

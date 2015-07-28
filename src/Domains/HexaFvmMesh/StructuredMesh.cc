@@ -2,9 +2,10 @@
 #include <algorithm>
 #include <sstream>
 
+#include <boost/algorithm/string.hpp>
+
 #include "StructuredMesh.h"
 #include "Output.h"
-#include "InputStringProcessing.h"
 
 
 // ************* Public Methods *************
@@ -139,45 +140,45 @@ void StructuredMesh::writeTec360(double time)
 void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name, int &nI, int &nJ, int &nK)
 {
     using namespace std;
+    using namespace boost::algorithm;
 
     int i;
     string buffer;
-    vector<string> bufferVec;
-
+    vector<string> splitVec;
 
     while(!fin.eof())
     {
         getline(fin, buffer);
-        buffer = InputStringProcessing::processBuffer(buffer, false);
 
-        if(buffer.empty())
+        splitVec.clear();
+        splitVec = split(splitVec, buffer, is_any_of(" ,=\""), token_compress_on);
+
+        if(splitVec.empty())
             continue;
 
-        bufferVec = InputStringProcessing::partition(buffer, " ,=\"");
-
-        if(bufferVec[0] == "TITLE")
-            name = bufferVec[1];
-        else if(bufferVec[0] == "VARIABLES")
+        if(splitVec[0] == "TITLE")
+            name = splitVec[1];
+        else if(splitVec[0] == "VARIABLES")
             continue;
-        else if(bufferVec[0] == "ZONE")
+        else if(splitVec[0] == "ZONE")
         {
             for(i = 1; i < 7; i += 2)
             {
-                if(bufferVec[i] == "I")
-                    nI = stoi(bufferVec[i + 1]);
-                else if(bufferVec[i] == "J")
-                    nJ = stoi(bufferVec[i + 1]);
-                else if(bufferVec[i] == "K")
-                    nK = stoi(bufferVec[i + 1]);
+                if(splitVec[i] == "I")
+                    nI = stoi(splitVec[i + 1]);
+                else if(splitVec[i] == "J")
+                    nJ = stoi(splitVec[i + 1]);
+                else if(splitVec[i] == "K")
+                    nK = stoi(splitVec[i + 1]);
                 else
-                    Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + bufferVec[i] + "\".");
+                    Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + splitVec[i] + "\".");
             }
         }
-        else if(bufferVec[0] == "FILETYPE")
+        else if(splitVec[0] == "FILETYPE")
             continue;
-        else if(bufferVec[0] == "DATAPACKING")
+        else if(splitVec[0] == "DATAPACKING")
             break;
         else
-            Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "invalid mesh header \"" + bufferVec[0] + "\".");
+            Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "invalid mesh header \"" + splitVec[0] + "\".");
     }
 }
