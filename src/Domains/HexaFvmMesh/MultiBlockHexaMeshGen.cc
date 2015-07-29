@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -157,6 +156,3 @@ void MultiBlockHexaMeshGen::getOwnershipRange(int nEntities, int nProcs, int pro
         iUpper = iLower + nEntitiesThisProc - 1;
     }
 }
-=======
-#include "MultiBlockHexaMeshGen.h"
->>>>>>> dd610b5763d66236723e62dc145c1660439db2a6
