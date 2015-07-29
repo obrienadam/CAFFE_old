@@ -6,26 +6,21 @@
 
 #include "Input.h"
 #include "HexaFvmMesh.h"
-#include "Parallel.h"
 
 class MultiBlockHexaFvmMesh
 {
-
-private:
-
-    int lBlockNo_, uBlockNo_, nBlocksThisProc_;
-    std::vector<HexaFvmMesh> blocks_;
-
 public:
 
     MultiBlockHexaFvmMesh();
 
-    std::string name;
 
-    void initialize(Input& input);
-    void allocate(int nBlocks);
 
-    void writeTec360(double time = 0, std::string directoryName = "");
+private:
+
+    std::vector<HexaFvmMesh> blocks_;
+
+    int nProcesses_, lProcess_, uProcess_;
+
 };
 
 #endif
