@@ -45,7 +45,7 @@ public:
     HexaFvmMesh();
     HexaFvmMesh(const HexaFvmMesh& other);
 
-    void initialize(Input &input);
+    void initialize(const std::string &filename);
     void initialize(Array3D<Point3D>& nodes);
 
     void addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation);

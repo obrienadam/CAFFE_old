@@ -9,6 +9,11 @@
 
 MultiBlockHexaMeshGen::MultiBlockHexaMeshGen()
 {
+
+}
+
+void MultiBlockHexaMeshGen::readFile()
+{
     using namespace boost::property_tree;
 
     ptree multiBlockMeshParameters;
@@ -80,10 +85,10 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
                     }
                 }
 
-                subMesh.resetFileStream();
-                subMesh.name = "mesh/multiBlockStructuredMesh/structuredMesh_block" + std::to_string(subMeshNo);
+                subMesh.name = "structuredMesh_block" + std::to_string(subMeshNo);
                 subMesh.initialize(localNodes);
-                subMesh.writeTec360();
+                subMesh.writeTec360(0, "mesh/multiBlockStructuredMesh");
+                subMesh.resetFileStream();
 
                 if(i < nBlocksI_ - 1)
                     eastBlockNo = k*nBlocksI_*nBlocksJ_ + j*nBlocksI_ + i + 1;

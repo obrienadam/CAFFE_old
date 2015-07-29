@@ -14,8 +14,8 @@ RunControl
 Solver
 {
 	timeAccurate OFF
-	relaxationFactorMomentum 0.5
-	relaxationFactorPCorr 0.5
+	relaxationFactorMomentum 0.7
+	relaxationFactorPCorr 0.3
 	rho 1
 	mu 0.001
 	numberOfPressureCorrections 3

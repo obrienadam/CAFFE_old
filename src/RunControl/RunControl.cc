@@ -21,7 +21,6 @@
  * This file contains the implementations for class RunControl.
  */
 
-#include <sstream>
 #include <boost/filesystem.hpp>
 
 #include "RunControl.h"
@@ -106,14 +105,8 @@ void RunControl::displayStartMessage()
 {
     using namespace std;
 
-    ostringstream message;
-
-    Output::printLine();
-
-    message << "Beginning simulation. Terminating on condition: " << terminationCondition_ << "." << endl
-            << "Iterations beginning on " << time_.currentTime() << ".";
-
-    Output::print(message.str());
+    Output::print("RunControl", "Beginning simulation. Terminating on condition: " + terminationCondition_);
+    Output::print("RunControl", "Iterations beginning on " + time_.currentTime() + ".");
 }
 
 void RunControl::displayUpdateMessage()
@@ -143,7 +136,7 @@ void RunControl::displayUpdateMessage()
             << "Elapsed time (hh:mm:ss)   |      " << time_.elapsedTime() << endl
             << "Residual norm             |      " << residualNorm;
 
-    Output::print(message.str());
+    Output::print("RunControl", message.str());
     Output::printLine();
 }
 
@@ -160,6 +153,6 @@ void RunControl::displayEndMessage()
             << "Simulation time: " << simTime_ << endl
             << "Elapsed time: " << time_.elapsedTime();
 
-    Output::print(message.str());
+    Output::print("RunControl", message.str());
     Output::printLine();
 }

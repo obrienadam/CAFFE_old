@@ -13,6 +13,8 @@ public:
 
     MultiBlockHexaFvmMesh();
 
+    void initialize();
+
     int nBlocks() const { return blocks_.size(); }
 
 private:

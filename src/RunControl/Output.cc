@@ -25,28 +25,23 @@
 #include <iomanip>
 
 #include "Output.h"
+#include "Parallel.h"
 
-void Output::print(const std::string& message)
+void Output::print(const std::string &message)
 {
-    std::cout << std::endl << message << std::endl;
+    if(Parallel::isMainProcessor())
+        std::cout << message << std::endl;
 }
 
-void Output::print(const std::vector<std::string>& vector)
+void Output::print(const std::string &className, const std::string &message)
 {
-    for(uint i = 0; i < vector.size(); ++i)
-    {
-        std::cout << "Element " << i << ": " << vector[i] << std::endl;
-    }
-}
-
-void Output::print(std::string className, std::string message)
-{
-    std::cout << className + ": " << message << std::endl;
+    if(Parallel::isMainProcessor())
+        std::cout << className + ": " << message << std::endl;
 }
 
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
-    throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
+    throw ("on process" + std::to_string(Parallel::processNo()) + ", in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
 }
 
 void Output::issueWarning(std::string className, std::string methodName, std::string warningDescription)
@@ -58,26 +53,29 @@ void Output::printCaffeHeader()
 {
     using namespace std;
 
+    if(Parallel::isMainProcessor())
+    {
+        printLine();
 
-    printLine();
+        cout << "|  || ___\n"
+             << "|  ||/ _  \\ \\\n"				\
+             << "|  ||\\__/ | | |\n"
+             << "|  | \\___/  | | CAFFE\n"
+             << "|   \\______/  /\n"
+             << " \\___________/\n"
+             << endl
+             << "  Computational Algorithm Framework for Fluid Equations (CAFFE)\n"
+             << endl
+             << "                      Author: Adam O'Brien\n"
+             << "	            E-mail: roni511@gmail.com\n"
+             << endl;
 
-    cout << "|  || ___\n"
-         << "|  ||/ _  \\ \\\n"				\
-         << "|  ||\\__/ | | |\n"
-         << "|  | \\___/  | | CAFFE\n"
-         << "|   \\______/  /\n"
-         << " \\___________/\n"
-         << endl
-         << "  Computational Algorithm Framework for Fluid Equations (CAFFE)\n"
-         << endl
-         << "                      Author: Adam O'Brien\n"
-         << "	            E-mail: roni511@gmail.com\n"
-         << endl;
-
-    printLine();
+        printLine();
+    }
 }
 
 void Output::printLine()
 {
-    std::cout << "------------------------------------------------------------------" << std::endl;
+    if(Parallel::isMainProcessor())
+        std::cout << "------------------------------------------------------------------" << std::endl;
 }

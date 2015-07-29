@@ -31,10 +31,10 @@ public:
     virtual std::string meshStats();
 
     //- Initialize from input file
-    virtual void initialize(std::string filename);
+    virtual void initialize(const std::string &filename);
 
     //- Output methods
-    virtual void writeTec360(double time = 0.);
+    virtual void writeTec360(double time, const std::string &directoryName);
     void resetFileStream();
     static void readTecplotMeshHeader(std::ifstream &fin, std::string &name, int& nI, int& nJ, int& nK);
 
@@ -46,8 +46,7 @@ protected:
     Array3D<Point3D> nodes_;
 
     //- File output
-    int nTec360Outputs_;
-    std::ofstream foutRestart_, foutTec360_;
+    std::ofstream foutTec360_;
 };
 
 #endif

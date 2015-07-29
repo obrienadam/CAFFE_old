@@ -9,6 +9,7 @@ public:
 
     MultiBlockHexaMeshGen();
 
+    void readFile();
     void generateMesh();
     void writeMeshFiles();
 

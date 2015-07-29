@@ -2,14 +2,19 @@
 #include <string>
 
 #include "HexaMeshGen.h"
+#include "Parallel.h"
 
 int main(int argc, const char* argv[])
 {
     using namespace std;
 
+    HexaMeshGen hexaMeshGen;
+
+    Parallel::initialize();
+
     try
     {
-        HexaMeshGen hexaMeshGen;
+        hexaMeshGen.readFile();
         hexaMeshGen.generateMesh();
         hexaMeshGen.checkMesh();
         hexaMeshGen.writeMeshFile();
@@ -18,6 +23,8 @@ int main(int argc, const char* argv[])
     {
         cerr << "Error: " << errorMessage << endl;
     }
+
+    Parallel::finalize();
 
     return 0;
 }

@@ -6,6 +6,7 @@
 
 #include "HexaFvmMesh.h"
 #include "Diffusion.h"
+#include "Parallel.h"
 
 int main(int argc, const char* argv[])
 {
@@ -15,10 +16,12 @@ int main(int argc, const char* argv[])
     RunControl runControl;
     HexaFvmMesh mesh;
 
+    Parallel::initialize();
+
     try
     {
         runControl.initialize(input);
-        mesh.initialize(input);
+        mesh.initialize("mesh/structuredMesh.dat");
         Output::print(mesh.meshStats());
 
         Diffusion diffusion(input, mesh);
@@ -41,6 +44,8 @@ int main(int argc, const char* argv[])
     {
         cerr << "Error: " << errorMessage << endl;
     }
+
+    Parallel::finalize();
 
     return 0;
 }

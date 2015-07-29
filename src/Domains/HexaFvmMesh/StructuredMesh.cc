@@ -12,17 +12,13 @@
 
 StructuredMesh::StructuredMesh()
     :
-      name("UnnamedMesh"),
-      nTec360Outputs_(0)
+      name("UnnamedMesh")
 {
 
 }
 
 StructuredMesh::~StructuredMesh()
 {
-    if(foutRestart_.is_open())
-        foutRestart_.close();
-
     if(foutTec360_.is_open())
         foutTec360_.close();
 }
@@ -56,7 +52,7 @@ std::string StructuredMesh::meshStats()
     return stats.str();
 }
 
-void StructuredMesh::initialize(std::string filename)
+void StructuredMesh::initialize(const std::string &filename)
 {
     using namespace std;
 
@@ -66,6 +62,8 @@ void StructuredMesh::initialize(std::string filename)
 
     int i, j, k, l;
     int nI, nJ, nK;
+
+    Output::print("StructuredMesh", "initializing structured mesh...");
 
     fin.open(filename.c_str());
 
@@ -92,6 +90,8 @@ void StructuredMesh::initialize(std::string filename)
     }
 
     fin.close();
+
+    Output::print("StructuredMesh", "initialization of structured mesh complete.");
 }
 
 void StructuredMesh::resetFileStream()
@@ -100,10 +100,12 @@ void StructuredMesh::resetFileStream()
         foutTec360_.close();
 }
 
-void StructuredMesh::writeTec360(double time)
+void StructuredMesh::writeTec360(double time, const std::string &directoryName)
 {
+    using namespace std;
+
     int nI, nJ, nK;
-    int i, j, k;
+    int i, j, k, l;
 
     nI = nodes_.sizeI();
     nJ = nodes_.sizeJ();
@@ -111,29 +113,33 @@ void StructuredMesh::writeTec360(double time)
 
     if(!foutTec360_.is_open())
     {
-        foutTec360_.open((name + ".dat").c_str());
+        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
 
-        foutTec360_ << "TITLE=" << name << "\n"
-                    << "STRANDID=1, SOLUTIONTIME=" << time << "\n"
-                    << "VARIABLES = " << "\"x\", \"y\", \"z\", " << "\n"
-                    << "ZONE I=" << nI << ", J=" << nJ << ", K=" << nK << "\n"
-                    << "ZONETYPE=ORDERED, DATAPACKING=POINT" << "\n\n";
+        foutTec360_ << "TITLE=\"" << name << "\"" << endl
+                    << "STRANDID=1" << endl
+                    << "SOLUTIONTIME=" << time << endl
+                    << "VARIABLES = " << "\"x\", \"y\", \"z\", " << endl
+                    << "ZONE I=" << nI << ", J=" << nJ << ", K=" << nK << endl
+                    << "ZONETYPE=ORDERED" << endl
+                    << "DATAPACKING=BLOCK" << endl
+                    << endl;
     }
 
-    for(k = 0; k < nK; ++k)
+    for(l = 0; l < 3; ++l)
     {
-        for(j = 0; j < nJ; ++j)
+        for(k = 0; k < nK; ++k)
         {
-            for(i = 0; i < nI; ++i)
+            for(j = 0; j < nJ; ++j)
             {
-                 foutTec360_ << nodes_(i, j, k).x << " " << nodes_(i, j, k).y << " " << nodes_(i, j, k).z << "\n";
-            } // end for i
-        } // end for j
-    } // end for k
+                for(i = 0; i < nI; ++i)
+                {
+                    foutTec360_ << nodes_(i, j, k)(l) << " ";
+                } // end for i
 
-    ++nTec360Outputs_;
-
-    foutTec360_.close();
+                foutTec360_ << endl;
+            } // end for j
+        } // end for k
+    } // end for l
 }
 
 // ************* Protected Methods *************
@@ -146,6 +152,7 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
     int i;
     string buffer;
     vector<string> splitVec;
+    bool nISet = false, nJSet = false, nKSet = false;
 
     while(!fin.eof())
     {
@@ -154,8 +161,11 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
         splitVec.clear();
         splitVec = split(splitVec, buffer, is_any_of(" ,=\""), token_compress_on);
 
-        if(splitVec.empty())
+        if(splitVec[0].empty())
             continue;
+
+        for(i = 0; i < splitVec.size(); ++i)
+            to_upper(splitVec[i]);
 
         if(splitVec[0] == "TITLE")
             name = splitVec[1];
@@ -166,20 +176,38 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
             for(i = 1; i < 7; i += 2)
             {
                 if(splitVec[i] == "I")
+                {
                     nI = stoi(splitVec[i + 1]);
+                    nISet = true;
+                }
                 else if(splitVec[i] == "J")
+                {
                     nJ = stoi(splitVec[i + 1]);
+                    nJSet = true;
+                }
                 else if(splitVec[i] == "K")
+                {
                     nK = stoi(splitVec[i + 1]);
+                    nKSet = true;
+                }
                 else
                     Output::raiseException("StructuredMesh", "initialize", "invalid zone specifier \"" + splitVec[i] + "\".");
             }
         }
         else if(splitVec[0] == "FILETYPE")
             continue;
+        else if(splitVec[0] == "STRANDID")
+            continue;
+        else if(splitVec[0] == "SOLUTIONTIME")
+            continue;
+        else if(splitVec[0] == "ZONETYPE")
+            continue;
         else if(splitVec[0] == "DATAPACKING")
             break;
         else
             Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "invalid mesh header \"" + splitVec[0] + "\".");
     }
+
+    if(!(nISet && nJSet && nKSet))
+        Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "one or more mesh dimensions has not been set.");
 }

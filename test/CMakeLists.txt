@@ -20,4 +20,4 @@ target_link_libraries(parallelTest Parallel Math HexaFvmMesh)
 
 # Build multi-block hexa mesh test unit
 add_executable(multiBlockHexaMeshTest multiBlockHexaMeshTest.cc)
-target_link_libraries(multiBlockHexaMeshTest Math HexaFvmMesh)
+target_link_libraries(multiBlockHexaMeshTest Parallel Math HexaFvmMesh)

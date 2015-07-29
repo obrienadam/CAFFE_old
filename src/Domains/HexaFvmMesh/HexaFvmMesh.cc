@@ -48,10 +48,10 @@ HexaFvmMesh::HexaFvmMesh(const HexaFvmMesh &other)
 
 // ************* Public Methods *************
 
-void HexaFvmMesh::initialize(Input &input)
+void HexaFvmMesh::initialize(const std::string &filename)
 {
     // Initialize the mesh nodes
-    StructuredMesh::initialize(input);
+    StructuredMesh::initialize(filename);
     Output::print("HexaFvmMesh", "initializing hexahedral finite-volume mesh...");
     initializeCellsAndFaces();
     Output::print("HexaFvmMesh", "initialization of hexahedral finite-volume mesh complete.");

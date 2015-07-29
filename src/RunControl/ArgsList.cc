@@ -25,7 +25,6 @@
 #include <string>
 
 #include "ArgsList.h"
-#include "Version.h"
 
 ArgsList::ArgsList()
     :

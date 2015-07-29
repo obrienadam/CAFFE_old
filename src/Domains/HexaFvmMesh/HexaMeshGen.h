@@ -20,6 +20,7 @@ public:
     HexaMeshGen();
 
     //- Mesh generation
+    void readFile();
     void generateMesh();
     void writeMeshFile();
 

@@ -34,9 +34,8 @@ class Output
 {
 public:
 
-    static void print(const std::string& message);
-    static void print(const std::vector<std::string>& vector);
-    static void print(std::string className, std::string message);
+    static void print(const std::string &message);
+    static void print(const std::string &className, const std::string &message);
 
     /**
      * @brief Used to raise an exception, while also making sure relevant information about the method raising the exception.

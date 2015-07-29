@@ -6,6 +6,13 @@
 
 HexaMeshGen::HexaMeshGen()
 {
+
+}
+
+//******************** Public methods **************************
+
+void HexaMeshGen::readFile()
+{
     using namespace boost::property_tree;
 
     read_info("mesh/structuredMesh.info", meshParameters_);
@@ -21,8 +28,6 @@ HexaMeshGen::HexaMeshGen()
 
     Output::print("HexaMeshGen", "Successfully read file \"mesh/structuredMesh.info\".");
 }
-
-//******************** Public methods **************************
 
 void HexaMeshGen::generateMesh()
 {
