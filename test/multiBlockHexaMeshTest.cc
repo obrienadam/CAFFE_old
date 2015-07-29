@@ -14,10 +14,16 @@ int main()
     try
     {
         mesh.initialize();
+        mesh.writeTec360(0., "solution");
+
+        if(Parallel::processNo() == 0)
+        {
+            cout << mesh().cellXc(11, 4, 4) << endl;
+        }
     }
     catch(const char* errorMessage)
     {
-        cerr << errorMessage << endl;
+        cerr << "Error: " << errorMessage << endl;
     }
 
     Parallel::finalize();

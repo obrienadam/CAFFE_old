@@ -43,7 +43,8 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
     create_directory("mesh/multiBlockStructuredMesh");
     fout.open("mesh/multiBlockStructuredMesh/multiBlockStructuredMeshConnectivity.info");
     fout << "; block connectivity file for the multi-block structured mesh" << std::endl
-         << std::endl;
+         << std::endl
+         << "numberOfBlocks " << nBlocksI_*nBlocksJ_*nBlocksK_ << std::endl;
 
     subMeshNo = 0;
     for(k = 0; k < nBlocksK_; ++k)

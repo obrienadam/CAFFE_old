@@ -11,15 +11,48 @@ MultiBlockHexaFvmMesh::MultiBlockHexaFvmMesh()
 
 void MultiBlockHexaFvmMesh::initialize()
 {
+    using namespace boost::property_tree;
     using namespace std;
 
-    int blockNo = Parallel::processNo();
+    ptree connectivity;
+
+    read_info("mesh/multiBlockStructuredMesh/multiBlockStructuredMeshConnectivity.info", connectivity);
 
     nProcesses_ = Parallel::nProcesses();
+
+    if(nProcesses_ != connectivity.get<int>("numberOfBlocks"))
+        Output::raiseException("MultiBlockHexaFvmMesh", "initialize", "Number of blocks is not equal to the number of processes.");
+
     blocks_.resize(nProcesses_);
 
     Parallel::barrier();
 
-    blocks_[blockNo].initialize("mesh/multiBlockStructuredMesh/structuredMesh_block" + std::to_string(blockNo) + ".dat");
-    blocks_[blockNo].writeTec360(0, "solution");
+    blocks_[Parallel::processNo()].initialize("mesh/multiBlockStructuredMesh/structuredMesh_block" + std::to_string(Parallel::processNo()) + ".dat");
+
+    adjacentBlockNo_[0] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".eastBlockNo");
+    adjacentBlockNo_[1] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".westBlockNo");
+    adjacentBlockNo_[2] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".northBlockNo");
+    adjacentBlockNo_[3] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".southBlockNo");
+    adjacentBlockNo_[4] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".topBlockNo");
+    adjacentBlockNo_[5] = connectivity.get<int>("Block" + std::to_string(Parallel::processNo()) + ".bottomBlockNo");
+
+    for(int i = 0; i < 6; ++i)
+    {
+        if(adjacentBlockNo_[i] < 0)
+            continue;
+
+        blocks_[adjacentBlockNo_[i]].initialize("mesh/multiBlockStructuredMesh/structuredMesh_block" + std::to_string(adjacentBlockNo_[i]) + ".dat");
+
+        blocks_[Parallel::processNo()].addBoundaryMesh(blocks_[adjacentBlockNo_[i]], (HexaFvmMesh::Direction)i);
+    }
+}
+
+const HexaFvmMesh& MultiBlockHexaFvmMesh::operator ()() const
+{
+    return blocks_[Parallel::processNo()];
+}
+
+void MultiBlockHexaFvmMesh::writeTec360(double time, const std::string &directoryName)
+{
+    blocks_[Parallel::processNo()].writeTec360(time, directoryName);
 }

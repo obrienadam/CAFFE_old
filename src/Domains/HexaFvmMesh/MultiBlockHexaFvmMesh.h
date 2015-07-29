@@ -17,11 +17,15 @@ public:
 
     int nBlocks() const { return blocks_.size(); }
 
+    const HexaFvmMesh& operator()() const;
+
+    void writeTec360(double time, const std::string &directoryName);
+
 private:
 
     std::vector<HexaFvmMesh> blocks_;
 
-    int nProcesses_, lProcess_, uProcess_;
+    int nProcesses_, adjacentBlockNo_[6];
 };
 
 #endif

@@ -154,19 +154,19 @@ std::string HexaFvmMesh::meshStats()
 Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
 {
     if(i < 0 && westBoundaryMeshPtr_ != NULL)
-        return westBoundaryMeshPtr_->cellXc(westBoundaryMeshPtr_->uCellI(), j, k);
+        return westBoundaryMeshPtr_->cellXc(westBoundaryMeshPtr_->uCellI() + i + 1, j, k);
     else if(i > uCellI() && eastBoundaryMeshPtr_ != NULL)
-        return eastBoundaryMeshPtr_->cellXc(0, j, k);
+        return eastBoundaryMeshPtr_->cellXc(i - uCellI() - 1, j, k);
 
     if(j < 0 && southBoundaryMeshPtr_ != NULL)
-        return southBoundaryMeshPtr_->cellXc(i, southBoundaryMeshPtr_->uCellJ(), k);
+        return southBoundaryMeshPtr_->cellXc(i, southBoundaryMeshPtr_->uCellJ() + j + 1, k);
     else if(j > uCellJ() && northBoundaryMeshPtr_ != NULL)
-        return northBoundaryMeshPtr_->cellXc(i, 0, k);
+        return northBoundaryMeshPtr_->cellXc(i, j - uCellJ() - 1, k);
 
     if(k < 0 && bottomBoundaryMeshPtr_ != NULL)
-        return bottomBoundaryMeshPtr_->cellXc(i, j, bottomBoundaryMeshPtr_->uCellK());
+        return bottomBoundaryMeshPtr_->cellXc(i, j, bottomBoundaryMeshPtr_->uCellK() + k + 1);
     else if(k > uCellK() && topBoundaryMeshPtr_ != NULL)
-        return topBoundaryMeshPtr_->cellXc(i, j, 0);
+        return topBoundaryMeshPtr_->cellXc(i, j, k - uCellK() - 1);
 
     return cellCenters_(i, j, k);
 }
@@ -174,19 +174,19 @@ Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
 double HexaFvmMesh::cellVol(int i, int j, int k) const
 {
     if(i < 0 && westBoundaryMeshPtr_ != NULL)
-        return westBoundaryMeshPtr_->cellVol(westBoundaryMeshPtr_->uCellI(), j, k);
+        return westBoundaryMeshPtr_->cellVol(westBoundaryMeshPtr_->uCellI() + i + 1, j, k);
     else if(i > uCellI() && eastBoundaryMeshPtr_ != NULL)
-        return eastBoundaryMeshPtr_->cellVol(0, j, k);
+        return eastBoundaryMeshPtr_->cellVol(i - uCellI() - 1, j, k);
 
     if(j < 0 && southBoundaryMeshPtr_ != NULL)
-        return southBoundaryMeshPtr_->cellVol(i, southBoundaryMeshPtr_->uCellJ(), k);
+        return southBoundaryMeshPtr_->cellVol(i, southBoundaryMeshPtr_->uCellJ() + j + 1, k);
     else if(j > uCellJ() && northBoundaryMeshPtr_ != NULL)
-        return northBoundaryMeshPtr_->cellVol(i, 0, k);
+        return northBoundaryMeshPtr_->cellVol(i, j - uCellJ() - 1, k);
 
     if(k < 0 && bottomBoundaryMeshPtr_ != NULL)
-        return bottomBoundaryMeshPtr_->cellVol(i, j, bottomBoundaryMeshPtr_->uCellK());
+        return bottomBoundaryMeshPtr_->cellVol(i, j, bottomBoundaryMeshPtr_->uCellK() + k + 1);
     else if(k > uCellK() && topBoundaryMeshPtr_ != NULL)
-        return topBoundaryMeshPtr_->cellVol(i, j, 0);
+        return topBoundaryMeshPtr_->cellVol(i, j, k - uCellK() - 1);
 
     return cellVolumes_(i, j, k);
 }
@@ -294,102 +294,6 @@ Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
     }
 
     return -cellToCellRelativeVectorsK_(i, j, k - 1);
-}
-
-Vector3D HexaFvmMesh::rnCellE(int i, int j, int k) const
-{
-    if(i == cellToCellUnitVectorsI_.sizeI())
-        return cellToFaceUnitVectorsE_(i, j, k);
-
-    return cellToCellUnitVectorsI_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellW(int i, int j, int k) const
-{
-    if(i == 0)
-        return cellToFaceUnitVectorsW_(i, j, k);
-
-    return -cellToCellUnitVectorsI_(i - 1, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellN(int i, int j, int k) const
-{
-    if(j == cellToCellUnitVectorsJ_.sizeJ())
-        return cellToFaceUnitVectorsN_(i, j, k);
-
-    return cellToCellUnitVectorsJ_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellS(int i, int j, int k) const
-{
-    if(j == 0)
-        return cellToFaceUnitVectorsS_(i, j, k);
-
-    return -cellToCellUnitVectorsJ_(i, j - 1, k);
-}
-
-Vector3D HexaFvmMesh::rnCellT(int i, int j, int k) const
-{
-    if(k == cellToCellUnitVectorsK_.sizeK())
-        return cellToFaceUnitVectorsT_(i, j, k);
-
-    return cellToCellUnitVectorsK_(i, j, k);
-}
-
-Vector3D HexaFvmMesh::rnCellB(int i, int j, int k) const
-{
-    if(k == 0)
-        return cellToFaceUnitVectorsB_(i, j, k);
-
-    return -cellToCellUnitVectorsK_(i, j, k - 1);
-}
-
-double HexaFvmMesh::rCellMagE(int i, int j, int k) const
-{
-    if(i == cellToCellDistancesI_.sizeI())
-        return cellToFaceDistancesE_(i, j, k);
-
-    return cellToCellDistancesI_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagW(int i, int j, int k) const
-{
-    if(i == 0)
-        return cellToFaceDistancesW_(i, j, k);
-
-    return cellToCellDistancesI_(i - 1, j, k);
-}
-
-double HexaFvmMesh::rCellMagN(int i, int j, int k) const
-{
-    if(j == cellToCellDistancesJ_.sizeJ())
-        return cellToFaceDistancesN_(i, j, k);
-
-    return cellToCellDistancesJ_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagS(int i, int j, int k) const
-{
-    if(j == 0)
-        return cellToFaceDistancesS_(i, j, k);
-
-    return cellToCellDistancesJ_(i, j - 1, k);
-}
-
-double HexaFvmMesh::rCellMagT(int i, int j, int k) const
-{
-    if(k == cellToCellDistancesK_.sizeK())
-        return cellToFaceDistancesT_(i, j, k);
-
-    return cellToCellDistancesK_(i, j, k);
-}
-
-double HexaFvmMesh::rCellMagB(int i, int j, int k) const
-{
-    if(k == 0)
-        return cellToFaceDistancesB_(i, j, k);
-
-    return cellToCellDistancesK_(i, j, k - 1);
 }
 
 void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk) const
@@ -532,7 +436,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
 {
     using namespace std;
 
-    int i, j, k, varNo, componentNo;
+    int i, j, k, varNo, componentNo, nVariables = 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size();
     string component;
 
     Output::print("HexaFvmMesh", "Writing data to Tec360 ASCII...");
@@ -574,8 +478,16 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
         foutTec360_ << "ZONE T = \"" << name << "Time:" << time << "s\"" << endl
                     << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
                     << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
-                    << "DATAPACKING = BLOCK" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
+                    << "DATAPACKING = BLOCK" << endl;
+
+        if(nVariables == 4)
+        {
+            foutTec360_ << "VARLOCATION = ([4] = CELLCENTERED)" << endl;
+        }
+        else if(nVariables > 4)
+        {
+            foutTec360_ << "VARLOCATION = ([4-" << nVariables << "] = CELLCENTERED)" << endl;
+        }
 
         // Output the mesh data
         for(componentNo = 0; componentNo < 3; ++componentNo)
@@ -600,8 +512,16 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
                     << "STRANDID = 1, " << "SOLUTIONTIME = " << time << endl
                     << "I = " << nodes_.sizeI() << ", J = " << nodes_.sizeJ() << ", K = " << nodes_.sizeK() << endl
                     << "DATAPACKING = BLOCK" << endl
-                    << "VARSHARELIST = ([1-3] = 1)" << endl
-                    << "VARLOCATION = ([4-" << 3 + scalarVariablePtrs_.size() + 3*vectorVariablePtrs_.size() << "] = CELLCENTERED)" << endl;
+                    << "VARSHARELIST = ([1-3] = 1)" << endl;
+
+        if(nVariables == 4)
+        {
+            foutTec360_ << "VARLOCATION = ([4] = CELLCENTERED)" << endl;
+        }
+        else if(nVariables > 4)
+        {
+            foutTec360_ << "VARLOCATION = ([4-" << nVariables << "] = CELLCENTERED)" << endl;
+        }
     }
 
     // Output the solution data for scalars
@@ -699,16 +619,10 @@ void HexaFvmMesh::initializeCellToCellParameters()
 
     // Allocate the cell to cell distance vectors and distaces
     cellToCellRelativeVectorsI_.allocate(nI - 1, nJ, nK);
-    cellToCellUnitVectorsI_.allocate(nI - 1, nJ, nK);
-    cellToCellDistancesI_.allocate(nI - 1, nJ, nK);
 
     cellToCellRelativeVectorsJ_.allocate(nI, nJ - 1, nK);
-    cellToCellUnitVectorsJ_.allocate(nI, nJ - 1, nK);
-    cellToCellDistancesJ_.allocate(nI, nJ - 1, nK);
 
     cellToCellRelativeVectorsK_.allocate(nI, nJ, nK - 1);
-    cellToCellUnitVectorsK_.allocate(nI, nJ, nK - 1);
-    cellToCellDistancesK_.allocate(nI, nJ, nK - 1);
 
     for(k = 0; k < nK; ++k)
     {
@@ -720,24 +634,18 @@ void HexaFvmMesh::initializeCellToCellParameters()
                 {
                     tmpVec = cellCenters_(i + 1, j, k) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsI_(i, j, k) = tmpVec;
-                    cellToCellUnitVectorsI_(i, j, k) = tmpVec.unitVector();
-                    cellToCellDistancesI_(i, j, k) = tmpVec.mag();
                 }
 
                 if (j < nJ - 1)
                 {
                     tmpVec = cellCenters_(i, j + 1, k) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsJ_(i, j, k) = tmpVec;
-                    cellToCellUnitVectorsJ_(i, j, k) = tmpVec.unitVector();
-                    cellToCellDistancesJ_(i, j, k) = tmpVec.mag();
                 }
 
                 if (k < nK - 1)
                 {
                     tmpVec = cellCenters_(i, j, k + 1) - cellCenters_(i, j, k);
                     cellToCellRelativeVectorsK_(i, j, k) = tmpVec;
-                    cellToCellUnitVectorsK_(i, j, k) = tmpVec.unitVector();
-                    cellToCellDistancesK_(i, j, k) = tmpVec.mag();
                 }
             } // end for i
         } // end for j
@@ -758,8 +666,6 @@ void HexaFvmMesh::initializeFaces()
 
     faceCentersI_.allocate(nI, nJ, nK);
     faceNormalsI_.allocate(nI, nJ, nK);
-    faceUnitNormalsI_.allocate(nI, nJ, nK);
-    faceAreasI_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -777,8 +683,6 @@ void HexaFvmMesh::initializeFaces()
 
                 faceCentersI_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsI_(i, j, k) = tmpVec*tmpArea;
-                faceUnitNormalsI_(i, j, k) = tmpVec.unitVector();
-                faceAreasI_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
@@ -790,8 +694,6 @@ void HexaFvmMesh::initializeFaces()
 
     faceCentersJ_.allocate(nI, nJ, nK);
     faceNormalsJ_.allocate(nI, nJ, nK);
-    faceUnitNormalsJ_.allocate(nI, nJ, nK);
-    faceAreasJ_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -809,8 +711,6 @@ void HexaFvmMesh::initializeFaces()
 
                 faceCentersJ_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsJ_(i, j, k) = tmpVec*tmpArea;
-                faceUnitNormalsJ_(i, j, k) = tmpVec.unitVector();
-                faceAreasJ_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
@@ -822,8 +722,6 @@ void HexaFvmMesh::initializeFaces()
 
     faceCentersK_.allocate(nI, nJ, nK);
     faceNormalsK_.allocate(nI, nJ, nK);
-    faceUnitNormalsK_.allocate(nI, nJ, nK);
-    faceAreasK_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -841,8 +739,6 @@ void HexaFvmMesh::initializeFaces()
 
                 faceCentersK_(i, j, k) = Geometry::computeQuadrilateralCentroid(tmpPoints);
                 faceNormalsK_(i, j, k) = tmpVec*tmpArea;
-                faceUnitNormalsK_(i, j, k) = tmpVec.unitVector();
-                faceAreasK_(i, j, k) = tmpArea;
             } // end for i
         } // end for j
     } // end for k
@@ -858,28 +754,16 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     nK = cellCenters_.sizeK();
 
     cellToFaceRelativeVectorsE_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsE_.allocate(nI, nJ, nK);
-    cellToFaceDistancesE_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsW_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsW_.allocate(nI, nJ, nK);
-    cellToFaceDistancesW_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsN_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsN_.allocate(nI, nJ, nK);
-    cellToFaceDistancesN_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsS_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsS_.allocate(nI, nJ, nK);
-    cellToFaceDistancesS_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsT_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsT_.allocate(nI, nJ, nK);
-    cellToFaceDistancesT_.allocate(nI, nJ, nK);
 
     cellToFaceRelativeVectorsB_.allocate(nI, nJ, nK);
-    cellToFaceUnitVectorsB_.allocate(nI, nJ, nK);
-    cellToFaceDistancesB_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -890,38 +774,26 @@ void HexaFvmMesh::initializeCellToFaceParameters()
                 // East cell to face parameters
                 tmpVec = faceCentersI_(i + 1, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsE_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsE_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesE_(i, j, k) = tmpVec.mag();
 
                 // West cell to face parameters
                 tmpVec = faceCentersI_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsW_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsW_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesW_(i, j, k) = tmpVec.mag();
 
                 // North cell to face parameters
                 tmpVec = faceCentersJ_(i, j + 1, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsN_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsN_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesN_(i, j, k) = tmpVec.mag();
 
                 // South cell to face parameters
                 tmpVec = faceCentersJ_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsS_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsS_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesS_(i, j, k) = tmpVec.mag();
 
                 // Top cell to face parameters
                 tmpVec = faceCentersK_(i, j, k + 1) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsT_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsT_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesT_(i, j, k) = tmpVec.mag();
 
                 // Bottom cell to face parameters
                 tmpVec = faceCentersK_(i, j, k) - cellCenters_(i, j, k);
                 cellToFaceRelativeVectorsB_(i, j, k) = tmpVec;
-                cellToFaceUnitVectorsB_(i, j, k) = tmpVec.unitVector();
-                cellToFaceDistancesB_(i, j, k) = tmpVec.mag();
             } // end for i
         } // end for j
     } // end for k

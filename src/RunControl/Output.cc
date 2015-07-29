@@ -41,7 +41,8 @@ void Output::print(const std::string &className, const std::string &message)
 
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
-    throw ("on process" + std::to_string(Parallel::processNo()) + ", in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
+    if(Parallel::isMainProcessor())
+        throw ("in \"" + className + "::" + methodName + "\", " + problemDescription).c_str();
 }
 
 void Output::issueWarning(std::string className, std::string methodName, std::string warningDescription)

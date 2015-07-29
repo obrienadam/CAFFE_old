@@ -164,8 +164,7 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
         if(splitVec[0].empty())
             continue;
 
-        for(i = 0; i < splitVec.size(); ++i)
-            to_upper(splitVec[i]);
+        to_upper(splitVec[0]);
 
         if(splitVec[0] == "TITLE")
             name = splitVec[1];
@@ -175,17 +174,17 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
         {
             for(i = 1; i < 7; i += 2)
             {
-                if(splitVec[i] == "I")
+                if(to_upper_copy(splitVec[i]) == "I")
                 {
                     nI = stoi(splitVec[i + 1]);
                     nISet = true;
                 }
-                else if(splitVec[i] == "J")
+                else if(to_upper_copy(splitVec[i]) == "J")
                 {
                     nJ = stoi(splitVec[i + 1]);
                     nJSet = true;
                 }
-                else if(splitVec[i] == "K")
+                else if(to_upper_copy(splitVec[i]) == "K")
                 {
                     nK = stoi(splitVec[i + 1]);
                     nKSet = true;

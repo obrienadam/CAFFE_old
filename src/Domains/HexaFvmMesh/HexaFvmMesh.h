@@ -79,13 +79,6 @@ public:
     Vector3D fAreaNormT(int i, int j, int k) const { return faceNormalsK_(i, j, k + 1); }
     Vector3D fAreaNormB(int i, int j, int k) const { return -faceNormalsK_(i, j, k); }
 
-    double faceAreaE(int i, int j, int k) const { return faceAreasI_(i + 1, j, k); }
-    double faceAreaW(int i, int j, int k) const { return faceAreasI_(i, j, k); }
-    double faceAreaN(int i, int j, int k) const { return faceAreasJ_(i, j + 1, k); }
-    double faceAreaS(int i, int j, int k) const { return faceAreasJ_(i, j, k); }
-    double faceAreaT(int i, int j, int k) const { return faceAreasK_(i, j, k + 1); }
-    double faceAreaB(int i, int j, int k) const { return faceAreasK_(i, j, k); }
-
     Point3D faceXcI(int i, int j, int k) const { return faceCentersI_(i, j, k); }
     Point3D faceXcJ(int i, int j, int k) const { return faceCentersJ_(i, j, k); }
     Point3D faceXcK(int i, int j, int k) const { return faceCentersK_(i, j, k); }
@@ -93,10 +86,6 @@ public:
     Vector3D fAreaNormI(int i, int j, int k) const { return faceNormalsI_(i, j, k); }
     Vector3D fAreaNormJ(int i, int j, int k) const { return faceNormalsJ_(i, j, k); }
     Vector3D fAreaNormK(int i, int j, int k) const { return faceNormalsK_(i, j, k); }
-
-    double fAreaI(int i, int j, int k) const { return faceAreasI_(i, j, k); }
-    double fAreaJ(int i, int j, int k) const { return faceAreasJ_(i, j, k); }
-    double fAreaK(int i, int j, int k) const { return faceAreasK_(i, j, k); }
 
     // Retrieve cell to cell parameters
     Vector3D rCellE(int i, int j, int k) const;
@@ -106,20 +95,6 @@ public:
     Vector3D rCellT(int i, int j, int k) const;
     Vector3D rCellB(int i, int j, int k) const;
 
-    Vector3D rnCellE(int i, int j, int k) const;
-    Vector3D rnCellW(int i, int j, int k) const;
-    Vector3D rnCellN(int i, int j, int k) const;
-    Vector3D rnCellS(int i, int j, int k) const;
-    Vector3D rnCellT(int i, int j, int k) const;
-    Vector3D rnCellB(int i, int j, int k) const;
-
-    double rCellMagE(int i, int j, int k) const;
-    double rCellMagW(int i, int j, int k) const;
-    double rCellMagN(int i, int j, int k) const;
-    double rCellMagS(int i, int j, int k) const;
-    double rCellMagT(int i, int j, int k) const;
-    double rCellMagB(int i, int j, int k) const;
-
     // Retrieve cell to face parameters
     Vector3D rFaceE(int i, int j, int k) const { return cellToFaceRelativeVectorsE_(i, j, k); }
     Vector3D rFaceW(int i, int j, int k) const { return cellToFaceRelativeVectorsW_(i, j, k); }
@@ -127,20 +102,6 @@ public:
     Vector3D rFaceS(int i, int j, int k) const { return cellToFaceRelativeVectorsS_(i, j, k); }
     Vector3D rFaceT(int i, int j, int k) const { return cellToFaceRelativeVectorsT_(i, j, k); }
     Vector3D rFaceB(int i, int j, int k) const { return cellToFaceRelativeVectorsB_(i, j, k); }
-
-    Vector3D rnFaceE(int i, int j, int k) const { return cellToFaceUnitVectorsE_(i, j, k); }
-    Vector3D rnFaceW(int i, int j, int k) const { return cellToFaceUnitVectorsW_(i, j, k); }
-    Vector3D rnFaceN(int i, int j, int k) const { return cellToFaceUnitVectorsN_(i, j, k); }
-    Vector3D rnFaceS(int i, int j, int k) const { return cellToFaceUnitVectorsS_(i, j, k); }
-    Vector3D rnFaceT(int i, int j, int k) const { return cellToFaceUnitVectorsT_(i, j, k); }
-    Vector3D rnFaceB(int i, int j, int k) const { return cellToFaceUnitVectorsB_(i, j, k); }
-
-    double rFaceMagE(int i, int j, int k) const { return cellToFaceDistancesE_(i, j, k); }
-    double rFaceMagW(int i, int j, int k) const { return cellToFaceDistancesW_(i, j, k); }
-    double rFaceMagN(int i, int j, int k) const { return cellToFaceDistancesN_(i, j, k); }
-    double rFaceMagS(int i, int j, int k) const { return cellToFaceDistancesS_(i, j, k); }
-    double rFaceMagT(int i, int j, int k) const { return cellToFaceDistancesT_(i, j, k); }
-    double rFaceMagB(int i, int j, int k) const { return cellToFaceDistancesB_(i, j, k); }
 
     int nCellsI() const { return cellCenters_.sizeI(); }
     int nCellsJ() const { return cellCenters_.sizeJ(); }
@@ -227,22 +188,10 @@ private:
     Array3D<Vector3D> faceNormalsI_;
     Array3D<Vector3D> faceNormalsJ_;
     Array3D<Vector3D> faceNormalsK_;
-    Array3D<double> faceAreasI_;
-    Array3D<double> faceAreasJ_;
-    Array3D<double> faceAreasK_;
-    Array3D<Vector3D> faceUnitNormalsI_;
-    Array3D<Vector3D> faceUnitNormalsJ_;
-    Array3D<Vector3D> faceUnitNormalsK_;
 
     Array3D<Vector3D> cellToCellRelativeVectorsI_;
     Array3D<Vector3D> cellToCellRelativeVectorsJ_;
     Array3D<Vector3D> cellToCellRelativeVectorsK_;
-    Array3D<Vector3D> cellToCellUnitVectorsI_;
-    Array3D<Vector3D> cellToCellUnitVectorsJ_;
-    Array3D<Vector3D> cellToCellUnitVectorsK_;
-    Array3D<double> cellToCellDistancesI_;
-    Array3D<double> cellToCellDistancesJ_;
-    Array3D<double> cellToCellDistancesK_;
 
     Array3D<Vector3D> cellToFaceRelativeVectorsE_;
     Array3D<Vector3D> cellToFaceRelativeVectorsW_;
@@ -250,18 +199,6 @@ private:
     Array3D<Vector3D> cellToFaceRelativeVectorsS_;
     Array3D<Vector3D> cellToFaceRelativeVectorsT_;
     Array3D<Vector3D> cellToFaceRelativeVectorsB_;
-    Array3D<Vector3D> cellToFaceUnitVectorsE_;
-    Array3D<Vector3D> cellToFaceUnitVectorsW_;
-    Array3D<Vector3D> cellToFaceUnitVectorsN_;
-    Array3D<Vector3D> cellToFaceUnitVectorsS_;
-    Array3D<Vector3D> cellToFaceUnitVectorsT_;
-    Array3D<Vector3D> cellToFaceUnitVectorsB_;
-    Array3D<double> cellToFaceDistancesE_;
-    Array3D<double> cellToFaceDistancesW_;
-    Array3D<double> cellToFaceDistancesN_;
-    Array3D<double> cellToFaceDistancesS_;
-    Array3D<double> cellToFaceDistancesT_;
-    Array3D<double> cellToFaceDistancesB_;
 
     //- Misc mesh metrics commonly used in fvm
     Array3D<double> dE_, dW_, dN_, dS_, dT_, dB_;
