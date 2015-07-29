@@ -20,7 +20,14 @@ public:
     //- Initialization
     virtual void initialize(Input& input);
     virtual void initialize(Array3D<Point3D>& nodes);
-    virtual int size();
+
+    int nNodes() const { return nodes_.size(); }
+    int nNodesI() const { return nodes_.sizeI(); }
+    int nNodesJ() const { return nodes_.sizeJ(); }
+    int nNodesK() const { return nodes_.sizeK(); }
+
+    Point3D node(int i, int j, int k) const { return nodes_(i, j, k); }
+
     virtual std::string meshStats();
 
     //- Initialize from input file
@@ -28,7 +35,7 @@ public:
 
     //- Output methods
     virtual void writeTec360(double time = 0.);
-
+    void resetFileStream();
     static void readTecplotMeshHeader(std::ifstream &fin, std::string &name, int& nI, int& nJ, int& nK);
 
     std::string name;

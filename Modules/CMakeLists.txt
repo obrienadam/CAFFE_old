@@ -2,9 +2,12 @@
 # Author: Adam O'Brien
 
 # Build the hexaMesh generator
-
 add_executable(hexaMesh hexaMesh.cc)
 target_link_libraries(hexaMesh HexaFvmMesh)
+
+# Build the multi-block hexaMesh generator
+add_executable(multiBlockHexaMesh multiBlockHexaMesh.cc)
+target_link_libraries(multiBlockHexaMesh HexaFvmMesh)
 
 # Build the diffusion solver
 add_executable(caffeDiffusion caffeDiffusion.cc)

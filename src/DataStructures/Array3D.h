@@ -32,6 +32,7 @@ public:
     int sizeJ() const {return nJ_;}
     int sizeK() const {return nK_;}
     int size() const {return n_;}
+    int elementNo(int i, int j, int k) const { return k*nInJ_ + j*nI_ + i; }
 
     virtual inline T& operator()(int i, int j, int k);
     virtual inline const T& operator()(int i, int j, int k) const;

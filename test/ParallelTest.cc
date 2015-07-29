@@ -116,15 +116,6 @@ int main()
                      << "This proc has " << nEntitiesThisProc << " entities." << endl;
             }
         }
-
-        if(Parallel::isMainProcessor())
-            cout << "Testing the multi-block Hexa-mesh..." << endl;
-
-        MultiBlockHexaFvmMesh mesh;
-        Input input;
-
-        mesh.initialize(input);
-        mesh.writeTec360(0, "solution");
     }
     catch(const char* errorMessage)
     {

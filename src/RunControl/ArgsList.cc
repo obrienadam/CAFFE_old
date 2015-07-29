@@ -53,24 +53,4 @@ void ArgsList::readArgs(int argc, const char* argv[])
 
     store(parse_command_line(argc, argv, optsDescription_), varsMap_);
     notify(varsMap_);
-
-    if(varsMap_.count("help"))
-    {
-        cout << optsDescription_ << endl;
-        exit(0);
-    }
-    else if(varsMap_.count("version"))
-    {
-        Version::display();
-        exit(0);
-    }
-    else if(varsMap_.count("file"))
-    {
-        inputFilename = varsMap_["file"].as<string>();
-    }
-    else
-    {
-        cout << optsDescription_ << endl;
-        exit(0);
-    }
 }

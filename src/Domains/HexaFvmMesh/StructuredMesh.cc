@@ -42,11 +42,6 @@ void StructuredMesh::initialize(Array3D<Point3D> &nodes)
         nodes_(i) = nodes(i);
 }
 
-int StructuredMesh::size()
-{
-    return nodes_.size();
-}
-
 std::string StructuredMesh::meshStats()
 {
     std::ostringstream stats;
@@ -99,6 +94,12 @@ void StructuredMesh::initialize(std::string filename)
     fin.close();
 }
 
+void StructuredMesh::resetFileStream()
+{
+    if(foutTec360_.is_open())
+        foutTec360_.close();
+}
+
 void StructuredMesh::writeTec360(double time)
 {
     int nI, nJ, nK;
@@ -108,7 +109,7 @@ void StructuredMesh::writeTec360(double time)
     nJ = nodes_.sizeJ();
     nK = nodes_.sizeK();
 
-    if(nTec360Outputs_ == 0)
+    if(!foutTec360_.is_open())
     {
         foutTec360_.open((name + ".dat").c_str());
 
