@@ -13,7 +13,7 @@ RunControl
 
 Solver
 {
-	timeAccurate ON
+	timeAccurate OFF
 	relaxationFactorMomentum 0.7
 	relaxationFactorPCorr 0.3
 	rho 1

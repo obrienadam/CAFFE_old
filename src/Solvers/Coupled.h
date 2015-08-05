@@ -17,6 +17,7 @@ protected:
 
     void computeMomentumAndPressure(double timeStep);
     void rhieChowInterpolateFaces();
+    double computeContinuityError();
 
     //- Primary fields
     Field<Vector3D> uField_;

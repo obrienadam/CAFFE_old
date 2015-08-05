@@ -45,6 +45,8 @@ double Coupled::solve(double timeStep)
     {
         computeMomentumAndPressure(timeStep);
     }
+
+    return computeContinuityError();
 }
 
 //*************************** Protected methods *****************************
@@ -151,6 +153,9 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
+                if(!indexMap_.isActive(i, j, k))
+                    continue;
+
                 rowNo = indexMap_(i, j, k, 3);
                 bp = 0.;
 
@@ -237,6 +242,9 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
+                if(indexMap_.isInactive(i, j, k))
+                    continue;
+
                 for(componentNo = 0; componentNo < 3; ++componentNo)
                 {
                     uField_(i, j, k)(componentNo) = x_[0](indexMap_(i, j, k, componentNo));
@@ -256,7 +264,10 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                hField_(i, j, k) = uField_(i, j, k) + dField_(i, j, k)*gradPField_(i, j, k);
+                if(indexMap_.isActive(i, j, k))
+                    hField_(i, j, k) = uField_(i, j, k) + dField_(i, j, k)*gradPField_(i, j, k);
+                else if(indexMap_.isGhost(i, j, k))
+                    hField_(i, j, k) = uField_(i, j, k);
             }
         }
     }
@@ -300,5 +311,29 @@ void Coupled::rhieChowInterpolateFaces()
             }
         }
     }
+}
+
+double Coupled::computeContinuityError()
+{
+    int i, j, k;
+    double maxContinuityError = 0., continuityError;
+
+    for(k = 0; k < mesh_.nCellsK(); ++k)
+    {
+        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        {
+            for(i = 0; i < mesh_.nCellsI(); ++i)
+            {
+                continuityError = fabs(massFlowField_.faceE(i, j, k) - massFlowField_.faceW(i, j, k)
+                                       + massFlowField_.faceN(i, j, k) - massFlowField_.faceS(i, j, k)
+                                       + massFlowField_.faceT(i, j, k) - massFlowField_.faceB(i, j, k))/mesh_.cellVol(i, j, k);
+
+                if(continuityError > maxContinuityError)
+                    maxContinuityError = continuityError;
+            }
+        }
+    }
+
+    return maxContinuityError;
 }
 
