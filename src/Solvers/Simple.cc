@@ -48,7 +48,7 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
       hField_(mesh, Field<Vector3D>::CONSERVED, "hField"),
       gradScalarField_(mesh, Field<Vector3D>::AUXILLARY, "gradScalarField"),
       gradVectorField_(mesh, Field<Tensor3D>::AUXILLARY, "gradVectorField"),
-      flowBcs_(input, uField_, pField_, pCorrField_, rhoField_, muField_, hField_, dField_)
+      flowBcs_(input, uField_, pField_, rhoField_, muField_, hField_, dField_, pCorrField_)
 {
     Solver::createMatrices(2, 3, 7);
     mesh_.addArray3DToTecplotOutput(uField_.name, uField_.cellData());
@@ -165,7 +165,7 @@ void Simple::computeMomentum(double timeStep)
                 b += muField_.faceT(i, j, k)*dot(gradUField_.faceT(i, j, k), mesh_.cT(i, j, k));
                 b += muField_.faceB(i, j, k)*dot(gradUField_.faceB(i, j, k), mesh_.cB(i, j, k));
 
-                flowBcs_.setImplicitMomentumBoundaryCoefficients(i, j, k, a, b);
+                flowBcs_.uFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
                 rowNo = indexMap_(i, j, k, 0);
                 cols[0] = rowNo;
@@ -261,7 +261,7 @@ void Simple::computePCorr()
                         + massFlowField_.faceN(i, j, k) - massFlowField_.faceS(i, j, k)
                         + massFlowField_.faceT(i, j, k) - massFlowField_.faceB(i, j, k);
 
-                flowBcs_.setImplicitPCorrBoundaryCoefficients(i, j, k, a, b);
+                flowBcs_.pCorrFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
                 rowNo = indexMap_(i, j, k, 0);
                 cols[0] = indexMap_(i, j, k, 0);

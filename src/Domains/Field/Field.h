@@ -70,6 +70,7 @@ public:
 
     void setFixedBoundaryPatches(const T *refValues);
     void setFixedBoundaryPatches(T refValue);
+    void setAll(T value);
 
     void setEastFacesFromPatch();
     void setWestFacesFromPatch();

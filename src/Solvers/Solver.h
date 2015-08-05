@@ -24,6 +24,7 @@ public:
 protected:
 
     void createMatrices(int nMatrices, int nVectors, int nnz);
+    void createMatrices(int nVariables, int nMatrices, int nVectors, int nnz);
     void destroyMatrices();
     void zeroMatrices();
 

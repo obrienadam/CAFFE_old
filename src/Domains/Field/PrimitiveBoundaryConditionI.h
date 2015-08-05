@@ -118,7 +118,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[0])
         {
         case FIXED:
-            b += -a[1]*internalField_.eastBoundaryPatch(0, j, k);
+            b -= a[1]*internalField_.eastBoundaryPatch(0, j, k);
             break;
 
         case ZERO_GRADIENT:
@@ -135,7 +135,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[1])
         {
         case FIXED:
-            b += -a[2]*internalField_.westBoundaryPatch(0, j, k);
+            b -= a[2]*internalField_.westBoundaryPatch(0, j, k);
             break;
 
         case ZERO_GRADIENT:
@@ -154,7 +154,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[2])
         {
         case FIXED:
-            b += -a[3]*internalField_.northBoundaryPatch(i, 0, k);
+            b -= a[3]*internalField_.northBoundaryPatch(i, 0, k);
             break;
 
         case ZERO_GRADIENT:
@@ -171,7 +171,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[3])
         {
         case FIXED:
-            b += -a[4]*internalField_.southBoundaryPatch(i, 0, k);
+            b -= a[4]*internalField_.southBoundaryPatch(i, 0, k);
             break;
 
         case ZERO_GRADIENT:
@@ -190,7 +190,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[4])
         {
         case FIXED:
-            b += -a[5]*internalField_.topBoundaryPatch(i, j, 0);
+            b -= a[5]*internalField_.topBoundaryPatch(i, j, 0);
             break;
 
         case ZERO_GRADIENT:
@@ -207,7 +207,7 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         switch(types_[5])
         {
         case FIXED:
-            b += -a[6]*internalField_.bottomBoundaryPatch(i, j, 0);
+            b -= a[6]*internalField_.bottomBoundaryPatch(i, j, 0);
             break;
 
         case ZERO_GRADIENT:
@@ -226,7 +226,9 @@ void PrimitiveBoundaryCondition<T>::changeType(int i, Type newType, T refValue)
 {
     types_[i] = newType;
     refValues_[i] = refValue;
-    setFixedBoundaries(); // This is a bit wasteful
+
+    if(newType == FIXED)
+        setFixedBoundaries(); // This is a bit wasteful
 }
 
 //************************ Protected methods ***********************************

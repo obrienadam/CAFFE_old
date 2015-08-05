@@ -16,9 +16,9 @@ int main()
         mesh.initialize();
         mesh.writeTec360(0., "solution");
 
-        if(Parallel::processNo() == 0)
+        if(Parallel::processNo() == 1)
         {
-            cout << mesh().cellXc(11, 4, 4) << endl;
+            cout << mesh().gW(0, 4, 4) << endl;
         }
     }
     catch(const char* errorMessage)

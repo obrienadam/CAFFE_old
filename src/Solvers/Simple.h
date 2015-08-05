@@ -39,7 +39,7 @@ public:
     virtual double solve(double timeStep);
     virtual void displayUpdateMessage();
 
-public:
+protected:
 
     void setConstantFields(const Input &input);
 

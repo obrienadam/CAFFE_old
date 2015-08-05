@@ -40,6 +40,8 @@ public:
     inline const T& operator()(int k) const;
     T* data(){ return data_; }
 
+    virtual void setAll(const T &value);
+
     //- Iterators
 
     class iterator

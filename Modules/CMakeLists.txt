@@ -48,3 +48,11 @@ target_link_libraries(caffeMultiphaseSimple RunControl
                                             Solvers
                                             HexaFvmMesh
                                             Schemes)
+
+# Build the coupled solver
+add_executable(caffeCoupled caffeCoupled.cc)
+target_link_libraries(caffeCoupled RunControl
+                                   Math
+                                   Solvers
+                                   HexaFvmMesh
+                                   Schemes)

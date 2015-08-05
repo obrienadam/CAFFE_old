@@ -44,6 +44,28 @@ void Solver::createMatrices(int nMatrices, int nVectors, int nnz)
     }
 }
 
+void Solver::createMatrices(int nVariables, int nMatrices, int nVectors, int nnz)
+{
+    int i;
+
+    A_.resize(nMatrices);
+    x_.resize(nVectors);
+    b_.resize(nVectors);
+    res_.resize(nVectors);
+
+    for(i = 0; i < nMatrices; ++i)
+    {
+        A_[i].allocate(nVariables*indexMap_.nActive(), nVariables*indexMap_.nActive(), nnz);
+    }
+
+    for(i = 0; i < nVectors; ++i)
+    {
+        x_[i].allocate(nVariables*indexMap_.nActive());
+        b_[i].allocate(nVariables*indexMap_.nActive());
+        res_[i].allocate(nVariables*indexMap_.nActive());
+    }
+}
+
 void Solver::destroyMatrices()
 {
     int i;

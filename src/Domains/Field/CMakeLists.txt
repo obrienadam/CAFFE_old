@@ -3,12 +3,14 @@
 
 set(HEADERS Field.h
             PrimitiveBoundaryCondition.h
+            FlowBoundaryConditions.h
             SimpleBoundaryCondition.h
             InitialConditions.h)
 
 set(SOURCE FieldI.h
            PrimitiveBoundaryConditionI.h
            PrimitiveBoundaryCondition.cc
+           FlowBoundaryConditions.cc
            SimpleBoundaryCondition.cc
            InitialConditionsI.h)
 

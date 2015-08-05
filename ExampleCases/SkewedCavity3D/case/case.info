@@ -13,12 +13,12 @@ RunControl
 Solver
 {
 	timeAccurate ON
-	relaxationFactorMomentum 0.6
-	relaxationFactorPCorr 0.4
+	relaxationFactorMomentum 0.5
+	relaxationFactorPCorr 0.5
 	rho 1
 	mu 0.01
-	numberOfPressureCorrections 3
-	numberOfInnerIterations 5
+	numberOfPressureCorrections 2
+	numberOfInnerIterations 4
 }
 
 Boundaries

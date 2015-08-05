@@ -324,6 +324,16 @@ void Field<T>::setFixedBoundaryPatches(T refValue)
 }
 
 template<class T>
+void Field<T>::setAll(T value)
+{
+    Array3D<T>::setAll(value);
+    facesI_.setAll(value);
+    facesJ_.setAll(value);
+    facesK_.setAll(value);
+    setFixedBoundaryPatches(value);
+}
+
+template<class T>
 void Field<T>::setEastFacesFromPatch()
 {
     int j, k;

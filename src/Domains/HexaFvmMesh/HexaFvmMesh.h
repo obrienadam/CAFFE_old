@@ -110,6 +110,7 @@ public:
     int nFacesI() const { return faceCentersI_.sizeI(); }
     int nFacesJ() const { return faceCentersJ_.sizeJ(); }
     int nFacesK() const { return faceCentersK_.sizeK(); }
+    int nFaces() const { return 6; }
 
     int uCellI() const { return cellCenters_.sizeI() - 1; }
     int uCellJ() const { return cellCenters_.sizeJ() - 1; }

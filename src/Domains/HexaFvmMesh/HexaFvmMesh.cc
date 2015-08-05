@@ -87,6 +87,9 @@ void HexaFvmMesh::addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLoc
         bottomBoundaryMeshPtr_ = &mesh;
         break;
     };
+
+    //- Re-compute mesh metrics to account for the presence of the boundary mesh
+    computeMeshMetrics();
 }
 
 bool HexaFvmMesh::eastMeshExists() const
@@ -754,15 +757,10 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     nK = cellCenters_.sizeK();
 
     cellToFaceRelativeVectorsE_.allocate(nI, nJ, nK);
-
     cellToFaceRelativeVectorsW_.allocate(nI, nJ, nK);
-
     cellToFaceRelativeVectorsN_.allocate(nI, nJ, nK);
-
     cellToFaceRelativeVectorsS_.allocate(nI, nJ, nK);
-
     cellToFaceRelativeVectorsT_.allocate(nI, nJ, nK);
-
     cellToFaceRelativeVectorsB_.allocate(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
@@ -847,32 +845,32 @@ void HexaFvmMesh::computeMeshMetrics()
                 if(i < uCellI() || eastBoundaryMeshPtr_ != NULL)
                     gE_(i, j, k) = cellVol(i + 1, j, k)/(cellVol(i + 1, j, k) + cellVol(i, j, k));
                 else
-                    gE_(i, j, k) = 1.;
+                    gE_(i, j, k) = 0.;
 
                 if(i > 0 || westBoundaryMeshPtr_ != NULL)
                     gW_(i, j, k) = cellVol(i - 1, j, k)/(cellVol(i - 1, j, k) + cellVol(i, j, k));
                 else
-                    gW_(i, j, k) = 1.;
+                    gW_(i, j, k) = 0.;
 
                 if(j < uCellJ() || northBoundaryMeshPtr_ != NULL)
                     gN_(i, j, k) = cellVol(i, j + 1, k)/(cellVol(i, j + 1, k) + cellVol(i, j, k));
                 else
-                    gN_(i, j, k) = 1.;
+                    gN_(i, j, k) = 0.;
 
                 if(j > 0 || southBoundaryMeshPtr_ != NULL)
                     gS_(i, j, k) = cellVol(i, j - 1, k)/(cellVol(i, j - 1, k) + cellVol(i, j, k));
                 else
-                    gS_(i, j, k) = 1.;
+                    gS_(i, j, k) = 0.;
 
                 if(k < uCellK() || topBoundaryMeshPtr_ != NULL)
                     gT_(i, j, k) = cellVol(i, j, k + 1)/(cellVol(i, j, k + 1) + cellVol(i, j, k));
                 else
-                    gT_(i, j, k) = 1.;
+                    gT_(i, j, k) = 0.;
 
                 if(k > 0 || bottomBoundaryMeshPtr_ != NULL)
                     gB_(i, j, k) = cellVol(i, j, k - 1)/(cellVol(i, j, k - 1) + cellVol(i, j, k));
                 else
-                    gB_(i, j, k) = 1.;
+                    gB_(i, j, k) = 0.;
             }
         }
     }

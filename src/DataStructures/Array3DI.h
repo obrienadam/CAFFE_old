@@ -99,6 +99,13 @@ const T& Array3D<T>::operator()(int k) const
   return data_[k];
 }
 
+template<class T>
+void Array3D<T>::setAll(const T &value)
+{
+	for(int i = 0; i < n_; ++i)
+		data_[i] = value;
+}
+
 //- Iterator methods
 template <class T>
 Array3D<T>::iterator::iterator()

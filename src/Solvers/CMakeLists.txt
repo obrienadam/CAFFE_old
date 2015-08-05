@@ -5,13 +5,15 @@ set(HEADERS Solver.h
             Diffusion.h
             Simple.h
             Piso.h
-            IbPiso.h)
+            IbPiso.h
+            Coupled.h)
 
 set(SOURCE Solver.cc
            Diffusion.cc
            Simple.cc
            Piso.cc
-           IbPiso.cc)
+           IbPiso.cc
+           Coupled.cc)
 
 add_library(Solvers ${HEADERS} ${SOURCE})
 target_link_libraries(Solvers Field)
