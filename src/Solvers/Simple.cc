@@ -27,6 +27,7 @@
 #include "Simple.h"
 #include "FvScalarScheme.h"
 #include "FvVectorScheme.h"
+#include "InitialConditions.h"
 
 // ************* Constructors and Destructors *************
 
@@ -50,6 +51,8 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
       gradVectorField_(mesh, Field<Tensor3D>::AUXILLARY, "gradVectorField"),
       flowBcs_(input, uField_, pField_, rhoField_, muField_, hField_, dField_, pCorrField_)
 {
+    InitialConditions initialConditions;
+
     Solver::createMatrices(2, 3, 7);
     mesh_.addArray3DToTecplotOutput(uField_.name, uField_.cellData());
     mesh_.addArray3DToTecplotOutput(pField_.name, pField_.cellData());
@@ -64,6 +67,8 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
     omegaPCorr_ = input.caseParameters.get<double>("Solver.relaxationFactorPCorr");
 
     setConstantFields(input);
+    initialConditions.setInitialConditions(uField_);
+    initialConditions.setInitialConditions(pField_);
 }
 
 // ************* Public Methods *************
@@ -321,28 +326,28 @@ void Simple::correct()
                 if(indexMap_.isInactive(i, j, k))
                     continue;
 
-                if(i == 0 && flowBcs_.getTypeWest() == SimpleBoundaryCondition::OUTLET)
+                if(i == 0 && flowBcs_.getTypeWest() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceW(i, j, k) += -rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*mesh_.dW(i, j, k);
                 }
-                if(j == 0 && flowBcs_.getTypeSouth() == SimpleBoundaryCondition::OUTLET)
+                if(j == 0 && flowBcs_.getTypeSouth() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceS(i, j, k) += -rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*mesh_.dS(i, j, k);
                 }
-                if(k == 0 && flowBcs_.getTypeBottom() == SimpleBoundaryCondition::OUTLET)
+                if(k == 0 && flowBcs_.getTypeBottom() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceB(i, j, k) += -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
-                if(i < mesh_.uCellI() || flowBcs_.getTypeEast() == SimpleBoundaryCondition::OUTLET)
+                if(i < mesh_.uCellI() || flowBcs_.getTypeEast() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceE(i, j, k) += -rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*(pCorrField_(i + 1, j, k) - pCorrField_(i, j, k))*mesh_.dE(i, j, k);
                 }
-                if(j < mesh_.uCellJ() || flowBcs_.getTypeNorth() == SimpleBoundaryCondition::OUTLET)
+                if(j < mesh_.uCellJ() || flowBcs_.getTypeNorth() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceN(i, j, k) += -rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*(pCorrField_(i, j + 1, k) - pCorrField_(i, j, k))*mesh_.dN(i, j, k);
                 }
-                if(k < mesh_.uCellK() || flowBcs_.getTypeTop() == SimpleBoundaryCondition::OUTLET)
+                if(k < mesh_.uCellK() || flowBcs_.getTypeTop() == FlowBoundaryConditions::OUTLET)
                 {
                     massFlowField_.faceT(i, j, k) += -rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*(pCorrField_(i, j, k + 1) - pCorrField_(i, j, k))*mesh_.dT(i, j, k);
                 }

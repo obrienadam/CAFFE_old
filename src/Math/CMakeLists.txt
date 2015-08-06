@@ -10,7 +10,8 @@ set(HEADERS MathConstants.h
             Matrix.h
             SparseMatrix.h
             SparseVector.h
-            Interpolation.h)
+            Interpolation.h
+            Kernel.h)
 
 set(SOURCES Vector3D.cc
             Tensor3D.cc
@@ -19,7 +20,8 @@ set(SOURCES Vector3D.cc
             Matrix.cc
             SparseMatrix.cc
             SparseVector.cc
-            Interpolation.cc)
+            Interpolation.cc
+            Kernel.cc)
 
 add_library(Math ${HEADERS} ${SOURCES})
 target_link_libraries(Math cblas lapack atlas petsc)

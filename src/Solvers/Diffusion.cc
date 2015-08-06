@@ -27,6 +27,7 @@
 #include "Diffusion.h"
 #include "Output.h"
 #include "FvScalarScheme.h"
+#include "InitialConditions.h"
 
 // ************* Constructors and Destructors *************
 
@@ -40,9 +41,13 @@ Diffusion::Diffusion(const Input &input, const HexaFvmMesh &mesh)
 {
     using namespace std;
 
+    InitialConditions initialConditions;
+
     Solver::createMatrices(1, 1, 7);
     mesh_.addArray3DToTecplotOutput(phiField_.name, phiField_.cellData());
     mesh_.addArray3DToTecplotOutput(gradPhiField_.name, gradPhiField_.cellData());
+
+    initialConditions.setInitialConditions(phiField_);
 }
 
 Diffusion::~Diffusion()
@@ -52,7 +57,7 @@ Diffusion::~Diffusion()
 
 // ************* Public Methods *************
 
-double Diffusion::solve(double time_Step)
+double Diffusion::solve(double timeStep)
 {
     int i, j, k, cols[7];
     double a0P, a[7], b;
@@ -65,7 +70,7 @@ double Diffusion::solve(double time_Step)
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(Solver::solutionType_ == Solver::UNSTEADY)
-                    a0P = 1./time_Step;
+                    a0P = mesh_.cellVol(i, j, k)/timeStep;
                 else
                     a0P = 0.;
 

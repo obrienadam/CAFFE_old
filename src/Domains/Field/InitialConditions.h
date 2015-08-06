@@ -28,30 +28,18 @@
 #include <fstream>
 #include <string>
 
-#include "Point3D.h"
-#include "HexaFvmMesh.h"
+#include <boost/property_tree/ptree.hpp>
+
 #include "Field.h"
 
 class InitialConditions
 {
-private:
-
-    HexaFvmMesh* meshPtr_;
-    std::ifstream inputFile_;
-
-    int nCellsI_, nCellsJ_, nCellsK_;
-
-    double metricConversion_;
-
-    void findOpeningBrace();
-
-    void readInputFile(std::string filename);
 
 public:
 
     InitialConditions();
 
-    void initialize(HexaFvmMesh& mesh);
+private:
 
     template <class T>
     void setInitialConditions(Field<T>& field);
@@ -73,6 +61,14 @@ public:
 
     template <class T>
     void createBox(double xLength, double yLength, double zLength, Point3D center, T boxInnerValue, Field<T>& field);
+
+    template <class T>
+    void smootheField();
+
+    static double kCos(const Point3D &point);
+    static double k
+
+    boost::property_tree::ptree initialConditionsParameters_;
 };
 
 #include "InitialConditionsI.h"

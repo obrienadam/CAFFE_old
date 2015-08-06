@@ -12,7 +12,8 @@ set(SOURCE FieldI.h
            PrimitiveBoundaryCondition.cc
            FlowBoundaryConditions.cc
            SimpleBoundaryCondition.cc
-           InitialConditionsI.h)
+           InitialConditionsI.h
+           InitialConditions.cc)
 
 add_library(Field ${HEADERS} ${SOURCE})
 target_link_libraries(Field)

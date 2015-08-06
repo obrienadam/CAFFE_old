@@ -28,21 +28,18 @@
 #include "Output.h"
 
 template <class T>
-void InitialConditions::setInitialConditions(Field<T> &field)
-{
-
-}
-
-template <class T>
 void InitialConditions::createUniform(T value, Field<T>& field)
 {
     int i, j, k;
-std::cout << "creating uniform field\n";
-    for(k = 0; k < nCellsK_; ++k)
+    const HexaFvmMesh &mesh = field.getMesh();
+
+    Output::print("InitialConditions", "Setting uniform initial conditions for field \"" + field.name + "\".");
+
+    for(k = 0; k < mesh.nCellsK(); ++k)
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        for(j = 0; j < mesh.nCellsJ(); ++j)
         {
-            for(i = 0; i < nCellsI_; ++i)
+            for(i = 0; i < mesh.nCellsI(); ++i)
             {
                 field(i, j, k) = value;
             }
@@ -53,14 +50,14 @@ std::cout << "creating uniform field\n";
 template <class T>
 void InitialConditions::createSphere(double radius, Point3D center, T sphereInnerValue, Field<T> &field)
 {
-    HexaFvmMesh& mesh = *meshPtr_;
     int i, j, k;
+    const HexaFvmMesh &mesh = field.getMesh();
 
-    for(k = 0; k < nCellsK_; ++k)
+    for(k = 0; k < mesh.nCellsK(); ++k)
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        for(j = 0; j < mesh.nCellsJ(); ++j)
         {
-            for(i = 0; i < nCellsI_; ++i)
+            for(i = 0; i < mesh.nCellsI(); ++i)
             {
                 if((mesh.cellXc(i, j, k) - center).mag() <= radius)
                 {
@@ -74,14 +71,14 @@ void InitialConditions::createSphere(double radius, Point3D center, T sphereInne
 template <class T>
 void InitialConditions::createBox(double xLength, double yLength, double zLength, Point3D center, T boxInnerValue, Field<T>& field)
 {
-    HexaFvmMesh& mesh = *meshPtr_;
     int i, j, k;
+    const HexaFvmMesh &mesh = field.getMesh();
 
-    for(k = 0; k < nCellsK_; ++k)
+    for(k = 0; k < mesh.nCellsK(); ++k)
     {
-        for(j = 0; j < nCellsJ_; ++j)
+        for(j = 0; j < mesh.nCellsJ(); ++j)
         {
-            for(i = 0; i < nCellsI_; ++i)
+            for(i = 0; i < mesh.nCellsI(); ++i)
             {
                 if(mesh.cellXc(i, j, k).x >= center.x - 0.5*xLength && mesh.cellXc(i, j, k).x <= center.x + 0.5*xLength
                         && mesh.cellXc(i, j, k).y >= center.y - 0.5*yLength && mesh.cellXc(i, j, k).y <= center.y + 0.5*yLength
