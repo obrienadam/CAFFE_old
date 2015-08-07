@@ -72,3 +72,47 @@ void InitialConditions::setInitialConditions(Field<Vector3D> &field)
         Output::raiseException("InitialConditions", "setInitialConditions", "Unrecognized initial condition type \"" + icType + "\".");
     }
 }
+
+template<>
+void InitialConditions::writeRestart(const Field<double> &field)
+{
+    int i, j, k;
+    std::ofstream fout((field.name + "Restart.rst").c_str());
+    const HexaFvmMesh &mesh = field.getMesh();
+
+    for(k = 0; k < mesh.nCellsK(); ++k)
+    {
+        for(j = 0; j < mesh.nCellsJ(); ++j)
+        {
+            for(i = 0; i < mesh.nCellsI(); ++i)
+            {
+                fout << field(i, j, k) << " ";
+            }
+
+            fout << std::endl;
+        }
+        fout << std::endl;
+    }
+}
+
+template<>
+void InitialConditions::writeRestart(const Field<Vector3D> &field)
+{
+    int i, j, k;
+    std::ofstream fout((field.name + "Restart.rst").c_str());
+    const HexaFvmMesh &mesh = field.getMesh();
+
+    for(k = 0; k < mesh.nCellsK(); ++k)
+    {
+        for(j = 0; j < mesh.nCellsJ(); ++j)
+        {
+            for(i = 0; i < mesh.nCellsI(); ++i)
+            {
+                fout << field(i, j, k).x << " " << field(i, j, k).y << " " << field(i, j, k).z << " ";
+            }
+
+            fout << std::endl;
+        }
+        fout << std::endl;
+    }
+}

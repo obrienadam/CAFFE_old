@@ -39,10 +39,13 @@ public:
 
     InitialConditions();
 
-private:
-
     template <class T>
     void setInitialConditions(Field<T>& field);
+
+    template <class T>
+    void writeRestart(const Field<T> &field);
+
+private:
 
     template <class T>
     void setSphere(Field<T>& field);
@@ -63,10 +66,10 @@ private:
     void createBox(double xLength, double yLength, double zLength, Point3D center, T boxInnerValue, Field<T>& field);
 
     template <class T>
-    void smootheField();
+    void setFromRestart();
 
-    static double kCos(const Point3D &point);
-    static double k
+    template <class T>
+    void smootheField(Field<T> &field);
 
     boost::property_tree::ptree initialConditionsParameters_;
 };

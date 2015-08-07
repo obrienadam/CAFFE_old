@@ -3,9 +3,9 @@
 RunControl
 {
 	terminationCondition iterations
-	maxNumberOfIterations 2000
+	maxNumberOfIterations 0
 	fileWriteInterval 1000
-	timeStep 0.0000001
+	timeStep 0.01
 	maxSimTime 48
 	maxRealTimeHours 48
 }

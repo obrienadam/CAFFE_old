@@ -26,6 +26,7 @@
 
 #include "InitialConditions.h"
 #include "Output.h"
+#include "Kernel.h"
 
 template <class T>
 void InitialConditions::createUniform(T value, Field<T>& field)
@@ -53,6 +54,8 @@ void InitialConditions::createSphere(double radius, Point3D center, T sphereInne
     int i, j, k;
     const HexaFvmMesh &mesh = field.getMesh();
 
+    Output::print("InitialConditions", "Generating sphere at " + std::to_string(center) + " with radius " + std::to_string(radius) + " for field \"" + field.name + "\".");
+
     for(k = 0; k < mesh.nCellsK(); ++k)
     {
         for(j = 0; j < mesh.nCellsJ(); ++j)
@@ -66,6 +69,8 @@ void InitialConditions::createSphere(double radius, Point3D center, T sphereInne
             }
         }
     }
+
+    smootheField(field);
 }
 
 template <class T>
@@ -89,4 +94,40 @@ void InitialConditions::createBox(double xLength, double yLength, double zLength
             }
         }
     }
+}
+
+template <class T>
+void InitialConditions::smootheField(Field<T> &field)
+{
+    int i, j, k, ii, jj, kk;
+    const HexaFvmMesh &mesh = field.getMesh();
+    Field<T> smoothedField(mesh, Field<T>::AUXILLARY, "smoothedField");
+    Kernel kernel(Kernel::K6, 2.*(mesh.faceXcI(0, 0, 0) - mesh.faceXcI(1, 0, 0)).mag());
+    Vector3D center;
+
+    Output::print("InitialConditions", "Smoothing field \"" + field.name + "\".");
+
+    for(k = 0; k < mesh.nCellsK(); ++k)
+    {
+        for(j = 0; j < mesh.nCellsJ(); ++j)
+        {
+            for(i = 0; i < mesh.nCellsI(); ++i)
+            {
+                center = mesh.cellXc(i, j, k);
+
+                for(kk = 0; kk < mesh.nCellsK(); ++kk)
+                {
+                    for(jj = 0; jj < mesh.nCellsJ(); ++jj)
+                    {
+                        for(ii = 0; ii < mesh.nCellsI(); ++ii)
+                        {
+                            smoothedField(i, j, k) += field(ii, jj, kk)*kernel.value(center, mesh.cellXc(ii, jj, kk))*mesh.cellVol(ii, jj, kk);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    field = smoothedField;
 }

@@ -17,15 +17,15 @@ Solver
 	relaxationFactorPCorr 0.5
 	rho 998
 	mu 8.94e-4
-	numberOfPressureCorrections 3
-	numberOfInnerIterations 4
+	numberOfPressureCorrections 2
+	numberOfInnerIterations 3
 }
 
 ImmersedBoundaries
 {
 	Sphere
 	{
-		radius 0.15
+		radius 0.2
 		center (0.7,1,1)
 	}
 }
@@ -41,7 +41,7 @@ Boundaries
 	west
 	{
 		type inlet
-		refVector (1,0,0)
+		refVector (2,0,0)
 		refValue 0
 	}
 	north
