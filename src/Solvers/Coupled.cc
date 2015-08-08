@@ -69,7 +69,7 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(!indexMap_.isActive(i, j, k))
+                if(!mesh_.iMap.isActive(i, j, k))
                     continue;
                 else if(solutionType_ == UNSTEADY)
                     a0P = rhoField_(i, j, k)*mesh_.cellVol(i, j, k)/timeStep;
@@ -115,21 +115,21 @@ void Coupled::computeMomentumAndPressure(double timeStep)
                     a[12] = (1. - mesh_.gT(i, j, k))*mesh_.fAreaNormT(i, j, k)(componentNo);
                     a[13] = (1. - mesh_.gB(i, j, k))*mesh_.fAreaNormB(i, j, k)(componentNo);
 
-                    rowNo = indexMap_(i, j, k, componentNo);
+                    rowNo = mesh_.iMap(i, j, k, componentNo);
                     cols[0] = rowNo;
-                    cols[1] = indexMap_(i + 1, j, k, componentNo);
-                    cols[2] = indexMap_(i - 1, j, k, componentNo);
-                    cols[3] = indexMap_(i, j + 1, k, componentNo);
-                    cols[4] = indexMap_(i, j - 1, k, componentNo);
-                    cols[5] = indexMap_(i, j, k + 1, componentNo);
-                    cols[6] = indexMap_(i, j, k - 1, componentNo);
-                    cols[7] = indexMap_(i, j, k, 3); // Redundant, but not changed for clarity
-                    cols[8] = indexMap_(i + 1, j, k, 3);
-                    cols[9] = indexMap_(i - 1, j, k, 3);
-                    cols[10] = indexMap_(i, j + 1, k, 3);
-                    cols[11] = indexMap_(i, j - 1, k, 3);
-                    cols[12] = indexMap_(i, j, k + 1, 3);
-                    cols[13] = indexMap_(i, j, k - 1, 3);
+                    cols[1] = mesh_.iMap(i + 1, j, k, componentNo);
+                    cols[2] = mesh_.iMap(i - 1, j, k, componentNo);
+                    cols[3] = mesh_.iMap(i, j + 1, k, componentNo);
+                    cols[4] = mesh_.iMap(i, j - 1, k, componentNo);
+                    cols[5] = mesh_.iMap(i, j, k + 1, componentNo);
+                    cols[6] = mesh_.iMap(i, j, k - 1, componentNo);
+                    cols[7] = mesh_.iMap(i, j, k, 3); // Redundant, but not changed for clarity
+                    cols[8] = mesh_.iMap(i + 1, j, k, 3);
+                    cols[9] = mesh_.iMap(i - 1, j, k, 3);
+                    cols[10] = mesh_.iMap(i, j + 1, k, 3);
+                    cols[11] = mesh_.iMap(i, j - 1, k, 3);
+                    cols[12] = mesh_.iMap(i, j, k + 1, 3);
+                    cols[13] = mesh_.iMap(i, j, k - 1, 3);
 
                     //- Pressure bcs for the momentum equations
                     flowBcs_.pFieldBcs.setImplicitBoundaryCoefficients(i, j, k, &a[7], bu(componentNo));
@@ -153,10 +153,10 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(!indexMap_.isActive(i, j, k))
+                if(!mesh_.iMap.isActive(i, j, k))
                     continue;
 
-                rowNo = indexMap_(i, j, k, 3);
+                rowNo = mesh_.iMap(i, j, k, 3);
                 bp = 0.;
 
                 for(componentNo = 0; componentNo < 3; ++componentNo)
@@ -176,13 +176,13 @@ void Coupled::computeMomentumAndPressure(double timeStep)
                     a[5] = rhoField_.faceT(i, j, k)*(1. - mesh_.gT(i, j, k))*mesh_.fAreaNormT(i, j, k)(componentNo);
                     a[6] = rhoField_.faceB(i, j, k)*(1. - mesh_.gB(i, j, k))*mesh_.fAreaNormB(i, j, k)(componentNo);
 
-                    cols[0] = indexMap_(i, j, k, componentNo);
-                    cols[1] = indexMap_(i + 1, j, k, componentNo);
-                    cols[2] = indexMap_(i - 1, j, k, componentNo);
-                    cols[3] = indexMap_(i, j + 1, k, componentNo);
-                    cols[4] = indexMap_(i, j - 1, k, componentNo);
-                    cols[5] = indexMap_(i, j, k + 1, componentNo);
-                    cols[6] = indexMap_(i, j, k - 1, componentNo);
+                    cols[0] = mesh_.iMap(i, j, k, componentNo);
+                    cols[1] = mesh_.iMap(i + 1, j, k, componentNo);
+                    cols[2] = mesh_.iMap(i - 1, j, k, componentNo);
+                    cols[3] = mesh_.iMap(i, j + 1, k, componentNo);
+                    cols[4] = mesh_.iMap(i, j - 1, k, componentNo);
+                    cols[5] = mesh_.iMap(i, j, k + 1, componentNo);
+                    cols[6] = mesh_.iMap(i, j, k - 1, componentNo);
 
                     bu = Vector3D(0., 0., 0.);
                     flowBcs_.uFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, bu);
@@ -206,12 +206,12 @@ void Coupled::computeMomentumAndPressure(double timeStep)
                 a[6] = -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*mesh_.dB(i, j, k);
 
                 cols[0] = rowNo;
-                cols[1] = indexMap_(i + 1, j, k, 3);
-                cols[2] = indexMap_(i - 1, j, k, 3);
-                cols[3] = indexMap_(i, j + 1, k, 3);
-                cols[4] = indexMap_(i, j - 1, k, 3);
-                cols[5] = indexMap_(i, j, k + 1, 3);
-                cols[6] = indexMap_(i, j, k - 1, 3);
+                cols[1] = mesh_.iMap(i + 1, j, k, 3);
+                cols[2] = mesh_.iMap(i - 1, j, k, 3);
+                cols[3] = mesh_.iMap(i, j + 1, k, 3);
+                cols[4] = mesh_.iMap(i, j - 1, k, 3);
+                cols[5] = mesh_.iMap(i, j, k + 1, 3);
+                cols[6] = mesh_.iMap(i, j, k - 1, 3);
 
                 bp -= rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*dot(gradPField_.faceE(i, j, k), mesh_.fAreaNormE(i, j, k))
                         + rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*dot(gradPField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k))
@@ -242,14 +242,14 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isInactive(i, j, k))
+                if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
                 for(componentNo = 0; componentNo < 3; ++componentNo)
                 {
-                    uField_(i, j, k)(componentNo) = x_[0](indexMap_(i, j, k, componentNo));
+                    uField_(i, j, k)(componentNo) = x_[0](mesh_.iMap(i, j, k, componentNo));
                 }
-                pField_(i, j, k) = x_[0](indexMap_(i, j, k, 3));
+                pField_(i, j, k) = x_[0](mesh_.iMap(i, j, k, 3));
             }
         }
     }
@@ -264,9 +264,9 @@ void Coupled::computeMomentumAndPressure(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isActive(i, j, k))
+                if(mesh_.iMap.isActive(i, j, k))
                     hField_(i, j, k) = uField_(i, j, k) + dField_(i, j, k)*gradPField_(i, j, k);
-                else if(indexMap_.isGhost(i, j, k))
+                else if(mesh_.iMap.isGhost(i, j, k))
                     hField_(i, j, k) = uField_(i, j, k);
             }
         }
@@ -289,7 +289,7 @@ void Coupled::rhieChowInterpolateFaces()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isInactive(i, j, k))
+                if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
                 if(i == 0)

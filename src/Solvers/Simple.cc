@@ -137,7 +137,7 @@ void Simple::computeMomentum(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(!indexMap_.isActive(i, j, k))
+                if(!mesh_.iMap.isActive(i, j, k))
                     continue;
                 else if(Solver::solutionType_ == Solver::UNSTEADY)
                     a0P = rhoField_(i, j, k)*mesh_.cellVol(i, j, k)/timeStep;
@@ -172,14 +172,14 @@ void Simple::computeMomentum(double timeStep)
 
                 flowBcs_.uFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
-                rowNo = indexMap_(i, j, k, 0);
+                rowNo = mesh_.iMap(i, j, k, 0);
                 cols[0] = rowNo;
-                cols[1] = indexMap_(i + 1, j, k, 0);
-                cols[2] = indexMap_(i - 1, j, k, 0);
-                cols[3] = indexMap_(i, j + 1, k, 0);
-                cols[4] = indexMap_(i, j - 1, k, 0);
-                cols[5] = indexMap_(i, j, k + 1, 0);
-                cols[6] = indexMap_(i, j, k - 1, 0);
+                cols[1] = mesh_.iMap(i + 1, j, k, 0);
+                cols[2] = mesh_.iMap(i - 1, j, k, 0);
+                cols[3] = mesh_.iMap(i, j + 1, k, 0);
+                cols[4] = mesh_.iMap(i, j - 1, k, 0);
+                cols[5] = mesh_.iMap(i, j, k + 1, 0);
+                cols[6] = mesh_.iMap(i, j, k - 1, 0);
 
                 A_[0].setRow(rowNo, 7, cols, a);
                 b_[0].setValue(rowNo, b.x);
@@ -206,12 +206,12 @@ void Simple::computeMomentum(double timeStep)
             {
                 for(i = 0; i < mesh_.nCellsI(); ++i)
                 {
-                    if(indexMap_.isInactive(i, j, k))
+                    if(mesh_.iMap.isInactive(i, j, k))
                         continue;
 
-                    uField_(i, j, k)(componentNo) = x_[componentNo](indexMap_(i, j, k, 0));
+                    uField_(i, j, k)(componentNo) = x_[componentNo](mesh_.iMap(i, j, k, 0));
 
-                    if(indexMap_.isActive(i, j, k))
+                    if(mesh_.iMap.isActive(i, j, k))
                         hField_(i, j, k)(componentNo) = uField_(i, j, k)(componentNo) + dField_(i, j, k)*gradPField_(i, j, k)(componentNo);
                     else
                         hField_(i, j, k)(componentNo) = uField_(i, j, k)(componentNo);
@@ -250,7 +250,7 @@ void Simple::computePCorr()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(!indexMap_.isActive(i, j, k))
+                if(!mesh_.iMap.isActive(i, j, k))
                     continue;
 
                 a[1] = rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*mesh_.dE(i, j, k);
@@ -268,14 +268,14 @@ void Simple::computePCorr()
 
                 flowBcs_.pCorrFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
-                rowNo = indexMap_(i, j, k, 0);
-                cols[0] = indexMap_(i, j, k, 0);
-                cols[1] = indexMap_(i + 1, j, k, 0);
-                cols[2] = indexMap_(i - 1, j, k, 0);
-                cols[3] = indexMap_(i, j + 1, k, 0);
-                cols[4] = indexMap_(i, j - 1, k, 0);
-                cols[5] = indexMap_(i, j, k + 1, 0);
-                cols[6] = indexMap_(i, j, k - 1, 0);
+                rowNo = mesh_.iMap(i, j, k, 0);
+                cols[0] = mesh_.iMap(i, j, k, 0);
+                cols[1] = mesh_.iMap(i + 1, j, k, 0);
+                cols[2] = mesh_.iMap(i - 1, j, k, 0);
+                cols[3] = mesh_.iMap(i, j + 1, k, 0);
+                cols[4] = mesh_.iMap(i, j - 1, k, 0);
+                cols[5] = mesh_.iMap(i, j, k + 1, 0);
+                cols[6] = mesh_.iMap(i, j, k - 1, 0);
 
                 A_[1].setRow(rowNo, 7, cols, a);
                 b_[0].setValue(rowNo, b);
@@ -295,10 +295,10 @@ void Simple::computePCorr()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isInactive(i, j,k))
+                if(mesh_.iMap.isInactive(i, j,k))
                     continue;
 
-                pCorrField_(i, j, k) = x_[0](indexMap_(i, j, k, 0));
+                pCorrField_(i, j, k) = x_[0](mesh_.iMap(i, j, k, 0));
             }
         }
     }
@@ -323,7 +323,7 @@ void Simple::correct()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isInactive(i, j, k))
+                if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
                 if(i == 0 && flowBcs_.getTypeWest() == FlowBoundaryConditions::OUTLET)
@@ -383,7 +383,7 @@ double Simple::computeContinuityError()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(!indexMap_.isActive(i, j, k))
+                if(!mesh_.iMap.isActive(i, j, k))
                     continue;
 
                 if(fabs(massFlowField_(i, j, k)) > continuityError_)
@@ -405,7 +405,7 @@ void Simple::rhieChowInterpolateFaces()
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                if(indexMap_.isInactive(i, j, k))
+                if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
                 if(i == 0)

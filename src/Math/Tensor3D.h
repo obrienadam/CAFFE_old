@@ -23,8 +23,6 @@ class Tensor3D
 	   double zy = 0.,
 	   double zz = 0.);
 
-  double xx, xy, xz, yx, yy, yz, zx, zy, zz;
-
   double& operator()(int i, int j);
   double& operator()(int i);
   Vector3D row(int rowNo);
@@ -38,6 +36,8 @@ class Tensor3D
   Tensor3D& operator/=(const double& rhs);
 
   void print();
+
+  double xx, xy, xz, yx, yy, yz, zx, zy, zz;
 };
 
 Vector3D operator*(const Tensor3D& lhs, const Vector3D& rhs);

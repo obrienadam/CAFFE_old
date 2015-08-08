@@ -33,6 +33,7 @@
 #include "Array3D.h"
 #include "Vector3D.h"
 #include "Point3D.h"
+#include "IndexMap.h"
 
 class HexaFvmMesh : public StructuredMesh
 {
@@ -168,6 +169,8 @@ public:
      * @param time The solution time.
      */
     void writeTec360(double time = 0, std::string directoryName = "");
+
+    mutable IndexMap iMap;
 
 private:
 

@@ -37,6 +37,7 @@ public:
     IndexMap();
 
     void initialize(int nCellsI, int nCellsJ, int nCellsK);
+
     int operator()(int i, int j, int k, int varSetNo);
 
     int nActive(){ return nActive_; }
@@ -52,7 +53,7 @@ public:
 private:
 
     int nCellsI_, nCellsJ_, nCellsK_, nActive_;
-    Array3D<int> globalIndices_;
+    Array3D<int> localIndices_;
     Array3D<CellStatus> cellStatuses_;
 };
 

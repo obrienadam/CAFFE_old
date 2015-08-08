@@ -5,8 +5,6 @@ Solver::Solver(const Input &input, const HexaFvmMesh &mesh)
     :
       mesh_(mesh)
 {
-    indexMap_.initialize(mesh_.nCellsI(), mesh_.nCellsJ(), mesh_.nCellsK());
-
     if(input.caseParameters.get<std::string>("Solver.timeAccurate") == "ON")
         solutionType_ = UNSTEADY;
     else
@@ -33,14 +31,14 @@ void Solver::createMatrices(int nMatrices, int nVectors, int nnz)
 
     for(i = 0; i < nMatrices; ++i)
     {
-        A_[i].allocate(indexMap_.nActive(), indexMap_.nActive(), nnz);
+        A_[i].allocate(mesh_.iMap.nActive(), mesh_.iMap.nActive(), nnz);
     }
 
     for(i = 0; i < nVectors; ++i)
     {
-        x_[i].allocate(indexMap_.nActive());
-        b_[i].allocate(indexMap_.nActive());
-        res_[i].allocate(indexMap_.nActive());
+        x_[i].allocate(mesh_.iMap.nActive());
+        b_[i].allocate(mesh_.iMap.nActive());
+        res_[i].allocate(mesh_.iMap.nActive());
     }
 }
 
@@ -55,14 +53,14 @@ void Solver::createMatrices(int nVariables, int nMatrices, int nVectors, int nnz
 
     for(i = 0; i < nMatrices; ++i)
     {
-        A_[i].allocate(nVariables*indexMap_.nActive(), nVariables*indexMap_.nActive(), nnz);
+        A_[i].allocate(nVariables*mesh_.iMap.nActive(), nVariables*mesh_.iMap.nActive(), nnz);
     }
 
     for(i = 0; i < nVectors; ++i)
     {
-        x_[i].allocate(nVariables*indexMap_.nActive());
-        b_[i].allocate(nVariables*indexMap_.nActive());
-        res_[i].allocate(nVariables*indexMap_.nActive());
+        x_[i].allocate(nVariables*mesh_.iMap.nActive());
+        b_[i].allocate(nVariables*mesh_.iMap.nActive());
+        res_[i].allocate(nVariables*mesh_.iMap.nActive());
     }
 }
 

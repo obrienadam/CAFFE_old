@@ -78,14 +78,14 @@ void IbPiso::computeIbField()
                 if(ibSphere_.isInside(mesh_.cellXc(i, j, k)))
                 {
                     ibField_(i, j, k) = SOLID;
-                    indexMap_.setInactive(i, j, k);
+                    mesh_.iMap.setInactive(i, j, k);
                     uField_(i, j, k) = Vector3D(0., 0., 0.);
                     pField_(i, j, k) = 0.;
                 }
                 else
                 {
                     ibField_(i, j, k) = FLUID;
-                    indexMap_.setActive(i, j, k);
+                    mesh_.iMap.setActive(i, j, k);
                 }
             }
         }
@@ -105,13 +105,13 @@ void IbPiso::computeIbField()
                             || ibField_(i, j, k + 1) == FLUID || ibField_(i, j, k - 1) == FLUID)
                     {
                         ibField_(i, j, k) = IB;
-                        indexMap_.setGhost(i, j, k);
+                        mesh_.iMap.setGhost(i, j, k);
                     }
                 }
             }
         }
     }
-    indexMap_.generateGlobalIndices();
+    mesh_.iMap.generateGlobalIndices();
 
     destroyMatrices();
     createMatrices(2, 3, 9);
@@ -147,7 +147,7 @@ void IbPiso::computeIbCoeffs()
                     beta = Interpolation::computeTrilinearCoeffs(tmpPoints, 8, imagePoint);
 
                     values[0] = 1.;
-                    colNos[0] = indexMap_(i, j, k, 0);
+                    colNos[0] = mesh_.iMap(i, j, k, 0);
 
                     for(m = 0; m < 8; ++m)
                     {
@@ -159,16 +159,16 @@ void IbPiso::computeIbCoeffs()
                         else
                         {
                             values[m + 1] = beta(0, m);
-                            colNos[m + 1] = indexMap_(ii[m], jj[m], kk[m], 0);
+                            colNos[m + 1] = mesh_.iMap(ii[m], jj[m], kk[m], 0);
                         }
                     }
-                    A_[0].setRow(indexMap_(i, j, k, 0), 9, colNos, values);
+                    A_[0].setRow(mesh_.iMap(i, j, k, 0), 9, colNos, values);
 
                     //- Add the equation for the ghost cells to the coefficient matrix form pressure
                     for(m = 0; m < 8; ++m)
                     {
                         values[0] = -1;
-                        colNos[0] = indexMap_(i, j, k, 0);
+                        colNos[0] = mesh_.iMap(i, j, k, 0);
 
                         if(ii[m] == i && jj[m] == j && kk[m] == k)
                         {
@@ -178,11 +178,11 @@ void IbPiso::computeIbCoeffs()
                         else
                         {
                             values[m + 1] = beta(0, m);
-                            colNos[m + 1] = indexMap_(ii[m], jj[m], kk[m], 0);
+                            colNos[m + 1] = mesh_.iMap(ii[m], jj[m], kk[m], 0);
                         }
                     }
 
-                    A_[1].setRow(indexMap_(i, j, k, 0), 9, colNos, values);
+                    A_[1].setRow(mesh_.iMap(i, j, k, 0), 9, colNos, values);
                 }
             }
         }

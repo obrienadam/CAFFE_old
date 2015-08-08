@@ -578,6 +578,7 @@ void HexaFvmMesh::initializeCellsAndFaces()
     initializeFaces();
     initializeCellToFaceParameters();
     computeMeshMetrics();
+    iMap.initialize(nCellsI(), nCellsJ(), nCellsK());
 }
 
 void HexaFvmMesh::initializeCells()

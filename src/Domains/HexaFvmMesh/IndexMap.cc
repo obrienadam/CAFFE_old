@@ -36,12 +36,12 @@ void IndexMap::initialize(int nCellsI, int nCellsJ, int nCellsK)
     nCellsJ_ = nCellsJ;
     nCellsK_ = nCellsK;
     nActive_ = nCellsI_*nCellsJ_*nCellsK_;
-    globalIndices_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    localIndices_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     cellStatuses_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
     for(int i = 0; i < nActive_; ++i)
     {
-        globalIndices_(i) = i;
+        localIndices_(i) = i;
         cellStatuses_(i) = ACTIVE;
     }
 }
@@ -52,7 +52,7 @@ int IndexMap::operator ()(int i, int j, int k, int varSetNo)
             && j >= 0 && j < nCellsJ_
             && k >= 0 && k < nCellsK_)
     {
-        return globalIndices_(i, j, k) + varSetNo*nActive_;
+        return localIndices_(i, j, k) + varSetNo*nActive_;
     }
 
     return -1;
@@ -104,12 +104,12 @@ void IndexMap::generateGlobalIndices()
     {
         if(cellStatuses_(i) == ACTIVE || cellStatuses_(i) == GHOST)
         {
-            globalIndices_(i) = nActive_;
+            localIndices_(i) = nActive_;
             ++nActive_;
         }
         else
         {
-            globalIndices_(i) = -1;
+            localIndices_(i) = -1;
         }
     }
 }

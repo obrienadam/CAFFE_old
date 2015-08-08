@@ -7,7 +7,6 @@
 #include "HexaFvmMesh.h"
 #include "SparseMatrix.h"
 #include "SparseVector.h"
-#include "IndexMap.h"
 #include "Time.h"
 
 class Solver
@@ -33,7 +32,6 @@ protected:
     SolutionType solutionType_;
     std::vector<SparseMatrix> A_;
     std::vector<SparseVector> x_, b_, res_;
-    IndexMap indexMap_;
 
     Time time_;
 

@@ -86,16 +86,16 @@ double Diffusion::solve(double timeStep)
 
                 bcs_.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
-                cols[0] = indexMap_(i, j, k, 0);
-                cols[1] = indexMap_(i + 1, j, k, 0);
-                cols[2] = indexMap_(i - 1, j, k, 0);
-                cols[3] = indexMap_(i, j + 1, k, 0);
-                cols[4] = indexMap_(i, j - 1, k, 0);
-                cols[5] = indexMap_(i, j, k + 1, 0);
-                cols[6] = indexMap_(i, j, k - 1, 0);
+                cols[0] = mesh_.iMap(i, j, k, 0);
+                cols[1] = mesh_.iMap(i + 1, j, k, 0);
+                cols[2] = mesh_.iMap(i - 1, j, k, 0);
+                cols[3] = mesh_.iMap(i, j + 1, k, 0);
+                cols[4] = mesh_.iMap(i, j - 1, k, 0);
+                cols[5] = mesh_.iMap(i, j, k + 1, 0);
+                cols[6] = mesh_.iMap(i, j, k - 1, 0);
 
-                A_[0].setRow(indexMap_(i, j, k, 0), 7, cols, a);
-                b_[0].setValue(indexMap_(i, j, k, 0), b);
+                A_[0].setRow(mesh_.iMap(i, j, k, 0), 7, cols, a);
+                b_[0].setValue(mesh_.iMap(i, j, k, 0), b);
             }
         }
     }
@@ -112,7 +112,7 @@ double Diffusion::solve(double timeStep)
         {
             for(i = 0; i < mesh_.nCellsI(); ++i)
             {
-                phiField_(i, j, k) = x_[0](indexMap_(i, j, k, 0));
+                phiField_(i, j, k) = x_[0](mesh_.iMap(i, j, k, 0));
             }
         }
     }
