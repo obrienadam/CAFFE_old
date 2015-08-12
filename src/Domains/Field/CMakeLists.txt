@@ -7,13 +7,13 @@ set(HEADERS Field.h
             SimpleBoundaryCondition.h
             InitialConditions.h)
 
-set(SOURCE FieldI.h
-           PrimitiveBoundaryConditionI.h
-           PrimitiveBoundaryCondition.cc
-           FlowBoundaryConditions.cc
-           SimpleBoundaryCondition.cc
-           InitialConditionsI.h
-           InitialConditions.cc)
+set(SOURCE Field.tpp
+           PrimitiveBoundaryCondition.tpp
+           PrimitiveBoundaryCondition.cpp
+           FlowBoundaryConditions.cpp
+           SimpleBoundaryCondition.cpp
+           InitialConditions.tpp
+           InitialConditions.cpp)
 
 add_library(Field ${HEADERS} ${SOURCE})
 target_link_libraries(Field)

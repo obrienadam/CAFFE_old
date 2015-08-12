@@ -8,12 +8,12 @@ set(HEADERS StructuredMesh.h
             MultiBlockHexaMeshGen.h
             IndexMap.h)
 
-set(SOURCE StructuredMesh.cc
-           HexaFvmMesh.cc
-           MultiBlockHexaFvmMesh.cc
-           HexaMeshGen.cc
-           MultiBlockHexaMeshGen.cc
-           IndexMap.cc)
+set(SOURCE StructuredMesh.cpp
+           HexaFvmMesh.cpp
+           MultiBlockHexaFvmMesh.cpp
+           HexaMeshGen.cpp
+           MultiBlockHexaMeshGen.cpp
+           IndexMap.cpp)
 
 add_library(HexaFvmMesh ${HEADERS} ${SOURCE})
 

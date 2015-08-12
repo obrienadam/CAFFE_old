@@ -1,5 +1,5 @@
 /**
- * @file    Diffusion.cc
+ * @file    Diffusion.cpp
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
  *

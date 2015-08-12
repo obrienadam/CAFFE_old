@@ -12,15 +12,15 @@ set(HEADERS Vector3D.h
             Interpolation.h
             Kernel.h)
 
-set(SOURCES Vector3D.cc
-            Tensor3D.cc
-            Geometry.cc
-            Sphere.cc
-            Matrix.cc
-            SparseMatrix.cc
-            SparseVector.cc
-            Interpolation.cc
-            Kernel.cc)
+set(SOURCES Vector3D.cpp
+            Tensor3D.cpp
+            Geometry.cpp
+            Sphere.cpp
+            Matrix.cpp
+            SparseMatrix.cpp
+            SparseVector.cpp
+            Interpolation.cpp
+            Kernel.cpp)
 
 add_library(Math ${HEADERS} ${SOURCES})
 target_link_libraries(Math cblas lapack atlas petsc)

@@ -74,6 +74,6 @@ private:
     boost::property_tree::ptree initialConditionsParameters_;
 };
 
-#include "InitialConditionsI.h"
+#include "InitialConditions.tpp"
 
 #endif

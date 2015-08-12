@@ -45,6 +45,6 @@ public:
     static void extrapolateInteriorFaces(GradientEvaluationMethod method, Field<T>& field, Field<GRAD_T>& gradField);
 };
 
-#include "FvSchemeI.h"
+#include "FvScheme.tpp"
 
 #endif

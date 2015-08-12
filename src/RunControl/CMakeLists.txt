@@ -7,11 +7,11 @@ set(HEADERS ArgsList.h
             RunControl.h
             Time.h)
 
-set(SOURCE ArgsList.cc
- 	   Input.cc
-           Output.cc
-           RunControl.cc
-           Time.cc)
+set(SOURCE ArgsList.cpp
+           Input.cpp
+           Output.cpp
+           RunControl.cpp
+           Time.cpp)
 
 add_library(RunControl ${HEADERS} ${SOURCE})
 target_link_libraries(RunControl Parallel ${Boost_LIBRARIES})

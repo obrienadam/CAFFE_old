@@ -9,5 +9,7 @@
 
 int main()
 {
-    std::cerr << "This application has been erased and needs to be re-written.\n";
+    using namespace std;
+
+    cerr << "This application has been erased and needs to be re-written.\n";
 }

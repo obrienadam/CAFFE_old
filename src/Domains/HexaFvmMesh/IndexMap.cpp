@@ -1,5 +1,5 @@
 /**
- * @file    IndexMap.cc
+ * @file    IndexMap.cpp
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
  *

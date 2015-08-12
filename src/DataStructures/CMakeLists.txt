@@ -3,4 +3,4 @@
 
 set(HEADERS Array3D.h)
 
-set(SOURCE Array3DI.h)
+set(SOURCE Array3D.tpp)

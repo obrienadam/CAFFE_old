@@ -74,6 +74,6 @@ public:
 
 };
 
-#include "Array3DI.h"
+#include "Array3D.tpp"
 
 #endif

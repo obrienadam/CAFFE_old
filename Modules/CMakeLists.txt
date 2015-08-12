@@ -2,15 +2,15 @@
 # Author: Adam O'Brien
 
 # Build the hexaMesh generator
-add_executable(hexaMesh hexaMesh.cc)
+add_executable(hexaMesh hexaMesh.cpp)
 target_link_libraries(hexaMesh HexaFvmMesh)
 
 # Build the multi-block hexaMesh generator
-add_executable(multiBlockHexaMesh multiBlockHexaMesh.cc)
+add_executable(multiBlockHexaMesh multiBlockHexaMesh.cpp)
 target_link_libraries(multiBlockHexaMesh HexaFvmMesh)
 
 # Build the diffusion solver
-add_executable(caffeDiffusion caffeDiffusion.cc)
+add_executable(caffeDiffusion caffeDiffusion.cpp)
 target_link_libraries(caffeDiffusion RunControl
                                      Math
                                      Solvers
@@ -18,7 +18,7 @@ target_link_libraries(caffeDiffusion RunControl
                                      Schemes)
 
 # Build the basic simple solver
-add_executable(caffeSimple caffeSimple.cc)
+add_executable(caffeSimple caffeSimple.cpp)
 target_link_libraries(caffeSimple RunControl
                                   Math
                                   Solvers
@@ -26,7 +26,7 @@ target_link_libraries(caffeSimple RunControl
                                   Schemes)
 
 # Build the basic piso solver
-add_executable(caffePiso caffePiso.cc)
+add_executable(caffePiso caffePiso.cpp)
 target_link_libraries(caffePiso RunControl
                                 Math
                                 Solvers
@@ -34,7 +34,7 @@ target_link_libraries(caffePiso RunControl
                                 Schemes)
 
 # Build the immersed boundary piso solver
-add_executable(caffeIbPiso caffeIbPiso.cc)
+add_executable(caffeIbPiso caffeIbPiso.cpp)
 target_link_libraries(caffeIbPiso RunControl
                                   Math
                                   Solvers
@@ -42,7 +42,7 @@ target_link_libraries(caffeIbPiso RunControl
                                   Schemes)
 
 # Build the multiphase simple solver
-add_executable(caffeMultiphaseSimple caffeMultiphaseSimple.cc)
+add_executable(caffeMultiphaseSimple caffeMultiphaseSimple.cpp)
 target_link_libraries(caffeMultiphaseSimple RunControl
                                             Math
                                             Solvers
@@ -50,7 +50,7 @@ target_link_libraries(caffeMultiphaseSimple RunControl
                                             Schemes)
 
 # Build the coupled solver
-add_executable(caffeCoupled caffeCoupled.cc)
+add_executable(caffeCoupled caffeCoupled.cpp)
 target_link_libraries(caffeCoupled RunControl
                                    Math
                                    Solvers

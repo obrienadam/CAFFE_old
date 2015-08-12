@@ -39,6 +39,6 @@ protected:
 
 };
 
-#include "PrimitiveBoundaryConditionI.h"
+#include "PrimitiveBoundaryCondition.tpp"
 
 #endif

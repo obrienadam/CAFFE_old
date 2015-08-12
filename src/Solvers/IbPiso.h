@@ -1,5 +1,5 @@
 /**
- * @file    IbSimple.h
+ * @file    IbPiso.h
  * @author  Adam O'Brien <obrienadam89@gmail.com>
  * @version 1.0
  *
