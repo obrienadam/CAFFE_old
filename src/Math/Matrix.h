@@ -31,12 +31,6 @@
 
 class Matrix
 {
-protected:
-
-    int m_, n_, nElements_;
-    std::vector<double> elements_;
-    std::vector<int> ipiv_;
-
 public:
 
     //- Constructors, copy constructors and destructors
@@ -87,9 +81,17 @@ public:
     */
     void solve(Matrix& b);
 
-    /** Compute the inverse using an LU factorization.
+    /**
+     * @brief Compute the inverse using an LU factorization.
+     * @return A reference to the inverted matrix.
      */
     Matrix& inverse();
+
+    /**
+     * @brief Compute the transpose of the matrix.
+     * @return A reference to the transposed matrix.
+     */
+    Matrix& transpose();
 
     Matrix& operator+=(Matrix& rhs);
     Matrix& operator-=(Matrix& rhs);
@@ -99,6 +101,14 @@ public:
     /** Print the matrix to the console.
      */
     void print();
+
+protected:
+
+    int m_, n_, nElements_;
+    std::vector<double> elements_;
+    std::vector<int> ipiv_;
+
+    static std::vector<double> buffer_;
 
     friend Matrix operator*(const Matrix& A, const Matrix& B);
     friend void multiply(const Matrix &A, const Matrix &B, Matrix& C);
@@ -111,6 +121,7 @@ Matrix solve(Matrix A, Matrix b);
 Matrix eye(int m);
 Matrix random(int m, int n, double min, double max);
 Matrix inverse(Matrix matrix);
+Matrix transpose(Matrix matrix);
 
 Matrix operator*(const Matrix& A, const Matrix& B);
 void multiply(const Matrix &A, const Matrix &B, Matrix& C);

@@ -24,8 +24,13 @@
 #include "IndexMap.h"
 #include "FvScheme.h"
 #include "Output.h"
+#include "Parallel.h"
 
 IndexMap::IndexMap()
+    :
+      lowerGlobalIndex_(0),
+      upperGlobalIndex_(0),
+      gatheredNActiveLocal_(Parallel::nProcesses())
 {
 
 }
@@ -35,15 +40,16 @@ void IndexMap::initialize(int nCellsI, int nCellsJ, int nCellsK)
     nCellsI_ = nCellsI;
     nCellsJ_ = nCellsJ;
     nCellsK_ = nCellsK;
-    nActive_ = nCellsI_*nCellsJ_*nCellsK_;
     localIndices_.allocate(nCellsI_, nCellsJ_, nCellsK_);
     cellStatuses_.allocate(nCellsI_, nCellsJ_, nCellsK_);
 
-    for(int i = 0; i < nActive_; ++i)
+    for(int i = 0; i < nActiveLocal_; ++i)
     {
         localIndices_(i) = i;
         cellStatuses_(i) = ACTIVE;
     }
+
+    generateIndices();
 }
 
 int IndexMap::operator ()(int i, int j, int k, int varSetNo)
@@ -52,7 +58,7 @@ int IndexMap::operator ()(int i, int j, int k, int varSetNo)
             && j >= 0 && j < nCellsJ_
             && k >= 0 && k < nCellsK_)
     {
-        return localIndices_(i, j, k) + varSetNo*nActive_;
+        return lowerGlobalIndex_ + localIndices_(i, j, k) + varSetNo*nActiveLocal_;
     }
 
     return -1;
@@ -97,19 +103,35 @@ void IndexMap::setInactive(int i, int j, int k)
     cellStatuses_(i, j, k) = INACTIVE;
 }
 
-void IndexMap::generateGlobalIndices()
+void IndexMap::generateIndices()
 {
-    nActive_ = 0;
+    nActiveLocal_ = 0;
+    nActiveGlobal_ = 0;
+
     for(int i = 0; i < cellStatuses_.size(); ++i)
     {
-        if(cellStatuses_(i) == ACTIVE || cellStatuses_(i) == GHOST)
+        switch (cellStatuses_(i))
         {
-            localIndices_(i) = nActive_;
-            ++nActive_;
-        }
-        else
-        {
+        case ACTIVE: case GHOST:
+            localIndices_(i) = nActiveLocal_;
+            ++nActiveLocal_;
+            break;
+
+        case INACTIVE:
             localIndices_(i) = -1;
         }
     }
+
+    lowerGlobalIndex_ = 0;
+    Parallel::allGather(nActiveLocal_, gatheredNActiveLocal_);
+
+    for(int i = 0; i < Parallel::nProcesses(); ++i)
+    {
+        if(i < Parallel::processNo())
+            lowerGlobalIndex_ += gatheredNActiveLocal_[i];
+
+        nActiveGlobal_ += gatheredNActiveLocal_[i];
+    }
+
+    upperGlobalIndex_ = lowerGlobalIndex_ + nActiveLocal_ - 1;
 }

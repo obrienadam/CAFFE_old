@@ -35,6 +35,12 @@ public:
     static void send(int source, int dest, Array3D<Vector3D>& vector3DArray3D);
     static void send(int source, int dest, Matrix& matrix);
 
+    static void gather(int dest, int number, std::vector<int> &vector);
+    static void gather(int dest, double number, std::vector<double> &vector);
+
+    static void allGather(int number, std::vector<int> &vector);
+    static void allGather(double number, std::vector<double> &vector);
+
     static void barrier();
 
 private:

@@ -57,10 +57,16 @@ void HexaFvmMesh::initialize(const std::string &filename)
     Output::print("HexaFvmMesh", "initialization of hexahedral finite-volume mesh complete.");
 }
 
-void HexaFvmMesh::initialize(Array3D<Point3D> &nodes)
+void HexaFvmMesh::initialize(const Array3D<Point3D> &nodes)
 {
     // Initialize the mesh nodes
     StructuredMesh::initialize(nodes);
+    initializeCellsAndFaces();
+}
+
+void HexaFvmMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK)
+{
+    StructuredMesh::initializeCartesianMesh(xLength, yLength, zLength, nCellsI + 1, nCellsJ + 1, nCellsK + 1);
     initializeCellsAndFaces();
 }
 

@@ -18,8 +18,13 @@ public:
     ~StructuredMesh();
 
     //- Initialization
-    virtual void initialize(Input& input);
-    virtual void initialize(Array3D<Point3D>& nodes);
+    virtual void initialize(const std::string &filename);
+    virtual void initialize(const Array3D<Point3D> &nodes);
+
+    /**
+     * @brief Method used to initialize a simple cartesian mesh, primarily for testing
+     */
+    virtual void initializeCartesianMesh(double xLength, double yLength, double zLength, int nNodesI, int nNodesJ, int nNodesK);
 
     int nNodes() const { return nodes_.size(); }
     int nNodesI() const { return nodes_.sizeI(); }
@@ -29,9 +34,6 @@ public:
     Point3D node(int i, int j, int k) const { return nodes_(i, j, k); }
 
     virtual std::string meshStats();
-
-    //- Initialize from input file
-    virtual void initialize(const std::string &filename);
 
     //- Output methods
     virtual void writeTec360(double time, const std::string &directoryName);

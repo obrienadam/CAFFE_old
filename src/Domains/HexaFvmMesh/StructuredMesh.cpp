@@ -23,35 +23,6 @@ StructuredMesh::~StructuredMesh()
         foutTec360_.close();
 }
 
-void StructuredMesh::initialize(Input &input)
-{
-    Output::print("StructuredMesh", "Initializing structured mesh...");
-    initialize("mesh/structuredMesh.dat");
-    Output::print("StructuredMesh", "Initialization of structured mesh complete.");
-}
-
-void StructuredMesh::initialize(Array3D<Point3D> &nodes)
-{
-    nodes_.allocate(nodes.sizeI(), nodes.sizeJ(), nodes.sizeK());
-
-    for(int i = 0; i < nodes_.size(); ++i)
-        nodes_(i) = nodes(i);
-}
-
-std::string StructuredMesh::meshStats()
-{
-    std::ostringstream stats;
-
-    stats << "Mesh statistics:" << "\n"
-          << "----------------" << "\n"
-          << "Nodes in I direction -> " << nodes_.sizeI() << "\n"
-          << "Nodes in J direction -> " << nodes_.sizeJ() << "\n"
-          << "Nodes in K direction -> " << nodes_.sizeK() << "\n"
-          << "Nodes total -> " << nodes_.size() << "\n";
-
-    return stats.str();
-}
-
 void StructuredMesh::initialize(const std::string &filename)
 {
     using namespace std;
@@ -92,6 +63,51 @@ void StructuredMesh::initialize(const std::string &filename)
     fin.close();
 
     Output::print("StructuredMesh", "initialization of structured mesh complete.");
+}
+
+void StructuredMesh::initialize(const Array3D<Point3D> &nodes)
+{
+    nodes_.allocate(nodes.sizeI(), nodes.sizeJ(), nodes.sizeK());
+
+    for(int i = 0; i < nodes_.size(); ++i)
+        nodes_(i) = nodes(i);
+}
+
+void StructuredMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nNodesI, int nNodesJ, int nNodesK)
+{
+    int i, j, k;
+    double hx = xLength/(nNodesI - 1), hy = yLength/(nNodesJ - 1), hz = zLength/(nNodesK - 1);
+
+    Output::print("StructuredMesh", "initializing a cartestian structured mesh...");
+
+    nodes_.allocate(nNodesI, nNodesJ, nNodesK);
+
+    for(k = 0; k < nodes_.sizeK(); ++k)
+    {
+        for(j = 0; j < nodes_.sizeJ(); ++j)
+        {
+            for(i = 0; i < nodes_.sizeI(); ++i)
+            {
+                nodes_(i, j, k) = Point3D(i*hx, j*hy, k*hz);
+            }
+        }
+    }
+
+    Output::print("StructuredMesh", "initialization of cartesian structured mesh complete.");
+}
+
+std::string StructuredMesh::meshStats()
+{
+    std::ostringstream stats;
+
+    stats << "Mesh statistics:" << "\n"
+          << "----------------" << "\n"
+          << "Nodes in I direction -> " << nodes_.sizeI() << "\n"
+          << "Nodes in J direction -> " << nodes_.sizeJ() << "\n"
+          << "Nodes in K direction -> " << nodes_.sizeK() << "\n"
+          << "Nodes total -> " << nodes_.size() << "\n";
+
+    return stats.str();
 }
 
 void StructuredMesh::resetFileStream()

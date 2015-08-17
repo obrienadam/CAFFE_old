@@ -44,6 +44,9 @@ Vector3D operator*(Vector3D lhs, double rhs);
 Vector3D operator*(double lhs, Vector3D rhs);
 Vector3D operator/(Vector3D lhs, double rhs);
 
+bool operator ==(const Vector3D &lhs, const Vector3D &rhs);
+bool operator !=(const Vector3D &lhs, const Vector3D &rhs);
+
 Vector3D sqr(const Vector3D& u);
 Vector3D sqrt(const Vector3D &u);
 

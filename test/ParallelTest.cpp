@@ -116,11 +116,35 @@ int main()
                      << "This proc has " << nEntitiesThisProc << " entities." << endl;
             }
         }
+
+        Parallel::barrier();
+
+        if(Parallel::isMainProcessor())
+            cout << "Testing the all gather routine..." << endl;
+
+
+        double number = Parallel::processNo()*10./M_PI;
+        vector<double> aVec;
+
+        cout << "Process " << Parallel::processNo() << " contains " << number << endl;
+
+        aVec.resize(Parallel::nProcesses());
+
+        Parallel::allGather(number, aVec);
+        Parallel::barrier();
+
+        if(Parallel::isMainProcessor())
+        {
+            cout << "The vector contains..." << endl;
+
+            for(i = 0; i < aVec.size(); ++i)
+                cout << aVec[i] << endl;
+        }
+
+        Parallel::finalize();
     }
     catch(const char* errorMessage)
     {
         cerr << errorMessage << endl;
     }
-
-    Parallel::finalize();
 }

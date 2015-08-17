@@ -1,15 +1,17 @@
-#include <iostream>
-#include <cstdlib>
-#include <math.h>
-
+#define BOOST_TEST_MODULE SparseMatrixTest
+#include <boost/test/included/unit_test.hpp>
 #include "SparseMatrix.h"
-#include "SparseVector.h"
 
-#define SIZE 1200
+BOOST_AUTO_TEST_SUITE (SparseMatrixTest)
 
-int main()
+BOOST_AUTO_TEST_CASE (test1)
 {
-    using namespace std;
 
-    cerr << "This application has been erased and needs to be re-written.\n";
 }
+
+BOOST_AUTO_TEST_CASE (test2)
+{
+
+}
+
+BOOST_AUTO_TEST_SUITE_END( )

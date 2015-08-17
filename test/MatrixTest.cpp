@@ -1,158 +1,80 @@
-#include <iostream>
+#define BOOST_TEST_MODULE MatrixTest
+#include <boost/test/included/unit_test.hpp>
+#include "Matrix.h"
 
-#include "../src/RunControl/Output.h"
-#include "../src/Math/Matrix.h"
-#include "Point3D.h"
-#include "Interpolation.h"
+BOOST_AUTO_TEST_SUITE (MatrixTest)
 
-int main()
+BOOST_AUTO_TEST_CASE (test1)
 {
-    using namespace std;
+    Matrix A = random(10, 8, 0, 15);
+    Matrix B = A;
 
-    double a[16] = {1, 2, 4, 3, 2, 3, 4, 1, 9, 5, 3, 2, 1, 5, 3, 5};
-    double b[4] = {1, 2, 3, 4};
-    double c[4] = {-0.1538, 1.0000, -0.1538, -0.0769};
-    Matrix A(a, 4, 4), B(b, 4, 1), C(c, 4, 1);
-    Point3D points[12], pt;
-    double values[12];
+    BOOST_CHECK_EQUAL(A.nRows(), 10);
+    BOOST_CHECK_EQUAL(A.nCols(), 8);
+    BOOST_CHECK_EQUAL(A.nRows(), B.nRows());
+    BOOST_CHECK_EQUAL(A.nCols(), B.nCols());
+    BOOST_CHECK(A.data() != B.data());
 
-    try{
-
-        cout << "Allocating 5x5 matrices..." << endl;
-
-        cout << "A contains:" << endl;
-
-        A.print();
-
-        cout << "B contains:" << endl;
-
-        B.print();
-
-        cout << "C is the solution of AC = B and contains:" << endl;
-
-        C.print();
-
-        cout << "Testing the linear solver (should be the same vector as above):" << endl;
-
-        C = solve(A, B);
-        C.print();
-
-        cout << "A still contains:" << endl;
-
-        A.print();
-
-        cout << "Inverting A..." << endl;
-
-        A.inverse();
-
-        cout << "A^-1*B = " << endl;
-        C = A*B;
-        C.print();
-
-        cout << "Allocating a large matrix:" << endl;
-
-        A = random(1000, 1000, 0, 9);
-        B = random(1000, 1000, -5, 9);
-
-        cout << "Solving large matrix with a large number of rhs vectors..." << endl;
-
-        A.solve(B);
-
-        cout << "Finished solving a large matrix with a large number of rhs vectors." << endl;
-
-        cout << "Setting up a least squares problem:" << endl;
-
-        A = random(4, 3, -9, 9);
-        B = random(4, 1, -9, 9);
-
-        cout << "Matrix A:" << endl;
-
-        A.print();
-
-        cout << "Matrix B:" << endl;
-
-        B.print();
-
-        cout << "Matrix C:" << endl;
-
-        C = solveLeastSquares(A, B);
-
-        C.print();
-
-        cout << "Test the interpolation methods:" << endl;
-
-        cout << "Testing 4 point stencil with linear:\n";
-
-        points[0] = Point3D(1., 1., 2); values[0] = 1.;
-        points[1] = Point3D(1., 3., 2); values[1] = 2.;
-        points[2] = Point3D(3., 1., 2); values[2] = 3.;
-        points[3] = Point3D(3., 3., 2); values[3] = 4.;
-
-        for(int i = 0; i < 10; ++i)
-        {
-            pt.x = rand()/double(RAND_MAX)*2. + 1.;
-            pt.y = rand()/double(RAND_MAX)*2. + 1.;
-            pt.z = rand()/double(RAND_MAX)*2. + 1.;
-
-            cout << "At " << pt << ": " << Interpolation::linear(points, values, 4, pt) << endl;
-        }
-
-        cout << "Testing 12 point stencil with linear and quadratic:\n";
-
-        points[0] = Point3D(0, 0, 0); values[0] = 1;
-        points[1] = Point3D(1, 0, 0); values[1] = 2;
-        points[2] = Point3D(1, 1, 0); values[2] = 3;
-        points[3] = Point3D(0, 1, 0); values[3] = 4;
-
-        points[4] = Point3D(0, 0, 2); values[4] = 9;
-        points[5] = Point3D(1, 0, 2); values[5] = 10;
-        points[6] = Point3D(1, 1, 2); values[6] = 11;
-        points[7] = Point3D(0, 1, 2); values[7] = 12;
-
-        points[8] = Point3D(0, 0, 1); values[8] = 5;
-        points[9] = Point3D(1, 0, 1); values[9] = 6;
-        points[10] = Point3D(1, 1, 1); values[10] = 7;
-        points[11] = Point3D(0, 1, 1); values[11] = 8;
-
-        double a = 0.0001;
-
-        for(int i = 0; i < 10; ++i)
-        {
-            points[i] *= a;
-            values[i] *= 0.0001*a;
-        }
-        for(int i = 0; i < 10; ++i)
-        {
-            pt.x = rand()/double(RAND_MAX);
-            pt.y = rand()/double(RAND_MAX);
-            pt.z = rand()/double(RAND_MAX) + 1.;
-
-            pt *= a;
-            cout << "Linear at " << pt << ": " << Interpolation::linear(points, values, 8, pt) << endl;
-            cout << "Quadratic at " << pt << ": " << Interpolation::quadratic(points, values, 12, pt) << endl;
-            cout << "Trilinear at " << pt << ": " << Interpolation::trilinear(points, values, 8, pt) << endl;
-        }
-
-        cout << "Testing trilinear coefficients computation..." << endl;
-
-        Matrix beta = Interpolation::computeTrilinearCoeffs(points, 8, pt);
-        Matrix phi(values, 8, 1);
-
-        cout << "The computed beta matrix is:" << endl;
-
-        beta.print();
-
-        cout << "Using the computed beta matrix for interpolation yields:" << endl;
-
-        (beta*phi).print();
-
-        cout << "The result of this operation should be zero if the beta matrix is correct:" << endl
-             << Interpolation::trilinear(points, values, 8, pt) - (beta*phi)(0, 0) << endl;
-    }
-    catch (const char* errorMessage)
-    {
-        cerr << errorMessage << endl;
-    }
-
-    return 0;
+    for(int i = 0; i < A.nRows(); ++i)
+        for(int j = 0; j < A.nCols(); ++j)
+            BOOST_CHECK_EQUAL(A(i, j), B(i, j));
 }
+
+BOOST_AUTO_TEST_CASE (test2)
+{
+    Matrix A = random(10, 10, 0, 15);
+    Matrix I = A*inverse(A);
+
+    for(int i = 0; i < A.nRows(); ++i)
+        for(int j = 0; j < A.nCols(); ++j)
+        {
+            if(i == j)
+                BOOST_CHECK_CLOSE(I(i, j), 1., 1e-13);
+            else
+                BOOST_CHECK_CLOSE(I(i, j) + 1, 1, 1e-13);
+        }
+}
+
+BOOST_AUTO_TEST_CASE (test3)
+{
+    Matrix A = random(10, 10, 1, 15);
+    Matrix B = random(10, 1, 1, 10);
+    Matrix X1 = solve(A, B);
+    Matrix X2 = inverse(A)*B;
+
+    A.solve(B);
+    BOOST_CHECK_EQUAL(B.nRows(), 10);
+    BOOST_CHECK_EQUAL(B.nCols(), 1);
+
+    for(int i = 0; i < X1.nRows(); ++i)
+    {
+        for(int j = 0; j < X1.nCols(); ++j)
+        {
+            BOOST_CHECK_CLOSE(X1(i, j), X2(i, j), 1e-12);
+            BOOST_CHECK_CLOSE(X1(i, j), B(i, j), 1e-12);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test4)
+{
+    Matrix A = random(20, 10, 1, 10);
+    Matrix B = random(20, 1, 1, 10);
+    Matrix X1 = solveLeastSquares(A, B);
+    Matrix X2;
+
+    BOOST_CHECK_EQUAL(X1.nRows(), 10);
+    BOOST_CHECK_EQUAL(X1.nCols(), 1);
+
+    X2 = solve(transpose(A)*A, transpose(A)*B);
+
+    for(int i = 0; i < X2.nRows(); ++i)
+    {
+        for(int j = 0; j < X2.nCols(); ++j)
+        {
+            BOOST_CHECK_CLOSE(X1(i, j), X2(i, j), 1e-11);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_SUITE_END()

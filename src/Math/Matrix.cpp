@@ -35,6 +35,8 @@ extern "C"
 #include "Matrix.h"
 #include "Output.h"
 
+std::vector<double> Matrix::buffer_(1000);
+
 Matrix::Matrix(int m, int n)
 {
     allocate(m, n);
@@ -128,6 +130,9 @@ double& Matrix::operator()(int i, int j)
 
 void Matrix::solveLeastSquares(Matrix &b)
 {
+    if(b.n_ != 1)
+        Output::raiseException("Matrix", "solveLeastSquares", "currently, passing more than one rhs equation is not working. This will be resolved in the future.");
+
     // This is a bit of workaround, there seems to be some kind of bug with CblasRowMajor for clapack_dgels
     clapack_dgels(CblasColMajor, CblasTrans, n_, m_, b.n_, elements_.data(), n_, b.elements_.data(), b.m_);
     b.m_ = n_;
@@ -135,6 +140,9 @@ void Matrix::solveLeastSquares(Matrix &b)
 
 void Matrix::solve(Matrix &b)
 {
+    if(b.n_ != 1)
+        Output::raiseException("Matrix", "solve", "currently, passing more than one rhs equation is not working. This will be resolved in the future.");
+
     clapack_dgesv(CblasRowMajor, m_, b.n_, elements_.data(), m_, ipiv_.data(), b.elements_.data(), b.m_);
 }
 
@@ -142,6 +150,34 @@ Matrix& Matrix::inverse()
 {
     clapack_dgetrf(CblasRowMajor, m_, n_, elements_.data(), n_, ipiv_.data());
     clapack_dgetri(CblasRowMajor, m_, elements_.data(), n_, ipiv_.data());
+    return *this;
+}
+
+Matrix& Matrix::transpose()
+{
+    int i, j;
+
+    if(buffer_.size() < nElements_)
+        buffer_.resize(nElements_);
+
+    for(i = 0; i < m_; ++i)
+    {
+        for(j = 0; j < n_; ++j)
+        {
+            buffer_[i*n_ + j] = elements_[i*n_ + j];
+        }
+    }
+
+    for(i = 0; i < m_; ++i)
+    {
+        for(j = 0; j < n_; ++j)
+        {
+            elements_[j*m_ + i] = buffer_[i*n_ + j];
+        }
+    }
+
+    std::swap(m_, n_);
+
     return *this;
 }
 
@@ -202,6 +238,12 @@ Matrix random(int m, int n, double min, double max)
 Matrix inverse(Matrix matrix)
 {
     matrix.inverse();
+    return matrix;
+}
+
+Matrix transpose(Matrix matrix)
+{
+    matrix.transpose();
     return matrix;
 }
 

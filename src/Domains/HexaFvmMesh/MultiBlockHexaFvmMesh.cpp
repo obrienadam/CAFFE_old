@@ -5,6 +5,8 @@
 #include "Parallel.h"
 
 MultiBlockHexaFvmMesh::MultiBlockHexaFvmMesh()
+    :
+      blocks_(Parallel::nProcesses())
 {
 
 }
@@ -18,12 +20,8 @@ void MultiBlockHexaFvmMesh::initialize()
 
     read_info("mesh/multiBlockStructuredMesh/multiBlockStructuredMeshConnectivity.info", connectivity);
 
-    nProcesses_ = Parallel::nProcesses();
-
-    if(nProcesses_ != connectivity.get<int>("numberOfBlocks"))
-        Output::raiseException("MultiBlockHexaFvmMesh", "initialize", "Number of blocks is not equal to the number of processes.");
-
-    blocks_.resize(nProcesses_);
+    if(Parallel::nProcesses() != connectivity.get<int>("numberOfBlocks"))
+        Output::raiseException("MultiBlockHexaFvmMesh", "initialize", "number of blocks is not equal to the number of processes.");
 
     Parallel::barrier();
 
@@ -45,6 +43,8 @@ void MultiBlockHexaFvmMesh::initialize()
 
         blocks_[Parallel::processNo()].addBoundaryMesh(blocks_[adjacentBlockNo_[i]], (HexaFvmMesh::Direction)i);
     }
+
+    blocks_[Parallel::processNo()].iMap.generateIndices();
 }
 
 const HexaFvmMesh& MultiBlockHexaFvmMesh::operator ()() const

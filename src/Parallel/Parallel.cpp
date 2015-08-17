@@ -156,6 +156,26 @@ void Parallel::send(int source, int dest, Matrix &matrix)
         MPI::COMM_WORLD.Recv(matrix.data(), matrix.nElements(), MPI::DOUBLE, source, 0);
 }
 
+void Parallel::gather(int dest, int number, std::vector<int> &vector)
+{
+    MPI::COMM_WORLD.Gather(&number, 1, MPI::INT, vector.data(), 1, MPI::INT, dest);
+}
+
+void Parallel::gather(int dest, double number, std::vector<double> &vector)
+{
+    MPI::COMM_WORLD.Gather(&number, 1, MPI::DOUBLE, vector.data(), 1, MPI::DOUBLE, dest);
+}
+
+void Parallel::allGather(int number, std::vector<int> &vector)
+{
+    MPI::COMM_WORLD.Allgather(&number, 1, MPI::INT, vector.data(), 1, MPI::INT);
+}
+
+void Parallel::allGather(double number, std::vector<double> &vector)
+{
+    MPI::COMM_WORLD.Allgather(&number, 1, MPI::DOUBLE, vector.data(), 1, MPI::DOUBLE);
+}
+
 void Parallel::barrier()
 {
     MPI::COMM_WORLD.Barrier();

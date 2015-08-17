@@ -8,9 +8,9 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
-    MultiBlockHexaMeshGen multiBlockHexaMeshGen;
-
     Parallel::initialize();
+
+    MultiBlockHexaMeshGen multiBlockHexaMeshGen;
 
     try
     {

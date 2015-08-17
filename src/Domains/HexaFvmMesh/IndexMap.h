@@ -26,6 +26,8 @@
 #ifndef INDEX_MAP_H
 #define INDEX_MAP_H
 
+#include <vector>
+
 #include "Array3D.h"
 
 class IndexMap
@@ -40,7 +42,7 @@ public:
 
     int operator()(int i, int j, int k, int varSetNo);
 
-    int nActive(){ return nActive_; }
+    int nActive(){ return nActiveLocal_; }
     bool isActive(int i, int j, int k);
     bool isGhost(int i, int j, int k);
     bool isInactive(int i, int j, int k);
@@ -48,12 +50,15 @@ public:
     void setActive(int i, int j, int k);
     void setGhost(int i, int j, int k);
     void setInactive(int i, int j, int k);
-    void generateGlobalIndices();
+
+    void generateIndices();
 
 private:
 
-    int nCellsI_, nCellsJ_, nCellsK_, nActive_;
+    int nCellsI_, nCellsJ_, nCellsK_, nActiveLocal_, nActiveGlobal_;
+    std::vector<int> gatheredNActiveLocal_;
     Array3D<int> localIndices_;
+    int lowerGlobalIndex_, upperGlobalIndex_;
     Array3D<CellStatus> cellStatuses_;
 };
 

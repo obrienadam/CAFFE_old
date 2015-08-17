@@ -47,7 +47,8 @@ public:
     HexaFvmMesh(const HexaFvmMesh& other);
 
     void initialize(const std::string &filename);
-    void initialize(Array3D<Point3D>& nodes);
+    void initialize(const Array3D<Point3D> &nodes);
+    void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
 
     void addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation);
     bool eastMeshExists() const;

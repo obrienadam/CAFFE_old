@@ -8,9 +8,9 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
-    HexaMeshGen hexaMeshGen;
-
     Parallel::initialize();
+
+    HexaMeshGen hexaMeshGen;
 
     try
     {

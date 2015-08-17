@@ -9,11 +9,11 @@ int main(int argc, const char* argv[])
 {
     using namespace std;
 
+    Parallel::initialize();
+
     Input input;
     RunControl runControl;
     HexaFvmMesh mesh;
-
-    Parallel::initialize();
 
     try
     {

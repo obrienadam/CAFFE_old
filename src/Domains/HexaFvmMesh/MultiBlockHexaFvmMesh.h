@@ -24,8 +24,7 @@ public:
 private:
 
     std::vector<HexaFvmMesh> blocks_;
-
-    int nProcesses_, adjacentBlockNo_[6];
+    int adjacentBlockNo_[6];
 };
 
 #endif

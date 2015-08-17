@@ -26,7 +26,7 @@ ImmersedBoundaries
 	Sphere
 	{
 		radius 0.15
-		center (0.7,1,1)
+		center (1,1,1)
 	}
 }
 

@@ -136,6 +136,21 @@ Vector3D operator/(Vector3D lhs, double rhs)
   return lhs /= rhs;
 }
 
+bool operator ==(const Vector3D &lhs, const Vector3D &rhs)
+{
+    const double toler = 1e-13;
+
+    return fabs(rhs.x - lhs.x) <= toler
+            && fabs(rhs.y - lhs.y) <= toler
+            && fabs(rhs.z - lhs.z) <= toler
+            ? true : false;
+}
+
+bool operator !=(const Vector3D &lhs, const Vector3D &rhs)
+{
+    return !(lhs == rhs);
+}
+
 Vector3D sqr(const Vector3D &u)
 {
     return Vector3D(u.x*u.x, u.y*u.y, u.z*u.z);
