@@ -11,11 +11,11 @@ HexaMeshGen::HexaMeshGen()
 
 //******************** Public methods **************************
 
-void HexaMeshGen::readFile()
+void HexaMeshGen::readFile(const std::string &directory)
 {
     using namespace boost::property_tree;
 
-    read_info("mesh/structuredMesh.info", meshParameters_);
+    read_info(directory + "structuredMesh.info", meshParameters_);
     meshName_ = meshParameters_.get<std::string>("MeshName");
     metricConversion_ = meshParameters_.get<double>("MetricConversion");
 
@@ -24,7 +24,7 @@ void HexaMeshGen::readFile()
 
     resolution_ = std::stov(meshParameters_.get<std::string>("Resolution"));
 
-    nodes_.allocate((int)resolution_.x, (int)resolution_.y, (int)resolution_.z);
+    nodes_.resize((int)resolution_.x, (int)resolution_.y, (int)resolution_.z);
 
     Output::print("HexaMeshGen", "Successfully read file \"mesh/structuredMesh.info\".");
 }
@@ -78,13 +78,13 @@ void HexaMeshGen::generateMesh()
     Output::print("HexaMeshGen", "Mesh generation complete.");
 }
 
-void HexaMeshGen::writeMeshFile()
+void HexaMeshGen::writeMeshFile(const std::string &directory)
 {
     using namespace std;
 
     int i, j, k, l;
 
-    ofstream fout("mesh/structuredMesh.dat");
+    ofstream fout(directory + "structuredMesh.dat");
 
     Output::print("HexaMeshGen", "Writing mesh file...");
 

@@ -3,14 +3,14 @@
 
 set(HEADERS StructuredMesh.h
 	    HexaFvmMesh.h
-            MultiBlockHexaFvmMesh.h
+            ParallelHexaFvmMesh.h
             HexaMeshGen.h
             MultiBlockHexaMeshGen.h
             IndexMap.h)
 
 set(SOURCE StructuredMesh.cpp
            HexaFvmMesh.cpp
-           MultiBlockHexaFvmMesh.cpp
+           ParallelHexaFvmMesh.cpp
            HexaMeshGen.cpp
            MultiBlockHexaMeshGen.cpp
            IndexMap.cpp)

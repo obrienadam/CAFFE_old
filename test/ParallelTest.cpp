@@ -1,150 +1,117 @@
-#include <iostream>
-#include <cstdlib>
-
+#define BOOST_TEST_MODULE ParallelTest
+#include <boost/test/included/unit_test.hpp>
+#include <stdlib.h>
 #include "Parallel.h"
-#include "Array3D.h"
-#include "Vector3D.h"
-#include "MultiBlockHexaFvmMesh.h"
 
-int main()
+BOOST_AUTO_TEST_SUITE (ParallelTest)
+
+BOOST_AUTO_TEST_CASE (test1)
 {
-    using namespace std;
-
-    int i, j, k;
-    Array3D<double> doubleArray3D;
-    Array3D<Vector3D> vector3DArray3D;
-
     Parallel::initialize();
 
-    try
+    std::pair<int, int> range = Parallel::ownershipRange(1000);
+
+    if(Parallel::processNo() < 1000%Parallel::nProcesses())
+        BOOST_CHECK_EQUAL(1000/Parallel::nProcesses(), range.second - range.first);
+    else
+        BOOST_CHECK_EQUAL(1000/Parallel::nProcesses() - 1, range.second - range.first);
+}
+
+BOOST_AUTO_TEST_CASE (test2)
+{
+    Vector3D vec;
+
+    if(Parallel::isMainProcessor())
+        vec = Vector3D(1, 2, 3);
+
+    vec = Parallel::broadcast(vec, Parallel::mainProcNo());
+
+    BOOST_CHECK_EQUAL(vec.x, 1);
+    BOOST_CHECK_EQUAL(vec.y, 2);
+    BOOST_CHECK_EQUAL(vec.z, 3);
+}
+
+BOOST_AUTO_TEST_CASE (test3)
+{
+    std::vector<double> doubles(1000);
+    std::vector<Vector3D> vecs(1000);
+
+    if(Parallel::isMainProcessor())
     {
-
-        if(Parallel::isMainProcessor())
-            cout << "Running test with " << Parallel::nProcesses() << " processes." << endl;
-
-        Parallel::barrier();
-
-        cout << "Hello world from process number " << Parallel::processNo() << "!" << endl;
-
-        Parallel::barrier();
-
-        if(Parallel::isMainProcessor())
-            cout << "Initializing a random double 3D array on process " << Parallel::processNo() << "." << endl;
-
-        doubleArray3D.allocate(100, 100, 100);
-
-        if(Parallel::isMainProcessor())
+        for(int i = 0; i < 1000; ++i)
         {
-            for(i = 0; i < doubleArray3D.size(); ++i)
-                doubleArray3D(i) = double(rand())/double(RAND_MAX);
+            doubles[i] = i;
+            vecs[i] = Vector3D(i, i + 1, i + 2);
         }
-
-        if(Parallel::isMainProcessor())
-            cout << "Sending random double 3D array to process 1." << endl;
-
-        Parallel::send(0, 1, doubleArray3D);
-
-        i = 40;
-        j = 40;
-        k = 40;
-
-        if(Parallel::processNo() == 0)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << doubleArray3D(i, j, k) << endl;
-        }
-        if(Parallel::processNo() == 1)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << doubleArray3D(i, j, k) << endl;
-        }
-
-        Parallel::barrier();
-
-        if(Parallel::isMainProcessor())
-            cout << "Initializing a random vector3D 3D array on process " << Parallel::processNo() << "." << endl;
-
-        vector3DArray3D.allocate(100, 100, 100);
-        cout << vector3DArray3D(i, j, k) << endl;
-
-        if(Parallel::isMainProcessor())
-        {
-            for(i = 0; i < vector3DArray3D.size(); ++i)
-                vector3DArray3D(i) = Vector3D(double(rand())/double(RAND_MAX), double(rand())/double(RAND_MAX), double(rand())/double(RAND_MAX));
-        }
-
-        i = 29;
-        j = 39;
-        k = 11;
-
-        Parallel::send(0, 1, vector3DArray3D);
-
-        if(Parallel::processNo() == 0)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << vector3DArray3D(i, j, k) << endl;
-        }
-        if(Parallel::processNo() == 1)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << vector3DArray3D(i, j, k) << endl;
-        }
-
-        Parallel::send(1, 2, vector3DArray3D);
-
-        if(Parallel::processNo() == 1)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << vector3DArray3D(i, j, k) << endl;
-        }
-        if(Parallel::processNo() == 2)
-        {
-            cout << "On process " << Parallel::processNo() << ", element " << i << ", " << j << ", " << k << " contains " << vector3DArray3D(i, j, k) << endl;
-        }
-
-        int nEntities = 9312, iLower, iUpper, nEntitiesThisProc;
-
-        Parallel::barrier();
-
-        if(Parallel::isMainProcessor())
-            cout << endl << "Testing the ownership range calculation with " << nEntities << " entities." << endl;
-
-        Parallel::ownershipRange(nEntities, iLower, iUpper, nEntitiesThisProc);
-
-        for(i = 0; i < Parallel::nProcesses(); ++i)
-        {
-            Parallel::barrier();
-
-            if(Parallel::isThisProcessor(i))
-            {
-                cout << "Ownership range for processor " << Parallel::processNo() << ": " << iLower << " -- " << iUpper << endl
-                     << "This proc has " << nEntitiesThisProc << " entities." << endl;
-            }
-        }
-
-        Parallel::barrier();
-
-        if(Parallel::isMainProcessor())
-            cout << "Testing the all gather routine..." << endl;
-
-
-        double number = Parallel::processNo()*10./M_PI;
-        vector<double> aVec;
-
-        cout << "Process " << Parallel::processNo() << " contains " << number << endl;
-
-        aVec.resize(Parallel::nProcesses());
-
-        Parallel::allGather(number, aVec);
-        Parallel::barrier();
-
-        if(Parallel::isMainProcessor())
-        {
-            cout << "The vector contains..." << endl;
-
-            for(i = 0; i < aVec.size(); ++i)
-                cout << aVec[i] << endl;
-        }
-
-        Parallel::finalize();
     }
-    catch(const char* errorMessage)
+
+    Parallel::send(Parallel::mainProcNo(), Parallel::nProcesses() - 1, doubles);
+    Parallel::send(Parallel::mainProcNo(), Parallel::nProcesses() - 1, vecs);
+
+    if(Parallel::processNo() == Parallel::nProcesses() - 1)
     {
-        cerr << errorMessage << endl;
+        for(int i = 0; i < 1000; ++i)
+
+        {
+            BOOST_CHECK_EQUAL(doubles[i], i);
+            BOOST_CHECK_EQUAL(vecs[i].x, i);
+            BOOST_CHECK_EQUAL(vecs[i].y, i + 1);
+            BOOST_CHECK_EQUAL(vecs[i].z, i + 2);
+        }
     }
 }
+
+BOOST_AUTO_TEST_CASE (test4)
+{
+    Array3D<double> doubles(10, 20, 12);
+    Array3D<Vector3D> vecs(10, 20, 12);
+
+    if(Parallel::isMainProcessor())
+    {
+        for(int i = 0; i < doubles.size(); ++i)
+            doubles[i] = i;
+
+        for(int i = 0; i < vecs.size(); ++i)
+            vecs[i] = Vector3D(i, i + 1, i + 2);
+    }
+
+    Parallel::send(Parallel::mainProcNo(), Parallel::nProcesses() - 1, doubles);
+    Parallel::send(Parallel::mainProcNo(), Parallel::nProcesses() - 1, vecs);
+
+    if(Parallel::processNo() == Parallel::nProcesses() - 1)
+    {
+        for(int i = 0; i < doubles.size(); ++i)
+            BOOST_CHECK_EQUAL(doubles[i], i);
+
+        for(int i = 0; i < vecs.size(); ++i)
+        {
+            BOOST_CHECK_EQUAL(vecs[i].x, i);
+            BOOST_CHECK_EQUAL(vecs[i].y, i + 1);
+            BOOST_CHECK_EQUAL(vecs[i].z, i + 2);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test5)
+{
+    int testInt = Parallel::processNo();
+    double testDouble = Parallel::processNo()*M_PI;
+    std::vector<int> allTestInts(Parallel::nProcesses());
+    std::vector<double> allTestDoubles(Parallel::nProcesses());
+
+    Parallel::allGather(testInt, allTestInts);
+    Parallel::allGather(testDouble, allTestDoubles);
+
+    for(int i = 0; i < Parallel::nProcesses(); ++i)
+    {
+        BOOST_CHECK_EQUAL(allTestInts[i], i);
+        BOOST_CHECK_EQUAL(allTestDoubles[i], i*M_PI);
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test6)
+{
+    Parallel::finalize();
+}
+
+BOOST_AUTO_TEST_SUITE_END()

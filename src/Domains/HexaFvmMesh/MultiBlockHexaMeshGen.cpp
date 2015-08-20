@@ -12,14 +12,14 @@ MultiBlockHexaMeshGen::MultiBlockHexaMeshGen()
 
 }
 
-void MultiBlockHexaMeshGen::readFile()
+void MultiBlockHexaMeshGen::readFile(const std::string &directory)
 {
     using namespace boost::property_tree;
 
     ptree multiBlockMeshParameters;
 
-    mesh_.initialize("mesh/structuredMesh.dat");
-    read_info("mesh/multiBlockStructuredMesh.info", multiBlockMeshParameters);
+    mesh.initialize(directory + "structuredMesh.dat");
+    read_info(directory + "multiBlockStructuredMesh.info", multiBlockMeshParameters);
 
     nBlocksI_ = multiBlockMeshParameters.get<int>("Decomposition.nBlocksI");
     nBlocksJ_ = multiBlockMeshParameters.get<int>("Decomposition.nBlocksJ");
@@ -28,7 +28,7 @@ void MultiBlockHexaMeshGen::readFile()
     Output::print("MultiBlockHexaMeshGen", "Successfully read file \"mesh/multiBlockStructuredMesh.info\".");
 }
 
-void MultiBlockHexaMeshGen::writeMeshFiles()
+void MultiBlockHexaMeshGen::writeMeshFiles(const std::string &directory)
 {
     using namespace boost::filesystem;
 
@@ -40,8 +40,8 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
 
     Output::print("MultiBlockHexaMeshGen", "Creating blocks...");
 
-    create_directory("mesh/multiBlockStructuredMesh");
-    fout.open("mesh/multiBlockStructuredMesh/multiBlockStructuredMeshConnectivity.info");
+    create_directory(directory + "multiBlockStructuredMesh");
+    fout.open(directory + "multiBlockStructuredMesh/multiBlockStructuredMeshConnectivity.info");
     fout << "; block connectivity file for the multi-block structured mesh" << std::endl
          << std::endl
          << "numberOfBlocks " << nBlocksI_*nBlocksJ_*nBlocksK_ << std::endl;
@@ -53,10 +53,11 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
         {
             for(i = 0; i < nBlocksI_; ++i)
             {
-                getOwnershipRange(mesh_.nNodesI(), nBlocksI_, i, lNodeI, uNodeI, nLocalNodesI);
-                getOwnershipRange(mesh_.nNodesJ(), nBlocksJ_, j, lNodeJ, uNodeJ, nLocalNodesJ);
-                getOwnershipRange(mesh_.nNodesK(), nBlocksK_, k, lNodeK, uNodeK, nLocalNodesK);
+                getOwnershipRange(mesh.nNodesI(), nBlocksI_, i, lNodeI, uNodeI, nLocalNodesI);
+                getOwnershipRange(mesh.nNodesJ(), nBlocksJ_, j, lNodeJ, uNodeJ, nLocalNodesJ);
+                getOwnershipRange(mesh.nNodesK(), nBlocksK_, k, lNodeK, uNodeK, nLocalNodesK);
 
+                //- Add additional nodes such that adjacent blocks have common nodes
                 if(i != 0)
                 {
                     --lNodeI;
@@ -73,7 +74,7 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
                     ++nLocalNodesK;
                 }
 
-                localNodes.allocate(nLocalNodesI, nLocalNodesJ, nLocalNodesK);
+                localNodes.resize(nLocalNodesI, nLocalNodesJ, nLocalNodesK);
 
                 for(kk = lNodeK; kk <= uNodeK; ++kk)
                 {
@@ -81,14 +82,14 @@ void MultiBlockHexaMeshGen::writeMeshFiles()
                     {
                         for(ii = lNodeI; ii <= uNodeI; ++ii)
                         {
-                            localNodes(ii - lNodeI, jj - lNodeJ, kk - lNodeK) = mesh_.node(ii, jj, kk);
+                            localNodes(ii - lNodeI, jj - lNodeJ, kk - lNodeK) = mesh.node(ii, jj, kk);
                         }
                     }
                 }
 
                 subMesh.name = "structuredMesh_block" + std::to_string(subMeshNo);
                 subMesh.initialize(localNodes);
-                subMesh.writeTec360(0, "mesh/multiBlockStructuredMesh");
+                subMesh.writeTec360(0, directory + "multiBlockStructuredMesh");
                 subMesh.resetFileStream();
 
                 if(i < nBlocksI_ - 1)

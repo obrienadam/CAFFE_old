@@ -32,11 +32,11 @@ int main(int argc, const char* argv[])
             runControl.displayUpdateMessage();
 
             if(runControl.writeToFile())
-                mesh.writeTec360(runControl.simTime(), "solution");
+                mesh.writeTec360(runControl.simTime(), "solution/");
         }
         runControl.displayEndMessage();
 
-        mesh.writeTec360(runControl.simTime(), "solution");
+        mesh.writeTec360(runControl.simTime(), "solution/");
     }
     catch(const char* errorMessage)
     {

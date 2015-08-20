@@ -1,77 +1,34 @@
 #ifndef ARRAY_3D_H
 #define ARRAY_3D_H
 
-#include <iterator>
+#include <vector>
 
 template <class T>
-class Array3D
+class Array3D : public std::vector<T>
 {
+public:
+
+    Array3D(int sizeI = 0, int sizeJ = 0, int sizeK = 0);
+
+    void resize(int sizeI, int sizeJ, int sizeK);
+    void clear();
+    void assign(const T& val);
+
+    int sizeI() const { return sizeI_; }
+    int sizeJ() const { return sizeJ_; }
+    int sizeK() const { return sizeK_; }
+    int upperI() const { return sizeI_ - 1; }
+    int upperJ() const { return sizeJ_ - 1; }
+    int upperK() const { return sizeK_ - 1; }
+
+    T& operator()(int i, int j, int k);
+    const T& operator ()(int i, int j, int k) const;
 
 protected:
 
-    int nI_, nJ_, nK_, n_;
-    int nInJ_, nInK_, nJnK_;
-    T* data_;
+    void setSizes(int sizeI, int sizeJ, int sizeK);
 
-public:
-
-    //- Constructors and destructors
-
-    Array3D();
-    Array3D(int nI, int nJ, int nK);
-    ~Array3D();
-
-    //- Memory management
-
-    virtual void allocate(int nI, int nJ, int nK);
-    void deallocate();
-
-    //- Return the container sizes
-
-    int sizeI() const {return nI_;}
-    int sizeJ() const {return nJ_;}
-    int sizeK() const {return nK_;}
-    int size() const {return n_;}
-    int elementNo(int i, int j, int k) const { return k*nInJ_ + j*nI_ + i; }
-
-    virtual inline T& operator()(int i, int j, int k);
-    virtual inline const T& operator()(int i, int j, int k) const;
-   	inline T& operator()(int k);
-    inline const T& operator()(int k) const;
-    T* data(){ return data_; }
-
-    virtual void setAll(const T &value);
-
-    //- Iterators
-
-    class iterator
-    {
-
-    private:
-
-        int k_;
-        T* dataPtr_;
-        Array3D<T>* objectPtr_;
-
-    public:
-
-        typedef std::bidirectional_iterator_tag iterator_category;
-
-        iterator();
-        iterator(T* dataPtr,
-                 Array3D<T>* objectPtr,
-                 int k);
-
-        iterator& operator++();
-
-        T& operator*();
-
-        bool operator!=(const iterator& rhs);
-    };
-
-    iterator begin();
-    iterator end();
-
+    int sizeI_, sizeJ_, sizeK_, sizeIJ_;
 };
 
 #include "Array3D.tpp"

@@ -14,10 +14,10 @@ int main(int argc, const char* argv[])
 
     try
     {
-        hexaMeshGen.readFile();
+        hexaMeshGen.readFile("mesh/");
         hexaMeshGen.generateMesh();
         hexaMeshGen.checkMesh();
-        hexaMeshGen.writeMeshFile();
+        hexaMeshGen.writeMeshFile("mesh/");
     }
     catch (const char* errorMessage)
     {

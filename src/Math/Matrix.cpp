@@ -42,31 +42,14 @@ Matrix::Matrix(int m, int n)
     allocate(m, n);
 }
 
-Matrix::Matrix(double **elements, int m, int n)
+Matrix::Matrix(int m, int n, std::initializer_list<double> list)
     :
-      Matrix(m, n)
+      elements_(list)
 {
-    int i, j;
-
-    for(i = 0; i < m_; ++i)
-    {
-        for(j = 0; j < n_; ++j)
-        {
-            operator ()(i, j) = elements[i][j];
-        }
-    }
-}
-
-Matrix::Matrix(double *elements, int m, int n)
-    :
-      Matrix(m, n)
-{
-    int k;
-
-    for(k = 0; k < nElements_; ++k)
-    {
-        elements_[k] = elements[k];
-    }
+    m_ = m;
+    n_ = n;
+    nElements_ = m_*n_; // elements_ is initialized from the initializer list
+    ipiv_.resize(nElements_);
 }
 
 Matrix::Matrix(const Matrix &other)

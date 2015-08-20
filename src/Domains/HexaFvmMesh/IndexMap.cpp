@@ -29,26 +29,24 @@
 IndexMap::IndexMap()
     :
       lowerGlobalIndex_(0),
-      upperGlobalIndex_(0),
-      gatheredNActiveLocal_(Parallel::nProcesses())
+      upperGlobalIndex_(0)
 {
 
 }
 
 void IndexMap::initialize(int nCellsI, int nCellsJ, int nCellsK)
 {
+    gatheredNActiveLocal_.resize(Parallel::nProcesses());
     nCellsI_ = nCellsI;
     nCellsJ_ = nCellsJ;
     nCellsK_ = nCellsK;
-    localIndices_.allocate(nCellsI_, nCellsJ_, nCellsK_);
-    cellStatuses_.allocate(nCellsI_, nCellsJ_, nCellsK_);
+    localIndices_.resize(nCellsI_, nCellsJ_, nCellsK_);
+    cellStatuses_.resize(nCellsI_, nCellsJ_, nCellsK_);
 
-    for(int i = 0; i < nActiveLocal_; ++i)
-    {
-        localIndices_(i) = i;
-        cellStatuses_(i) = ACTIVE;
-    }
+    for(int i = 0; i < localIndices_.size(); ++i)
+        localIndices_[i] = i;
 
+    cellStatuses_.assign(ACTIVE);
     generateIndices();
 }
 
@@ -110,15 +108,16 @@ void IndexMap::generateIndices()
 
     for(int i = 0; i < cellStatuses_.size(); ++i)
     {
-        switch (cellStatuses_(i))
+        switch (cellStatuses_[i])
         {
         case ACTIVE: case GHOST:
-            localIndices_(i) = nActiveLocal_;
+            localIndices_[i] = nActiveLocal_;
             ++nActiveLocal_;
             break;
 
         case INACTIVE:
-            localIndices_(i) = -1;
+            localIndices_[i] = -1;
+            break;
         }
     }
 

@@ -46,9 +46,10 @@ public:
     HexaFvmMesh();
     HexaFvmMesh(const HexaFvmMesh& other);
 
-    void initialize(const std::string &filename);
-    void initialize(const Array3D<Point3D> &nodes);
-    void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
+    virtual void initialize(const std::string &filename);
+    virtual void initialize(const Array3D<Point3D> &nodes);
+    virtual void initialize(const std::vector<Point3D> &vertices, int nCellsI, int nCellsJ, int nCellsK);
+    virtual void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
 
     void addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation);
     bool eastMeshExists() const;
@@ -169,7 +170,7 @@ public:
      * @brief Write cell-centered data to the Tecplot360 ASCII format.
      * @param time The solution time.
      */
-    void writeTec360(double time = 0, std::string directoryName = "");
+    void writeTec360(double time, const std::string &directory);
 
     mutable IndexMap iMap;
 

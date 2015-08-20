@@ -3,15 +3,12 @@
 
 #include "Field.h"
 #include "PrimitiveBoundaryCondition.h"
-#include "Parallel.h"
 
 BOOST_AUTO_TEST_SUITE (FieldTest)
 
 BOOST_AUTO_TEST_CASE (test1)
 {
-
-    Parallel::initialize();
-    HexaFvmMesh mesh, mesh2;
+    HexaFvmMesh mesh;
     mesh.initializeCartesianMesh(1, 1, 1, 10, 10, 10);
 
     Field<double> testField(mesh, Field<double>::CONSERVED, "testField");
@@ -62,7 +59,6 @@ BOOST_AUTO_TEST_CASE (test3)
     double patchNo[6] = {1, 2, 3, 4, 5, 6};
 
     mesh.initializeCartesianMesh(1, 1, 1, 20, 20, 20);
-
     Field<double> testField(mesh, Field<double>::CONSERVED, "testField");
     testField.setFixedBoundaryPatches(patchNo);
 
@@ -214,8 +210,6 @@ BOOST_AUTO_TEST_CASE(test5)
             BOOST_CHECK_EQUAL(testField.faceB(j, j, 0), 1);
         }
     }
-
-    Parallel::finalize();
 }
 
 BOOST_AUTO_TEST_SUITE_END( )

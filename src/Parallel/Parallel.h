@@ -17,26 +17,16 @@ public:
 
     static int nProcesses();
     static int processNo();
-    static bool isThisProcessor(int source);
+    static int mainProcNo(){ return 0; }
     static bool isMainProcessor();
-    static void ownershipRange(int nEntities, int &iLower, int &iUpper, int &nEntitiesThisProc);
+    static std::pair<int, int> ownershipRange(int nEntities);
 
-    static int sum(int number);
-    static int min(int number);
-    static int max(int number);
+    static int broadcast(int number, int source);
+    static double broadcast(double number, int source);
+    static Vector3D broadcast(const Vector3D &vec, int source);
 
-    static double sum(double number);
-    static double min(double number);
-    static double max(double number);
-
-    //- Note: All of these methods assume that the data structures have been properly sized!
-    static void send(int source, int dest, std::vector<double>& vector);
-    static void send(int source, int dest, Array3D<double>& doubleArray3D);
-    static void send(int source, int dest, Array3D<Vector3D>& vector3DArray3D);
-    static void send(int source, int dest, Matrix& matrix);
-
-    static void gather(int dest, int number, std::vector<int> &vector);
-    static void gather(int dest, double number, std::vector<double> &vector);
+    static void send(int source, int dest, std::vector<double> &doubles);
+    static void send(int source, int dest, std::vector<Vector3D> &vecs);
 
     static void allGather(int number, std::vector<int> &vector);
     static void allGather(double number, std::vector<double> &vector);
@@ -45,8 +35,12 @@ public:
 
 private:
 
-    static int commBufferSize_;
+    static void loadBuffer(const std::vector<Vector3D> &vecs);
+    static void unloadBuffer(std::vector<Vector3D> &vecs);
+
     static std::vector<double> commBuffer_;
+    static int nProcesses_, procNo_;
+    static bool isInitialized_;
 };
 
 #endif

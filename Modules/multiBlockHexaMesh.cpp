@@ -14,8 +14,8 @@ int main(int argc, const char* argv[])
 
     try
     {
-        multiBlockHexaMeshGen.readFile();
-        multiBlockHexaMeshGen.writeMeshFiles();
+        multiBlockHexaMeshGen.readFile("mesh/");
+        multiBlockHexaMeshGen.writeMeshFiles("mesh/");
     }
     catch (const char* errorMessage)
     {

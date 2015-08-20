@@ -15,6 +15,10 @@ target_link_libraries(MatrixTest Math RunControl)
 add_executable(geometryTest GeometryTest.cpp)
 target_link_libraries(geometryTest Math)
 
+# Build Array3D test unit
+
+add_executable(Array3DTest Array3DTest.cpp)
+
 # Build field test unit
 
 add_executable(FieldTest FieldTest.cpp)
@@ -25,8 +29,8 @@ add_executable(SparseMatrixTest SparseMatrixTest.cpp)
 target_link_libraries(SparseMatrixTest Math RunControl)
 
 # Build parallel test unit
-add_executable(parallelTest ParallelTest.cpp)
-target_link_libraries(parallelTest Parallel Math HexaFvmMesh)
+add_executable(ParallelTest ParallelTest.cpp)
+target_link_libraries(ParallelTest Parallel RunControl)
 
 # Build multi-block hexa mesh test unit
 add_executable(MultiBlockHexaMeshTest MultiBlockHexaMeshTest.cpp)

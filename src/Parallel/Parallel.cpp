@@ -2,40 +2,45 @@
 
 #include "Parallel.h"
 
-int Parallel::commBufferSize_;
-std::vector<double> Parallel::commBuffer_;
-
 /********************** Public methods ***********************/
+
+void Parallel::initialize()
+{
+    MPI::Init();
+    procNo_ = MPI::COMM_WORLD.Get_rank();
+    nProcesses_ = MPI::COMM_WORLD.Get_size();
+    commBuffer_.resize(100000);
+    isInitialized_ = true;
+}
+
+void Parallel::finalize()
+{
+    MPI::Finalize();
+    procNo_ = 0;
+    nProcesses_ = 1;
+    commBuffer_.erase(commBuffer_.begin(), commBuffer_.end());
+    isInitialized_ = false;
+}
 
 int Parallel::nProcesses()
 {
-    return MPI::COMM_WORLD.Get_size();
+    return nProcesses_;
 }
 
 int Parallel::processNo()
 {
-    return MPI::COMM_WORLD.Get_rank();
-}
-
-bool Parallel::isThisProcessor(int source)
-{
-    if(source == processNo())
-        return true;
-    else
-        return false;
+    return procNo_;
 }
 
 bool Parallel::isMainProcessor()
 {
-    if(0 == processNo())
-        return true;
-    else
-        return false;
+    return procNo_ == 0;
 }
 
-void Parallel::ownershipRange(int nEntities, int &iLower, int &iUpper, int &nEntitiesThisProc)
+std::pair<int, int> Parallel::ownershipRange(int nEntities)
 {
-    int nRemainingEntities;
+    int nRemainingEntities, nEntitiesThisProc;
+    std::pair<int, int> range;
 
     nEntitiesThisProc = nEntities/nProcesses();
     nRemainingEntities = nEntities%nProcesses();
@@ -43,137 +48,77 @@ void Parallel::ownershipRange(int nEntities, int &iLower, int &iUpper, int &nEnt
     if(processNo() < nRemainingEntities)
     {
         ++nEntitiesThisProc;
-        iLower = processNo()*nEntitiesThisProc;
-        iUpper = iLower + nEntitiesThisProc - 1;
+        range.first = processNo()*nEntitiesThisProc;
     }
     else
     {
-        iLower = (nEntitiesThisProc + 1)*nRemainingEntities + (processNo() - nRemainingEntities)*nEntitiesThisProc;
-        iUpper = iLower + nEntitiesThisProc - 1;
-    }
-}
-
-int Parallel::sum(int number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::INT, MPI::SUM);
-
-    return number;
-}
-
-int Parallel::min(int number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::INT, MPI::MIN);
-
-    return number;
-}
-
-int Parallel::max(int number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::INT, MPI::MAX);
-
-    return number;
-}
-
-double Parallel::sum(double number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::DOUBLE, MPI::SUM);
-
-    return number;
-}
-
-double Parallel::min(double number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::DOUBLE, MPI::MIN);
-
-    return number;
-}
-
-double Parallel::max(double number)
-{
-    MPI::COMM_WORLD.Allreduce(&number, &number, 1, MPI::DOUBLE, MPI::MAX);
-
-    return number;
-}
-
-void Parallel::send(int source, int dest, std::vector<double> &vector)
-{
-    if(processNo() == source)
-        MPI::COMM_WORLD.Send(vector.data(), vector.size(), MPI::DOUBLE, dest, 0);
-    if(processNo() == dest)
-        MPI::COMM_WORLD.Recv(vector.data(), vector.size(), MPI::DOUBLE, source, 0);
-}
-
-void Parallel::send(int source, int dest, Array3D<double> &doubleArray3D)
-{
-    if(processNo() == source)
-        MPI::COMM_WORLD.Send(doubleArray3D.data(), doubleArray3D.size(), MPI::DOUBLE, dest, 0);
-    if(processNo() == dest)
-        MPI::COMM_WORLD.Recv(doubleArray3D.data(), doubleArray3D.size(), MPI::DOUBLE, source, 0);
-}
-
-void Parallel::send(int source, int dest, Array3D<Vector3D> &vector3DArray3D)
-{
-    int i, k, size = 3*vector3DArray3D.size();
-
-    if(commBufferSize_ < size)
-    {
-        commBufferSize_ = size;
-        commBuffer_.resize(commBufferSize_);
+        range.first = (nEntitiesThisProc + 1)*nRemainingEntities + (processNo() - nRemainingEntities)*nEntitiesThisProc;
     }
 
+    range.second = range.first + nEntitiesThisProc - 1;
+
+    return range;
+}
+
+int Parallel::broadcast(int number, int source)
+{
+    MPI::COMM_WORLD.Bcast(&number, 1, MPI::INT, source);
+    return number;
+}
+
+double Parallel::broadcast(double number, int source)
+{
+    MPI::COMM_WORLD.Bcast(&number, 1, MPI::DOUBLE, source);
+    return number;
+}
+
+Vector3D Parallel::broadcast(const Vector3D &vec, int source)
+{
+    double buff[3] = {vec.x, vec.y, vec.z};
+    MPI::COMM_WORLD.Bcast(buff, 3, MPI::DOUBLE, source);
+    return Vector3D(buff[0], buff[1], buff[2]);
+}
+
+void Parallel::send(int source, int dest, std::vector<double> &doubles)
+{
     if(processNo() == source)
     {
-        for(i = 0; i < size; i += 3)
-        {
-            k = i/3;
-            commBuffer_[i] = vector3DArray3D(k).x;
-            commBuffer_[i + 1] = vector3DArray3D(k).y;
-            commBuffer_[i + 2] = vector3DArray3D(k).z;
-        }
-
-        MPI::COMM_WORLD.Send(commBuffer_.data(), size, MPI::DOUBLE, dest, 0);
+        MPI::COMM_WORLD.Send(doubles.data(), doubles.size(), MPI::DOUBLE, dest, 0);
     }
-    if(processNo() == dest)
+    else if(processNo() == dest)
     {
-        MPI::COMM_WORLD.Recv(commBuffer_.data(), size, MPI::DOUBLE, source, 0);
-
-        for(i = 0; i < size; i += 3)
-        {
-            k=i/3;
-            vector3DArray3D(k).x = commBuffer_[i];
-            vector3DArray3D(k).y = commBuffer_[i + 1];
-            vector3DArray3D(k).z = commBuffer_[i + 2];
-        }
+        MPI::COMM_WORLD.Recv(doubles.data(), doubles.size(), MPI::DOUBLE, source, 0);
     }
 }
 
-void Parallel::send(int source, int dest, Matrix &matrix)
+void Parallel::send(int source, int dest, std::vector<Vector3D> &vecs)
 {
-    // Note - there is no check here to make sure the matrices on each process are the right size in the interest of efficiency
     if(processNo() == source)
-        MPI::COMM_WORLD.Send(matrix.data(), matrix.nElements(), MPI::DOUBLE, dest, 0);
-    if(processNo() == dest)
-        MPI::COMM_WORLD.Recv(matrix.data(), matrix.nElements(), MPI::DOUBLE, source, 0);
-}
-
-void Parallel::gather(int dest, int number, std::vector<int> &vector)
-{
-    MPI::COMM_WORLD.Gather(&number, 1, MPI::INT, vector.data(), 1, MPI::INT, dest);
-}
-
-void Parallel::gather(int dest, double number, std::vector<double> &vector)
-{
-    MPI::COMM_WORLD.Gather(&number, 1, MPI::DOUBLE, vector.data(), 1, MPI::DOUBLE, dest);
+    {
+        loadBuffer(vecs);
+        MPI::COMM_WORLD.Send(commBuffer_.data(), 3*vecs.size(), MPI::DOUBLE, dest, 0);
+    }
+    else if(processNo() == dest)
+    {
+        MPI::COMM_WORLD.Recv(commBuffer_.data(), 3*vecs.size(), MPI::DOUBLE, source, 0);
+        unloadBuffer(vecs);
+    }
 }
 
 void Parallel::allGather(int number, std::vector<int> &vector)
 {
-    MPI::COMM_WORLD.Allgather(&number, 1, MPI::INT, vector.data(), 1, MPI::INT);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allgather(&number, 1, MPI::INT, vector.data(), 1, MPI::INT);
+    else
+        vector[0] = number;
 }
 
 void Parallel::allGather(double number, std::vector<double> &vector)
 {
-    MPI::COMM_WORLD.Allgather(&number, 1, MPI::DOUBLE, vector.data(), 1, MPI::DOUBLE);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allgather(&number, 1, MPI::DOUBLE, vector.data(), 1, MPI::DOUBLE);
+    else
+        vector[0] = number;
 }
 
 void Parallel::barrier()
@@ -181,17 +126,36 @@ void Parallel::barrier()
     MPI::COMM_WORLD.Barrier();
 }
 
-/********************** Private methods ***********************/
+//*************************** Private Methods ************************************
 
-void Parallel::initialize()
+void Parallel::loadBuffer(const std::vector<Vector3D> &vecs)
 {
-    MPI::Init();
+    if(commBuffer_.size() < 3*vecs.size())
+        commBuffer_.resize(3*vecs.size());
 
-    commBufferSize_ = 1000000;
-    commBuffer_.resize(commBufferSize_);
+    for(int i = 0, k = 0; i < vecs.size(); ++i, k += 3)
+    {
+        commBuffer_[k] = vecs[i].x;
+        commBuffer_[k + 1] = vecs[i].y;
+        commBuffer_[k + 2] = vecs[i].z;
+    }
 }
 
-void Parallel::finalize()
+void Parallel::unloadBuffer(std::vector<Vector3D> &vecs)
 {
-    MPI::Finalize();
+    if(commBuffer_.size() < 3*vecs.size())
+        commBuffer_.resize(3*vecs.size());
+
+    for(int i = 0, k = 0; i < vecs.size(); ++i, k += 3)
+    {
+        vecs[i].x = commBuffer_[k];
+        vecs[i].y = commBuffer_[k + 1];
+        vecs[i].z = commBuffer_[k + 2];
+    }
 }
+
+//***************************** Private Static Variables *******************************
+
+std::vector<double> Parallel::commBuffer_;
+int Parallel::procNo_ = 0, Parallel::nProcesses_ = 1;
+bool Parallel::isInitialized_ = false;

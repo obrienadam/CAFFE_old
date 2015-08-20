@@ -50,25 +50,17 @@ Field<T>::Field(const Field &other)
 template<class T>
 Field<T>& Field<T>::operator =(const Field<T>& other)
 {
-    int i;
-
     //- Check to make sure this assignment is legal. Fields cannont be equated to other fields that reference a different mesh
     if(&mesh_ != &other.mesh_)
         Output::raiseException("Field", "operator=", "cannot assign a field to another field if the mesh references are different.");
 
-    for(i = 0; i < Array3D<T>::n_; ++i)
-        Array3D<T>::data_[i] = other.data_[i];
+    fieldData_ = other.fieldData_;
 
     if(type_ == CONSERVED && other.type_ == CONSERVED)
     {
-        for(i = 0; i < facesI_.size(); ++i)
-            facesI_(i) = other.facesI_(i);
-
-        for(i = 0; i < facesJ_.size(); ++i)
-            facesJ_(i) = other.facesJ_(i);
-
-        for(i = 0; i < facesK_.size(); ++i)
-            facesK_(i) = other.facesK_(i);
+        facesI_ = other.facesI_;
+        facesJ_ = other.facesJ_;
+        facesK_ = other.facesK_;
     }
 
     return *this;
@@ -77,30 +69,30 @@ Field<T>& Field<T>::operator =(const Field<T>& other)
 template<class T>
 void Field<T>::allocate(int nCellsI, int nCellsJ, int nCellsK)
 {
-    Array3D<T>::allocate(nCellsI, nCellsJ, nCellsK);
+    fieldData_.resize(nCellsI, nCellsJ, nCellsK);
 
     if (type_ == CONSERVED)
     {
-        facesI_.allocate(nCellsI + 1, nCellsJ, nCellsK);
-        facesJ_.allocate(nCellsI, nCellsJ + 1, nCellsK);
-        facesK_.allocate(nCellsI, nCellsJ, nCellsK + 1);
+        facesI_.resize(nCellsI + 1, nCellsJ, nCellsK);
+        facesJ_.resize(nCellsI, nCellsJ + 1, nCellsK);
+        facesK_.resize(nCellsI, nCellsJ, nCellsK + 1);
     }
 
-    eastBoundaryPatch.allocate(1, mesh_.nCellsJ(), mesh_.nCellsK());
-    westBoundaryPatch.allocate(1, mesh_.nCellsJ(), mesh_.nCellsK());
-    northBoundaryPatch.allocate(mesh_.nCellsI(), 1, mesh_.nCellsK());
-    southBoundaryPatch.allocate(mesh_.nCellsI(), 1, mesh_.nCellsK());
-    topBoundaryPatch.allocate(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
-    bottomBoundaryPatch.allocate(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
+    eastBoundaryPatch.resize(1, mesh_.nCellsJ(), mesh_.nCellsK());
+    westBoundaryPatch.resize(1, mesh_.nCellsJ(), mesh_.nCellsK());
+    northBoundaryPatch.resize(mesh_.nCellsI(), 1, mesh_.nCellsK());
+    southBoundaryPatch.resize(mesh_.nCellsI(), 1, mesh_.nCellsK());
+    topBoundaryPatch.resize(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
+    bottomBoundaryPatch.resize(mesh_.nCellsI(), mesh_.nCellsJ(), 1);
 }
 
 template<class T>
 T& Field<T>::operator()(int i, int j, int k)
 {
     if(i >= 0 && j >= 0 && k >= 0 &&
-            i < Array3D<T>::nI_ && j < Array3D<T>::nJ_ && k < Array3D<T>::nK_)
+            i < fieldData_.sizeI() && j < fieldData_.sizeJ() && k < fieldData_.sizeK())
     {
-        return Array3D<T>::operator ()(i, j, k);
+        return fieldData_(i, j, k);
     }
 
     // Access to the boundaries
@@ -108,40 +100,40 @@ T& Field<T>::operator()(int i, int j, int k)
     {
         return westBoundaryPatch(abs(i) - 1, j, k);
     }
-    else if (i >= Array3D<T>::nI_)
+    else if (i >= fieldData_.sizeI())
     {
-        return eastBoundaryPatch(i - Array3D<T>::nI_, j, k);
+        return eastBoundaryPatch(i - fieldData_.sizeI(), j, k);
     }
 
     if(j < 0)
     {
         return southBoundaryPatch(i, abs(j) - 1, k);
     }
-    else if (j >= Array3D<T>::nJ_)
+    else if (j >= fieldData_.sizeJ())
     {
-        return northBoundaryPatch(i, j - Array3D<T>::nJ_, k);
+        return northBoundaryPatch(i, j - fieldData_.sizeJ(), k);
     }
 
     if(k < 0)
     {
         return bottomBoundaryPatch(i, j, abs(k) - 1);
     }
-    else if (k >= Array3D<T>::nK_)
+    else if (k >= fieldData_.sizeK())
     {
-        return topBoundaryPatch(i, j, k - Array3D<T>::nK_);
+        return topBoundaryPatch(i, j, k - fieldData_.sizeK());
     }
 
     // Just to get rid of the compiler warning
-    return Array3D<T>::data_[0];
+    return fieldData_[0];
 }
 
 template<class T>
 const T& Field<T>::operator()(int i, int j, int k) const
 {
     if(i >= 0 && j >= 0 && k >= 0 &&
-            i < Array3D<T>::nI_ && j < Array3D<T>::nJ_ && k < Array3D<T>::nK_)
+            i < fieldData_.sizeI() && j < fieldData_.sizeJ() && k < fieldData_.sizeK())
     {
-        return Array3D<T>::operator ()(i, j, k);
+        return fieldData_(i, j, k);
     }
 
     // Access to the boundaries
@@ -149,88 +141,40 @@ const T& Field<T>::operator()(int i, int j, int k) const
     {
         return westBoundaryPatch(abs(i) - 1, j, k);
     }
-    else if (i >= Array3D<T>::nI_)
+    else if (i >= fieldData_.sizeI())
     {
-        return eastBoundaryPatch(i - Array3D<T>::nI_, j, k);
+        return eastBoundaryPatch(i - fieldData_.sizeI(), j, k);
     }
 
     if(j < 0)
     {
         return southBoundaryPatch(i, abs(j) - 1, k);
     }
-    else if (j >= Array3D<T>::nJ_)
+    else if (j >= fieldData_.sizeJ())
     {
-        return northBoundaryPatch(i, j - Array3D<T>::nJ_, k);
+        return northBoundaryPatch(i, j - fieldData_.sizeJ(), k);
     }
 
     if(k < 0)
     {
         return bottomBoundaryPatch(i, j, abs(k) - 1);
     }
-    else if (k >= Array3D<T>::nK_)
+    else if (k >= fieldData_.sizeK())
     {
-        return topBoundaryPatch(i, j, k - Array3D<T>::nK_);
+        return topBoundaryPatch(i, j, k - fieldData_.sizeK());
     }
 
     // Just to get rid of the compiler warning
-    return Array3D<T>::data_[0];
-}
-
-template<class T>
-T& Field<T>::operator ()(int i, int j, int k, int faceNo)
-{
-    switch(faceNo)
-    {
-    case 0:
-        return operator ()(i + 1, j, k);
-    case 1:
-        return operator ()(i - 1, j, k);
-    case 2:
-        return operator ()(i, j + 1, k);
-    case 3:
-        return operator ()(i, j - 1, k);
-    case 4:
-        return operator ()(i, j, k + 1);
-    case 5:
-        return operator ()(i, j, k - 1);
-    default:
-        Output::raiseException("Field", "operator()", "invalid face number specified.");
-    };
-
-    return operator ()(i, j, k);
-}
-
-template<class T>
-const T& Field<T>::operator ()(int i, int j, int k, int faceNo) const
-{
-    switch(faceNo)
-    {
-    case 0:
-        return operator ()(i + 1, j, k);
-    case 1:
-        return operator ()(i - 1, j, k);
-    case 2:
-        return operator ()(i, j + 1, k);
-    case 3:
-        return operator ()(i, j - 1, k);
-    case 4:
-        return operator ()(i, j, k + 1);
-    case 5:
-        return operator ()(i, j, k - 1);
-    default:
-        Output::raiseException("Field", "operator()", "invalid face number specified.");
-    };
-
-    return operator ()(i, j, k);
+    return fieldData_[0];
 }
 
 template<class T>
 T& Field<T>::operator ()(int k)
 {
-    if(k < 0 || k >= Array3D<T>::n_)
+    if(k < 0 || k >= fieldData_.size())
         Output::raiseException("Field", "operator()", "Attempted to access an element outside the bounds of the field.");
 
-    return Array3D<T>::data_[k];
+    return fieldData_[k];
 }
 
 template<class T>
@@ -285,51 +229,34 @@ void Field<T>::setValues(int iLower, int iUpper,
 template<class T>
 void Field<T>::setValue(T value)
 {
-    int i;
-
-    for(i = 0; i < Array3D<T>::n_; ++i)
-        Array3D<T>::data_[i] = value;
+    fieldData_.assign(value);
 }
 
 template<class T>
 void Field<T>::setFixedBoundaryPatches(const T *refValues)
 {
-    int i;
-
-    for(i = 0; i < eastBoundaryPatch.size(); ++i)
-        eastBoundaryPatch(i) = refValues[0];
-
-    for(i = 0; i < westBoundaryPatch.size(); ++i)
-        westBoundaryPatch(i) = refValues[1];
-
-    for(i = 0; i < northBoundaryPatch.size(); ++i)
-        northBoundaryPatch(i) = refValues[2];
-
-    for(i = 0; i < southBoundaryPatch.size(); ++i)
-        southBoundaryPatch(i) = refValues[3];
-
-    for(i = 0; i < topBoundaryPatch.size(); ++i)
-        topBoundaryPatch(i) = refValues[4];
-
-    for(i = 0; i < bottomBoundaryPatch.size(); ++i)
-        bottomBoundaryPatch(i) = refValues[5];
+    eastBoundaryPatch.assign(refValues[0]);
+    westBoundaryPatch.assign(refValues[1]);
+    northBoundaryPatch.assign(refValues[2]);
+    southBoundaryPatch.assign(refValues[3]);
+    topBoundaryPatch.assign(refValues[4]);
+    bottomBoundaryPatch.assign(refValues[5]);
 }
 
 template<class T>
-void Field<T>::setFixedBoundaryPatches(T refValue)
+void Field<T>::setFixedBoundaryPatches(const T &refValue)
 {
     T refValues[6] = {refValue};
-
     setFixedBoundaryPatches(refValues);
 }
 
 template<class T>
 void Field<T>::setAll(T value)
 {
-    Array3D<T>::setAll(value);
-    facesI_.setAll(value);
-    facesJ_.setAll(value);
-    facesK_.setAll(value);
+    fieldData_.assign(value);
+    facesI_.assign(value);
+    facesJ_.assign(value);
+    facesK_.assign(value);
     setFixedBoundaryPatches(value);
 }
 
@@ -338,11 +265,11 @@ void Field<T>::setEastFacesFromPatch()
 {
     int j, k;
 
-    for(k = 0; k < Array3D<T>::sizeK(); ++k)
+    for(k = 0; k < fieldData_.sizeK(); ++k)
     {
-        for(j = 0; j < Array3D<T>::sizeJ(); ++j)
+        for(j = 0; j < fieldData_.sizeJ(); ++j)
         {
-            facesI_(Array3D<T>::sizeI(), j, k) = eastBoundaryPatch(0, j, k);
+            facesI_(facesI_.upperI(), j, k) = eastBoundaryPatch(0, j, k);
         }
     }
 }
@@ -352,9 +279,9 @@ void Field<T>::setWestFacesFromPatch()
 {
     int j, k;
 
-    for(k = 0; k < Array3D<T>::sizeK(); ++k)
+    for(k = 0; k < fieldData_.sizeK(); ++k)
     {
-        for(j = 0; j < Array3D<T>::sizeJ(); ++j)
+        for(j = 0; j < fieldData_.sizeJ(); ++j)
         {
             facesI_(0, j, k) = westBoundaryPatch(0, j, k);
         }
@@ -366,11 +293,11 @@ void Field<T>::setNorthFacesFromPatch()
 {
     int i, k;
 
-    for(k = 0; k < Array3D<T>::sizeK(); ++k)
+    for(k = 0; k < fieldData_.sizeK(); ++k)
     {
-        for(i = 0; i < Array3D<T>::sizeI(); ++i)
+        for(i = 0; i < fieldData_.sizeI(); ++i)
         {
-            facesJ_(i, Array3D<T>::sizeJ(), k) = northBoundaryPatch(i, 0, k);
+            facesJ_(i, facesJ_.upperJ(), k) = northBoundaryPatch(i, 0, k);
         }
     }
 }
@@ -380,9 +307,9 @@ void Field<T>::setSouthFacesFromPatch()
 {
     int i, k;
 
-    for(k = 0; k < Array3D<T>::sizeK(); ++k)
+    for(k = 0; k < fieldData_.sizeK(); ++k)
     {
-        for(i = 0; i < Array3D<T>::sizeI(); ++i)
+        for(i = 0; i < fieldData_.sizeI(); ++i)
         {
             facesJ_(i, 0, k) = southBoundaryPatch(i, 0, k);
         }
@@ -394,11 +321,11 @@ void Field<T>::setTopFacesFromPatch()
 {
     int i, j;
 
-    for(j = 0; j < Array3D<T>::sizeJ(); ++j)
+    for(j = 0; j < fieldData_.sizeJ(); ++j)
     {
-        for(i = 0; i < Array3D<T>::sizeI(); ++i)
+        for(i = 0; i < fieldData_.sizeI(); ++i)
         {
-            facesK_(i, j, Array3D<T>::sizeK()) = topBoundaryPatch(i, j, 0);
+            facesK_(i, j, facesK_.upperK()) = topBoundaryPatch(i, j, 0);
         }
     }
 }
@@ -408,9 +335,9 @@ void Field<T>::setBottomFacesFromPatch()
 {
     int i, j;
 
-    for(j = 0; j < Array3D<T>::sizeJ(); ++j)
+    for(j = 0; j < fieldData_.sizeJ(); ++j)
     {
-        for(i = 0; i < Array3D<T>::sizeI(); ++i)
+        for(i = 0; i < fieldData_.sizeI(); ++i)
         {
             facesK_(i, j, 0) = bottomBoundaryPatch(i, j, 0);
         }
@@ -524,18 +451,16 @@ void Field<T>::print()
 
     cout << "Field name = " << "\"" << name << "\"\n";
 
-    for(k = 0, l = 0; k < Array3D<T>::nK_; ++k)
+    for(k = 0, l = 0; k < fieldData_.sizeK(); ++k)
     {
-        for(j = 0; j < Array3D<T>::nJ_; ++j)
+        for(j = 0; j < fieldData_.sizeJ(); ++j)
         {
-            for(i = 0; i < Array3D<T>::nI_; ++i, ++l)
+            for(i = 0; i < fieldData_.sizeI(); ++i, ++l)
             {
                 cout << Array3D<T>::data_[l] << " ";
             } // end for i
-
             cout << endl;
         } // end for j
-
         cout << endl;
     } // end for k
 }

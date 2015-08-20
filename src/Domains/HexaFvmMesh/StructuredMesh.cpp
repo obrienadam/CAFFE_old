@@ -40,11 +40,11 @@ void StructuredMesh::initialize(const std::string &filename)
 
     readTecplotMeshHeader(fin, name, nI, nJ, nK);
 
-    // Check to see if a dimension was not allocated
+    // Check to see if a dimension was not resized
     if(nI == 0 || nJ == 0 || nK == 0)
         Output::raiseException("StructuredMesh", "initialize", "one or more structured mesh dimensions was not found in file \"" + filename + "\".");
 
-    nodes_.allocate(nI, nJ, nK);
+    nodes_.resize(nI, nJ, nK);
 
     for(l = 0; l < 3; ++l)
     {
@@ -67,10 +67,60 @@ void StructuredMesh::initialize(const std::string &filename)
 
 void StructuredMesh::initialize(const Array3D<Point3D> &nodes)
 {
-    nodes_.allocate(nodes.sizeI(), nodes.sizeJ(), nodes.sizeK());
+    nodes_.resize(nodes.sizeI(), nodes.sizeJ(), nodes.sizeK());
 
     for(int i = 0; i < nodes_.size(); ++i)
-        nodes_(i) = nodes(i);
+        nodes_[i] = nodes[i];
+}
+
+void StructuredMesh::initialize(const std::vector<Point3D> &vertices, int nNodesI, int nNodesJ, int nNodesK)
+{
+    int i, j, k, upperI, upperJ, upperK;
+    double s;
+    Vector3D tmp1, tmp2;
+
+    nodes_.resize(nNodesI, nNodesJ, nNodesK);
+    upperI = nodes_.sizeI() - 1;
+    upperJ = nodes_.sizeJ() - 1;
+    upperK = nodes_.sizeK() - 1;
+
+    // Generate surface meshes on the west and east sides
+    for(k = 0; k <= upperK; ++k)
+    {
+        s = double(k)/double(upperK);
+
+        nodes_(0, 0, k) = (vertices[4] - vertices[0])*s + vertices[0];
+        nodes_(0, upperJ, k) = (vertices[7] - vertices[3])*s + vertices[3];
+        nodes_(upperI, 0, k) = (vertices[5] - vertices[1])*s + vertices[1];
+        nodes_(upperI, upperJ, k) = (vertices[6] - vertices[2])*s + vertices[2];
+
+        tmp1 = nodes_(0, upperJ, k) - nodes_(0, 0, k);
+        tmp2 = nodes_(upperI, upperJ, k) - nodes_(upperI, 0, k);
+
+        for(j = 0; j <= upperJ; ++j)
+        {
+            s = double(j)/double(upperJ);
+
+            nodes_(0, j, k) = tmp1*s + nodes_(0, 0, k);
+            nodes_(upperI, j, k) = tmp2*s + nodes_(upperI, 0, k);
+        } // end for j
+    } // end for k
+
+    // Generate the 3D mesh using the opposing surface meshes
+    for(k = 0; k <= upperK; ++k)
+    {
+        for(j = 0; j <= upperJ; ++j)
+        {
+            tmp1 = nodes_(upperI, j, k) - nodes_(0, j, k);
+
+            for(i = 0; i <= upperI; ++i)
+            {
+                s = double(i)/double(upperI);
+
+                nodes_(i, j, k) = tmp1*s + nodes_(0, j, k);
+            } // end for i
+        } // end for j
+    } // end for k
 }
 
 void StructuredMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nNodesI, int nNodesJ, int nNodesK)
@@ -78,9 +128,7 @@ void StructuredMesh::initializeCartesianMesh(double xLength, double yLength, dou
     int i, j, k;
     double hx = xLength/(nNodesI - 1), hy = yLength/(nNodesJ - 1), hz = zLength/(nNodesK - 1);
 
-    Output::print("StructuredMesh", "initializing a cartestian structured mesh...");
-
-    nodes_.allocate(nNodesI, nNodesJ, nNodesK);
+    nodes_.resize(nNodesI, nNodesJ, nNodesK);
 
     for(k = 0; k < nodes_.sizeK(); ++k)
     {
@@ -92,8 +140,6 @@ void StructuredMesh::initializeCartesianMesh(double xLength, double yLength, dou
             }
         }
     }
-
-    Output::print("StructuredMesh", "initialization of cartesian structured mesh complete.");
 }
 
 std::string StructuredMesh::meshStats()
@@ -116,7 +162,7 @@ void StructuredMesh::resetFileStream()
         foutTec360_.close();
 }
 
-void StructuredMesh::writeTec360(double time, const std::string &directoryName)
+void StructuredMesh::writeTec360(double time, const std::string &directory)
 {
     using namespace std;
 
@@ -129,7 +175,7 @@ void StructuredMesh::writeTec360(double time, const std::string &directoryName)
 
     if(!foutTec360_.is_open())
     {
-        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
+        foutTec360_.open((directory + name + ".dat").c_str());
 
         foutTec360_ << "TITLE=\"" << name << "\"" << endl
                     << "STRANDID=1" << endl

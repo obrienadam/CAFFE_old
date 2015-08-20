@@ -26,6 +26,7 @@
 #define MATRIX_H
 
 #include <vector>
+#include <initializer_list>
 
 #include "Vector3D.h"
 
@@ -36,22 +37,7 @@ public:
     //- Constructors, copy constructors and destructors
 
     Matrix(int m = 0, int n = 0);
-
-    /**
-     * @brief Matrix
-     * @param elements 2D array containing the elements
-     * @param m number of rows of elements
-     * @param n number of columns of elements
-     */
-    Matrix(double **elements, int m, int n);
-
-    /**
-     * @brief Matrix
-     * @param elements 1D array containing the elements
-     * @param m number of rows
-     * @param n number of columns
-     */
-    Matrix(double *elements, int m, int n);
+    Matrix(int m, int n, std::initializer_list<double> list);
     Matrix(const Matrix& other);
     ~Matrix();
 

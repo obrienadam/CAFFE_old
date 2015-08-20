@@ -32,7 +32,7 @@
 #include "HexaFvmMesh.h"
 
 template <class T>
-class Field : public Array3D<T>
+class Field
 {
 public:
 
@@ -43,6 +43,11 @@ public:
     Field(const Field& other);
 
     Field<T>& operator=(const Field<T>& other);
+
+    int sizeI() const { return fieldData_.sizeI(); }
+    int sizeJ() const { return fieldData_.sizeJ(); }
+    int sizeK() const { return fieldData_.sizeK(); }
+    int size() const { return fieldData_.size(); }
 
     //- Access
     T& operator()(int i, int j, int k);
@@ -69,7 +74,7 @@ public:
     void setValue(T value);
 
     void setFixedBoundaryPatches(const T *refValues);
-    void setFixedBoundaryPatches(T refValue);
+    void setFixedBoundaryPatches(const T &refValue);
     void setAll(T value);
 
     void setEastFacesFromPatch();
@@ -113,7 +118,7 @@ public:
     T maxNeighbour(int i, int j, int k);
     T minNeighbour(int i, int j, int k);
 
-    const Array3D<T>* cellData() const { return this; }
+    const Array3D<T>* cellData() const { return &fieldData_; }
     void print();
 
     Array3D<T> eastBoundaryPatch;
@@ -128,6 +133,9 @@ public:
 protected:
 
     void allocate(int nCellsI, int nCellsJ, int nCellsK);
+
+    //- Main data
+    Array3D<T> fieldData_;
 
     //- Reference to the mesh, required for constructing a field
     const HexaFvmMesh &mesh_;

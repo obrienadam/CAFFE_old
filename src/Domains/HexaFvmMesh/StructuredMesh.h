@@ -20,6 +20,7 @@ public:
     //- Initialization
     virtual void initialize(const std::string &filename);
     virtual void initialize(const Array3D<Point3D> &nodes);
+    virtual void initialize(const std::vector<Point3D> &vertices, int nNodesI, int nNodesJ, int nNodesK);
 
     /**
      * @brief Method used to initialize a simple cartesian mesh, primarily for testing
@@ -31,12 +32,16 @@ public:
     int nNodesJ() const { return nodes_.sizeJ(); }
     int nNodesK() const { return nodes_.sizeK(); }
 
+    int uNodeI() const { return nNodesI() - 1; }
+    int uNodeJ() const { return nNodesJ() - 1; }
+    int uNodeK() const { return nNodesK() - 1; }
+
     Point3D node(int i, int j, int k) const { return nodes_(i, j, k); }
 
     virtual std::string meshStats();
 
     //- Output methods
-    virtual void writeTec360(double time, const std::string &directoryName);
+    virtual void writeTec360(double time, const std::string &directory);
     void resetFileStream();
     static void readTecplotMeshHeader(std::ifstream &fin, std::string &name, int& nI, int& nJ, int& nK);
 

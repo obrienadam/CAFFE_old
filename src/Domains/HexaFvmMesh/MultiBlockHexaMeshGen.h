@@ -9,15 +9,18 @@ public:
 
     MultiBlockHexaMeshGen();
 
-    void readFile();
+    void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
+
+    void readFile(const std::string &directory);
     void generateMesh();
-    void writeMeshFiles();
+    void writeMeshFiles(const std::string &directory);
+
+    StructuredMesh mesh;
 
 private:
 
     void getOwnershipRange(int nEntities, int nProcs, int procNo, int &iLower, int &iUpper, int &nEntitiesThisProc);
 
-    StructuredMesh mesh_;
     int nBlocksI_, nBlocksJ_, nBlocksK_;
 
 };

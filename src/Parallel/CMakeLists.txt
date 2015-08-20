@@ -6,4 +6,4 @@ set(HEADERS Parallel.h)
 set(SOURCES Parallel.cpp)
 
 add_library(Parallel ${HEADERS} ${SOURCES})
-target_link_libraries(Parallel mpi)
+target_link_libraries(Parallel mpi Math)

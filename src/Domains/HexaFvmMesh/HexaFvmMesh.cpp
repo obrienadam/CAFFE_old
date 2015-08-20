@@ -64,6 +64,12 @@ void HexaFvmMesh::initialize(const Array3D<Point3D> &nodes)
     initializeCellsAndFaces();
 }
 
+void HexaFvmMesh::initialize(const std::vector<Point3D> &vertices, int nCellsI, int nCellsJ, int nCellsK)
+{
+    StructuredMesh::initialize(vertices, nCellsI + 1, nCellsJ + 1, nCellsK + 1);
+    initializeCellsAndFaces();
+}
+
 void HexaFvmMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK)
 {
     StructuredMesh::initializeCartesianMesh(xLength, yLength, zLength, nCellsI + 1, nCellsJ + 1, nCellsK + 1);
@@ -441,7 +447,7 @@ void HexaFvmMesh::addArray3DToTecplotOutput(std::string name, const Array3D<Vect
     vectorVariablePtrs_.push_back(pair<string, const Array3D<Vector3D>*>(name, array3DPtr));
 }
 
-void HexaFvmMesh::writeTec360(double time, std::string directoryName)
+void HexaFvmMesh::writeTec360(double time, const std::string &directory)
 {
     using namespace std;
 
@@ -452,7 +458,7 @@ void HexaFvmMesh::writeTec360(double time, std::string directoryName)
 
     if(!foutTec360_.is_open())
     {
-        foutTec360_.open((directoryName + "/" + name + ".dat").c_str());
+        foutTec360_.open(directory + name + ".dat");
 
         foutTec360_ << "TITLE = \"" << name << "\"" << endl
                     << "VARIABLES = \"x\", \"y\", \"z\", ";
@@ -593,8 +599,8 @@ void HexaFvmMesh::initializeCells()
     Point3D tmpPoints[8];
 
     // Allocate cell centers and their volumes
-    cellCenters_.allocate(nI, nJ, nK);
-    cellVolumes_.allocate(nI, nJ, nK);
+    cellCenters_.resize(nI, nJ, nK);
+    cellVolumes_.resize(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -628,11 +634,9 @@ void HexaFvmMesh::initializeCellToCellParameters()
     nK = cellCenters_.sizeK();
 
     // Allocate the cell to cell distance vectors and distaces
-    cellToCellRelativeVectorsI_.allocate(nI - 1, nJ, nK);
-
-    cellToCellRelativeVectorsJ_.allocate(nI, nJ - 1, nK);
-
-    cellToCellRelativeVectorsK_.allocate(nI, nJ, nK - 1);
+    cellToCellRelativeVectorsI_.resize(nI - 1, nJ, nK);
+    cellToCellRelativeVectorsJ_.resize(nI, nJ - 1, nK);
+    cellToCellRelativeVectorsK_.resize(nI, nJ, nK - 1);
 
     for(k = 0; k < nK; ++k)
     {
@@ -674,8 +678,8 @@ void HexaFvmMesh::initializeFaces()
     nJ = cellCenters_.sizeJ();
     nK = cellCenters_.sizeK();
 
-    faceCentersI_.allocate(nI, nJ, nK);
-    faceNormalsI_.allocate(nI, nJ, nK);
+    faceCentersI_.resize(nI, nJ, nK);
+    faceNormalsI_.resize(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -702,8 +706,8 @@ void HexaFvmMesh::initializeFaces()
     nJ = cellCenters_.sizeJ() + 1;
     nK = cellCenters_.sizeK();
 
-    faceCentersJ_.allocate(nI, nJ, nK);
-    faceNormalsJ_.allocate(nI, nJ, nK);
+    faceCentersJ_.resize(nI, nJ, nK);
+    faceNormalsJ_.resize(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -730,8 +734,8 @@ void HexaFvmMesh::initializeFaces()
     nJ = cellCenters_.sizeJ();
     nK = cellCenters_.sizeK() + 1;
 
-    faceCentersK_.allocate(nI, nJ, nK);
-    faceNormalsK_.allocate(nI, nJ, nK);
+    faceCentersK_.resize(nI, nJ, nK);
+    faceNormalsK_.resize(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -763,12 +767,12 @@ void HexaFvmMesh::initializeCellToFaceParameters()
     nJ = cellCenters_.sizeJ();
     nK = cellCenters_.sizeK();
 
-    cellToFaceRelativeVectorsE_.allocate(nI, nJ, nK);
-    cellToFaceRelativeVectorsW_.allocate(nI, nJ, nK);
-    cellToFaceRelativeVectorsN_.allocate(nI, nJ, nK);
-    cellToFaceRelativeVectorsS_.allocate(nI, nJ, nK);
-    cellToFaceRelativeVectorsT_.allocate(nI, nJ, nK);
-    cellToFaceRelativeVectorsB_.allocate(nI, nJ, nK);
+    cellToFaceRelativeVectorsE_.resize(nI, nJ, nK);
+    cellToFaceRelativeVectorsW_.resize(nI, nJ, nK);
+    cellToFaceRelativeVectorsN_.resize(nI, nJ, nK);
+    cellToFaceRelativeVectorsS_.resize(nI, nJ, nK);
+    cellToFaceRelativeVectorsT_.resize(nI, nJ, nK);
+    cellToFaceRelativeVectorsB_.resize(nI, nJ, nK);
 
     for(k = 0; k < nK; ++k)
     {
@@ -808,26 +812,26 @@ void HexaFvmMesh::computeMeshMetrics()
 {
     int i, j, k;
 
-    dE_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    dW_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    dN_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    dS_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    dT_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    dB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    dE_.resize(nCellsI(), nCellsJ(), nCellsK());
+    dW_.resize(nCellsI(), nCellsJ(), nCellsK());
+    dN_.resize(nCellsI(), nCellsJ(), nCellsK());
+    dS_.resize(nCellsI(), nCellsJ(), nCellsK());
+    dT_.resize(nCellsI(), nCellsJ(), nCellsK());
+    dB_.resize(nCellsI(), nCellsJ(), nCellsK());
 
-    cE_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    cW_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    cN_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    cS_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    cT_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    cB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    cE_.resize(nCellsI(), nCellsJ(), nCellsK());
+    cW_.resize(nCellsI(), nCellsJ(), nCellsK());
+    cN_.resize(nCellsI(), nCellsJ(), nCellsK());
+    cS_.resize(nCellsI(), nCellsJ(), nCellsK());
+    cT_.resize(nCellsI(), nCellsJ(), nCellsK());
+    cB_.resize(nCellsI(), nCellsJ(), nCellsK());
 
-    gE_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    gW_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    gN_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    gS_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    gT_.allocate(nCellsI(), nCellsJ(), nCellsK());
-    gB_.allocate(nCellsI(), nCellsJ(), nCellsK());
+    gE_.resize(nCellsI(), nCellsJ(), nCellsK());
+    gW_.resize(nCellsI(), nCellsJ(), nCellsK());
+    gN_.resize(nCellsI(), nCellsJ(), nCellsK());
+    gS_.resize(nCellsI(), nCellsJ(), nCellsK());
+    gT_.resize(nCellsI(), nCellsJ(), nCellsK());
+    gB_.resize(nCellsI(), nCellsJ(), nCellsK());
 
     for(k = 0; k < nCellsK(); ++k)
     {

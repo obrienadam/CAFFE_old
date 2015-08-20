@@ -1,6 +1,11 @@
 # CMakeLists.txt for CAFFE/src/DataStructures
 # Author: Adam O'Brien
 
-set(HEADERS Array3D.h)
+set(HEADERS DataStructures.h
+            Array3D.h)
 
-set(SOURCE Array3D.tpp)
+set(SOURCE  DataStructures.cpp
+            Array3D.tpp)
+
+add_library(DataStructures ${HEADERS} ${SOURCE})
+target_link_libraries(DataStructures Math)

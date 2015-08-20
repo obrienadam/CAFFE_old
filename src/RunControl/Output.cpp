@@ -47,7 +47,8 @@ void Output::raiseException(std::string className, std::string methodName, std::
 
 void Output::issueWarning(std::string className, std::string methodName, std::string warningDescription)
 {
-    std::cout << "WARNING! in \"" << className << "::" << methodName << "\", " << warningDescription << std::endl;
+    if(Parallel::isMainProcessor())
+        std::cout << "WARNING! in \"" << className << "::" << methodName << "\", " << warningDescription << std::endl;
 }
 
 void Output::printCaffeHeader()

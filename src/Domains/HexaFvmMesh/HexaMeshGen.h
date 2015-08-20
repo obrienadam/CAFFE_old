@@ -20,9 +20,9 @@ public:
     HexaMeshGen();
 
     //- Mesh generation
-    void readFile();
+    void readFile(const std::string &directory);
     void generateMesh();
-    void writeMeshFile();
+    void writeMeshFile(const std::string &directory);
 
     //- Mesh check
     void checkMesh();
