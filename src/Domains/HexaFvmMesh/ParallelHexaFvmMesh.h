@@ -20,14 +20,16 @@ public:
 
     int nSubDomains() const { return Parallel::nProcesses(); }
 
-    void writeTec360(double time, const std::string &directoryName);
+    const int* adjacentSubDomainProcNo() { return adjacentSubDomainProcNo_; }
+
+    void writeTec360(double time, const std::string &directory);
 
 private:
 
     void initializeSubDomains(const StructuredMesh &tmpMesh);
 
     std::vector<HexaFvmMesh> boundaryMeshes_;
-    int adjacentBlockProcNo_[6];
+    int adjacentSubDomainProcNo_[6];
 };
 
 #endif

@@ -39,6 +39,25 @@ void Output::print(const std::string &className, const std::string &message)
         std::cout << className + ": " << message << std::endl;
 }
 
+void Output::print(const Array3D<int> &array3D)
+{
+    if(Parallel::isMainProcessor())
+    {
+        for(int k = 0; k < array3D.sizeK(); ++k)
+        {
+            for(int j = 0; j < array3D.sizeJ(); ++j)
+            {
+                for(int i = 0; i < array3D.sizeI(); ++i)
+                {
+                    std::cout << array3D(i, j, k) << " ";
+                }
+                std::cout << std::endl;
+            }
+            std::cout << std::endl;
+        }
+    }
+}
+
 void Output::raiseException(std::string className, std::string methodName, std::string problemDescription)
 {
     if(Parallel::isMainProcessor())

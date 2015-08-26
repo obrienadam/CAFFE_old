@@ -13,6 +13,7 @@ public:
     void resize(int sizeI, int sizeJ, int sizeK);
     void clear();
     void assign(const T& val);
+    void add(const T& val);
 
     int sizeI() const { return sizeI_; }
     int sizeJ() const { return sizeJ_; }

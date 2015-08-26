@@ -30,6 +30,13 @@ void Array3D<T>::assign(const T &val)
     std::vector<T>::assign(std::vector<T>::size(), val);
 }
 
+template<class T>
+void Array3D<T>::add(const T &val)
+{
+    for(auto it = std::vector<T>::begin(); it != std::vector<T>::end(); ++it)
+        *it += val;
+}
+
 template <class T>
 T& Array3D<T>::operator()(int i, int j, int k)
 {

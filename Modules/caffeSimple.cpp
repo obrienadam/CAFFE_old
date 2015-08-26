@@ -1,9 +1,9 @@
 #include <iostream>
 
+#include "Parallel.h"
 #include "Input.h"
 #include "RunControl.h"
 #include "Simple.h"
-#include "Parallel.h"
 
 int main(int argc, const char* argv[])
 {

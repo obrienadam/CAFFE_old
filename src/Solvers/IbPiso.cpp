@@ -111,7 +111,7 @@ void IbPiso::computeIbField()
             }
         }
     }
-    mesh_.iMap.generateIndices(); // This must be called after making changes to cell statuses. Not elegant, but what are you going to do.
+    mesh_.iMap.generateLocalIndices(); // This must be called after making changes to cell statuses. Not elegant, but what are you going to do.
 
     destroyMatrices();
     createMatrices(2, 3, 9);

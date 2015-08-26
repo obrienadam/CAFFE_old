@@ -2,6 +2,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <stdlib.h>
 #include "Parallel.h"
+#include "Output.h"
 
 BOOST_AUTO_TEST_SUITE (ParallelTest)
 
@@ -110,6 +111,66 @@ BOOST_AUTO_TEST_CASE (test5)
 }
 
 BOOST_AUTO_TEST_CASE (test6)
+{
+    Array3D<int> sourceArray(10, 10, 10), destArray;
+    int i = 0;
+
+    if(Parallel::isMainProcessor())
+    {
+        for(auto it = sourceArray.begin(); it != sourceArray.end(); ++it, ++i)
+        {
+            *it = i;
+        }
+    }
+    Parallel::send(Parallel::mainProcNo(), Parallel::nProcesses() - 1, sourceArray, destArray);
+
+    if(Parallel::processNo() == Parallel::processNo() - 1)
+    {
+        BOOST_CHECK_EQUAL(sourceArray.size(), destArray.size());
+
+        i = 0;
+        for(auto it = destArray.begin(); it != destArray.end(); ++it, ++i)
+        {
+            BOOST_CHECK_EQUAL(*it, i);
+        }
+    }
+}
+
+BOOST_AUTO_TEST_CASE (test7)
+{
+    Array3D<int> sourceArray(20, 20, 20), clockWise(20, 20, 20), cclockWise(20, 20, 20);
+    std::vector<MPI::Request> requests;
+
+    for(auto it = sourceArray.begin(); it != sourceArray.end(); ++it)
+        *it = rand()%20;
+
+    // Send information in two directions around a loop... meant to just test non-blocking communications
+    if(Parallel::processNo() == 0)
+    {
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, Parallel::processNo() + 1, 0));
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, Parallel::nProcesses() - 1, 1));
+        requests.push_back(MPI::COMM_WORLD.Irecv(cclockWise.data(), cclockWise.size(), MPI::INT, Parallel::nProcesses() - 1, 0));
+        requests.push_back(MPI::COMM_WORLD.Irecv(clockWise.data(), clockWise.size(), MPI::INT, Parallel::processNo() + 1, 1));
+    }
+    else if(Parallel::processNo() == Parallel::nProcesses() - 1)
+    {
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, 0, 0));
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, Parallel::processNo() - 1, 1));
+        requests.push_back(MPI::COMM_WORLD.Irecv(cclockWise.data(), cclockWise.size(), MPI::INT, Parallel::processNo() - 1, 0));
+        requests.push_back(MPI::COMM_WORLD.Irecv(clockWise.data(), clockWise.size(), MPI::INT, 0, 1));
+    }
+    else
+    {
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, Parallel::processNo() + 1, 0));
+        requests.push_back(MPI::COMM_WORLD.Isend(sourceArray.data(), sourceArray.size(), MPI::INT, Parallel::processNo() - 1, 1));
+        requests.push_back(MPI::COMM_WORLD.Irecv(cclockWise.data(), cclockWise.size(), MPI::INT, Parallel::processNo() - 1, 0));
+        requests.push_back(MPI::COMM_WORLD.Irecv(clockWise.data(), clockWise.size(), MPI::INT, Parallel::processNo() + 1, 1));
+    }
+
+    MPI::Request::Waitall(requests.size(), requests.data());
+}
+
+BOOST_AUTO_TEST_CASE (end)
 {
     Parallel::finalize();
 }

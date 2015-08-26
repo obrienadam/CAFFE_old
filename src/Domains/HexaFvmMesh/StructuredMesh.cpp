@@ -79,6 +79,8 @@ void StructuredMesh::initialize(const std::vector<Point3D> &vertices, int nNodes
     double s;
     Vector3D tmp1, tmp2;
 
+    Output::print("StructuredMesh", "initializing structured mesh from vertex list...");
+
     nodes_.resize(nNodesI, nNodesJ, nNodesK);
     upperI = nodes_.sizeI() - 1;
     upperJ = nodes_.sizeJ() - 1;
@@ -121,6 +123,8 @@ void StructuredMesh::initialize(const std::vector<Point3D> &vertices, int nNodes
             } // end for i
         } // end for j
     } // end for k
+
+    Output::print("StructuredMesh", "initialization of structured mesh complete.");
 }
 
 void StructuredMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nNodesI, int nNodesJ, int nNodesK)

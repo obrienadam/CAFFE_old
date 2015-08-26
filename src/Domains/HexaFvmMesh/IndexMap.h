@@ -42,7 +42,9 @@ public:
 
     int operator()(int i, int j, int k, int varSetNo);
 
-    int nActive(){ return nActiveLocal_; }
+    int nActiveGlobal() const;
+    int nActiveLocal() const;
+    int nActive() const;
     bool isActive(int i, int j, int k);
     bool isGhost(int i, int j, int k);
     bool isInactive(int i, int j, int k);
@@ -51,15 +53,23 @@ public:
     void setGhost(int i, int j, int k);
     void setInactive(int i, int j, int k);
 
-    void generateIndices();
+    void generateLocalIndices();
+    void generateGlobalIndices(const int adjProcNo[]);
 
 private:
 
-    int nCellsI_, nCellsJ_, nCellsK_, nActiveLocal_, nActiveGlobal_;
-    std::vector<int> gatheredNActiveLocal_;
-    Array3D<int> localIndices_;
-    int lowerGlobalIndex_, upperGlobalIndex_;
+    static int intCat(int a, int b);
+    static int createTag(int sendProcNo, int recvProcNo, int sendFaceNo);
+
+    int nActiveGlobal_, maxNLocal_;
+
+    int nActiveLocalThisProc_, nCellsIThisProc_, nCellsJThisProc_, nCellsKThisProc_;
+    std::vector<int> nActiveLocal_, nCellsILocal_, nCellsJLocal_, nCellsKLocal_;
     Array3D<CellStatus> cellStatuses_;
+    Array3D<int> globalIndices_;
+
+    const int* adjProcNo_;
+    Array3D<int> adjGlobalIndices_[6];
 };
 
 #endif

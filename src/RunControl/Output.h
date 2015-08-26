@@ -30,12 +30,15 @@
 #include <sstream>
 #include <vector>
 
+#include "Array3D.h"
+
 class Output
 {
 public:
 
     static void print(const std::string &message);
     static void print(const std::string &className, const std::string &message);
+    static void print(const Array3D<int> &array3D);
 
     /**
      * @brief Used to raise an exception, while also making sure relevant information about the method raising the exception.

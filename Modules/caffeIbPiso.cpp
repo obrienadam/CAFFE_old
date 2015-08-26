@@ -1,10 +1,10 @@
 #include <iostream>
 
+#include "Parallel.h"
 #include "Input.h"
 #include "RunControl.h"
 #include "IbPiso.h"
 #include "InitialConditions.h"
-#include "Parallel.h"
 
 int main(int argc, const char* argv[])
 {

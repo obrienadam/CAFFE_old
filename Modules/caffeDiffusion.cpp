@@ -1,12 +1,12 @@
 #include <iostream>
 
+#include "Parallel.h"
 #include "Output.h"
 #include "Input.h"
 #include "RunControl.h"
 
 #include "HexaFvmMesh.h"
 #include "Diffusion.h"
-#include "Parallel.h"
 
 int main(int argc, const char* argv[])
 {

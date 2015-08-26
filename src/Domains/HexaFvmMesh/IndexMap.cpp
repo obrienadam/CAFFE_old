@@ -28,62 +28,78 @@
 
 IndexMap::IndexMap()
     :
-      lowerGlobalIndex_(0),
-      upperGlobalIndex_(0)
+      adjProcNo_(NULL)
 {
 
 }
 
 void IndexMap::initialize(int nCellsI, int nCellsJ, int nCellsK)
 {
-    gatheredNActiveLocal_.resize(Parallel::nProcesses());
-    nCellsI_ = nCellsI;
-    nCellsJ_ = nCellsJ;
-    nCellsK_ = nCellsK;
-    localIndices_.resize(nCellsI_, nCellsJ_, nCellsK_);
-    cellStatuses_.resize(nCellsI_, nCellsJ_, nCellsK_);
+    nCellsIThisProc_ = nCellsI;
+    nCellsJThisProc_ = nCellsJ;
+    nCellsKThisProc_ = nCellsK;
 
-    for(int i = 0; i < localIndices_.size(); ++i)
-        localIndices_[i] = i;
+    globalIndices_.resize(nCellsIThisProc_, nCellsJThisProc_, nCellsKThisProc_);
+    cellStatuses_.resize(nCellsIThisProc_, nCellsJThisProc_, nCellsKThisProc_);
 
     cellStatuses_.assign(ACTIVE);
-    generateIndices();
+    generateLocalIndices();
 }
 
 int IndexMap::operator ()(int i, int j, int k, int varSetNo)
 {
-    if(i >= 0 && i < nCellsI_
-            && j >= 0 && j < nCellsJ_
-            && k >= 0 && k < nCellsK_)
+    if(i >= 0 && i < nCellsIThisProc_
+            && j >= 0 && j < nCellsJThisProc_
+            && k >= 0 && k < nCellsKThisProc_)
     {
-        return lowerGlobalIndex_ + localIndices_(i, j, k) + varSetNo*nActiveLocal_;
+        return globalIndices_(i, j, k) + varSetNo*nActiveGlobal_;
     }
+    else if(i >= nCellsIThisProc_)
+        return adjGlobalIndices_[0](i - nCellsIThisProc_, j, k) + varSetNo*nActiveGlobal_;
+    else if(i < 0)
+        return adjGlobalIndices_[1](adjGlobalIndices_[1].sizeI() + i, j, k) + varSetNo*nActiveGlobal_;
+    else if(j >= nCellsJThisProc_)
+        return adjGlobalIndices_[2](i, j - nCellsJThisProc_, k) + varSetNo*nActiveGlobal_;
+    else if(j < 0)
+        return adjGlobalIndices_[3](i, adjGlobalIndices_[3].sizeJ() + j, k) + varSetNo*nActiveGlobal_;
+    else if(k >= nCellsKThisProc_)
+        return adjGlobalIndices_[4](i, j, k - nCellsKThisProc_) + varSetNo*nActiveGlobal_;
+    else if(k < 0)
+        return adjGlobalIndices_[5](i, j, adjGlobalIndices_[5].sizeK() + k) + varSetNo*nActiveGlobal_;
+    else
+        Output::raiseException("IndexMap", "operator()", "attempted to access an invalid index.");
 
     return -1;
 }
 
+int IndexMap::nActiveGlobal() const
+{
+    return nActiveGlobal_;
+}
+
+int IndexMap::nActiveLocal() const
+{
+    return nActiveLocalThisProc_;
+}
+
+int IndexMap::nActive() const
+{
+    return nActiveLocal();
+}
+
 bool IndexMap::isActive(int i, int j, int k)
 {
-    if(cellStatuses_(i, j, k) == ACTIVE)
-        return true;
-    else
-        return false;
+    return cellStatuses_(i, j, k) == ACTIVE;
 }
 
 bool IndexMap::isGhost(int i, int j, int k)
 {
-    if(cellStatuses_(i, j, k) == GHOST)
-        return true;
-    else
-        return false;
+    return cellStatuses_(i, j, k) == GHOST;
 }
 
 bool IndexMap::isInactive(int i, int j, int k)
 {
-    if(cellStatuses_(i, j, k) == INACTIVE)
-        return true;
-    else
-        return false;
+    return cellStatuses_(i, j, k) == INACTIVE;
 }
 
 void IndexMap::setActive(int i, int j, int k)
@@ -101,36 +117,86 @@ void IndexMap::setInactive(int i, int j, int k)
     cellStatuses_(i, j, k) = INACTIVE;
 }
 
-void IndexMap::generateIndices()
+void IndexMap::generateLocalIndices()
 {
-    nActiveLocal_ = 0;
-    nActiveGlobal_ = 0;
+    nActiveLocalThisProc_ = 0;
 
     for(int i = 0; i < cellStatuses_.size(); ++i)
     {
         switch (cellStatuses_[i])
         {
         case ACTIVE: case GHOST:
-            localIndices_[i] = nActiveLocal_;
-            ++nActiveLocal_;
+            globalIndices_[i] = nActiveLocalThisProc_;
+            ++nActiveLocalThisProc_;
             break;
 
         case INACTIVE:
-            localIndices_[i] = -1;
+            globalIndices_[i] = -1;
             break;
         }
     }
+}
 
-    lowerGlobalIndex_ = 0;
-    Parallel::allGather(nActiveLocal_, gatheredNActiveLocal_);
+void IndexMap::generateGlobalIndices(const int adjProcNo[])
+{
+    int lowerGlobalIndex = 0, stag, rtag;
+    std::vector<MPI::Request> requests;
+
+    adjProcNo_ = adjProcNo;
+    nActiveGlobal_ = 0;
+    maxNLocal_ = 0;
+
+    nActiveLocal_.resize(Parallel::nProcesses());
+    nCellsILocal_.resize(Parallel::nProcesses());
+    nCellsJLocal_.resize(Parallel::nProcesses());
+    nCellsKLocal_.resize(Parallel::nProcesses());
+
+    Parallel::allGather(nActiveLocalThisProc_, nActiveLocal_);
+    Parallel::allGather(nCellsIThisProc_, nCellsILocal_);
+    Parallel::allGather(nCellsJThisProc_, nCellsJLocal_);
+    Parallel::allGather(nCellsKThisProc_, nCellsKLocal_);
 
     for(int i = 0; i < Parallel::nProcesses(); ++i)
     {
         if(i < Parallel::processNo())
-            lowerGlobalIndex_ += gatheredNActiveLocal_[i];
+            lowerGlobalIndex += nActiveLocal_[i];
 
-        nActiveGlobal_ += gatheredNActiveLocal_[i];
+        nActiveGlobal_ += nActiveLocal_[i];
+
+        if(maxNLocal_ < nActiveLocal_[i])
+            maxNLocal_ = nActiveLocal_[i];
     }
 
-    upperGlobalIndex_ = lowerGlobalIndex_ + nActiveLocal_ - 1;
+    globalIndices_.add(lowerGlobalIndex);
+
+    for(int i = 0; i < 6; ++i)
+    {
+        if(adjProcNo_[i] != -1)
+        {
+            adjGlobalIndices_[i].resize(nCellsILocal_[adjProcNo_[i]], nCellsJLocal_[adjProcNo_[i]], nCellsKLocal_[adjProcNo_[i]]);
+
+            stag = createTag(Parallel::processNo(), adjProcNo_[i], i);
+            rtag = createTag(adjProcNo_[i], Parallel::processNo(), i%2 == 0 ? i + 1 : i - 1);
+
+            requests.push_back(MPI::COMM_WORLD.Isend(globalIndices_.data(), globalIndices_.size(), MPI::INT, adjProcNo_[i], stag));
+            requests.push_back(MPI::COMM_WORLD.Irecv(adjGlobalIndices_[i].data(), adjGlobalIndices_[i].size(), MPI::INT, adjProcNo_[i], rtag));
+        }
+    }
+
+    MPI::Request::Waitall(requests.size(), requests.data());
+}
+
+//****************************** Private methods ***********************************
+int IndexMap::intCat(int a, int b)
+{
+    int pow = 10;
+    while(b >= pow)
+        pow *= 10;
+
+    return a*pow + b;
+}
+
+int IndexMap::createTag(int sendProcNo, int recvProcNo, int sendFaceNo)
+{
+    return intCat(intCat(1, sendProcNo), intCat(recvProcNo, sendFaceNo));
 }
