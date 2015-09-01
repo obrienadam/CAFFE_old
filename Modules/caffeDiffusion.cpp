@@ -5,7 +5,7 @@
 #include "Input.h"
 #include "RunControl.h"
 
-#include "HexaFvmMesh.h"
+#include "ParallelHexaFvmMesh.h"
 #include "Diffusion.h"
 
 int main(int argc, const char* argv[])
@@ -16,7 +16,7 @@ int main(int argc, const char* argv[])
 
     Input input;
     RunControl runControl;
-    HexaFvmMesh mesh;
+    ParallelHexaFvmMesh mesh;
 
     try
     {

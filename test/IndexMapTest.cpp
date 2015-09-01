@@ -10,7 +10,7 @@ BOOST_AUTO_TEST_CASE (test1)
     Parallel::initialize();
 
     ParallelHexaFvmMesh mesh;
-    mesh.name = "indexMapTest1Mesh";
+    mesh.changeName("indexMapTest1Mesh");
     mesh.initializeCartesianMesh(2, 1.5, 1.2, 36, 28, 52);
 
     BOOST_CHECK_EQUAL(mesh.iMap.nActiveGlobal(), 36*28*52);
@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE (test2)
 {
     ParallelHexaFvmMesh mesh;
     int testIndex;
-    mesh.name = "indexMapTest2Mesh";
+    mesh.changeName("indexMapTest2Mesh");
     mesh.initializeCartesianMesh(1, 1, 1, 40, 40, 40);
 
     testIndex = Parallel::broadcast(mesh.iMap(2, 0, 0, 0), 1);

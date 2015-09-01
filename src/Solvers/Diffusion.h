@@ -25,9 +25,9 @@
 #ifndef DIFFUSION_H
 #define DIFFUSION_H
 
+#include "PrimitiveBoundaryCondition.h"
 #include "Solver.h"
 #include "Field.h"
-#include "PrimitiveBoundaryCondition.h"
 
 class Diffusion : public Solver
 {

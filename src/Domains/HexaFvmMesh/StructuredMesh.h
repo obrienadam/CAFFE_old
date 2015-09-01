@@ -45,7 +45,8 @@ public:
     void resetFileStream();
     static void readTecplotMeshHeader(std::ifstream &fin, std::string &name, int& nI, int& nJ, int& nK);
 
-    std::string name;
+    virtual void changeName(const std::string &newName);
+    const std::string& name() const { return name_; }
 
 protected:
 
@@ -53,7 +54,9 @@ protected:
     Array3D<Point3D> nodes_;
 
     //- File output
+    const int OUTPUT_PRECISION;
     std::ofstream foutTec360_;
+    std::string name_;
 };
 
 #endif

@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include <array>
 
 #include "Input.h"
 #include "HexaFvmMesh.h"
@@ -18,18 +20,22 @@ public:
     virtual void initialize(const Array3D<Point3D> &nodes);
     virtual void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
 
+    virtual std::string meshStats();
+
     int nSubDomains() const { return Parallel::nProcesses(); }
 
-    const int* adjacentSubDomainProcNo() { return adjacentSubDomainProcNo_; }
+    std::shared_ptr< std::array<int, 6> > getAdjProcNoPtr() { return adjProcNoPtr_; }
 
     void writeTec360(double time, const std::string &directory);
+    void writeBoundaryMeshes(double time, const std::string &directory);
+
+    virtual void changeName(const std::string &newName);
 
 private:
 
     void initializeSubDomains(const StructuredMesh &tmpMesh);
 
-    std::vector<HexaFvmMesh> boundaryMeshes_;
-    int adjacentSubDomainProcNo_[6];
+    std::shared_ptr< std::array<int, 6> > adjProcNoPtr_;
 };
 
 #endif

@@ -12,7 +12,8 @@
 
 StructuredMesh::StructuredMesh()
     :
-      name("UnnamedMesh")
+      name_("UnnamedMesh"),
+      OUTPUT_PRECISION(16)
 {
 
 }
@@ -38,7 +39,7 @@ void StructuredMesh::initialize(const std::string &filename)
 
     fin.open(filename.c_str());
 
-    readTecplotMeshHeader(fin, name, nI, nJ, nK);
+    readTecplotMeshHeader(fin, name_, nI, nJ, nK);
 
     // Check to see if a dimension was not resized
     if(nI == 0 || nJ == 0 || nK == 0)
@@ -179,9 +180,10 @@ void StructuredMesh::writeTec360(double time, const std::string &directory)
 
     if(!foutTec360_.is_open())
     {
-        foutTec360_.open((directory + name + ".dat").c_str());
+        foutTec360_.open((directory + name_ + ".dat").c_str());
+        foutTec360_.precision(OUTPUT_PRECISION);
 
-        foutTec360_ << "TITLE=\"" << name << "\"" << endl
+        foutTec360_ << "TITLE=\"" << name_ << "\"" << endl
                     << "STRANDID=1" << endl
                     << "SOLUTIONTIME=" << time << endl
                     << "VARIABLES = " << "\"x\", \"y\", \"z\", " << endl
@@ -275,4 +277,9 @@ void StructuredMesh::readTecplotMeshHeader(std::ifstream &fin, std::string& name
 
     if(!(nISet && nJSet && nKSet))
         Output::raiseException("StructuredMesh", "readTecplotMeshHeader", "one or more mesh dimensions has not been set.");
+}
+
+void StructuredMesh::changeName(const std::string &newName)
+{
+    name_ = newName;
 }

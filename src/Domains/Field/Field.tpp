@@ -440,6 +440,8 @@ T& Field<T>::face(int i, int j, int k, int faceNo)
     default:
         Output::raiseException("Field", "face", "attempted to access a face that does not exist.");
     };
+
+    return facesI_(i, j, k); // gets rid of compiler warning
 }
 
 template<class T>

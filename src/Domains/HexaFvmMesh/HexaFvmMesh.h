@@ -28,6 +28,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "StructuredMesh.h"
 #include "Array3D.h"
@@ -51,7 +52,7 @@ public:
     virtual void initialize(const std::vector<Point3D> &vertices, int nCellsI, int nCellsJ, int nCellsK);
     virtual void initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK);
 
-    void addBoundaryMesh(const HexaFvmMesh &mesh, Direction relativeLocation);
+    void addBoundaryMesh(std::shared_ptr<HexaFvmMesh> meshPtr, Direction relativeLocation);
     bool eastMeshExists() const;
     bool westMeshExists() const;
     bool northMeshExists() const;
@@ -174,7 +175,7 @@ public:
 
     mutable IndexMap iMap;
 
-private:
+protected:
 
     //- Private helper methods
     void initializeCellsAndFaces();
@@ -183,6 +184,8 @@ private:
     void initializeFaces();
     void initializeCellToFaceParameters();
     void computeMeshMetrics();
+
+    std::shared_ptr<HexaFvmMesh> boundaryMeshPointer(Direction direction);
 
     //- Geometric data pertaining only to the interior fvm mesh
     Array3D<Point3D> cellCenters_;
@@ -213,12 +216,12 @@ private:
     //- Volume based interpolation factors
     Array3D<double> gE_, gW_, gN_, gS_, gT_, gB_;
 
-    const HexaFvmMesh *eastBoundaryMeshPtr_;
-    const HexaFvmMesh *westBoundaryMeshPtr_;
-    const HexaFvmMesh *northBoundaryMeshPtr_;
-    const HexaFvmMesh *southBoundaryMeshPtr_;
-    const HexaFvmMesh *topBoundaryMeshPtr_;
-    const HexaFvmMesh *bottomBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> eastBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> westBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> northBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> southBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> topBoundaryMeshPtr_;
+    std::shared_ptr<HexaFvmMesh> bottomBoundaryMeshPtr_;
 
     mutable std::vector< std::pair< std::string, const Array3D<double> *> > scalarVariablePtrs_;
     mutable std::vector< std::pair< std::string, const Array3D<Vector3D> *> > vectorVariablePtrs_;

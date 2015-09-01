@@ -27,8 +27,6 @@
 #include "Parallel.h"
 
 IndexMap::IndexMap()
-    :
-      adjProcNo_(NULL)
 {
 
 }
@@ -51,23 +49,30 @@ int IndexMap::operator ()(int i, int j, int k, int varSetNo)
     if(i >= 0 && i < nCellsIThisProc_
             && j >= 0 && j < nCellsJThisProc_
             && k >= 0 && k < nCellsKThisProc_)
-    {
         return globalIndices_(i, j, k) + varSetNo*nActiveGlobal_;
+
+    if(adjProcNoPtr_)
+    {
+        const std::array<int, 6> &adjProcNo = *adjProcNoPtr_;
+
+        if(i >= nCellsIThisProc_ && adjProcNo[HexaFvmMesh::EAST] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[0]](i - nCellsIThisProc_, j, k) + varSetNo*nActiveGlobal_;
+
+        else if(i < 0 && adjProcNo[HexaFvmMesh::WEST] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[1]](adjGlobalIndices_[1].sizeI() + i, j, k) + varSetNo*nActiveGlobal_;
+
+        else if(j >= nCellsJThisProc_ && adjProcNo[HexaFvmMesh::NORTH] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[2]](i, j - nCellsJThisProc_, k) + varSetNo*nActiveGlobal_;
+
+        else if(j < 0 && adjProcNo[HexaFvmMesh::SOUTH] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[3]](i, adjGlobalIndices_[3].sizeJ() + j, k) + varSetNo*nActiveGlobal_;
+
+        else if(k >= nCellsKThisProc_ && adjProcNo[HexaFvmMesh::TOP] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[4]](i, j, k - nCellsKThisProc_) + varSetNo*nActiveGlobal_;
+
+        else if(k < 0 && adjProcNo[HexaFvmMesh::BOTTOM] != Parallel::PROC_NULL)
+            return adjGlobalIndices_[adjProcNo[5]](i, j, adjGlobalIndices_[5].sizeK() + k) + varSetNo*nActiveGlobal_;
     }
-    else if(i >= nCellsIThisProc_)
-        return adjGlobalIndices_[0](i - nCellsIThisProc_, j, k) + varSetNo*nActiveGlobal_;
-    else if(i < 0)
-        return adjGlobalIndices_[1](adjGlobalIndices_[1].sizeI() + i, j, k) + varSetNo*nActiveGlobal_;
-    else if(j >= nCellsJThisProc_)
-        return adjGlobalIndices_[2](i, j - nCellsJThisProc_, k) + varSetNo*nActiveGlobal_;
-    else if(j < 0)
-        return adjGlobalIndices_[3](i, adjGlobalIndices_[3].sizeJ() + j, k) + varSetNo*nActiveGlobal_;
-    else if(k >= nCellsKThisProc_)
-        return adjGlobalIndices_[4](i, j, k - nCellsKThisProc_) + varSetNo*nActiveGlobal_;
-    else if(k < 0)
-        return adjGlobalIndices_[5](i, j, adjGlobalIndices_[5].sizeK() + k) + varSetNo*nActiveGlobal_;
-    else
-        Output::raiseException("IndexMap", "operator()", "attempted to access an invalid index.");
 
     return -1;
 }
@@ -135,14 +140,15 @@ void IndexMap::generateLocalIndices()
             break;
         }
     }
+
+    nActiveGlobal_ = nActiveLocalThisProc_;
 }
 
-void IndexMap::generateGlobalIndices(const int adjProcNo[])
+void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjProcNoPtr)
 {
     int lowerGlobalIndex = 0, stag, rtag;
-    std::vector<MPI::Request> requests;
 
-    adjProcNo_ = adjProcNo;
+    adjProcNoPtr_ = adjProcNoPtr;
     nActiveGlobal_ = 0;
     maxNLocal_ = 0;
 
@@ -169,21 +175,20 @@ void IndexMap::generateGlobalIndices(const int adjProcNo[])
 
     globalIndices_.add(lowerGlobalIndex);
 
-    for(int i = 0; i < 6; ++i)
+    for(int adjProcNo : *adjProcNoPtr_)
     {
-        if(adjProcNo_[i] != -1)
-        {
-            adjGlobalIndices_[i].resize(nCellsILocal_[adjProcNo_[i]], nCellsJLocal_[adjProcNo_[i]], nCellsKLocal_[adjProcNo_[i]]);
+        if(adjProcNo == Parallel::PROC_NULL)
+            continue;
 
-            stag = createTag(Parallel::processNo(), adjProcNo_[i], i);
-            rtag = createTag(adjProcNo_[i], Parallel::processNo(), i%2 == 0 ? i + 1 : i - 1);
+        adjGlobalIndices_[adjProcNo] = Array3D<int>(nCellsILocal_[adjProcNo], nCellsJLocal_[adjProcNo], nCellsKLocal_[adjProcNo]);
+        stag = createTag(Parallel::processNo(), adjProcNo, 0);
+        rtag = createTag(adjProcNo, Parallel::processNo(), 0);
 
-            requests.push_back(MPI::COMM_WORLD.Isend(globalIndices_.data(), globalIndices_.size(), MPI::INT, adjProcNo_[i], stag));
-            requests.push_back(MPI::COMM_WORLD.Irecv(adjGlobalIndices_[i].data(), adjGlobalIndices_[i].size(), MPI::INT, adjProcNo_[i], rtag));
-        }
+        Parallel::iSend(Parallel::processNo(), adjProcNo, stag, globalIndices_);
+        Parallel::iRecv(adjProcNo, Parallel::processNo(), rtag, adjGlobalIndices_[adjProcNo]);
     }
 
-    MPI::Request::Waitall(requests.size(), requests.data());
+    Parallel::waitAll();
 }
 
 //****************************** Private methods ***********************************

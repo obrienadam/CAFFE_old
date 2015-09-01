@@ -7,8 +7,7 @@ void Parallel::initialize()
     MPI::Init();
     procNo_ = MPI::COMM_WORLD.Get_rank();
     nProcesses_ = MPI::COMM_WORLD.Get_size();
-    commBuffer_.resize(100000);
-    requests_.reserve(10000);
+    requests_.reserve(100);
     isInitialized_ = true;
 }
 
@@ -17,7 +16,6 @@ void Parallel::finalize()
     MPI::Finalize();
     procNo_ = 0;
     nProcesses_ = 1;
-    commBuffer_.erase(commBuffer_.begin(), commBuffer_.end());
     requests_.erase(requests_.begin(), requests_.end());
     isInitialized_ = false;
 }
@@ -96,14 +94,25 @@ void Parallel::broadcast(int source, std::vector<Vector3D> &vecs)
 {
     if(isInitialized_)
     {
-        if(processNo() == source)
-            loadBuffer(vecs);
-
-        MPI::COMM_WORLD.Bcast(commBuffer_.data(), 3*vecs.size(), MPI::DOUBLE, source);
-
-        if(processNo() != source)
-            unloadBuffer(vecs);
+        MPI::COMM_WORLD.Bcast(vec3Dbuffers_.initCollectiveBuffer(vecs), 3*vecs.size(), MPI::DOUBLE, source);
+        vec3Dbuffers_.freeLastRecvBuffer();
     }
+}
+
+int Parallel::sum(int number)
+{
+    int sum;
+
+    MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::INT, MPI::SUM);
+    return number;
+}
+
+double Parallel::sum(double number)
+{
+    double sum;
+
+    MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::DOUBLE, MPI::SUM);
+    return number;
 }
 
 void Parallel::send(int source, int dest, std::vector<double> &doubles)
@@ -123,13 +132,13 @@ void Parallel::send(int source, int dest, std::vector<Vector3D> &vecs)
     {
         if(processNo() == source)
         {
-            loadBuffer(vecs);
-            MPI::COMM_WORLD.Send(commBuffer_.data(), 3*vecs.size(), MPI::DOUBLE, dest, source);
+            MPI::COMM_WORLD.Send(vec3Dbuffers_.initSendBuffer(vecs), 3*vecs.size(), MPI::DOUBLE, dest, source);
+            vec3Dbuffers_.freeLastSendBuffer();
         }
         if(processNo() == dest)
         {
-            MPI::COMM_WORLD.Recv(commBuffer_.data(), 3*vecs.size(), MPI::DOUBLE, source, source);
-            unloadBuffer(vecs);
+            MPI::COMM_WORLD.Recv(vec3Dbuffers_.initRecvBuffer(vecs), 3*vecs.size(), MPI::DOUBLE, source, source);
+            vec3Dbuffers_.freeLastRecvBuffer();
         }
     }
 }
@@ -152,6 +161,54 @@ void Parallel::send(int source, int dest, const Array3D<int> &sourceArray3D, Arr
             MPI::COMM_WORLD.Recv(destArray3D.data(), destArray3D.size(), MPI::INT, source, source);
         }
     }
+}
+
+void Parallel::iSend(int source, int dest, int tag, const std::vector<int> &ints)
+{
+    if(isInitialized_)
+    {
+        if(processNo() == source)
+            requests_.push_back(MPI::COMM_WORLD.Isend(ints.data(), ints.size(), MPI::INT, dest, tag));
+    }
+}
+
+void Parallel::iRecv(int source, int dest, int tag, std::vector<int> &ints)
+{
+    if(isInitialized_)
+    {
+        if(processNo() == dest)
+            requests_.push_back(MPI::COMM_WORLD.Irecv(ints.data(), ints.size(), MPI::INT, source, tag));
+    }
+}
+
+void Parallel::iSend(int source, int dest, int tag, const std::vector<double> &doubles)
+{
+    if(isInitialized_)
+    {
+        if(processNo() == source)
+            requests_.push_back(MPI::COMM_WORLD.Isend(doubles.data(), doubles.size(), MPI::DOUBLE, dest, tag));
+    }
+}
+
+void Parallel::iRecv(int source, int dest, int tag, std::vector<double> &doubles)
+{
+    if(isInitialized_)
+    {
+        if(processNo() == dest)
+            requests_.push_back(MPI::COMM_WORLD.Irecv(doubles.data(), doubles.size(), MPI::DOUBLE, source, tag));
+    }
+}
+
+void Parallel::iSend(int source, int dest, int tag, const std::vector<Vector3D> &vecs)
+{
+    if(isInitialized_ && processNo() == source)
+        requests_.push_back(MPI::COMM_WORLD.Isend(vec3Dbuffers_.initSendBuffer(vecs), 3*vecs.size(), MPI::DOUBLE, dest, tag));
+}
+
+void Parallel::iRecv(int source, int dest, int tag, std::vector<Vector3D> &vecs)
+{
+    if(isInitialized_ && processNo() == dest)
+        requests_.push_back(MPI::COMM_WORLD.Irecv(vec3Dbuffers_.initRecvBuffer(vecs), 3*vecs.size(), MPI::DOUBLE, source, tag));
 }
 
 void Parallel::allGather(int number, std::vector<int> &vector)
@@ -182,40 +239,14 @@ void Parallel::waitAll()
     {
         MPI::Request::Waitall(requests_.size(), requests_.data());
         requests_.clear();
-    }
-}
-
-//*************************** Private Methods ************************************
-
-void Parallel::loadBuffer(const std::vector<Vector3D> &vecs)
-{
-    if(commBuffer_.size() < 3*vecs.size())
-        commBuffer_.resize(3*vecs.size());
-
-    for(int i = 0, k = 0; i < vecs.size(); ++i, k += 3)
-    {
-        commBuffer_[k] = vecs[i].x;
-        commBuffer_[k + 1] = vecs[i].y;
-        commBuffer_[k + 2] = vecs[i].z;
-    }
-}
-
-void Parallel::unloadBuffer(std::vector<Vector3D> &vecs)
-{
-    if(commBuffer_.size() < 3*vecs.size())
-        commBuffer_.resize(3*vecs.size());
-
-    for(int i = 0, k = 0; i < vecs.size(); ++i, k += 3)
-    {
-        vecs[i].x = commBuffer_[k];
-        vecs[i].y = commBuffer_[k + 1];
-        vecs[i].z = commBuffer_[k + 2];
+        vec3Dbuffers_.freeBuffers();
     }
 }
 
 //***************************** Private Static Variables *******************************
 
-std::vector<double> Parallel::commBuffer_;
+const int Parallel::PROC_NULL = MPI::PROC_NULL;
+Vector3DBuffer Parallel::vec3Dbuffers_(8, 100);
 std::vector<MPI::Request> Parallel::requests_;
 int Parallel::procNo_ = 0, Parallel::nProcesses_ = 1;
 bool Parallel::isInitialized_ = false;

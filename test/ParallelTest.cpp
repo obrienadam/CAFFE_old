@@ -30,6 +30,23 @@ BOOST_AUTO_TEST_CASE (test2)
     BOOST_CHECK_EQUAL(vec.x, 1);
     BOOST_CHECK_EQUAL(vec.y, 2);
     BOOST_CHECK_EQUAL(vec.z, 3);
+
+    Array3D<Vector3D> vecs(20, 20, 20);
+
+    if(Parallel::isMainProcessor())
+    {
+        for(Vector3D &vec : vecs)
+            vec = Vector3D(1, 2, 3);
+    }
+
+    Parallel::broadcast(Parallel::mainProcNo(), vecs);
+
+    for(Vector3D &vec : vecs)
+    {
+        BOOST_CHECK_EQUAL(vec.x, 1);
+        BOOST_CHECK_EQUAL(vec.y, 2);
+        BOOST_CHECK_EQUAL(vec.z, 3);
+    }
 }
 
 BOOST_AUTO_TEST_CASE (test3)
@@ -168,6 +185,42 @@ BOOST_AUTO_TEST_CASE (test7)
     }
 
     MPI::Request::Waitall(requests.size(), requests.data());
+}
+
+BOOST_AUTO_TEST_CASE (test8)
+{
+    Array3D<Vector3D> sourceArray(20, 20, 20), destArray(20, 20, 20);
+
+    for(Vector3D &vec3D : sourceArray)
+        vec3D = Vector3D(Parallel::processNo(), 2*Parallel::processNo(), 3*Parallel::processNo());
+
+    for(int i = 0; i < 3; ++i)
+    {
+        Output::print("Sending messages...");
+        Parallel::iSend(0, 1, 0, sourceArray);
+        Parallel::iSend(1, 2, 0, sourceArray);
+        Parallel::iSend(1, 3, 0, sourceArray);
+        Parallel::iSend(1, 0, 1, sourceArray);
+
+        Output::print("Receiving messages...");
+        Parallel::iRecv(0, 1, 0, destArray);
+        Parallel::iRecv(1, 0, 1, destArray);
+        Parallel::iRecv(1, 2, 0, destArray);
+        Parallel::iRecv(1, 3, 0, destArray);
+
+        Parallel::waitAll();
+    }
+    Output::print("Finished communication.");
+
+    if(Parallel::processNo() == 0 || Parallel::processNo() == 2 || Parallel::processNo() == 3)
+    {
+        for(const Vector3D &vec : destArray)
+        {
+            BOOST_CHECK_EQUAL(vec.x, 1.);
+            BOOST_CHECK_EQUAL(vec.y, 2.);
+            BOOST_CHECK_EQUAL(vec.z, 3.);
+        }
+    }
 }
 
 BOOST_AUTO_TEST_CASE (end)

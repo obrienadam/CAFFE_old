@@ -1,9 +1,9 @@
 #ifndef COUPLED_H
 #define COUPLED_H
 
+#include "FlowBoundaryConditions.h"
 #include "Solver.h"
 #include "Field.h"
-#include "FlowBoundaryConditions.h"
 
 class Coupled : public Solver
 {

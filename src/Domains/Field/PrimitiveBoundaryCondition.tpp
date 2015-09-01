@@ -36,7 +36,8 @@ PrimitiveBoundaryCondition<T>::PrimitiveBoundaryCondition(Field<T> &field)
       internalField_(field),
       mesh_(internalField_.getMesh())
 {
-
+    for(int i = 0; i < 6; ++i)
+        types_[i] = FIXED;
 }
 
 template<class T>
@@ -51,6 +52,11 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundaryEast();
         break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundaryEast();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[0], 0, internalField_.eastBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[0], Parallel::processNo(), 1, internalField_.eastBoundaryPatch);
+        break;
     }
 
     //- West boundary
@@ -61,6 +67,11 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
 
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundaryWest();
+        break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundaryWest();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[1], 1, internalField_.westBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[1], Parallel::processNo(), 0, internalField_.westBoundaryPatch);
         break;
     }
 
@@ -73,6 +84,11 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundaryNorth();
         break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundaryNorth();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[2], 2, internalField_.northBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[2], Parallel::processNo(), 3, internalField_.northBoundaryPatch);
+        break;
     }
 
     //- South boundary
@@ -83,6 +99,11 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
 
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundarySouth();
+        break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundarySouth();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[3], 3, internalField_.southBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[3], Parallel::processNo(), 2, internalField_.southBoundaryPatch);
         break;
     }
 
@@ -95,6 +116,11 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundaryTop();
         break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundaryTop();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[4], 4, internalField_.topBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[4], Parallel::processNo(), 5, internalField_.topBoundaryPatch);
+        break;
     }
 
     //- Bottom boundary
@@ -106,7 +132,14 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
     case ZERO_GRADIENT: case EMPTY:
         internalField_.setZeroGradientBoundaryBottom();
         break;
+    case PARALLEL:
+        internalField_.setZeroGradientBoundaryBottom();
+        Parallel::iSend(Parallel::processNo(), (*adjProcNoPtr_)[5], 5, internalField_.bottomBoundaryPatch);
+        Parallel::iRecv((*adjProcNoPtr_)[5], Parallel::processNo(), 4, internalField_.bottomBoundaryPatch);
+        break;
     }
+
+    Parallel::waitAll();
 }
 
 template<class T>
@@ -222,13 +255,25 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
 }
 
 template<class T>
-void PrimitiveBoundaryCondition<T>::changeType(int i, Type newType, T refValue)
+void PrimitiveBoundaryCondition<T>::changeType(int i, Type newType, const T &refValue)
 {
     types_[i] = newType;
     refValues_[i] = refValue;
 
     if(newType == FIXED)
         setFixedBoundaries(); // This is a bit wasteful
+}
+
+template <class T>
+void PrimitiveBoundaryCondition<T>::setParallelBoundaries(std::shared_ptr<std::array<int, 6> > adjProcNoPtr)
+{
+    adjProcNoPtr_ = adjProcNoPtr;
+
+    for(int i = 0; i < 6; ++i)
+    {
+        if((*adjProcNoPtr_)[i] != Parallel::PROC_NULL)
+            changeType(i, PARALLEL, T());
+    }
 }
 
 //************************ Protected methods ***********************************

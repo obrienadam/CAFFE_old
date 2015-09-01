@@ -6,6 +6,7 @@
 
 #include "Vector3D.h"
 #include "Array3D.h"
+#include "Vector3DBuffer.h"
 
 class Parallel
 {
@@ -27,12 +28,25 @@ public:
     static void broadcast(int source, std::vector<double> &doubles);
     static void broadcast(int source, std::vector<Vector3D> &vecs);
 
+    static int sum(int number);
+    static double sum(double number);
+
     //- These methods assume the data structures are already apropriately sized
     static void send(int source, int dest, std::vector<double> &doubles);
     static void send(int source, int dest, std::vector<Vector3D> &vecs);
 
     //- These methods will also resize the receiving data structure if necessary. Involves an extra communication
     static void send(int source, int dest, const Array3D<int> &sourceArray3D, Array3D<int> &destArray3D);
+
+    //- Non-blocking comms. Must remember to call waitAll to ensure comms are in sync
+    static void iSend(int source, int dest, int tag, const std::vector<int> &ints);
+    static void iRecv(int source, int dest, int tag, std::vector<int> &ints);
+
+    static void iSend(int source, int dest, int tag, const std::vector<double> &doubles);
+    static void iRecv(int source, int dest, int tag, std::vector<double> &doubles);
+
+    static void iSend(int source, int dest, int tag, const std::vector<Vector3D> &vecs);
+    static void iRecv(int source, int dest, int tag, std::vector<Vector3D> &vecs);
 
     static void allGather(int number, std::vector<int> &vector);
     static void allGather(double number, std::vector<double> &vector);
@@ -42,14 +56,13 @@ public:
     //- Important method that must be called at the end of a cycle of non-blocking communication
     static void waitAll();
 
+    static const int PROC_NULL;
+
 private:
 
-    static void loadBuffer(const std::vector<Vector3D> &vecs);
-    static void unloadBuffer(std::vector<Vector3D> &vecs);
+    static Vector3DBuffer vec3Dbuffers_;
 
-    static std::vector<double> commBuffer_;
     static std::vector< MPI::Request > requests_;
-
     static int nProcesses_, procNo_;
     static bool isInitialized_;
 };

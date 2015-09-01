@@ -27,6 +27,9 @@
 #define INDEX_MAP_H
 
 #include <vector>
+#include <memory>
+#include <array>
+#include <unordered_map>
 
 #include "Array3D.h"
 
@@ -54,7 +57,7 @@ public:
     void setInactive(int i, int j, int k);
 
     void generateLocalIndices();
-    void generateGlobalIndices(const int adjProcNo[]);
+    void generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjProcNoPtr);
 
 private:
 
@@ -68,8 +71,8 @@ private:
     Array3D<CellStatus> cellStatuses_;
     Array3D<int> globalIndices_;
 
-    const int* adjProcNo_;
-    Array3D<int> adjGlobalIndices_[6];
+    std::shared_ptr< std::array<int, 6> > adjProcNoPtr_;
+    std::unordered_map<int, Array3D<int> > adjGlobalIndices_;
 };
 
 #endif

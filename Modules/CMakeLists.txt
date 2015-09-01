@@ -41,14 +41,6 @@ target_link_libraries(caffeIbPiso RunControl
                                   HexaFvmMesh
                                   Schemes)
 
-# Build the multiphase simple solver
-add_executable(caffeMultiphaseSimple caffeMultiphaseSimple.cpp)
-target_link_libraries(caffeMultiphaseSimple RunControl
-                                            Math
-                                            Solvers
-                                            HexaFvmMesh
-                                            Schemes)
-
 # Build the coupled solver
 add_executable(caffeCoupled caffeCoupled.cpp)
 target_link_libraries(caffeCoupled RunControl

@@ -87,7 +87,7 @@ void MultiBlockHexaMeshGen::writeMeshFiles(const std::string &directory)
                     }
                 }
 
-                subMesh.name = "structuredMesh_block" + std::to_string(subMeshNo);
+                subMesh.changeName("structured_block" + std::to_string(subMeshNo));
                 subMesh.initialize(localNodes);
                 subMesh.writeTec360(0, directory + "multiBlockStructuredMesh");
                 subMesh.resetFileStream();

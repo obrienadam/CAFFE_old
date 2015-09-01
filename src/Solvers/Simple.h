@@ -26,9 +26,9 @@
 #ifndef SIMPLE_H
 #define SIMPLE_H
 
+#include "SimpleBoundaryCondition.h"
 #include "Solver.h"
 #include "Field.h"
-#include "SimpleBoundaryCondition.h"
 
 class Simple : public Solver
 {

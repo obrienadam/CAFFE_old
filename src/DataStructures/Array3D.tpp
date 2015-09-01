@@ -32,9 +32,9 @@ void Array3D<T>::assign(const T &val)
 
 template<class T>
 void Array3D<T>::add(const T &val)
-{
-    for(auto it = std::vector<T>::begin(); it != std::vector<T>::end(); ++it)
-        *it += val;
+{  
+    for(T &element : *this)
+        element += val;
 }
 
 template <class T>
