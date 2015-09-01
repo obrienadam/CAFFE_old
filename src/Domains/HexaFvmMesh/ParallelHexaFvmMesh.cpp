@@ -35,7 +35,7 @@ void ParallelHexaFvmMesh::initializeCartesianMesh(double xLength, double yLength
     StructuredMesh tmpMesh;
 
     if(Parallel::isMainProcessor())
-        tmpMesh.initializeCartesianMesh(xLength, yLength, zLength, nCellsI, nCellsJ, nCellsK);
+        tmpMesh.initializeCartesianMesh(xLength, yLength, zLength, nCellsI + 1, nCellsJ + 1, nCellsK + 1);
 
     initializeSubDomains(tmpMesh);
 }
@@ -46,7 +46,8 @@ std::string ParallelHexaFvmMesh::meshStats()
 
     ostringstream sout;
 
-    sout << "Nodes per proc in I direction -> " << nNodesI() << endl
+    sout << "Total procs -> " << Parallel::nProcesses() << endl
+         << "Nodes per proc in I direction -> " << nNodesI() << endl
          << "Nodes per proc in J direction -> " << nNodesJ() << endl
          << "Nodes per proc in K direction -> " << nNodesK() << endl
          << "Nodes per proc total -> " << nNodes() << endl
@@ -103,8 +104,6 @@ void ParallelHexaFvmMesh::initializeSubDomains(const StructuredMesh &tmpMesh)
     int nSubDomainsI, nSubDomainsJ, nSubDomainsK, subDomainNo;
     vector<Point3D> vertices(8);
     Array3D<Point3D> boundaryNodesSend[6], boundaryNodesRecv[6];
-    vector< vector<double> > sendBuffers(1000, vector<double>(1000)),
-            recvBuffers(1000, vector<double>(1000));
 
     //- Determine domain decomposition
     Output::issueWarning("ParallelHexaFvmMesh", "initializeSubDomains", "number of sub-domains currently fixed. May not be suitable for all computations.");
@@ -112,10 +111,13 @@ void ParallelHexaFvmMesh::initializeSubDomains(const StructuredMesh &tmpMesh)
     nSubDomainsJ = 2;
     nSubDomainsK = 2;
 
+    if(Parallel::nProcesses() != nSubDomainsI*nSubDomainsJ*nSubDomainsK)
+        Output::raiseException("ParallelHexaFvmMesh", "initializeSubDomains", "number of processes different than number of sub domains.");
+
     //- Broadcast the global number of cells from the root process
-    nCellsIGlobal = Parallel::broadcast(tmpMesh.nNodesI() + 1, Parallel::mainProcNo());
-    nCellsJGlobal = Parallel::broadcast(tmpMesh.nNodesJ() + 1, Parallel::mainProcNo());
-    nCellsKGlobal = Parallel::broadcast(tmpMesh.nNodesK() + 1, Parallel::mainProcNo());
+    nCellsIGlobal = Parallel::broadcast(tmpMesh.nNodesI() - 1, Parallel::mainProcNo());
+    nCellsJGlobal = Parallel::broadcast(tmpMesh.nNodesJ() - 1, Parallel::mainProcNo());
+    nCellsKGlobal = Parallel::broadcast(tmpMesh.nNodesK() - 1, Parallel::mainProcNo());
 
     //- Create a vector to store the local number of cells on each process, so every process has access to this info
     nCellsILocal.resize(Parallel::nProcesses());

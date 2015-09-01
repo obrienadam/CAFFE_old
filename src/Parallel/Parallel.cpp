@@ -104,7 +104,7 @@ int Parallel::sum(int number)
     int sum;
 
     MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::INT, MPI::SUM);
-    return number;
+    return sum;
 }
 
 double Parallel::sum(double number)
@@ -112,7 +112,39 @@ double Parallel::sum(double number)
     double sum;
 
     MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::DOUBLE, MPI::SUM);
-    return number;
+    return sum;
+}
+
+int Parallel::min(int number)
+{
+    int min;
+
+    MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::INT, MPI::MIN);
+    return min;
+}
+
+double Parallel::min(double number)
+{
+    double min;
+
+    MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::DOUBLE, MPI::MIN);
+    return min;
+}
+
+int Parallel::max(int number)
+{
+    int max;
+
+    MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::INT, MPI::MAX);
+    return max;
+}
+
+double Parallel::max(double number)
+{
+    double max;
+
+    MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::DOUBLE, MPI::MAX);
+    return max;
 }
 
 void Parallel::send(int source, int dest, std::vector<double> &doubles)

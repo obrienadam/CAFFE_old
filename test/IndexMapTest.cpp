@@ -24,25 +24,25 @@ BOOST_AUTO_TEST_CASE (test2)
     mesh.changeName("indexMapTest2Mesh");
     mesh.initializeCartesianMesh(1, 1, 1, 40, 40, 40);
 
-    testIndex = Parallel::broadcast(mesh.iMap(2, 0, 0, 0), 1);
+    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 1);
 
     if(Parallel::isMainProcessor())
     {
-        BOOST_CHECK_EQUAL(mesh.iMap(22, 0, 0, 0), testIndex);
+        BOOST_CHECK_EQUAL(mesh.iMap(mesh.uCellI() + 1, 0, 0, 0), testIndex);
     }
 
-    testIndex = Parallel::broadcast(mesh.iMap(0, 3, 0, 0), 2);
+    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 2);
 
     if(Parallel::isMainProcessor())
     {
-        BOOST_CHECK_EQUAL(mesh.iMap(0, 23, 0, 0), testIndex);
+        BOOST_CHECK_EQUAL(mesh.iMap(0, mesh.uCellJ() + 1, 0, 0), testIndex);
     }
 
-    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 1, 0), 4);
+    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 4);
 
     if(Parallel::isMainProcessor())
     {
-        BOOST_CHECK_EQUAL(mesh.iMap(0, 0, 21, 0), testIndex);
+        BOOST_CHECK_EQUAL(mesh.iMap(0, 0, mesh.uCellK() + 1, 0), testIndex);
     }
 }
 

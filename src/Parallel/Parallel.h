@@ -31,6 +31,12 @@ public:
     static int sum(int number);
     static double sum(double number);
 
+    static int min(int number);
+    static double min(double number);
+
+    static int max(int number);
+    static double max(double number);
+
     //- These methods assume the data structures are already apropriately sized
     static void send(int source, int dest, std::vector<double> &doubles);
     static void send(int source, int dest, std::vector<Vector3D> &vecs);

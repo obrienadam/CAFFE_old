@@ -29,7 +29,6 @@
 #include <vector>
 #include <memory>
 #include <array>
-#include <unordered_map>
 
 #include "Array3D.h"
 
@@ -61,9 +60,6 @@ public:
 
 private:
 
-    static int intCat(int a, int b);
-    static int createTag(int sendProcNo, int recvProcNo, int sendFaceNo);
-
     int nActiveGlobal_, maxNLocal_;
 
     int nActiveLocalThisProc_, nCellsIThisProc_, nCellsJThisProc_, nCellsKThisProc_;
@@ -72,7 +68,7 @@ private:
     Array3D<int> globalIndices_;
 
     std::shared_ptr< std::array<int, 6> > adjProcNoPtr_;
-    std::unordered_map<int, Array3D<int> > adjGlobalIndices_;
+    Array3D<int> adjGlobalIndices_[6];
 };
 
 #endif
