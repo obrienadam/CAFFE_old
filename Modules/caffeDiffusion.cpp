@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 
 #include "Parallel.h"
 #include "Output.h"
@@ -16,15 +17,20 @@ int main(int argc, const char* argv[])
 
     Input input;
     RunControl runControl;
-    ParallelHexaFvmMesh mesh;
+    unique_ptr<HexaFvmMesh> meshPtr;
+
+    if(Parallel::nProcesses() == 1)
+        meshPtr = unique_ptr<HexaFvmMesh>(new HexaFvmMesh);
+    else
+        meshPtr = unique_ptr<HexaFvmMesh>(new ParallelHexaFvmMesh);
 
     try
     {
         runControl.initialize(input);
-        mesh.initialize("mesh/structuredMesh.dat");
-        Output::print(mesh.meshStats());
+        meshPtr->initialize("mesh/structuredMesh.dat");
+        Output::print(meshPtr->meshStats());
 
-        Diffusion diffusion(input, mesh);
+        Diffusion diffusion(input, *meshPtr);
 
         runControl.displayStartMessage();
         while(runControl.continueRun())
@@ -34,11 +40,11 @@ int main(int argc, const char* argv[])
             runControl.displayUpdateMessage();
 
             if(runControl.writeToFile())
-                mesh.writeTec360(runControl.simTime(), "solution/");
+                meshPtr->writeTec360(runControl.simTime(), "solution/");
         }
         runControl.displayEndMessage();
 
-        mesh.writeTec360(runControl.simTime(), "solution/");
+        meshPtr->writeTec360(runControl.simTime(), "solution/");
     }
     catch(const char* errorMessage)
     {

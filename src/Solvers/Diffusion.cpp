@@ -46,6 +46,7 @@ Diffusion::Diffusion(const Input &input, const HexaFvmMesh &mesh)
     Solver::createMatrices(1, 1, 7);
     mesh_.addArray3DToTecplotOutput(phiField_.name, phiField_.cellData());
     mesh_.addArray3DToTecplotOutput(gradPhiField_.name, gradPhiField_.cellData());
+    bcs_.setParallelBoundaries(mesh.getAdjProcNoPtr());
 
     initialConditions.setInitialConditions(phiField_);
 }
@@ -103,9 +104,9 @@ double Diffusion::solve(double timeStep)
     time_.toc();
     Output::print("\nDiffusion", "matrix assembly completed in " + time_.elapsedTime());
 
+    time_.tic();
     biCGStabIters_ = A_[0].solve(b_[0], x_[0]);
 
-    time_.tic();
     for(k = 0; k < mesh_.nCellsK(); ++k)
     {
         for(j = 0; j < mesh_.nCellsJ(); ++j)

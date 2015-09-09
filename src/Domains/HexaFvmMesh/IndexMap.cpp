@@ -89,7 +89,7 @@ int IndexMap::nActiveLocal() const
 
 int IndexMap::nActive() const
 {
-    return nActiveLocal();
+    return nActiveGlobal_;
 }
 
 bool IndexMap::isActive(int i, int j, int k)
@@ -146,6 +146,9 @@ void IndexMap::generateLocalIndices()
 
 void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjProcNoPtr)
 {
+    if(!adjProcNoPtr)
+        return;
+
     int lowerGlobalIndex = 0;
 
     adjProcNoPtr_ = adjProcNoPtr;

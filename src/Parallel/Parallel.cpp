@@ -1,5 +1,7 @@
 #include "Parallel.h"
 
+const int Parallel::PROC_NULL = MPI::PROC_NULL;
+
 /********************** Public methods ***********************/
 
 void Parallel::initialize()
@@ -101,49 +103,61 @@ void Parallel::broadcast(int source, std::vector<Vector3D> &vecs)
 
 int Parallel::sum(int number)
 {
-    int sum;
+    int sum = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::INT, MPI::SUM);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::INT, MPI::SUM);
+
     return sum;
 }
 
 double Parallel::sum(double number)
 {
-    double sum;
+    double sum = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::DOUBLE, MPI::SUM);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &sum, 1, MPI::DOUBLE, MPI::SUM);
+
     return sum;
 }
 
 int Parallel::min(int number)
 {
-    int min;
+    int min = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::INT, MPI::MIN);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::INT, MPI::MIN);
+
     return min;
 }
 
 double Parallel::min(double number)
 {
-    double min;
+    double min = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::DOUBLE, MPI::MIN);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &min, 1, MPI::DOUBLE, MPI::MIN);
+
     return min;
 }
 
 int Parallel::max(int number)
 {
-    int max;
+    int max = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::INT, MPI::MAX);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::INT, MPI::MAX);
+
     return max;
 }
 
 double Parallel::max(double number)
 {
-    double max;
+    double max = number;
 
-    MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::DOUBLE, MPI::MAX);
+    if(isInitialized_)
+        MPI::COMM_WORLD.Allreduce(&number, &max, 1, MPI::DOUBLE, MPI::MAX);
+
     return max;
 }
 
@@ -277,7 +291,6 @@ void Parallel::waitAll()
 
 //***************************** Private Static Variables *******************************
 
-const int Parallel::PROC_NULL = MPI::PROC_NULL;
 Vector3DBuffer Parallel::vec3Dbuffers_(8, 100);
 std::vector<MPI::Request> Parallel::requests_;
 int Parallel::procNo_ = 0, Parallel::nProcesses_ = 1;

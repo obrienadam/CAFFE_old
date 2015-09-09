@@ -24,7 +24,7 @@ public:
 
     int nSubDomains() const { return Parallel::nProcesses(); }
 
-    std::shared_ptr< std::array<int, 6> > getAdjProcNoPtr() { return adjProcNoPtr_; }
+    std::shared_ptr< std::array<int, 6> > getAdjProcNoPtr() const { return adjProcNoPtr_; }
 
     void writeTec360(double time, const std::string &directory);
     void writeBoundaryMeshes(double time, const std::string &directory);
@@ -33,7 +33,7 @@ public:
 
 private:
 
-    void initializeSubDomains(const StructuredMesh &tmpMesh);
+    void initializeSubDomains(const StructuredMesh &tmpMesh, int nSubDomainsI, int nSubDomainsJ, int nSubDomainsK);
 
     std::shared_ptr< std::array<int, 6> > adjProcNoPtr_;
 };

@@ -1,0 +1,8 @@
+; defines the domain decomposition
+
+Coefficients
+{
+	nSubDomainsI 1
+	nSubDomainsJ 2
+	nSubDomainsK 2
+}

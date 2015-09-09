@@ -3,8 +3,8 @@
 RunControl
 {
 	terminationCondition iterations
-	maxNumberOfIterations 1
-	fileWriteInterval 1000
+	maxNumberOfIterations 30
+	fileWriteInterval 10
 	timeStep 0.01
 	maxSimTime 48
 	maxRealTimeHours 48
@@ -12,7 +12,7 @@ RunControl
 
 Solver
 {
-	timeAccurate ON
+	timeAccurate OFF
 }
 
 Boundaries
@@ -26,13 +26,13 @@ Boundaries
 	west
 	{
 		type fixed
-		refValue 0
+		refValue 1
 	}
 
 	north
 	{
 		type fixed
-		refValue 0
+		refValue 1
 	}
 
 	south

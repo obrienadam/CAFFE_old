@@ -28,6 +28,7 @@
 #include "PrimitiveBoundaryCondition.h"
 #include "Solver.h"
 #include "Field.h"
+#include "ParallelHexaFvmMesh.h"
 
 class Diffusion : public Solver
 {

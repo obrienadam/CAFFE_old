@@ -167,6 +167,8 @@ public:
     void addArray3DToTecplotOutput(std::string name, const Array3D<double> *array3DPtr) const;
     void addArray3DToTecplotOutput(std::string name, const Array3D<Vector3D> *array3DPtr) const;
 
+    virtual std::shared_ptr< std::array<int, 6> > getAdjProcNoPtr() const { return nullptr; }
+
     /**
      * @brief Write cell-centered data to the Tecplot360 ASCII format.
      * @param time The solution time.

@@ -152,16 +152,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[1]*internalField_.eastBoundaryPatch(0, j, k);
+            a[1] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[1];
+            a[1] = 0.;
             break;
 
         case EMPTY:
+            a[1] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[1] = 0.;
     }
     if(i == 0)
     {
@@ -169,16 +174,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[2]*internalField_.westBoundaryPatch(0, j, k);
+            a[2] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[2];
+            a[2] = 0.;
             break;
 
         case EMPTY:
+            a[2] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[2] = 0.;
     }
 
     //- North/south boundaries
@@ -188,16 +198,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[3]*internalField_.northBoundaryPatch(i, 0, k);
+            a[3] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[3];
+            a[3] = 0.;
             break;
 
         case EMPTY:
+            a[3] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[3] = 0.;
     }
     if(j == 0)
     {
@@ -205,16 +220,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[4]*internalField_.southBoundaryPatch(i, 0, k);
+            a[4] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[4];
+            a[4] = 0.;
             break;
 
         case EMPTY:
+            a[4] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[4] = 0.;
     }
 
     //- Top/bottom boundaries
@@ -224,16 +244,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[5]*internalField_.topBoundaryPatch(i, j, 0);
+            a[5] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[5];
+            a[5] = 0.;
             break;
 
         case EMPTY:
+            a[5] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[5] = 0.;
     }
     if(k == 0)
     {
@@ -241,16 +266,21 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[6]*internalField_.bottomBoundaryPatch(i, j, 0);
+            a[6] = 0.;
             break;
 
         case ZERO_GRADIENT:
             a[0] += a[6];
+            a[6] = 0.;
             break;
 
         case EMPTY:
+            a[6] = 0.;
+            break;
+
+        case PARALLEL:
             break;
         }
-        a[6] = 0.;
     }
 }
 
@@ -267,6 +297,9 @@ void PrimitiveBoundaryCondition<T>::changeType(int i, Type newType, const T &ref
 template <class T>
 void PrimitiveBoundaryCondition<T>::setParallelBoundaries(std::shared_ptr<std::array<int, 6> > adjProcNoPtr)
 {
+    if(!adjProcNoPtr)
+        return;
+
     adjProcNoPtr_ = adjProcNoPtr;
 
     for(int i = 0; i < 6; ++i)

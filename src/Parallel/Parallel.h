@@ -12,6 +12,8 @@ class Parallel
 {
 public:
 
+    static const int PROC_NULL;
+
     static void initialize();
     static void finalize();
 
@@ -61,8 +63,6 @@ public:
 
     //- Important method that must be called at the end of a cycle of non-blocking communication
     static void waitAll();
-
-    static const int PROC_NULL;
 
 private:
 

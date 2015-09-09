@@ -1,4 +1,6 @@
 #include <boost/algorithm/string.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/info_parser.hpp>
 
 #include "ParallelHexaFvmMesh.h"
 #include "Output.h"
@@ -17,7 +19,19 @@ void ParallelHexaFvmMesh::initialize(const std::string &filename)
     if(Parallel::isMainProcessor())
         tmpMesh.initialize(filename);
 
-    initializeSubDomains(tmpMesh);
+    boost::property_tree::ptree decompositionParameters;
+    boost::property_tree::read_info("mesh/decomposition.info", decompositionParameters);
+
+    int nSubDomainsI = decompositionParameters.get<int>("Coefficients.nSubDomainsI");
+    int nSubDomainsJ = decompositionParameters.get<int>("Coefficients.nSubDomainsJ");
+    int nSubDomainsK = decompositionParameters.get<int>("Coefficients.nSubDomainsK");
+
+    Output::print("ParallelHexaFvmMesh", "Decomposing domain using ("
+                  + std::to_string(nSubDomainsI) + ", "
+                  + std::to_string(nSubDomainsJ) + ", "
+                  + std::to_string(nSubDomainsK) + ").");
+
+    initializeSubDomains(tmpMesh, nSubDomainsI, nSubDomainsJ, nSubDomainsK);
 }
 
 void ParallelHexaFvmMesh::initialize(const Array3D<Point3D> &nodes)
@@ -27,7 +41,7 @@ void ParallelHexaFvmMesh::initialize(const Array3D<Point3D> &nodes)
     if(Parallel::isMainProcessor())
         tmpMesh.initialize(nodes);
 
-    initializeSubDomains(tmpMesh);
+    initializeSubDomains(tmpMesh, 2, 2, 2);
 }
 
 void ParallelHexaFvmMesh::initializeCartesianMesh(double xLength, double yLength, double zLength, int nCellsI, int nCellsJ, int nCellsK)
@@ -37,7 +51,7 @@ void ParallelHexaFvmMesh::initializeCartesianMesh(double xLength, double yLength
     if(Parallel::isMainProcessor())
         tmpMesh.initializeCartesianMesh(xLength, yLength, zLength, nCellsI + 1, nCellsJ + 1, nCellsK + 1);
 
-    initializeSubDomains(tmpMesh);
+    initializeSubDomains(tmpMesh, 2, 2, 2);
 }
 
 std::string ParallelHexaFvmMesh::meshStats()
@@ -95,29 +109,21 @@ void ParallelHexaFvmMesh::changeName(const std::string &newName)
 
 //************************* Private methods **********************************
 
-void ParallelHexaFvmMesh::initializeSubDomains(const StructuredMesh &tmpMesh)
+void ParallelHexaFvmMesh::initializeSubDomains(const StructuredMesh &tmpMesh, int nSubDomainsI, int nSubDomainsJ, int nSubDomainsK)
 {
     using namespace std;
 
-    int nCellsIGlobal, nCellsJGlobal, nCellsKGlobal;
     std::vector<int> nCellsILocal, nCellsJLocal, nCellsKLocal;
-    int nSubDomainsI, nSubDomainsJ, nSubDomainsK, subDomainNo;
     vector<Point3D> vertices(8);
     Array3D<Point3D> boundaryNodesSend[6], boundaryNodesRecv[6];
-
-    //- Determine domain decomposition
-    Output::issueWarning("ParallelHexaFvmMesh", "initializeSubDomains", "number of sub-domains currently fixed. May not be suitable for all computations.");
-    nSubDomainsI = 2;
-    nSubDomainsJ = 2;
-    nSubDomainsK = 2;
 
     if(Parallel::nProcesses() != nSubDomainsI*nSubDomainsJ*nSubDomainsK)
         Output::raiseException("ParallelHexaFvmMesh", "initializeSubDomains", "number of processes different than number of sub domains.");
 
     //- Broadcast the global number of cells from the root process
-    nCellsIGlobal = Parallel::broadcast(tmpMesh.nNodesI() - 1, Parallel::mainProcNo());
-    nCellsJGlobal = Parallel::broadcast(tmpMesh.nNodesJ() - 1, Parallel::mainProcNo());
-    nCellsKGlobal = Parallel::broadcast(tmpMesh.nNodesK() - 1, Parallel::mainProcNo());
+    int nCellsIGlobal = Parallel::broadcast(tmpMesh.nNodesI() - 1, Parallel::mainProcNo());
+    int nCellsJGlobal = Parallel::broadcast(tmpMesh.nNodesJ() - 1, Parallel::mainProcNo());
+    int nCellsKGlobal = Parallel::broadcast(tmpMesh.nNodesK() - 1, Parallel::mainProcNo());
 
     //- Create a vector to store the local number of cells on each process, so every process has access to this info
     nCellsILocal.resize(Parallel::nProcesses());
@@ -151,7 +157,7 @@ void ParallelHexaFvmMesh::initializeSubDomains(const StructuredMesh &tmpMesh)
         {
             for(int i = 0; i < nSubDomainsI; ++i)
             {
-                subDomainNo = k*nSubDomainsI*nSubDomainsJ + j*nSubDomainsI + i;
+                int subDomainNo = k*nSubDomainsI*nSubDomainsJ + j*nSubDomainsI + i;
 
                 if(subDomainNo == Parallel::processNo())
                 {
