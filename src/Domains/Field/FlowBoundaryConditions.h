@@ -24,6 +24,8 @@ public:
     Type getTypeTop() const { return types_[4]; }
     Type getTypeBottom() const { return types_[5]; }
 
+    virtual void setParallelBoundaries(std::shared_ptr< std::array<int, 6> > adjProcNoPtr);
+
     PrimitiveBoundaryCondition<Vector3D> uFieldBcs;
     PrimitiveBoundaryCondition<double> pFieldBcs;
     PrimitiveBoundaryCondition<double> rhoFieldBcs;

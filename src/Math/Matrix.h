@@ -90,11 +90,11 @@ public:
 
 protected:
 
+    static std::vector<double> buffer_;
+
     int m_, n_, nElements_;
     std::vector<double> elements_;
     std::vector<int> ipiv_;
-
-    static std::vector<double> buffer_;
 
     friend Matrix operator*(const Matrix& A, const Matrix& B);
     friend void multiply(const Matrix &A, const Matrix &B, Matrix& C);

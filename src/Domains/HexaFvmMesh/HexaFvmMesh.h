@@ -100,12 +100,12 @@ public:
     Vector3D rCellB(int i, int j, int k) const;
 
     // Retrieve cell to face parameters
-    Vector3D rFaceE(int i, int j, int k) const { return cellToFaceRelativeVectorsE_(i, j, k); }
-    Vector3D rFaceW(int i, int j, int k) const { return cellToFaceRelativeVectorsW_(i, j, k); }
-    Vector3D rFaceN(int i, int j, int k) const { return cellToFaceRelativeVectorsN_(i, j, k); }
-    Vector3D rFaceS(int i, int j, int k) const { return cellToFaceRelativeVectorsS_(i, j, k); }
-    Vector3D rFaceT(int i, int j, int k) const { return cellToFaceRelativeVectorsT_(i, j, k); }
-    Vector3D rFaceB(int i, int j, int k) const { return cellToFaceRelativeVectorsB_(i, j, k); }
+    Vector3D rFaceE(int i, int j, int k) const;
+    Vector3D rFaceW(int i, int j, int k) const;
+    Vector3D rFaceN(int i, int j, int k) const;
+    Vector3D rFaceS(int i, int j, int k) const;
+    Vector3D rFaceT(int i, int j, int k) const;
+    Vector3D rFaceB(int i, int j, int k) const;
 
     int nCellsI() const { return cellCenters_.sizeI(); }
     int nCellsJ() const { return cellCenters_.sizeJ(); }

@@ -5,18 +5,17 @@
 template <class T>
 void FvScheme::interpolateInteriorFaces(InterpolationMethod method, Field<T> &field)
 {
-    int i, j, k;
     const HexaFvmMesh &mesh = field.getMesh();
 
     switch (method)
     {
     case VOLUME_WEIGHTED:
 
-        for(k = 0; k < mesh.nCellsK(); ++k)
+        for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
         {
-            for(j = 0; j < mesh.nCellsJ(); ++j)
+            for(int j = 0, nJ = mesh.nCellsJ(); j < nJ; ++j)
             {
-                for(i = 0; i < mesh.nCellsI(); ++i)
+                for(int i = 0, nI = mesh.nCellsI(); i < nI; ++i)
                 {
                     if(i == 0 && mesh.westMeshExists())
                         field.faceW(i, j, k) = mesh.gW(i, j, k)*field(i, j, k) + (1. - mesh.gW(i, j, k))*field(i - 1, j, k);
@@ -42,11 +41,11 @@ void FvScheme::interpolateInteriorFaces(InterpolationMethod method, Field<T> &fi
 
     case NON_WEIGHTED:
 
-        for(k = 0; k < mesh.nCellsK(); ++k)
+        for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
         {
-            for(j = 0; j < mesh.nCellsJ(); ++j)
+            for(int j = 0, nJ = mesh.nCellsJ(); j < nJ; ++j)
             {
-                for(i = 0; i < mesh.nCellsI(); ++i)
+                for(int i = 0, nI = mesh.nCellsI(); i < nI; ++i)
                 {
                     if(i == 0 && mesh.westMeshExists())
                         field.faceW(i, j, k) = 0.5*(field(i, j, k) + field(i - 1, j, k));

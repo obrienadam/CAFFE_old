@@ -100,7 +100,7 @@ void HexaFvmMesh::addBoundaryMesh(std::shared_ptr<HexaFvmMesh> meshPtr, Directio
         break;
     };
 
-    //- Re-compute mesh metrics to account for the presence of the boundary mesh
+    //- Re-compute mesh metrics to account for the presence of the boundary mesh (a bit wasteful)
     computeMeshMetrics();
 }
 
@@ -170,19 +170,19 @@ Point3D HexaFvmMesh::cellXc(int i, int j, int k) const
 
 double HexaFvmMesh::cellVol(int i, int j, int k) const
 {
-    if(i < 0 && westBoundaryMeshPtr_ != nullptr)
+    if(i < 0 && westBoundaryMeshPtr_)
         return westBoundaryMeshPtr_->cellVol(westBoundaryMeshPtr_->uCellI() + i + 1, j, k);
-    else if(i > uCellI() && eastBoundaryMeshPtr_ != nullptr)
+    else if(i > uCellI() && eastBoundaryMeshPtr_)
         return eastBoundaryMeshPtr_->cellVol(i - uCellI() - 1, j, k);
 
-    if(j < 0 && southBoundaryMeshPtr_ != nullptr)
+    if(j < 0 && southBoundaryMeshPtr_)
         return southBoundaryMeshPtr_->cellVol(i, southBoundaryMeshPtr_->uCellJ() + j + 1, k);
-    else if(j > uCellJ() && northBoundaryMeshPtr_ != nullptr)
+    else if(j > uCellJ() && northBoundaryMeshPtr_)
         return northBoundaryMeshPtr_->cellVol(i, j - uCellJ() - 1, k);
 
-    if(k < 0 && bottomBoundaryMeshPtr_ != nullptr)
+    if(k < 0 && bottomBoundaryMeshPtr_)
         return bottomBoundaryMeshPtr_->cellVol(i, j, bottomBoundaryMeshPtr_->uCellK() + k + 1);
-    else if(k > uCellK() && topBoundaryMeshPtr_ != nullptr)
+    else if(k > uCellK() && topBoundaryMeshPtr_)
         return topBoundaryMeshPtr_->cellVol(i, j, k - uCellK() - 1);
 
     return cellVolumes_(i, j, k);
@@ -219,7 +219,7 @@ Vector3D HexaFvmMesh::rCellE(int i, int j, int k) const
 {
     if(i == uCellI())
     {
-        if(eastBoundaryMeshPtr_ != nullptr)
+        if(eastBoundaryMeshPtr_)
             return eastBoundaryMeshPtr_->cellXc(0, j, k) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsE_(i, j, k);
@@ -232,7 +232,7 @@ Vector3D HexaFvmMesh::rCellW(int i, int j, int k) const
 {
     if(i == 0)
     {
-        if(westBoundaryMeshPtr_ != nullptr)
+        if(westBoundaryMeshPtr_)
             return westBoundaryMeshPtr_->cellXc(westBoundaryMeshPtr_->uCellI(), j, k) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsW_(i, j, k);
@@ -245,7 +245,7 @@ Vector3D HexaFvmMesh::rCellN(int i, int j, int k) const
 {
     if(j == uCellJ())
     {
-        if(northBoundaryMeshPtr_ != nullptr)
+        if(northBoundaryMeshPtr_)
             return northBoundaryMeshPtr_->cellXc(i, 0, k) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsN_(i, j, k);
@@ -258,7 +258,7 @@ Vector3D HexaFvmMesh::rCellS(int i, int j, int k) const
 {
     if(j == 0)
     {
-        if(southBoundaryMeshPtr_ != nullptr)
+        if(southBoundaryMeshPtr_)
             return southBoundaryMeshPtr_->cellXc(i, southBoundaryMeshPtr_->uCellJ(), k) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsS_(i, j, k);
@@ -271,7 +271,7 @@ Vector3D HexaFvmMesh::rCellT(int i, int j, int k) const
 {
     if(k == uCellK())
     {
-        if(topBoundaryMeshPtr_ != nullptr)
+        if(topBoundaryMeshPtr_)
             return topBoundaryMeshPtr_->cellXc(i, j, 0) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsT_(i, j, k);
@@ -284,7 +284,7 @@ Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
 {
     if(k == 0)
     {
-        if(bottomBoundaryMeshPtr_ != nullptr)
+        if(bottomBoundaryMeshPtr_)
             return bottomBoundaryMeshPtr_->cellXc(i, j, bottomBoundaryMeshPtr_->uCellK()) - cellXc(i, j, k);
         else
             return cellToFaceRelativeVectorsB_(i, j, k);
@@ -293,17 +293,64 @@ Vector3D HexaFvmMesh::rCellB(int i, int j, int k) const
     return -cellToCellRelativeVectorsK_(i, j, k - 1);
 }
 
+Vector3D HexaFvmMesh::rFaceE(int i, int j, int k) const
+{
+    if(i < 0 && westBoundaryMeshPtr_)
+        return westBoundaryMeshPtr_->rFaceE(westBoundaryMeshPtr_->uCellI(), j, k);
+
+    return cellToFaceRelativeVectorsE_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rFaceW(int i, int j, int k) const
+{
+    if(i > uCellI() && eastBoundaryMeshPtr_)
+        return eastBoundaryMeshPtr_->rFaceW(0, j, k);
+
+    return cellToFaceRelativeVectorsW_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rFaceN(int i, int j, int k) const
+{
+    if(j < 0 && southBoundaryMeshPtr_)
+        return southBoundaryMeshPtr_->rFaceN(i, southBoundaryMeshPtr_->uCellJ(), k);
+
+    return cellToFaceRelativeVectorsN_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rFaceS(int i, int j, int k) const
+{
+    if(j > uCellJ() && northBoundaryMeshPtr_)
+        return northBoundaryMeshPtr_->rFaceS(i, 0, k);
+
+    return cellToFaceRelativeVectorsS_(i, j, k);
+}
+
+
+Vector3D HexaFvmMesh::rFaceT(int i, int j, int k) const
+{
+    if(k < 0 && bottomBoundaryMeshPtr_)
+        return bottomBoundaryMeshPtr_->rFaceT(i, j, bottomBoundaryMeshPtr_->uCellK());
+
+    return cellToFaceRelativeVectorsT_(i, j, k);
+}
+
+Vector3D HexaFvmMesh::rFaceB(int i, int j, int k) const
+{
+    if(k > uCellK() && topBoundaryMeshPtr_)
+        return topBoundaryMeshPtr_->rFaceB(i, j, 0);
+
+    return cellToFaceRelativeVectorsB_(i, j, k);
+}
+
 void HexaFvmMesh::locateCell(const Point3D &point, int &ii, int &jj, int &kk) const
 {
-    int i, j, k;
-    int nI = cellCenters_.sizeI(), nJ = cellCenters_.sizeJ(), nK = cellCenters_.sizeK();
     Point3D tmpPoints[8];
 
-    for(k = 0; k < nK; ++k)
+    for(int k = 0, nK = nCellsK(); k < nK; ++k)
     {
-        for(j = 0; j < nJ; ++j)
+        for(int j = 0, nJ = nCellsJ(); j < nJ; ++j)
         {
-            for(i = 0; i < nI; ++i)
+            for(int i = 0, nI = nCellsI(); i < nI; ++i)
             {
                 tmpPoints[0] = nodes_(i, j, k);
                 tmpPoints[1] = nodes_(i + 1, j, k);
@@ -793,7 +840,7 @@ void HexaFvmMesh::initializeCellToFaceParameters()
 
 void HexaFvmMesh::computeMeshMetrics()
 {
-    int i, j, k;
+    //Output::raiseException("HexaFvmMesh", "computeMeshMetrics", "check to make sure this method computes the right parameters in parallel you imbecile!");
 
     dE_.resize(nCellsI(), nCellsJ(), nCellsK());
     dW_.resize(nCellsI(), nCellsJ(), nCellsK());
@@ -816,11 +863,11 @@ void HexaFvmMesh::computeMeshMetrics()
     gT_.resize(nCellsI(), nCellsJ(), nCellsK());
     gB_.resize(nCellsI(), nCellsJ(), nCellsK());
 
-    for(k = 0; k < nCellsK(); ++k)
+    for(int k = 0; k < nCellsK(); ++k)
     {
-        for(j = 0; j < nCellsJ(); ++j)
+        for(int j = 0; j < nCellsJ(); ++j)
         {
-            for(i = 0; i < nCellsI(); ++i)
+            for(int i = 0; i < nCellsI(); ++i)
             {
                 dE_(i, j, k) = dot(fAreaNormE(i, j, k), fAreaNormE(i, j, k))/dot(fAreaNormE(i, j, k), rCellE(i, j, k));
                 dW_(i, j, k) = dot(fAreaNormW(i, j, k), fAreaNormW(i, j, k))/dot(fAreaNormW(i, j, k), rCellW(i, j, k));

@@ -122,15 +122,15 @@ void IbPiso::computeIbCoeffs()
     using namespace std;
 
     Point3D boundaryPoint, imagePoint, tmpPoints[8];
-    int i, j, k, m, ii[8], jj[8], kk[8], pointNo, colNos[9];
+    int ii[8], jj[8], kk[8], colNos[9];
     Matrix beta(1, 8);
     double values[9];
 
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(ibField_(i, j, k) == IB)
                 {
@@ -140,7 +140,7 @@ void IbPiso::computeIbCoeffs()
 
                     mesh_.locateEnclosingCells(imagePoint, ii, jj, kk);
 
-                    for(pointNo = 0; pointNo < 8; ++pointNo)
+                    for(int pointNo = 0; pointNo < 8; ++pointNo)
                         tmpPoints[pointNo] = mesh_.cellXc(ii[pointNo], jj[pointNo], kk[pointNo]);
 
                     //- Determine the interpolation coefficients for the image point
@@ -149,7 +149,7 @@ void IbPiso::computeIbCoeffs()
                     values[0] = 1.;
                     colNos[0] = mesh_.iMap(i, j, k, 0);
 
-                    for(m = 0; m < 8; ++m)
+                    for(int m = 0; m < 8; ++m)
                     {
                         if(ii[m] == i && jj[m] == j && kk[m] == k)
                         {
@@ -165,7 +165,7 @@ void IbPiso::computeIbCoeffs()
                     A_[0].setRow(mesh_.iMap(i, j, k, 0), 9, colNos, values);
 
                     //- Add the equation for the ghost cells to the coefficient matrix form pressure
-                    for(m = 0; m < 8; ++m)
+                    for(int m = 0; m < 8; ++m)
                     {
                         values[0] = -1;
                         colNos[0] = mesh_.iMap(i, j, k, 0);

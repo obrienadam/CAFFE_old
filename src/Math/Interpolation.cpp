@@ -8,15 +8,13 @@ double Interpolation::linear(const Point3D* points,
                              int nPoints,
                              const Point3D &interpolationPoint)
 {
-    int i;
-
     if(nPoints < 4)
         throw "in \"Interpolation::linear\", linear interpolation requires at least 4 points.";
 
     M_.reallocate(nPoints, 4);
     b_.reallocate(nPoints, 1);
 
-    for(i = 0; i < nPoints; ++i)
+    for(int i = 0; i < nPoints; ++i)
     {
         M_(i, 0) = 1.;
         M_(i, 1) = points[i].x;

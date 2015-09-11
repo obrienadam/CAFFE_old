@@ -60,15 +60,15 @@ Diffusion::~Diffusion()
 
 double Diffusion::solve(double timeStep)
 {
-    int i, j, k, cols[7];
+    int cols[7];
     double a0P, a[7], b;
 
     time_.tic();
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(Solver::solutionType_ == Solver::UNSTEADY)
                     a0P = mesh_.cellVol(i, j, k)/timeStep;
@@ -107,11 +107,11 @@ double Diffusion::solve(double timeStep)
     time_.tic();
     biCGStabIters_ = A_[0].solve(b_[0], x_[0]);
 
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 phiField_(i, j, k) = x_[0](mesh_.iMap(i, j, k, 0));
             }

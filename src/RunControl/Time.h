@@ -16,10 +16,11 @@ public:
     void toc();
     void pause();
     void resume();
-    double elapsedTimeMicroseconds();
-    std::string elapsedTime();
-    std::string currentTime();
-    bool exceededRefElapsedTime();
+
+    double elapsedTimeMicroseconds() const;
+    std::string elapsedTime() const;
+    std::string currentTime() const;
+    bool exceededRefElapsedTime() const;
 
 private:
 

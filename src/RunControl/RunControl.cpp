@@ -47,6 +47,7 @@ void RunControl::initialize(const Input &input)
 
     //- Create a directory for the solution output
     createDirectory("solution");
+    time_.tic();
 }
 
 bool RunControl::continueRun()
@@ -79,10 +80,7 @@ bool RunControl::continueRun()
 
 bool RunControl::writeToFile()
 {
-    if(itrs_%fileWriteInterval_ == 0)
-        return true;
-
-    return false;
+    return itrs_ % fileWriteInterval_ == 0;
 }
 
 void RunControl::reset()
@@ -130,11 +128,11 @@ void RunControl::displayUpdateMessage()
         //completionPercentage = elapsedRealTime_.total_microseconds()/maxElapsedRealTime_.total_microseconds()*100.;
     }
 
+    time_.toc();
     message << "Simulation completion (%) |      " << completionPercentage << endl
             << "Iterations completed      |      " << itrs_ << endl
             << "Simulation time (sec)     |      " << simTime_ << endl
             << "Elapsed time (hh:mm:ss)   |      " << time_.elapsedTime() << endl
-            // << "CPU time (microseconds)   |      " << time_.elapsedCpuTimeMicroseconds() << endl
             << "Residual norm             |      " << residualNorm;
 
     Output::print("RunControl", message.str());

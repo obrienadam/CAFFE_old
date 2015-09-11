@@ -3,7 +3,7 @@
 RunControl
 {
 	terminationCondition iterations
-	maxNumberOfIterations 1000
+	maxNumberOfIterations 500
 	fileWriteInterval 1
 	timeStep 2.5e-2
 	maxSimTime 48
@@ -17,7 +17,7 @@ Solver
 	relaxationFactorPCorr 0.3
 	rho 1.
 	mu 0.01
-	numberOfPressureCorrections 3
+	numberOfPressureCorrections 2
 	numberOfInnerIterations 5
 }
 
@@ -40,14 +40,14 @@ Boundaries
 	north
 	{
 		type wall
-		refVector (10,0,10)
+		refVector (10,0,0)
 		refValue 0
 	}
 
 	south
 	{
 		type wall
-		refVector (-10,0,-10)
+		refVector (-10,0,0)
 		refValue 0
 	}
 

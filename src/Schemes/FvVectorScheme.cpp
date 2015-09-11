@@ -3,9 +3,8 @@
 
 void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod method, const Field<Vector3D> &field, Field<Tensor3D> &gradField)
 {
-    int i, j, k, l, m;
-    Matrix A, b, x;
     const HexaFvmMesh &mesh = field.getMesh();
+    Matrix A, b, x;
 
     switch(method)
     {
@@ -15,11 +14,11 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
         b.allocate(6, 1);
         x.allocate(3, 1);
 
-        for(k = 0; k < mesh.nCellsK(); ++k)
+        for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
         {
-            for(j = 0; j < mesh.nCellsJ(); ++j)
+            for(int j = 0, nJ = mesh.nCellsJ(); j < nJ; ++j)
             {
-                for(i = 0; i < mesh.nCellsI(); ++i)
+                for(int i = 0, nI = mesh.nCellsI(); i < nI; ++i)
                 {
                     b.reallocate(6, 1);
 
@@ -31,7 +30,7 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
                     A.addVector3DToRow(mesh.rCellT(i, j, k), 4, 0);
                     A.addVector3DToRow(mesh.rCellB(i, j, k), 5, 0);
 
-                    for(l = 0; l < 3; ++l)
+                    for(int l = 0; l < 3; ++l)
                     {
                         b(0, 0) = field(i + 1, j, k)(l) - field(i, j, k)(l);
                         b(1, 0) = field(i - 1, j, k)(l) - field(i, j, k)(l);
@@ -42,7 +41,7 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
 
                         x = solveLeastSquares(A, b);
 
-                        for(m = 0; m < 3; ++m)
+                        for(int m = 0; m < 3; ++m)
                         {
                             gradField(i, j, k)(l, m) = x(m, 0);
                         }
@@ -53,13 +52,14 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
         }
 
         break;
+
     case DIVERGENCE_THEOREM:
 
-        for(k = 0; k < mesh.nCellsK(); ++k)
+        for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
         {
-            for(j = 0; j < mesh.nCellsJ(); ++j)
+            for(int j = 0, nJ = mesh.nCellsJ(); j < nJ; ++j)
             {
-                for(i = 0; i < mesh.nCellsI(); ++i)
+                for(int i = 0, nI = mesh.nCellsI(); i < nI; ++i)
                 {
                     gradField(i, j, k) = (tensor(field.faceE(i, j, k), mesh.fAreaNormE(i, j, k))
                                           + tensor(field.faceW(i, j, k), mesh.fAreaNormW(i, j, k))
@@ -72,50 +72,92 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
         }
 
         break;
-    };
+    }
 }
 
 void FvVectorScheme::extrapolateInteriorFaces(GradientEvaluationMethod method, Field<Vector3D>& field, Field<Tensor3D>& gradField)
 {
     using namespace std;
 
-    int i, j, k;
-    Vector3D upperLimit, lowerLimit;
     const HexaFvmMesh &mesh = field.getMesh();
 
     //- Interpolate the interior faces and then use the guessed face values to apply the divergence theorem.
     interpolateInteriorFaces(VOLUME_WEIGHTED, field);
     computeCellCenteredGradients(method, field, gradField);
 
-    for(k = 0; k < mesh.nCellsK(); ++k)
+    for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
     {
-        for(j = 0; j < mesh.nCellsJ(); ++j)
+        for(int j = 0, nJ = mesh.nCellsJ(); j < nJ; ++j)
         {
-            for(i = 0; i < mesh.nCellsI(); ++i)
+            for(int i = 0, nI = mesh.nCellsI(); i < nI; ++i)
             {
-                if(i < mesh.uCellI())
+                bool applyLimitingWest = false, applyLimitingSouth = false, applyLimitingBottom = false;
+
+                if(i == 0 && mesh.westMeshExists())
+                {
+                    field.faceW(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceW(i, j, k))
+                                                + field(i - 1, j, k) + dot(gradField(i - 1, j, k), mesh.rFaceE(i - 1, j, k)));
+                    applyLimitingWest = true;
+                }
+
+                if(j == 0 && mesh.southMeshExists())
+                {
+                    field.faceS(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceS(i, j, k))
+                                                + field(i, j - 1, k) + dot(gradField(i, j - 1, k), mesh.rFaceN(i, j - 1, k)));
+                    applyLimitingSouth = true;
+                }
+
+                if(k == 0 && mesh.bottomMeshExists())
+                {
+                    field.faceB(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceB(i, j, k))
+                                                + field(i, j, k - 1) + dot(gradField(i, j, k - 1), mesh.rFaceT(i, j, k - 1)));
+                    applyLimitingBottom = true;
+                }
+
+                bool applyLimitingEast = false, applyLimitingNorth = false, applyLimitingTop = false;
+
+                if(i < mesh.uCellI() || mesh.eastMeshExists())
                 {
                     field.faceE(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceE(i, j, k))
                                                 + field(i + 1, j, k) + dot(gradField(i + 1, j, k), mesh.rFaceW(i + 1, j, k)));
+                    applyLimitingEast = true;
                 }
-                if(j < mesh.uCellJ())
+
+                if(j < mesh.uCellJ() || mesh.northMeshExists())
                 {
                     field.faceN(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceN(i, j, k))
                                                 + field(i, j + 1, k) + dot(gradField(i, j + 1, k), mesh.rFaceS(i, j + 1, k)));
+                    applyLimitingNorth = true;
                 }
-                if(k < mesh.uCellK())
+
+                if(k < mesh.uCellK() || mesh.topMeshExists())
                 {
                     field.faceT(i, j, k) = 0.5*(field(i, j, k) + dot(gradField(i, j, k), mesh.rFaceT(i, j, k))
                                                 + field(i, j, k + 1) + dot(gradField(i, j, k + 1), mesh.rFaceB(i, j, k + 1)));
+                    applyLimitingTop = true;
                 }
 
                 //- Apply limiting
-                upperLimit = field.maxNeighbour(i, j, k);
-                lowerLimit = field.minNeighbour(i, j, k);
+                Vector3D upperLimit = field.maxNeighbour(i, j, k);
+                Vector3D lowerLimit = field.minNeighbour(i, j, k);
 
-                field.faceE(i, j, k) = max(min(upperLimit, field.faceE(i, j, k)), lowerLimit);
-                field.faceN(i, j, k) = max(min(upperLimit, field.faceN(i, j, k)), lowerLimit);
-                field.faceT(i, j, k) = max(min(upperLimit, field.faceT(i, j, k)), lowerLimit);
+                if(applyLimitingEast)
+                    field.faceE(i, j, k) = max(min(upperLimit, field.faceE(i, j, k)), lowerLimit);
+
+                if(applyLimitingNorth)
+                    field.faceN(i, j, k) = max(min(upperLimit, field.faceN(i, j, k)), lowerLimit);
+
+                if(applyLimitingTop)
+                    field.faceT(i, j, k) = max(min(upperLimit, field.faceT(i, j, k)), lowerLimit);
+
+                if(applyLimitingWest)
+                    field.faceW(i, j, k) = max(min(upperLimit, field.faceW(i, j, k)), lowerLimit);
+
+                if(applyLimitingSouth)
+                    field.faceS(i, j, k) = max(min(upperLimit, field.faceS(i, j, k)), lowerLimit);
+
+                if(applyLimitingBottom)
+                    field.faceB(i, j, k) = max(min(upperLimit, field.faceB(i, j, k)), lowerLimit);
             }
         }
     }

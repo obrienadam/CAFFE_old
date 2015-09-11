@@ -71,3 +71,16 @@ FlowBoundaryConditions::FlowBoundaryConditions(const Input &input,
         dFieldBcs.changeType(i, PrimitiveBoundaryCondition<double>::ZERO_GRADIENT, 0.);
     }
 }
+
+void FlowBoundaryConditions::setParallelBoundaries(std::shared_ptr<std::array<int, 6> > adjProcNoPtr)
+{
+    if(!adjProcNoPtr)
+        return;
+
+    uFieldBcs.setParallelBoundaries(adjProcNoPtr);
+    pFieldBcs.setParallelBoundaries(adjProcNoPtr);
+    rhoFieldBcs.setParallelBoundaries(adjProcNoPtr);
+    muFieldBcs.setParallelBoundaries(adjProcNoPtr);
+    hFieldBcs.setParallelBoundaries(adjProcNoPtr);
+    dFieldBcs.setParallelBoundaries(adjProcNoPtr);
+}

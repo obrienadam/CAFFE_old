@@ -4,21 +4,17 @@
 
 double Geometry::computeQuadrilateralArea(Point3D* points)
 {
-    Vector3D r01, r02, r03;
-
-    r01 = points[1] - points[0];
-    r02 = points[2] - points[0];
-    r03 = points[3] - points[0];
+    Vector3D r01 = points[1] - points[0];
+    Vector3D r02 = points[2] - points[0];
+    Vector3D r03 = points[3] - points[0];
 
     return 0.5*(cross(r02, r01).mag() + cross(r03, r02).mag());
 }
 
 Point3D Geometry::computeQuadrilateralCentroid(Point3D* points)
 {
-    Point3D diag1Midpoint, diag2Midpoint;
-
-    diag1Midpoint = points[0] + 0.5*(points[2] - points[0]);
-    diag2Midpoint = points[1] + 0.5*(points[3] - points[1]);
+    Point3D diag1Midpoint = points[0] + 0.5*(points[2] - points[0]);
+    Point3D diag2Midpoint = points[1] + 0.5*(points[3] - points[1]);
 
     return diag1Midpoint + 0.5*(diag2Midpoint - diag1Midpoint);
 }
@@ -33,11 +29,10 @@ bool Geometry::checkQuadrilateralIsPlanar(Point3D *points)
     // Check to see if a quadrilateral is planary by comparing the normals formed by
     // the triangles sharing the diagonal
 
-    Vector3D normal1, normal2;
-    const double TOLER(1e-8);
+    const double TOLER(1e-12);
 
-    normal1 = cross(points[1] - points[0], points[2] - points[0]).unitVector();
-    normal2 = cross(points[2] - points[0], points[3] - points[0]).unitVector();
+    Vector3D normal1 = cross(points[1] - points[0], points[2] - points[0]).unitVector();
+    Vector3D normal2 = cross(points[2] - points[0], points[3] - points[0]).unitVector();
 
     return (normal1 - normal2).mag() <= TOLER;
 }
@@ -48,20 +43,17 @@ double Geometry::computeHexahedronVolume(Point3D* points)
     // Computational Fluid Mechanics and Heat Transfer, Third Edition, by
     // Richard H. Pletcher, John C. Tannehill and Gale Anderson
 
-    Vector3D r16, r25, r57, r64, r27, r36;
-    Vector3D s1265, s5674, s2376;
+    Vector3D r16 = points[6] - points[1];
+    Vector3D r25 = points[5] - points[2];
+    Vector3D s1265 = 0.5*cross(r16, r25);
 
-    r16 = points[6] - points[1];
-    r25 = points[5] - points[2];
-    s1265 = 0.5*cross(r16, r25);
+    Vector3D r57 = points[7] - points[5];
+    Vector3D r64 = points[4] - points[6];
+    Vector3D s5674 = 0.5*cross(r57, r64);
 
-    r57 = points[7] - points[5];
-    r64 = points[4] - points[6];
-    s5674 = 0.5*cross(r57, r64);
-
-    r27 = points[7] - points[2];
-    r36 = points[6] - points[3];
-    s2376 = 0.5*cross(r27, r36);
+    Vector3D r27 = points[7] - points[2];
+    Vector3D r36 = points[6] - points[3];
+    Vector3D s2376 = 0.5*cross(r27, r36);
 
     return fabs(dot(s1265 + s5674 + s2376, points[6] - points[0])/3.);
 }
@@ -71,7 +63,6 @@ Point3D Geometry::computeHexahedronCentroid(Point3D *points)
     // The strategy is to break the hexahedron into tetrahedrons. The centroid is then
     // defined as the volume weighted average of the tetrahedron centroids
 
-    int i;
     Point3D tet[5][4], tetCentroids[5], centroid(0., 0., 0.);
     double tetVolumes[5], sumVolumes(0.);
 
@@ -102,14 +93,14 @@ Point3D Geometry::computeHexahedronCentroid(Point3D *points)
     tet[4][2] = points[2];
     tet[4][3] = points[6];
 
-    for(i = 0; i < 5; ++i)
+    for(int i = 0; i < 5; ++i)
     {
         tetCentroids[i] = computeTetrahedronCentroid(tet[i]);
         tetVolumes[i] = computeTetrahedronVolume(tet[i]);
         sumVolumes += tetVolumes[i];
     }
 
-    for(i = 0; i < 5; ++i)
+    for(int i = 0; i < 5; ++i)
     {
         centroid += tetVolumes[i]*tetCentroids[i];
     }

@@ -66,6 +66,8 @@ Simple::Simple(const Input &input, const HexaFvmMesh &mesh)
     omegaMomentum_ = input.caseParameters.get<double>("Solver.relaxationFactorMomentum");
     omegaPCorr_ = input.caseParameters.get<double>("Solver.relaxationFactorPCorr");
 
+    flowBcs_.setParallelBoundaries(mesh.getAdjProcNoPtr());
+
     setConstantFields(input);
     initialConditions.setInitialConditions(uField_);
     initialConditions.setInitialConditions(pField_);
@@ -77,7 +79,7 @@ double Simple::solve(double timeStep)
 {
     uField0_ = uField_;
 
-    for(int i = 0; i < nInnerIters_; ++i)
+    for(int innerIterNo = 0; innerIterNo < nInnerIters_; ++innerIterNo)
     {
         computeMomentum(timeStep);
         computePCorr();
@@ -99,43 +101,26 @@ void Simple::displayUpdateMessage()
 
 void Simple::setConstantFields(const Input &input)
 {
-    double rho, mu;
-
-    rho = input.caseParameters.get<double>("Solver.rho");
-    mu = input.caseParameters.get<double>("Solver.mu");
-
-    rhoField_.setValue(rho);
-    muField_.setValue(mu);
-
-    rhoField_.setFixedBoundaryPatches(rho);
-    muField_.setFixedBoundaryPatches(mu);
-
-    Output::printLine();
-
-    flowBcs_.rhoFieldBcs.setBoundaries();
-    flowBcs_.muFieldBcs.setBoundaries();
-
-    FvScheme::interpolateInteriorFaces(FvScheme::NON_WEIGHTED, rhoField_);
-    FvScheme::interpolateInteriorFaces(FvScheme::NON_WEIGHTED, muField_);
+    rhoField_.setAll(input.caseParameters.get<double>("Solver.rho"));
+    muField_.setAll(input.caseParameters.get<double>("Solver.mu"));
 }
 
 void Simple::computeMomentum(double timeStep)
 {
     using namespace std;
 
-    int i, j, k, componentNo, cols[7], rowNo;
+    int cols[7];
     double a0P, a[7];
-    Vector3D b = Vector3D(0., 0., 0.);
 
     uFieldStar_ = uField_;
 
     //- Assemble the coefficient matrix, to be used for each velocity component
     time_.tic();
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(!mesh_.iMap.isActive(i, j, k))
                     continue;
@@ -159,7 +144,7 @@ void Simple::computeMomentum(double timeStep)
                         - min(massFlowField_.faceB(i, j, k), 0.) + muField_.faceB(i, j, k)*mesh_.dB(i, j, k)
                         + a0P)/omegaMomentum_;
 
-                b = a0P*uField0_(i, j, k);
+                Vector3D b = a0P*uField0_(i, j, k);
                 b += -mesh_.cellVol(i, j, k)*gradPField_(i, j, k);
                 b += (1. - omegaMomentum_)*a[0]*uFieldStar_(i, j, k);
 
@@ -172,7 +157,7 @@ void Simple::computeMomentum(double timeStep)
 
                 flowBcs_.uFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
-                rowNo = mesh_.iMap(i, j, k, 0);
+                int rowNo = mesh_.iMap(i, j, k, 0);
                 cols[0] = rowNo;
                 cols[1] = mesh_.iMap(i + 1, j, k, 0);
                 cols[2] = mesh_.iMap(i - 1, j, k, 0);
@@ -194,17 +179,16 @@ void Simple::computeMomentum(double timeStep)
     time_.toc();
     Output::print("Simple", "momentum matrix assembly completed in " + time_.elapsedTime());
 
-    biCGStabIters_ = 0;
     time_.tic();
-    for(componentNo = 0; componentNo < 3; ++componentNo)
+    for(int componentNo = 0, biCGStabIters_ = 0; componentNo < 3; ++componentNo)
     {
         biCGStabIters_ += A_[0].solve(b_[componentNo], x_[componentNo]);
 
-        for(k = 0; k < mesh_.nCellsK(); ++k)
+        for(int k = 0; k < mesh_.nCellsK(); ++k)
         {
-            for(j = 0; j < mesh_.nCellsJ(); ++j)
+            for(int j = 0; j < mesh_.nCellsJ(); ++j)
             {
-                for(i = 0; i < mesh_.nCellsI(); ++i)
+                for(int i = 0; i < mesh_.nCellsI(); ++i)
                 {
                     if(mesh_.iMap.isInactive(i, j, k))
                         continue;
@@ -228,8 +212,8 @@ void Simple::computeMomentum(double timeStep)
     flowBcs_.dFieldBcs.setBoundaries();
     flowBcs_.hFieldBcs.setBoundaries();
 
-    FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, dField_, gradScalarField_);
-    FvVectorScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, hField_, gradVectorField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, dField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, hField_);
 
     rhieChowInterpolateFaces();
 }
@@ -238,17 +222,17 @@ void Simple::computePCorr()
 {
     using namespace std;
 
-    int i, j, k, cols[7], rowNo;
+    int cols[7], rowNo;
     double a[7];
     double b = 0.;
 
     //- Assemble the coefficient matrix
     time_.tic();
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(!mesh_.iMap.isActive(i, j, k))
                     continue;
@@ -289,11 +273,11 @@ void Simple::computePCorr()
     time_.tic();
     biCGStabIters_ = A_[1].solve(b_[0], x_[0]);
 
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(mesh_.iMap.isInactive(i, j,k))
                     continue;
@@ -309,45 +293,43 @@ void Simple::computePCorr()
 
     flowBcs_.pCorrFieldBcs.setBoundaries();
 
-    FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, pCorrField_, gradPCorrField_);
-    FvScalarScheme::computeCellCenteredGradients(FvScheme::DIVERGENCE_THEOREM, pCorrField_, gradPCorrField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, pCorrField_);
+    FvScalarScheme::computeCellCenteredGradients(FvScalarScheme::DIVERGENCE_THEOREM, pCorrField_, gradPCorrField_);
 }
 
 void Simple::correct()
 {
-    int i, j, k;
-
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
-                if(i == 0 && flowBcs_.getTypeWest() == FlowBoundaryConditions::OUTLET)
+                if(i == 0 && flowBcs_.massCorrectionRequiredWest())
                 {
                     massFlowField_.faceW(i, j, k) += -rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*mesh_.dW(i, j, k);
                 }
-                if(j == 0 && flowBcs_.getTypeSouth() == FlowBoundaryConditions::OUTLET)
+                if(j == 0 && flowBcs_.massCorrectionRequiredSouth())
                 {
                     massFlowField_.faceS(i, j, k) += -rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*mesh_.dS(i, j, k);
                 }
-                if(k == 0 && flowBcs_.getTypeBottom() == FlowBoundaryConditions::OUTLET)
+                if(k == 0 && flowBcs_.massCorrectionRequiredBottom())
                 {
                     massFlowField_.faceB(i, j, k) += -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
-                if(i < mesh_.uCellI() || flowBcs_.getTypeEast() == FlowBoundaryConditions::OUTLET)
+                if(i < mesh_.uCellI() || flowBcs_.massCorrectionRequiredEast())
                 {
                     massFlowField_.faceE(i, j, k) += -rhoField_.faceE(i, j, k)*dField_.faceE(i, j, k)*(pCorrField_(i + 1, j, k) - pCorrField_(i, j, k))*mesh_.dE(i, j, k);
                 }
-                if(j < mesh_.uCellJ() || flowBcs_.getTypeNorth() == FlowBoundaryConditions::OUTLET)
+                if(j < mesh_.uCellJ() || flowBcs_.massCorrectionRequiredNorth())
                 {
                     massFlowField_.faceN(i, j, k) += -rhoField_.faceN(i, j, k)*dField_.faceN(i, j, k)*(pCorrField_(i, j + 1, k) - pCorrField_(i, j, k))*mesh_.dN(i, j, k);
                 }
-                if(k < mesh_.uCellK() || flowBcs_.getTypeTop() == FlowBoundaryConditions::OUTLET)
+                if(k < mesh_.uCellK() || flowBcs_.massCorrectionRequiredTop())
                 {
                     massFlowField_.faceT(i, j, k) += -rhoField_.faceT(i, j, k)*dField_.faceT(i, j, k)*(pCorrField_(i, j, k + 1) - pCorrField_(i, j, k))*mesh_.dT(i, j, k);
                 }
@@ -365,8 +347,8 @@ void Simple::correct()
     flowBcs_.pFieldBcs.setBoundaries();
     flowBcs_.uFieldBcs.setBoundaries();
 
-    FvScalarScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, pField_, gradPField_);
-    FvVectorScheme::extrapolateInteriorFaces(FvScheme::DIVERGENCE_THEOREM, uField_, gradUField_);
+    FvScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, pField_);
+    FvVectorScheme::interpolateInteriorFaces(FvScheme::VOLUME_WEIGHTED, uField_);
 
     FvScalarScheme::computeCellCenteredGradients(FvScheme::DIVERGENCE_THEOREM, pField_, gradPField_);
     FvVectorScheme::computeCellCenteredGradients(FvScheme::DIVERGENCE_THEOREM, uField_, gradUField_);
@@ -374,36 +356,35 @@ void Simple::correct()
 
 double Simple::computeContinuityError()
 {
-    int i, j, k;
-
     continuityError_ = 0.;
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(!mesh_.iMap.isActive(i, j, k))
                     continue;
 
                 if(fabs(massFlowField_(i, j, k)) > continuityError_)
+                {
                     continuityError_ = fabs(massFlowField_(i, j, k))/mesh_.cellVol(i, j, k);
+                }
             }
         }
     }
+    continuityError_ = Parallel::max(continuityError_);
 
     return continuityError_;
 }
 
 void Simple::rhieChowInterpolateFaces()
 {
-    int i, j, k;
-
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(mesh_.iMap.isInactive(i, j, k))
                     continue;
