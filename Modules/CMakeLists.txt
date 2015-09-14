@@ -5,10 +5,6 @@
 add_executable(hexaMesh hexaMesh.cpp)
 target_link_libraries(hexaMesh HexaFvmMesh)
 
-# Build the multi-block hexaMesh generator
-add_executable(multiBlockHexaMesh multiBlockHexaMesh.cpp)
-target_link_libraries(multiBlockHexaMesh HexaFvmMesh)
-
 # Build the diffusion solver
 add_executable(caffeDiffusion caffeDiffusion.cpp)
 target_link_libraries(caffeDiffusion RunControl

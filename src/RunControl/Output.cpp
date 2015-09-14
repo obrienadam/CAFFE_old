@@ -70,6 +70,17 @@ void Output::issueWarning(std::string className, std::string methodName, std::st
         std::cout << "WARNING! in \"" << className << "::" << methodName << "\", " << warningDescription << std::endl;
 }
 
+void Output::pause()
+{
+    if(Parallel::isMainProcessor())
+    {
+        int i;
+        print("Press Enter to continue...");
+        std::cin >> i;
+    }
+    Parallel::barrier();
+}
+
 void Output::printCaffeHeader()
 {
     using namespace std;

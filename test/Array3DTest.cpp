@@ -23,20 +23,20 @@ BOOST_AUTO_TEST_CASE (test1)
     array3D2 = array3D;
     Array3D<double> array3D3(array3D);
 
-    BOOST_CHECK_EQUAL(array3D2.sizeI(), array3D.sizeI());
-    BOOST_CHECK_EQUAL(array3D2.sizeJ(), array3D.sizeJ());
-    BOOST_CHECK_EQUAL(array3D2.sizeK(), array3D.sizeK());
-    BOOST_CHECK_EQUAL(array3D2.size(), array3D.size());
-    BOOST_CHECK_EQUAL(array3D.sizeI(), array3D3.sizeI());
-    BOOST_CHECK_EQUAL(array3D.sizeJ(), array3D3.sizeJ());
-    BOOST_CHECK_EQUAL(array3D.sizeK(), array3D3.sizeK());
-    BOOST_CHECK_EQUAL(array3D.size(), array3D3.size());
+    BOOST_REQUIRE_EQUAL(array3D2.sizeI(), array3D.sizeI());
+    BOOST_REQUIRE_EQUAL(array3D2.sizeJ(), array3D.sizeJ());
+    BOOST_REQUIRE_EQUAL(array3D2.sizeK(), array3D.sizeK());
+    BOOST_REQUIRE_EQUAL(array3D2.size(), array3D.size());
+    BOOST_REQUIRE_EQUAL(array3D.sizeI(), array3D3.sizeI());
+    BOOST_REQUIRE_EQUAL(array3D.sizeJ(), array3D3.sizeJ());
+    BOOST_REQUIRE_EQUAL(array3D.sizeK(), array3D3.sizeK());
+    BOOST_REQUIRE_EQUAL(array3D.size(), array3D3.size());
 
     for(auto it = array3D.begin(), it2 = array3D2.begin(); it != array3D.end(); ++it, ++it2)
-        BOOST_CHECK_EQUAL(*it, *it2);
+        BOOST_REQUIRE_EQUAL(*it, *it2);
 
     array3D(3, 3, 3) = 5;
-    BOOST_CHECK_EQUAL(array3D(3, 3, 3), 5);
+    BOOST_REQUIRE_EQUAL(array3D(3, 3, 3), 5);
 }
 
 BOOST_AUTO_TEST_CASE (test2)
@@ -45,10 +45,10 @@ BOOST_AUTO_TEST_CASE (test2)
 
     array3D.assign(1);
 
-    BOOST_CHECK_EQUAL(array3D.size(), 20*20*20);
+    BOOST_REQUIRE_EQUAL(array3D.size(), 20*20*20);
 
     for(auto it = array3D.begin(); it != array3D.end(); ++it)
-        BOOST_CHECK_EQUAL(*it, 1);
+        BOOST_REQUIRE_EQUAL(*it, 1);
 }
 
 BOOST_AUTO_TEST_CASE (test3)
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE (test3)
         {
             for(int i = 0; i < array3D.sizeI(); ++i)
             {
-                BOOST_CHECK_EQUAL(array3D(i, j, k), *it);
+                BOOST_REQUIRE_EQUAL(array3D(i, j, k), *it);
                 ++it;
             }
         }
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE (test3)
         {
             for(int i = 0; i < array3D.sizeI(); ++i)
             {
-                BOOST_CHECK_EQUAL(array3D(i, j, k), *it);
+                BOOST_REQUIRE_EQUAL(array3D(i, j, k), *it);
                 ++it;
             }
         }

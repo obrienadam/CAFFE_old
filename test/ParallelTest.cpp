@@ -13,9 +13,9 @@ BOOST_AUTO_TEST_CASE (test1)
     std::pair<int, int> range = Parallel::ownershipRange(1000);
 
     if(Parallel::processNo() < 1000%Parallel::nProcesses())
-        BOOST_CHECK_EQUAL(1000/Parallel::nProcesses(), range.second - range.first);
+        BOOST_REQUIRE_EQUAL(1000/Parallel::nProcesses(), range.second - range.first);
     else
-        BOOST_CHECK_EQUAL(1000/Parallel::nProcesses() - 1, range.second - range.first);
+        BOOST_REQUIRE_EQUAL(1000/Parallel::nProcesses() - 1, range.second - range.first);
 }
 
 BOOST_AUTO_TEST_CASE (test2)
@@ -27,9 +27,9 @@ BOOST_AUTO_TEST_CASE (test2)
 
     vec = Parallel::broadcast(vec, Parallel::mainProcNo());
 
-    BOOST_CHECK_EQUAL(vec.x, 1);
-    BOOST_CHECK_EQUAL(vec.y, 2);
-    BOOST_CHECK_EQUAL(vec.z, 3);
+    BOOST_REQUIRE_EQUAL(vec.x, 1);
+    BOOST_REQUIRE_EQUAL(vec.y, 2);
+    BOOST_REQUIRE_EQUAL(vec.z, 3);
 
     Array3D<Vector3D> vecs(20, 20, 20);
 
@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE (test2)
 
     for(Vector3D &vec : vecs)
     {
-        BOOST_CHECK_EQUAL(vec.x, 1);
-        BOOST_CHECK_EQUAL(vec.y, 2);
-        BOOST_CHECK_EQUAL(vec.z, 3);
+        BOOST_REQUIRE_EQUAL(vec.x, 1);
+        BOOST_REQUIRE_EQUAL(vec.y, 2);
+        BOOST_REQUIRE_EQUAL(vec.z, 3);
     }
 }
 
@@ -71,10 +71,10 @@ BOOST_AUTO_TEST_CASE (test3)
         for(int i = 0; i < 1000; ++i)
 
         {
-            BOOST_CHECK_EQUAL(doubles[i], i);
-            BOOST_CHECK_EQUAL(vecs[i].x, i);
-            BOOST_CHECK_EQUAL(vecs[i].y, i + 1);
-            BOOST_CHECK_EQUAL(vecs[i].z, i + 2);
+            BOOST_REQUIRE_EQUAL(doubles[i], i);
+            BOOST_REQUIRE_EQUAL(vecs[i].x, i);
+            BOOST_REQUIRE_EQUAL(vecs[i].y, i + 1);
+            BOOST_REQUIRE_EQUAL(vecs[i].z, i + 2);
         }
     }
 }
@@ -99,13 +99,13 @@ BOOST_AUTO_TEST_CASE (test4)
     if(Parallel::processNo() == Parallel::nProcesses() - 1)
     {
         for(int i = 0; i < doubles.size(); ++i)
-            BOOST_CHECK_EQUAL(doubles[i], i);
+            BOOST_REQUIRE_EQUAL(doubles[i], i);
 
         for(int i = 0; i < vecs.size(); ++i)
         {
-            BOOST_CHECK_EQUAL(vecs[i].x, i);
-            BOOST_CHECK_EQUAL(vecs[i].y, i + 1);
-            BOOST_CHECK_EQUAL(vecs[i].z, i + 2);
+            BOOST_REQUIRE_EQUAL(vecs[i].x, i);
+            BOOST_REQUIRE_EQUAL(vecs[i].y, i + 1);
+            BOOST_REQUIRE_EQUAL(vecs[i].z, i + 2);
         }
     }
 }
@@ -122,8 +122,8 @@ BOOST_AUTO_TEST_CASE (test5)
 
     for(int i = 0; i < Parallel::nProcesses(); ++i)
     {
-        BOOST_CHECK_EQUAL(allTestInts[i], i);
-        BOOST_CHECK_EQUAL(allTestDoubles[i], i*M_PI);
+        BOOST_REQUIRE_EQUAL(allTestInts[i], i);
+        BOOST_REQUIRE_EQUAL(allTestDoubles[i], i*M_PI);
     }
 }
 
@@ -143,12 +143,12 @@ BOOST_AUTO_TEST_CASE (test6)
 
     if(Parallel::processNo() == Parallel::processNo() - 1)
     {
-        BOOST_CHECK_EQUAL(sourceArray.size(), destArray.size());
+        BOOST_REQUIRE_EQUAL(sourceArray.size(), destArray.size());
 
         i = 0;
         for(auto it = destArray.begin(); it != destArray.end(); ++it, ++i)
         {
-            BOOST_CHECK_EQUAL(*it, i);
+            BOOST_REQUIRE_EQUAL(*it, i);
         }
     }
 }
@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE (test8)
         Parallel::iRecv(1, 2, 0, destArray);
         Parallel::iRecv(1, 3, 0, destArray);
 
+        Output::print("Finalizing messages...");
         Parallel::waitAll();
     }
     Output::print("Finished communication.");
@@ -216,9 +217,9 @@ BOOST_AUTO_TEST_CASE (test8)
     {
         for(const Vector3D &vec : destArray)
         {
-            BOOST_CHECK_EQUAL(vec.x, 1.);
-            BOOST_CHECK_EQUAL(vec.y, 2.);
-            BOOST_CHECK_EQUAL(vec.z, 3.);
+            BOOST_REQUIRE_EQUAL(vec.x, 1.);
+            BOOST_REQUIRE_EQUAL(vec.y, 2.);
+            BOOST_REQUIRE_EQUAL(vec.z, 3.);
         }
     }
 }

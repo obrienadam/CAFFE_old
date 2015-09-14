@@ -2,10 +2,10 @@
 # Author: Adam O'Brien
 
 set(HEADERS Parallel.h
-            Vector3DBuffer.h)
+            ParallelBuffers.h)
 
 set(SOURCES Parallel.cpp
-            Vector3DBuffer.cpp)
+            ParallelBuffers.cpp)
 
 add_library(Parallel ${HEADERS} ${SOURCES})
-target_link_libraries(Parallel mpi Math)
+target_link_libraries(Parallel Math)

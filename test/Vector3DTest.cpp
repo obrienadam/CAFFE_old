@@ -20,13 +20,13 @@ BOOST_AUTO_TEST_CASE (test2)
     Vector3D u(rand(), rand(), rand()), v;
 
     u = v;
-    BOOST_CHECK_EQUAL(u.x, v.x);
-    BOOST_CHECK_EQUAL(u.y, v.y);
-    BOOST_CHECK_EQUAL(u.z, v.z);
-    BOOST_CHECK(u == v);
+    BOOST_REQUIRE_EQUAL(u.x, v.x);
+    BOOST_REQUIRE_EQUAL(u.y, v.y);
+    BOOST_REQUIRE_EQUAL(u.z, v.z);
+    BOOST_REQUIRE(u == v);
 
     v = Vector3D(u.x*1.2, rand(), rand());
-    BOOST_CHECK(u != v);
+    BOOST_REQUIRE(u != v);
 }
 
 BOOST_AUTO_TEST_SUITE_END( )

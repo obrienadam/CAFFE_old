@@ -11,8 +11,6 @@ class Tensor3D;
 
 class Vector3D
 {
- private:
-
  public:
 
   Vector3D(double x = 0., double y = 0., double z = 0.);

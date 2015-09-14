@@ -37,6 +37,6 @@ target_link_libraries(SparseMatrixTest Math RunControl)
 add_executable(ParallelTest ParallelTest.cpp)
 target_link_libraries(ParallelTest Parallel RunControl)
 
-# Build multi-block hexa mesh test unit
-add_executable(MultiBlockHexaMeshTest MultiBlockHexaMeshTest.cpp)
-target_link_libraries(MultiBlockHexaMeshTest Parallel Math HexaFvmMesh)
+# Build a parallel simple test unit
+add_executable(ParallelSimpleTest ParallelSimpleTest.cpp)
+target_link_libraries(ParallelSimpleTest Solvers HexaFvmMesh)

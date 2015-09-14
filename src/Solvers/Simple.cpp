@@ -84,6 +84,24 @@ double Simple::solve(double timeStep)
         computeMomentum(timeStep);
         computePCorr();
         correct();
+
+        if(Parallel::processNo() == 0)
+            std::cout << hField_(29, 14, 29) << std::endl;
+
+        Parallel::barrier();
+
+        if(Parallel::processNo() == 1)
+            std::cout << hField_(-1, 14, 29) << std::endl;
+
+        if(Parallel::processNo() == 0)
+            std::cout << hField_(30, 14, 29) << std::endl;
+
+        Parallel::barrier();
+
+        if(Parallel::processNo() == 1)
+            std::cout << hField_(0, 14, 29) << std::endl;
+
+        Output::pause();
     }
 
     return computeContinuityError();
@@ -224,7 +242,6 @@ void Simple::computePCorr()
 
     int cols[7], rowNo;
     double a[7];
-    double b = 0.;
 
     //- Assemble the coefficient matrix
     time_.tic();
@@ -246,7 +263,7 @@ void Simple::computePCorr()
 
                 a[0] = -(a[1] + a[2] + a[3] + a[4] + a[5] + a[6]);
 
-                b = massFlowField_.faceE(i, j, k) - massFlowField_.faceW(i, j, k)
+                double b = massFlowField_.faceE(i, j, k) - massFlowField_.faceW(i, j, k)
                         + massFlowField_.faceN(i, j, k) - massFlowField_.faceS(i, j, k)
                         + massFlowField_.faceT(i, j, k) - massFlowField_.faceB(i, j, k);
 

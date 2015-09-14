@@ -6,7 +6,7 @@
 
 #include "Vector3D.h"
 #include "Array3D.h"
-#include "Vector3DBuffer.h"
+#include "ParallelBuffers.h"
 
 class Parallel
 {
@@ -66,7 +66,7 @@ public:
 
 private:
 
-    static Vector3DBuffer vec3Dbuffers_;
+    static ParallelBuffers buffers_;
 
     static std::vector< MPI::Request > requests_;
     static int nProcesses_, procNo_;

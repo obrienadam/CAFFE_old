@@ -246,7 +246,9 @@ void Field<T>::setFixedBoundaryPatches(const T *refValues)
 template<class T>
 void Field<T>::setFixedBoundaryPatches(const T &refValue)
 {
-    T refValues[6] = {refValue};
+    T refValues[6];
+    std::fill_n(refValues, 6, refValue);
+
     setFixedBoundaryPatches(refValues);
 }
 

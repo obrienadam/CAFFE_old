@@ -49,6 +49,8 @@ public:
     static void raiseException(std::string className, std::string methodName, std::string problemDescription);
     static void issueWarning(std::string className, std::string methodName, std::string warningDescription);
 
+    static void pause();
+
     static void printCaffeHeader();
     static void printLine();
 };

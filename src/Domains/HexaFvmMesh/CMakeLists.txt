@@ -5,14 +5,12 @@ set(HEADERS StructuredMesh.h
 	    HexaFvmMesh.h
             ParallelHexaFvmMesh.h
             HexaMeshGen.h
-            MultiBlockHexaMeshGen.h
             IndexMap.h)
 
 set(SOURCE StructuredMesh.cpp
            HexaFvmMesh.cpp
            ParallelHexaFvmMesh.cpp
            HexaMeshGen.cpp
-           MultiBlockHexaMeshGen.cpp
            IndexMap.cpp)
 
 add_library(HexaFvmMesh ${HEADERS} ${SOURCE})
