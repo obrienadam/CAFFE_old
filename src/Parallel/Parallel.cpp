@@ -241,7 +241,7 @@ void Parallel::iRecv(int source, int dest, int tag, std::vector<double> &doubles
     if(isInitialized_)
     {
         if(processNo() == dest)
-            requests_.push_back(MPI::COMM_WORLD.Irecv(doubles.data(), doubles.size(), MPI::DOUBLE, source, tag));
+            requests_.push_back(MPI::COMM_WORLD.Irecv(buffers_.initRecvBuffer(doubles), doubles.size(), MPI::DOUBLE, source, tag));
     }
 }
 

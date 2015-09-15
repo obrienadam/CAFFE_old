@@ -84,24 +84,6 @@ double Simple::solve(double timeStep)
         computeMomentum(timeStep);
         computePCorr();
         correct();
-
-        if(Parallel::processNo() == 0)
-            std::cout << hField_(29, 14, 29) << std::endl;
-
-        Parallel::barrier();
-
-        if(Parallel::processNo() == 1)
-            std::cout << hField_(-1, 14, 29) << std::endl;
-
-        if(Parallel::processNo() == 0)
-            std::cout << hField_(30, 14, 29) << std::endl;
-
-        Parallel::barrier();
-
-        if(Parallel::processNo() == 1)
-            std::cout << hField_(0, 14, 29) << std::endl;
-
-        Output::pause();
     }
 
     return computeContinuityError();
@@ -240,7 +222,7 @@ void Simple::computePCorr()
 {
     using namespace std;
 
-    int cols[7], rowNo;
+    int cols[7];
     double a[7];
 
     //- Assemble the coefficient matrix
@@ -269,7 +251,7 @@ void Simple::computePCorr()
 
                 flowBcs_.pCorrFieldBcs.setImplicitBoundaryCoefficients(i, j, k, a, b);
 
-                rowNo = mesh_.iMap(i, j, k, 0);
+                int rowNo = mesh_.iMap(i, j, k, 0);
                 cols[0] = mesh_.iMap(i, j, k, 0);
                 cols[1] = mesh_.iMap(i + 1, j, k, 0);
                 cols[2] = mesh_.iMap(i - 1, j, k, 0);
@@ -408,15 +390,15 @@ void Simple::rhieChowInterpolateFaces()
 
                 if(i == 0)
                 {
-                    massFlowField_.faceW(i, j, k) = -dot(hField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k)) - dField_.faceW(i, j, k)*(pField_(i - 1, j, k) - pField_(i, j, k))*mesh_.dW(i, j, k);
+                    massFlowField_.faceW(i, j, k) = -dot(hField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k)) + dField_.faceW(i, j, k)*(pField_(i - 1, j, k) - pField_(i, j, k))*mesh_.dW(i, j, k);
                 }
                 if(j == 0)
                 {
-                    massFlowField_.faceS(i, j, k) = -dot(hField_.faceS(i, j, k), mesh_.fAreaNormS(i, j, k)) - dField_.faceS(i, j, k)*(pField_(i, j - 1, k) - pField_(i, j, k))*mesh_.dS(i, j, k);
+                    massFlowField_.faceS(i, j, k) = -dot(hField_.faceS(i, j, k), mesh_.fAreaNormS(i, j, k)) + dField_.faceS(i, j, k)*(pField_(i, j - 1, k) - pField_(i, j, k))*mesh_.dS(i, j, k);
                 }
                 if(k == 0)
                 {
-                    massFlowField_.faceB(i, j, k) = -dot(hField_.faceB(i, j, k), mesh_.fAreaNormB(i, j, k)) - dField_.faceB(i, j, k)*(pField_(i, j, k - 1) - pField_(i, j, k))*mesh_.dB(i, j, k);
+                    massFlowField_.faceB(i, j, k) = -dot(hField_.faceB(i, j, k), mesh_.fAreaNormB(i, j, k)) + dField_.faceB(i, j, k)*(pField_(i, j, k - 1) - pField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
                 massFlowField_.faceE(i, j, k) = dot(hField_.faceE(i, j, k), mesh_.fAreaNormE(i, j, k)) - dField_.faceE(i, j, k)*(pField_(i + 1, j, k) - pField_(i, j, k))*mesh_.dE(i, j, k);
