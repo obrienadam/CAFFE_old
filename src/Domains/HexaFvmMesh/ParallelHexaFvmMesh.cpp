@@ -19,7 +19,7 @@ void ParallelHexaFvmMesh::initialize(const std::string &filename)
     if(Parallel::isMainProcessor())
         tmpMesh.initialize(filename);
 
-    name_ = tmpMesh.name();
+    name_ = Parallel::broadcast(tmpMesh.name(), Parallel::mainProcNo());
 
     boost::property_tree::ptree decompositionParameters;
     boost::property_tree::read_info("mesh/decomposition.info", decompositionParameters);

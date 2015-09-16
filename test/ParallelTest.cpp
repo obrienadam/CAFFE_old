@@ -47,6 +47,15 @@ BOOST_AUTO_TEST_CASE (test2)
         BOOST_REQUIRE_EQUAL(vec.y, 2);
         BOOST_REQUIRE_EQUAL(vec.z, 3);
     }
+
+    std::string str;
+
+    if(Parallel::isMainProcessor())
+        str = "Broadcasted from proc 0!";
+
+    str = Parallel::broadcast(str, 0);
+
+    BOOST_REQUIRE(str == "Broadcasted from proc 0!");
 }
 
 BOOST_AUTO_TEST_CASE (test3)

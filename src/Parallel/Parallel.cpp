@@ -101,6 +101,32 @@ void Parallel::broadcast(int source, std::vector<Vector3D> &vecs)
     }
 }
 
+std::string Parallel::broadcast(const std::string &str, int source)
+{
+    if(isInitialized_)
+    {
+        int size = str.size();
+        MPI::COMM_WORLD.Bcast(&size, 1, MPI::INT, source);
+
+        char *buff = new char[size];
+
+        if(Parallel::processNo() == source)
+        {
+            for(int i = 0; i < size; ++i)
+                buff[i] = str[i];
+        }
+
+        MPI::COMM_WORLD.Bcast(buff, size, MPI::CHAR, source);
+        std::string retStr(buff, size);
+
+        delete[] buff;
+
+        return retStr;
+    }
+
+    return str;
+}
+
 int Parallel::sum(int number)
 {
     int sum = number;

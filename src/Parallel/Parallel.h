@@ -26,6 +26,7 @@ public:
     static int broadcast(int number, int source);
     static double broadcast(double number, int source);
     static Vector3D broadcast(const Vector3D &vec, int source);
+    static std::string broadcast(const std::string &str, int source);
 
     static void broadcast(int source, std::vector<double> &doubles);
     static void broadcast(int source, std::vector<Vector3D> &vecs);
