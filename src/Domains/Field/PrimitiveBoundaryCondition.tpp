@@ -8,23 +8,22 @@ PrimitiveBoundaryCondition<T>::PrimitiveBoundaryCondition(const Input &input, Fi
 {
     using namespace std;
 
-    int i;
     string locationStr[6] = {"east", "west", "north", "south", "top", "bottom"}, typeStr;
 
-    for(i = 0; i < 6; ++i)
+    for(int faceNo = 0; faceNo < 6; ++faceNo)
     {
-        typeStr = input.caseParameters.get<string>("Boundaries." + locationStr[i] + ".type");
+        typeStr = input.caseParameters.get<string>("Boundaries." + locationStr[faceNo] + ".type");
 
         if(typeStr == "fixed")
-            types_[i] = FIXED;
+            types_[faceNo] = FIXED;
         else if(typeStr == "zeroGradient")
-            types_[i] = ZERO_GRADIENT;
+            types_[faceNo] = ZERO_GRADIENT;
         else if(typeStr == "empty")
-            types_[i] = EMPTY;
+            types_[faceNo] = EMPTY;
         else
             Output::raiseException("FlowBoundaryCondition", "FlowBoundaryCondition", "invalid boundary type \"" + typeStr + "\".");
 
-        refValues_[i] = input.caseParameters.get<T>("Boundaries." + locationStr[i] + ".refValue");
+        refValues_[faceNo] = input.caseParameters.get<T>("Boundaries." + locationStr[faceNo] + ".refValue");
     }
 
     setFixedBoundaries();
@@ -143,7 +142,7 @@ void PrimitiveBoundaryCondition<T>::setBoundaries()
 }
 
 template<class T>
-void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j, int k, double a[], T &b)
+void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j, int k, double  *a, T &b)
 {
     //- East/west boundaries
     if(i == mesh_.uCellI())
@@ -152,15 +151,10 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[1]*internalField_.eastBoundaryPatch(0, j, k);
-            a[1] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[1];
-            a[1] = 0.;
-            break;
-
-        case EMPTY:
             a[1] = 0.;
             break;
 
@@ -168,21 +162,17 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
             break;
         }
     }
+
     if(i == 0)
     {
         switch(types_[1])
         {
         case FIXED:
             b -= a[2]*internalField_.westBoundaryPatch(0, j, k);
-            a[2] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[2];
-            a[2] = 0.;
-            break;
-
-        case EMPTY:
             a[2] = 0.;
             break;
 
@@ -198,15 +188,10 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[3]*internalField_.northBoundaryPatch(i, 0, k);
-            a[3] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[3];
-            a[3] = 0.;
-            break;
-
-        case EMPTY:
             a[3] = 0.;
             break;
 
@@ -220,15 +205,10 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[4]*internalField_.southBoundaryPatch(i, 0, k);
-            a[4] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[4];
-            a[4] = 0.;
-            break;
-
-        case EMPTY:
             a[4] = 0.;
             break;
 
@@ -244,15 +224,10 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[5]*internalField_.topBoundaryPatch(i, j, 0);
-            a[5] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[5];
-            a[5] = 0.;
-            break;
-
-        case EMPTY:
             a[5] = 0.;
             break;
 
@@ -266,15 +241,10 @@ void PrimitiveBoundaryCondition<T>::setImplicitBoundaryCoefficients(int i, int j
         {
         case FIXED:
             b -= a[6]*internalField_.bottomBoundaryPatch(i, j, 0);
-            a[6] = 0.;
             break;
 
-        case ZERO_GRADIENT:
+        case ZERO_GRADIENT: case EMPTY:
             a[0] += a[6];
-            a[6] = 0.;
-            break;
-
-        case EMPTY:
             a[6] = 0.;
             break;
 

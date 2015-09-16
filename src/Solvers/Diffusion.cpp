@@ -61,7 +61,7 @@ Diffusion::~Diffusion()
 double Diffusion::solve(double timeStep)
 {
     int cols[7];
-    double a0P, a[7], b;
+    double a0P, a[7];
 
     time_.tic();
     for(int k = 0; k < mesh_.nCellsK(); ++k)
@@ -81,11 +81,10 @@ double Diffusion::solve(double timeStep)
                 a[4] = mesh_.dS(i, j, k);
                 a[5] = mesh_.dT(i, j, k);
                 a[6] = mesh_.dB(i, j, k);
-
                 a[0] = -(a[1] + a[2] + a[3] + a[4] + a[5] + a[6]) + a0P;
-                b = a0P*phiField_(i, j, k);
+                double b = a0P*phiField_(i, j, k);
 
-                bcs_.setImplicitBoundaryCoefficients(i, j, k, a, b);
+                bcs_.setImplicitBoundaryCoefficients(i, j, k, a, b); // This is the only other possibility :-/
 
                 cols[0] = mesh_.iMap(i, j, k, 0);
                 cols[1] = mesh_.iMap(i + 1, j, k, 0);

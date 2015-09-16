@@ -19,7 +19,7 @@ public:
     PrimitiveBoundaryCondition(Field<T> &field);
 
     virtual void setBoundaries();
-    virtual void setImplicitBoundaryCoefficients(int i, int j, int k, double a[], T &b);
+    virtual void setImplicitBoundaryCoefficients(int i, int j, int k, double *a, T &b);
 
     Type getType(int i) const { return types_[i]; }
     Type getTypeEast() const { return types_[0]; }

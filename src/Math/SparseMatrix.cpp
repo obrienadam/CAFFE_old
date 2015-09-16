@@ -51,8 +51,8 @@ void SparseMatrix::allocate(int m, int n, int nnz)
     // Should be MATMPIAIJ if parallel or MATSEQAIJ if single
     MatSetType(A_, MATAIJ);
     // Both of these need to be called to ensure it works with MPI and single processor (very weird)
-    MatMPIAIJSetPreallocation(A_, nnz, NULL, nnz, NULL);
-    MatSeqAIJSetPreallocation(A_, nnz, NULL);
+    MatMPIAIJSetPreallocation(A_, nnz, PETSC_NULL, 3, PETSC_NULL);
+    MatSeqAIJSetPreallocation(A_, nnz, PETSC_NULL);
     MatSetUp(A_);
 
     // Get MPI ranges
@@ -95,9 +95,9 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
     PCSetType(pc_, PCASM);
-    PCFactorSetFill(pc_, 2);
+    PCASMSetOverlap(pc_, 1);
     KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
-    KSPSetType(ksp_, KSPBCGS);
+    KSPSetType(ksp_, KSPBCGSL);
 
     KSPSolve(ksp_, b.vec_, x.vec_);
     KSPGetIterationNumber(ksp_, &nIters);
@@ -114,6 +114,14 @@ void SparseMatrix::assemble()
 void SparseMatrix::print()
 {
     MatView(A_, PETSC_VIEWER_STDOUT_SELF);
+}
+
+void SparseMatrix::writeASCII(const std::string &filename)
+{
+    PetscViewer viewer;
+    PetscViewerASCIIOpen(PETSC_COMM_WORLD, filename.c_str(), &viewer);
+    MatView(A_, viewer);
+    PetscViewerDestroy(&viewer);
 }
 
 void multiply(const SparseMatrix &A, const SparseMatrix &B, SparseMatrix &C)

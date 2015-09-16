@@ -50,7 +50,11 @@ public:
     int solve(const SparseVector &b, SparseVector& x);
     void assemble();
 
+    int iLower() const { return iLower_; }
+    int iUpper() const { return iUpper_; }
+
     void print();
+    void writeASCII(const std::string &filename);
 
 private:
 

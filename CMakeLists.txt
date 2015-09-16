@@ -15,7 +15,7 @@ set(CMAKE_C_COMPILER "mpicc")
 set(CMAKE_CXX_COMPILER "mpic++")
 
 # Compiler flags
-set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -Wno-switch -std=c++0x -O3")
+set(CMAKE_CXX_FLAGS "-g -Wall -Wno-reorder -Wno-sign-compare -Wno-switch -std=c++0x -O0")
 set(CMAKE_C_FLAGS "-Wall")
 
 # Output paths

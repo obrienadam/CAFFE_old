@@ -2,6 +2,7 @@
 #include <boost/test/included/unit_test.hpp>
 #include <stdlib.h>
 #include "ParallelHexaFvmMesh.h"
+#include "SparseMatrix.h"
 
 BOOST_AUTO_TEST_SUITE (IndexMapTest)
 
@@ -20,30 +21,56 @@ BOOST_AUTO_TEST_CASE (test1)
 BOOST_AUTO_TEST_CASE (test2)
 {
     ParallelHexaFvmMesh mesh;
-    int testIndex;
-    mesh.changeName("indexMapTest2Mesh");
-    mesh.initializeCartesianMesh(1, 1, 1, 40, 40, 40);
+    mesh.changeName("indexMapTest3Mesh");
+    mesh.initializeCartesianMesh(1, 1, 1, 20, 20, 20);
+    int cellsPerProc = mesh.nCellsI()*mesh.nCellsJ()*mesh.nCellsK();
 
-    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 1);
+    // Check that all the global indices are correct
 
-    if(Parallel::isMainProcessor())
+    for(int k = 0; k < mesh.nCellsK(); ++k)
     {
-        BOOST_REQUIRE_EQUAL(mesh.iMap(mesh.uCellI() + 1, 0, 0, 0), testIndex);
+        for(int j = 0; j < mesh.nCellsJ(); ++j)
+        {
+            for(int i = 0; i < mesh.nCellsI(); ++i)
+            {
+                BOOST_REQUIRE_EQUAL(mesh.iMap(i, j, k, 0), k*mesh.nCellsJ()*mesh.nCellsI() + j*mesh.nCellsI() + i + Parallel::processNo()*cellsPerProc);
+            }
+        }
     }
 
-    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 2);
-
-    if(Parallel::isMainProcessor())
+    for(int faceNo = 0; faceNo < 6; ++faceNo)
     {
-        BOOST_REQUIRE_EQUAL(mesh.iMap(0, mesh.uCellJ() + 1, 0, 0), testIndex);
-    }
+        int adjProcNo = (*mesh.getAdjProcNoPtr())[faceNo];
 
-    testIndex = Parallel::broadcast(mesh.iMap(0, 0, 0, 0), 4);
+        if(adjProcNo != Parallel::PROC_NULL)
+        {
+            const Array3D<int> &adjGlobalIndices = mesh.iMap.getAdjGlobalIndices(faceNo);
 
-    if(Parallel::isMainProcessor())
-    {
-        BOOST_REQUIRE_EQUAL(mesh.iMap(0, 0, mesh.uCellK() + 1, 0), testIndex);
+            for(int k = 0; k < mesh.nCellsK(); ++k)
+            {
+                for(int j = 0; j < mesh.nCellsJ(); ++j)
+                {
+                    for(int i = 0; i < mesh.nCellsI(); ++i)
+                    {
+                        BOOST_REQUIRE_EQUAL(adjGlobalIndices(i, j, k), k*mesh.nCellsJ()*mesh.nCellsI() + j*mesh.nCellsI() + i + adjProcNo*cellsPerProc);
+                    }
+                }
+            }
+        }
     }
+}
+
+BOOST_AUTO_TEST_CASE (test3)
+{
+    ParallelHexaFvmMesh mesh;
+    mesh.changeName("indexMapTest3Mesh");
+    mesh.initializeCartesianMesh(1, 1, 1, 20, 20, 20);
+    SparseMatrix A;
+
+    A.allocate(mesh.iMap.nActiveGlobal(), mesh.iMap.nActiveGlobal(), 7);
+
+    BOOST_REQUIRE_EQUAL(A.iLower(), mesh.iMap(0, 0, 0, 0));
+    BOOST_REQUIRE_EQUAL(A.iUpper(), mesh.iMap(mesh.uCellI(), mesh.uCellJ(), mesh.uCellK(), 0) + 1);
 }
 
 BOOST_AUTO_TEST_CASE (end)

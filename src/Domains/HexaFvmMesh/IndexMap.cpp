@@ -92,33 +92,36 @@ int IndexMap::nActive() const
     return nActiveGlobal_;
 }
 
-bool IndexMap::isActive(int i, int j, int k)
+bool IndexMap::isActive(int i, int j, int k) const
 {
     return cellStatuses_(i, j, k) == ACTIVE;
 }
 
-bool IndexMap::isGhost(int i, int j, int k)
+bool IndexMap::isGhost(int i, int j, int k) const
 {
     return cellStatuses_(i, j, k) == GHOST;
 }
 
-bool IndexMap::isInactive(int i, int j, int k)
+bool IndexMap::isInactive(int i, int j, int k) const
 {
     return cellStatuses_(i, j, k) == INACTIVE;
 }
 
 void IndexMap::setActive(int i, int j, int k)
 {
+    indicesSet_ = false;
     cellStatuses_(i, j, k) = ACTIVE;
 }
 
 void IndexMap::setGhost(int i, int j, int k)
 {
+    indicesSet_ = false;
     cellStatuses_(i, j, k) = GHOST;
 }
 
 void IndexMap::setInactive(int i, int j, int k)
 {
+    indicesSet_ = false;
     cellStatuses_(i, j, k) = INACTIVE;
 }
 
@@ -149,8 +152,6 @@ void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjPr
     if(!adjProcNoPtr)
         return;
 
-    int lowerGlobalIndex = 0;
-
     adjProcNoPtr_ = adjProcNoPtr;
     nActiveGlobal_ = 0;
     maxNLocal_ = 0;
@@ -165,6 +166,7 @@ void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjPr
     Parallel::allGather(nCellsJThisProc_, nCellsJLocal_);
     Parallel::allGather(nCellsKThisProc_, nCellsKLocal_);
 
+    int lowerGlobalIndex = 0;
     for(int i = 0; i < Parallel::nProcesses(); ++i)
     {
         if(i < Parallel::processNo())
@@ -177,8 +179,9 @@ void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjPr
     }
 
     globalIndices_.add(lowerGlobalIndex);
+    Parallel::barrier();
 
-    std::array<int, 6> adjProcNo = *adjProcNoPtr_;
+    const std::array<int, 6> &adjProcNo = *adjProcNoPtr_;
 
     for(int i = 0; i < 6; ++i)
     {
@@ -188,7 +191,7 @@ void IndexMap::generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjPr
         adjGlobalIndices_[i].resize(nCellsILocal_[adjProcNo[i]], nCellsJLocal_[adjProcNo[i]], nCellsKLocal_[adjProcNo[i]]);
 
         Parallel::iSend(Parallel::processNo(), adjProcNo[i], i, globalIndices_);
-        Parallel::iRecv(adjProcNo[i], Parallel::processNo(), i%2 == 0 ? i + 1 : i - 1, adjGlobalIndices_[i]);
+        Parallel::iRecv(adjProcNo[i], Parallel::processNo(), i % 2 == 0 ? i + 1 : i - 1, adjGlobalIndices_[i]);
     }
 
     Parallel::waitAll();

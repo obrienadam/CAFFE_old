@@ -309,15 +309,15 @@ void Simple::correct()
 
                 if(i == 0 && flowBcs_.massCorrectionRequiredWest())
                 {
-                    massFlowField_.faceW(i, j, k) += -rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*mesh_.dW(i, j, k);
+                    massFlowField_.faceW(i, j, k) += rhoField_.faceW(i, j, k)*dField_.faceW(i, j, k)*(pCorrField_(i - 1, j, k) - pCorrField_(i, j, k))*mesh_.dW(i, j, k);
                 }
                 if(j == 0 && flowBcs_.massCorrectionRequiredSouth())
                 {
-                    massFlowField_.faceS(i, j, k) += -rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*mesh_.dS(i, j, k);
+                    massFlowField_.faceS(i, j, k) += rhoField_.faceS(i, j, k)*dField_.faceS(i, j, k)*(pCorrField_(i, j - 1, k) - pCorrField_(i, j, k))*mesh_.dS(i, j, k);
                 }
                 if(k == 0 && flowBcs_.massCorrectionRequiredBottom())
                 {
-                    massFlowField_.faceB(i, j, k) += -rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*mesh_.dB(i, j, k);
+                    massFlowField_.faceB(i, j, k) += rhoField_.faceB(i, j, k)*dField_.faceB(i, j, k)*(pCorrField_(i, j, k - 1) - pCorrField_(i, j, k))*mesh_.dB(i, j, k);
                 }
 
                 if(i < mesh_.uCellI() || flowBcs_.massCorrectionRequiredEast())

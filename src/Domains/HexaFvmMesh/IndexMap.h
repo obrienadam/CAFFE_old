@@ -47,9 +47,10 @@ public:
     int nActiveGlobal() const;
     int nActiveLocal() const;
     int nActive() const;
-    bool isActive(int i, int j, int k);
-    bool isGhost(int i, int j, int k);
-    bool isInactive(int i, int j, int k);
+
+    bool isActive(int i, int j, int k) const;
+    bool isGhost(int i, int j, int k) const;
+    bool isInactive(int i, int j, int k) const;
 
     void setActive(int i, int j, int k);
     void setGhost(int i, int j, int k);
@@ -57,6 +58,8 @@ public:
 
     void generateLocalIndices();
     void generateGlobalIndices(std::shared_ptr< std::array<int, 6> > adjProcNoPtr);
+
+    const Array3D<int>& getAdjGlobalIndices(int faceNo) const { return adjGlobalIndices_[faceNo]; }
 
 private:
 
@@ -69,6 +72,8 @@ private:
 
     std::shared_ptr< std::array<int, 6> > adjProcNoPtr_;
     Array3D<int> adjGlobalIndices_[6];
+
+    bool indicesSet_;
 };
 
 #endif

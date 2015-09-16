@@ -77,6 +77,12 @@ void FlowBoundaryConditions::setParallelBoundaries(std::shared_ptr<std::array<in
     if(!adjProcNoPtr)
         return;
 
+    const std::array<int, 6> &adjProcNo = *adjProcNoPtr;
+
+    for(int faceNo = 0; faceNo < 6; ++faceNo)
+        if(adjProcNo[faceNo] != Parallel::PROC_NULL)
+            types_[faceNo] = PARALLEL;
+
     uFieldBcs.setParallelBoundaries(adjProcNoPtr);
     pFieldBcs.setParallelBoundaries(adjProcNoPtr);
     rhoFieldBcs.setParallelBoundaries(adjProcNoPtr);
