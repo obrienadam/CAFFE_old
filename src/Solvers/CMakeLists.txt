@@ -6,6 +6,7 @@ set(HEADERS Solver.h
             Simple.h
             Piso.h
             IbPiso.h
+            MultiphasePiso.h
             Coupled.h)
 
 set(SOURCE Solver.cpp
@@ -13,6 +14,7 @@ set(SOURCE Solver.cpp
            Simple.cpp
            Piso.cpp
            IbPiso.cpp
+           MultiphasePiso.cpp
            Coupled.cpp)
 
 add_library(Solvers ${HEADERS} ${SOURCE})

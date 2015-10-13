@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE (test2)
         for(int j = 0; j < A.nCols(); ++j)
         {
             if(i == j)
-                BOOST_REQUIRE_CLOSE(I(i, j), 1., 1e-13);
+                BOOST_REQUIRE_CLOSE(I(i, j), 1., 1e-11);
             else
-                BOOST_REQUIRE_CLOSE(I(i, j) + 1, 1, 1e-13);
+                BOOST_REQUIRE_CLOSE(I(i, j) + 1, 1, 1e-11);
         }
 }
 
@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE (test3)
     {
         for(int j = 0; j < X1.nCols(); ++j)
         {
-            BOOST_REQUIRE_CLOSE(X1(i, j), X2(i, j), 1e-12);
-            BOOST_REQUIRE_CLOSE(X1(i, j), B(i, j), 1e-12);
+            BOOST_REQUIRE_CLOSE(X1(i, j), X2(i, j), 1e-11);
+            BOOST_REQUIRE_CLOSE(X1(i, j), B(i, j), 1e-11);
         }
     }
 }

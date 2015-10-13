@@ -148,7 +148,7 @@ public:
      * @param jj The j index of the cell closest to point.
      * @param kk The k index of the cell closest to point.
      */
-    void locateCell(const Point3D& point, int& ii, int& jj, int& kk) const;
+    virtual void locateCell(const Point3D& point, int& ii, int& jj, int& kk) const;
 
     /**
      * @brief Locate the 8 cells that form a hexahedron with their centers and enclose the point.
@@ -157,7 +157,7 @@ public:
      * @param jj Array of the j indices enclosing the point.
      * @param kk Array of the k indices enclosing the point.
      */
-    void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]) const;
+    virtual void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]) const;
 
     /**
      * @brief Output all mesh data to a file for debugging purposes.

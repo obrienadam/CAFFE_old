@@ -233,6 +233,21 @@ void Field<T>::setValue(T value)
 }
 
 template<class T>
+void Field<T>::setInitialCondition(const std::function<T (Point3D)> &icFunction)
+{
+    for(int k = 0; k < fieldData_.sizeK(); ++k)
+    {
+        for(int j = 0; j < fieldData_.sizeJ(); ++j)
+        {
+            for(int i = 0; i < fieldData_.sizeI(); ++i)
+            {
+                fieldData_(i, j, k) = icFunction(mesh_.cellXc(i, j, k));
+            }
+        }
+    }
+}
+
+template<class T>
 void Field<T>::setFixedBoundaryPatches(const T *refValues)
 {
     eastBoundaryPatch.assign(refValues[0]);

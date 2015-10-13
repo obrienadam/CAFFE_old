@@ -10,9 +10,9 @@ void FvVectorScheme::computeCellCenteredGradients(GradientEvaluationMethod metho
     {
     case LEAST_SQUARES:
 
-        A.allocate(6, 3);
-        b.allocate(6, 1);
-        x.allocate(3, 1);
+        A.reallocate(6, 3);
+        b.reallocate(6, 1);
+        x.reallocate(3, 1);
 
         for(int k = 0, nK = mesh.nCellsK(); k < nK; ++k)
         {

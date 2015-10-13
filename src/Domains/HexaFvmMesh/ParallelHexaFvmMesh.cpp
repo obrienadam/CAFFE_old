@@ -76,9 +76,14 @@ std::string ParallelHexaFvmMesh::meshStats()
     return sout.str();
 }
 
-void ParallelHexaFvmMesh::writeTec360(double time, const std::string &directory)
+void ParallelHexaFvmMesh::locateCell(const Point3D& point, int& ii, int& jj, int& kk) const
 {
-    HexaFvmMesh::writeTec360(time, directory);
+
+}
+
+void ParallelHexaFvmMesh::locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]) const
+{
+
 }
 
 void ParallelHexaFvmMesh::writeBoundaryMeshes(double time, const std::string &directory)

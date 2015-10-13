@@ -24,9 +24,11 @@ public:
 
     int nSubDomains() const { return Parallel::nProcesses(); }
 
+    virtual void locateCell(const Point3D& point, int& ii, int& jj, int& kk) const;
+    virtual void locateEnclosingCells(const Point3D& point, int ii[], int jj[], int kk[]) const;
+
     std::shared_ptr< std::array<int, 6> > getAdjProcNoPtr() const { return adjProcNoPtr_; }
 
-    void writeTec360(double time, const std::string &directory);
     void writeBoundaryMeshes(double time, const std::string &directory);
 
     virtual void changeName(const std::string &newName);

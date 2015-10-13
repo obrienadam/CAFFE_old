@@ -3,8 +3,8 @@
 RunControl
 {
 	terminationCondition iterations
-	maxNumberOfIterations 500
-	fileWriteInterval 50
+	maxNumberOfIterations 5
+	fileWriteInterval 1
 	timeStep 2.5e-2
 	maxSimTime 48
 	maxRealTimeHours 48
@@ -13,8 +13,8 @@ RunControl
 Solver
 {
 	timeAccurate OFF
-	relaxationFactorMomentum 0.7
-	relaxationFactorPCorr 0.3
+	relaxationFactorMomentum 0.5
+	relaxationFactorPCorr 0.5
 	rho 1.
 	mu 0.01
 	numberOfPressureCorrections 2

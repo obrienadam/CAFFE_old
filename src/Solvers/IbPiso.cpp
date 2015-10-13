@@ -42,17 +42,15 @@ IbPiso::IbPiso(const Input &input, const HexaFvmMesh &mesh)
 
 double IbPiso::solve(double timeStep)
 {
-    int i, j;
-
     uField0_ = uField_;
     computeIbField();
 
-    for(j = 0; j < nInnerIters_; ++j)
+    for(int innerIterNo = 0; innerIterNo < nInnerIters_; ++innerIterNo)
     {
         computeIbCoeffs();
         computeMomentum(timeStep);
 
-        for(i = 0; i < nPCorrections_; ++i)
+        for(int pCorrNo = 0; pCorrNo < nPCorrections_; ++pCorrNo)
         {
             computePCorr();
             correct();
@@ -66,14 +64,12 @@ double IbPiso::solve(double timeStep)
 
 void IbPiso::computeIbField()
 {
-    int i, j, k;
-
     //- This procedure is done as per Mittal et al. (2008)
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(ibSphere_.isInside(mesh_.cellXc(i, j, k)))
                 {
@@ -92,11 +88,11 @@ void IbPiso::computeIbField()
     }
 
     //- Determine the IB or "ghost" cells
-    for(k = 0; k < mesh_.nCellsK(); ++k)
+    for(int k = 0; k < mesh_.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh_.nCellsJ(); ++j)
+        for(int j = 0; j < mesh_.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh_.nCellsI(); ++i)
+            for(int i = 0; i < mesh_.nCellsI(); ++i)
             {
                 if(ibField_(i, j, k) == SOLID)
                 {
@@ -111,7 +107,10 @@ void IbPiso::computeIbField()
             }
         }
     }
-    mesh_.iMap.generateLocalIndices(); // This must be called after making changes to cell statuses. Not elegant, but what are you going to do.
+
+    // These methods must be called to re-compute the indices after cells have been rendered inactive
+    mesh_.iMap.generateLocalIndices();
+    mesh_.iMap.generateGlobalIndices(mesh_.getAdjProcNoPtr());
 
     destroyMatrices();
     createMatrices(2, 3, 9);
@@ -121,7 +120,7 @@ void IbPiso::computeIbCoeffs()
 {
     using namespace std;
 
-    Point3D boundaryPoint, imagePoint, tmpPoints[8];
+    Point3D tmpPoints[8];
     int ii[8], jj[8], kk[8], colNos[9];
     Matrix beta(1, 8);
     double values[9];
@@ -135,8 +134,8 @@ void IbPiso::computeIbCoeffs()
                 if(ibField_(i, j, k) == IB)
                 {
                     // Find the boundary and image points
-                    boundaryPoint = ibSphere_.nearestIntersect(mesh_.cellXc(i, j, k));
-                    imagePoint = 2.*boundaryPoint - mesh_.cellXc(i, j , k);
+                    Point3D boundaryPoint = ibSphere_.nearestIntersect(mesh_.cellXc(i, j, k));
+                    Point3D imagePoint = 2.*boundaryPoint - mesh_.cellXc(i, j , k);
 
                     mesh_.locateEnclosingCells(imagePoint, ii, jj, kk);
 
@@ -149,6 +148,7 @@ void IbPiso::computeIbCoeffs()
                     values[0] = 1.;
                     colNos[0] = mesh_.iMap(i, j, k, 0);
 
+                    //- Add the equation for the ghost cells to the momentum coefficient matrix
                     for(int m = 0; m < 8; ++m)
                     {
                         if(ii[m] == i && jj[m] == j && kk[m] == k)
@@ -164,7 +164,7 @@ void IbPiso::computeIbCoeffs()
                     }
                     A_[0].setRow(mesh_.iMap(i, j, k, 0), 9, colNos, values);
 
-                    //- Add the equation for the ghost cells to the coefficient matrix form pressure
+                    //- Add the equation for the ghost cells to the coefficient matrix for pressure
                     for(int m = 0; m < 8; ++m)
                     {
                         values[0] = -1;

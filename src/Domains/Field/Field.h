@@ -27,6 +27,7 @@
 
 #include <string>
 #include <iostream>
+#include <functional>
 
 #include "Array3D.h"
 #include "HexaFvmMesh.h"
@@ -72,6 +73,7 @@ public:
                    T value);
 
     void setValue(T value);
+    void setInitialCondition(const std::function<T (Point3D)> &icFunction);
 
     void setFixedBoundaryPatches(const T *refValues);
     void setFixedBoundaryPatches(const T &refValue);

@@ -1,24 +1,25 @@
-; Example case: Diffuser3D
+; Example case: Channel3D
 
 RunControl
 {
 	terminationCondition iterations
 	maxNumberOfIterations 1000
-	fileWriteInterval 1
+	fileWriteInterval 20
 	timeStep 2e-3
 	maxSimTime 48
 	maxRealTimeHours 48
+
 }
 
 Solver
 {
-	timeAccurate ON
-	numberOfInnerIterations 5
-	numberOfPressureCorrections 2
-	relaxationFactorMomentum 0.3
-	relaxationFactorPCorr 0.1
-	rho 998
-	mu 8.94e-4
+	timeAccurate OFF
+	relaxationFactorMomentum 0.7
+	relaxationFactorPCorr 0.3
+	rho 1
+	mu 0.001
+	numberOfPressureCorrections 3
+	numberOfInnerIterations 4
 }
 
 Boundaries
@@ -32,7 +33,7 @@ Boundaries
 	west
 	{
 		type inlet
-		refVector (3,0,0)
+		refVector (1,0,0)
 		refValue 0
 	}
 	north

@@ -1,8 +1,7 @@
-; defines the domain decomposition
-
-Coefficients
-{
-	nSubDomainsI 2
-	nSubDomainsJ 2
-	nSubDomainsK 1
-}
+; Mesh decomposition file
+        Coefficients
+        {
+            nSubDomainsI 8
+            nSubDomainsJ 1
+            nSubDomainsK 1
+        }

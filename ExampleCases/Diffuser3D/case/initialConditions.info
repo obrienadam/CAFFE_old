@@ -1,13 +1,14 @@
-; Initial conditions: Diffuser3D
+; Initial conditions: Channel3D
+
 
 u
 {
 	type uniform
-	refVector (3,0,0)
+	value (1,0,0)
 }
 
 p
 {
 	type uniform
-	refVector (0,0,0)
+	value 0
 }

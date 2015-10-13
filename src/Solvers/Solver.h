@@ -36,8 +36,6 @@ protected:
     Time time_;
 
     int biCGStabIters_;
-
-    friend class InitialConditions;
 };
 
 #endif

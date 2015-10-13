@@ -49,6 +49,7 @@ public:
 
     double& operator()(int i, int j);
     double* data(){ return elements_.data(); }
+    const double* data() const { return elements_.data(); }
     int nRows() const {return m_;}
     int nCols() const {return n_;}
     int nElements(){return elements_.size();}
@@ -96,8 +97,8 @@ protected:
     std::vector<double> elements_;
     std::vector<int> ipiv_;
 
+    friend void multiply(const Matrix &A, const Matrix &B, Matrix &C);
     friend Matrix operator*(const Matrix& A, const Matrix& B);
-    friend void multiply(const Matrix &A, const Matrix &B, Matrix& C);
 };
 
 //- Solution functions. These will not modify the original matrices
@@ -110,6 +111,6 @@ Matrix inverse(Matrix matrix);
 Matrix transpose(Matrix matrix);
 
 Matrix operator*(const Matrix& A, const Matrix& B);
-void multiply(const Matrix &A, const Matrix &B, Matrix& C);
+void multiply(const Matrix &A, const Matrix &B, Matrix &C);
 
 #endif

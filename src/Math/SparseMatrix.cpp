@@ -94,10 +94,10 @@ int SparseMatrix::solve(const SparseVector& b, SparseVector& x)
 
     KSPSetOperators(ksp_, A_, A_);
     KSPGetPC(ksp_, &pc_);
-    PCSetType(pc_, PCASM);
-    PCASMSetOverlap(pc_, 1);
+    PCSetType(pc_, PCSOR);
+    PCSORSetIterations(pc_, 1, 1);
     KSPSetTolerances(ksp_, rToler_, absToler_, PETSC_DEFAULT, maxIters_);
-    KSPSetType(ksp_, KSPBCGSL);
+    KSPSetType(ksp_, KSPBCGS);
 
     KSPSolve(ksp_, b.vec_, x.vec_);
     KSPGetIterationNumber(ksp_, &nIters);

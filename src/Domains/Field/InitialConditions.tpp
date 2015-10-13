@@ -31,44 +31,21 @@
 template <class T>
 void InitialConditions::createUniform(T value, Field<T>& field)
 {
-    int i, j, k;
-    const HexaFvmMesh &mesh = field.getMesh();
-
     Output::print("InitialConditions", "Setting uniform initial conditions for field \"" + field.name + "\".");
-
-    for(k = 0; k < mesh.nCellsK(); ++k)
-    {
-        for(j = 0; j < mesh.nCellsJ(); ++j)
-        {
-            for(i = 0; i < mesh.nCellsI(); ++i)
-            {
-                field(i, j, k) = value;
-            }
-        }
-    }
+    field.setInitialCondition([value](Point3D){ return value; });
 }
 
 template <class T>
 void InitialConditions::createSphere(double radius, Point3D center, T sphereInnerValue, Field<T> &field)
 {
-    int i, j, k;
-    const HexaFvmMesh &mesh = field.getMesh();
-
     Output::print("InitialConditions", "Generating sphere at " + std::to_string(center) + " with radius " + std::to_string(radius) + " for field \"" + field.name + "\".");
 
-    for(k = 0; k < mesh.nCellsK(); ++k)
+    auto icFunc = [radius, center, sphereInnerValue](Point3D point)
     {
-        for(j = 0; j < mesh.nCellsJ(); ++j)
-        {
-            for(i = 0; i < mesh.nCellsI(); ++i)
-            {
-                if((mesh.cellXc(i, j, k) - center).mag() <= radius)
-                {
-                    field(i, j, k) = sphereInnerValue;
-                }
-            }
-        }
-    }
+        return (point - center).mag() <= radius ? sphereInnerValue : T();
+    };
+
+    field.setInitialCondition(icFunc);
 
     smootheField(field);
 }
@@ -99,27 +76,27 @@ void InitialConditions::createBox(double xLength, double yLength, double zLength
 template <class T>
 void InitialConditions::smootheField(Field<T> &field)
 {
-    int i, j, k, ii, jj, kk;
+    using namespace std;
+
     const HexaFvmMesh &mesh = field.getMesh();
     Field<T> smoothedField(mesh, Field<T>::AUXILLARY, "smoothedField");
     Kernel kernel(Kernel::K6, 2.*(mesh.faceXcI(0, 0, 0) - mesh.faceXcI(1, 0, 0)).mag());
-    Vector3D center;
 
     Output::print("InitialConditions", "Smoothing field \"" + field.name + "\".");
 
-    for(k = 0; k < mesh.nCellsK(); ++k)
+    for(int k = 0; k < mesh.nCellsK(); ++k)
     {
-        for(j = 0; j < mesh.nCellsJ(); ++j)
+        for(int j = 0; j < mesh.nCellsJ(); ++j)
         {
-            for(i = 0; i < mesh.nCellsI(); ++i)
+            for(int i = 0; i < mesh.nCellsI(); ++i)
             {
-                center = mesh.cellXc(i, j, k);
+                Point3D center = mesh.cellXc(i, j, k);
 
-                for(kk = 0; kk < mesh.nCellsK(); ++kk)
+                for(int kk = max(k - 4, 0), endK = min(k + 4, mesh.uCellK()); kk < endK; ++kk)
                 {
-                    for(jj = 0; jj < mesh.nCellsJ(); ++jj)
+                    for(int jj = max(j - 4, 0), endJ = min(j + 4, mesh.uCellJ()); jj < endJ; ++jj)
                     {
-                        for(ii = 0; ii < mesh.nCellsI(); ++ii)
+                        for(int ii = max(i - 4, 0), endI = min(i + 4, mesh.uCellI()); i < endI; ++ii)
                         {
                             smoothedField(i, j, k) += field(ii, jj, kk)*kernel.value(center, mesh.cellXc(ii, jj, kk))*mesh.cellVol(ii, jj, kk);
                         }

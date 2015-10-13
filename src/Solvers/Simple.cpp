@@ -85,6 +85,7 @@ double Simple::solve(double timeStep)
         computePCorr();
         correct();
     }
+    courantNumber_ = computeCourantNumber(timeStep);
 
     return computeContinuityError();
 }
@@ -92,8 +93,9 @@ double Simple::solve(double timeStep)
 void Simple::displayUpdateMessage()
 {
     Output::print("Simple", "completed iteration.");
-    Output::print("Simple", "BiCGStab iterations: " + std::to_string(biCGStabIters_));
-    Output::print("Simple", "Max continuity error: " + std::to_string(continuityError_));
+    Output::print("Simple", "BiCGStab iterations  : " + std::to_string(biCGStabIters_));
+    Output::print("Simple", "Max continuity error : " + std::to_string(continuityError_));
+    Output::print("Simple", "Max Courant number   : " + std::to_string(courantNumber_));
     Output::printLine();
 }
 
@@ -375,6 +377,34 @@ double Simple::computeContinuityError()
     continuityError_ = Parallel::max(continuityError_);
 
     return continuityError_;
+}
+
+double Simple::computeCourantNumber(double timeStep)
+{
+    double maxCo = 0.;
+    for(int k = 0, sizeK = mesh_.nCellsK(); k < sizeK; ++k)
+    {
+        for(int j = 0, sizeJ = mesh_.nCellsJ(); j < sizeJ; ++j)
+        {
+            for(int i = 0, sizeI = mesh_.nCellsI(); i < sizeI; ++i)
+            {
+                Vector3D rVecI = mesh_.rFaceE(i, j, k) - mesh_.rFaceW(i, j, k);
+                Vector3D rVecJ = mesh_.rFaceN(i, j, k) - mesh_.rFaceS(i, j, k);
+                Vector3D rVecK = mesh_.rFaceT(i, j, k) - mesh_.rFaceB(i, j, k);
+
+                double uI = fabs(dot(uField_(i, j, k), rVecI.unitVector()));
+                double uJ = fabs(dot(uField_(i, j, k), rVecJ.unitVector()));
+                double uK = fabs(dot(uField_(i, j, k), rVecK.unitVector()));
+
+                double co = timeStep*(uI/rVecI.mag() + uJ/rVecJ.mag() + uK/rVecK.mag());
+
+                if(co > maxCo)
+                    maxCo = co;
+            }
+        }
+    }
+
+    return Parallel::max(maxCo);
 }
 
 void Simple::rhieChowInterpolateFaces()

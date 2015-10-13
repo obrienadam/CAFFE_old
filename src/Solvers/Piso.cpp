@@ -11,20 +11,19 @@ Piso::Piso(const Input &input, const HexaFvmMesh &mesh)
 
 double Piso::solve(double timeStep)
 {
-    int i, j;
-
     uField0_ = uField_;
 
-    for(j = 0; j < nInnerIters_; ++j)
+    for(int innerIterNo = 0; innerIterNo < nInnerIters_; ++innerIterNo)
     {
         computeMomentum(timeStep);
 
-        for(i = 0; i < nPCorrections_; ++i)
+        for(int pCorrNo = 0; pCorrNo < nPCorrections_; ++pCorrNo)
         {
             computePCorr();
             correct();
         }
     }
+    courantNumber_ = computeCourantNumber(timeStep);
 
     return computeContinuityError();
 }
@@ -32,7 +31,8 @@ double Piso::solve(double timeStep)
 void Piso::displayUpdateMessage()
 {
     Output::print("Piso", "completed iteration.");
-    Output::print("Piso", "BiCGStab iterations: " + std::to_string(biCGStabIters_));
-    Output::print("Piso", "Max continuity error: " + std::to_string(continuityError_));
+    Output::print("Piso", "BiCGStab iterations  : " + std::to_string(biCGStabIters_));
+    Output::print("Piso", "Max continuity error : " + std::to_string(continuityError_));
+    Output::print("Piso", "Max Courant number   : " + std::to_string(courantNumber_));
     Output::printLine();
 }

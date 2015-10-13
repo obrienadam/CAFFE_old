@@ -47,6 +47,7 @@ protected:
     void computePCorr();
     void correct();
     double computeContinuityError();
+    double computeCourantNumber(double timeStep);
     void rhieChowInterpolateFaces();
 
     //- Primary fields
@@ -76,7 +77,7 @@ protected:
 
     int nInnerIters_;
     double omegaMomentum_, omegaPCorr_;
-    double continuityError_;
+    double continuityError_, courantNumber_;
 };
 
 #endif

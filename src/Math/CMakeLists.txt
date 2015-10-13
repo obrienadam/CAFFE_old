@@ -23,4 +23,4 @@ set(SOURCES Vector3D.cpp
             Kernel.cpp)
 
 add_library(Math ${HEADERS} ${SOURCES})
-target_link_libraries(Math cblas lapack atlas petsc)
+target_link_libraries(Math blas lapacke petsc)

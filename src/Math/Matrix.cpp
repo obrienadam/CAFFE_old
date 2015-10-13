@@ -28,8 +28,23 @@
 
 extern "C"
 {
-    #include <cblas.h>
-    #include <clapack.h>
+#define lapack_complex_float float _Complex
+#define lapack_complex_double double _Complex
+#include <lapacke/lapacke.h>
+
+void dgemm_(char *TRANSA,
+            char *TRANSB,
+            int *M,
+            int *N,
+            int *K,
+            double *ALPHA,
+            double *A,
+            int *LDA,
+            double *B,
+            int *LDB,
+            double *BETA,
+            double *C,
+            int *LDC);
 }
 
 #include "Matrix.h"
@@ -116,8 +131,10 @@ void Matrix::solveLeastSquares(Matrix &b)
     if(b.n_ != 1)
         Output::raiseException("Matrix", "solveLeastSquares", "currently, passing more than one rhs equation is not working. This will be resolved in the future.");
 
-    // This is a bit of workaround, there seems to be some kind of bug with CblasRowMajor for clapack_dgels
-    clapack_dgels(CblasColMajor, CblasTrans, n_, m_, b.n_, elements_.data(), n_, b.elements_.data(), b.m_);
+    LAPACKE_dgels(LAPACK_ROW_MAJOR, 'N', m_, n_, b.n_, elements_.data(), n_, b.data(), b.n_);
+
+    // Remove garbage elments from b
+    b.elements_.erase(b.elements_.end() - b.n_*(m_ - n_), b.elements_.end());
     b.m_ = n_;
 }
 
@@ -126,13 +143,14 @@ void Matrix::solve(Matrix &b)
     if(b.n_ != 1)
         Output::raiseException("Matrix", "solve", "currently, passing more than one rhs equation is not working. This will be resolved in the future.");
 
-    clapack_dgesv(CblasRowMajor, m_, b.n_, elements_.data(), m_, ipiv_.data(), b.elements_.data(), b.m_);
+    LAPACKE_dgesv(LAPACK_ROW_MAJOR, m_, b.n_, elements_.data(), n_, ipiv_.data(), b.data(), b.n_);
 }
 
 Matrix& Matrix::inverse()
 {
-    clapack_dgetrf(CblasRowMajor, m_, n_, elements_.data(), n_, ipiv_.data());
-    clapack_dgetri(CblasRowMajor, m_, elements_.data(), n_, ipiv_.data());
+    LAPACKE_dgetrf(LAPACK_ROW_MAJOR, m_, n_, elements_.data(), n_, ipiv_.data());
+    LAPACKE_dgetri(LAPACK_ROW_MAJOR, m_, elements_.data(), n_, ipiv_.data());
+
     return *this;
 }
 
@@ -241,6 +259,11 @@ Matrix operator*(const Matrix& A, const Matrix& B)
 
 void multiply(const Matrix &A, const Matrix &B, Matrix &C)
 {
-    cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, A.m_, B.n_, A.n_, 1., A.elements_.data(), A.n_, B.elements_.data(), B.n_, 1., C.elements_.data(), C.n_);
+    char TRANSA = 'T', TRANSB = 'T';
+    double ALPHA = 1., BETA = 1.;
+    int M = A.m_, N = B.n_, K = A.n_, LDA = A.n_, LDB = B.n_, LDC = C.m_;
+
+    // Must remove const qualifiers to compile. Ugly, but necessary
+    dgemm_(&TRANSA, &TRANSB, &M, &N, &K, &ALPHA, const_cast<double*>(A.data()), &LDA, const_cast<double*>(B.data()), &LDB, &BETA, C.data(), &LDC);
 }
 
