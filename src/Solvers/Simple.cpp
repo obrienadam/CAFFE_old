@@ -418,22 +418,31 @@ void Simple::rhieChowInterpolateFaces()
                 if(mesh_.iMap.isInactive(i, j, k))
                     continue;
 
+                // Is this a bug? Should this not be multiplied by the density??
+
                 if(i == 0)
                 {
                     massFlowField_.faceW(i, j, k) = -dot(hField_.faceW(i, j, k), mesh_.fAreaNormW(i, j, k)) + dField_.faceW(i, j, k)*(pField_(i - 1, j, k) - pField_(i, j, k))*mesh_.dW(i, j, k);
+                    massFlowField_.faceW(i, j, k) *= rhoField_.faceW(i, j, k);
                 }
                 if(j == 0)
                 {
                     massFlowField_.faceS(i, j, k) = -dot(hField_.faceS(i, j, k), mesh_.fAreaNormS(i, j, k)) + dField_.faceS(i, j, k)*(pField_(i, j - 1, k) - pField_(i, j, k))*mesh_.dS(i, j, k);
+                    massFlowField_.faceS(i, j, k) *= rhoField_.faceS(i, j, k);
                 }
                 if(k == 0)
                 {
                     massFlowField_.faceB(i, j, k) = -dot(hField_.faceB(i, j, k), mesh_.fAreaNormB(i, j, k)) + dField_.faceB(i, j, k)*(pField_(i, j, k - 1) - pField_(i, j, k))*mesh_.dB(i, j, k);
+                    massFlowField_.faceB(i, j, k) *= rhoField_.faceB(i, j, k);
                 }
 
                 massFlowField_.faceE(i, j, k) = dot(hField_.faceE(i, j, k), mesh_.fAreaNormE(i, j, k)) - dField_.faceE(i, j, k)*(pField_(i + 1, j, k) - pField_(i, j, k))*mesh_.dE(i, j, k);
                 massFlowField_.faceN(i, j, k) = dot(hField_.faceN(i, j, k), mesh_.fAreaNormN(i, j, k)) - dField_.faceN(i, j, k)*(pField_(i, j + 1, k) - pField_(i, j, k))*mesh_.dN(i, j, k);
                 massFlowField_.faceT(i, j, k) = dot(hField_.faceT(i, j, k), mesh_.fAreaNormT(i, j, k)) - dField_.faceT(i, j, k)*(pField_(i, j, k + 1) - pField_(i, j, k))*mesh_.dT(i, j, k);
+
+                massFlowField_.faceE(i, j, k) *= rhoField_.faceE(i, j, k);
+                massFlowField_.faceN(i, j, k) *= rhoField_.faceN(i, j, k);
+                massFlowField_.faceT(i, j, k) *= rhoField_.faceT(i, j, k);
             }
         }
     }
